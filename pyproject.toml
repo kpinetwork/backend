@@ -1,0 +1,8 @@
+[tool.commitizen]
+name = "cz_customize"
+[tool.commitizen.customize]
+message_template = "{{change_type}}:{% if show_message %} {{message}}{% endif %}"
+example = "fix: KPI-001 all summarize_data tests now succeed"
+schema_pattern = "^(fix: KPI-|feat: KPI-|perf: KPI-|build: KPI-|ci: KPI-|docs: KPI-|refactor: KPI-|test: KPI-|code-smell: KPI-)[0-9].*"
+[tool.coverage.run]
+omit = ["venv/*"]
