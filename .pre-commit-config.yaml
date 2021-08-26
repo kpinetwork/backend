@@ -22,4 +22,3 @@ repos:
         pass_filenames: false
         stages: [commit]
         additional_dependencies: [pydash]
-
