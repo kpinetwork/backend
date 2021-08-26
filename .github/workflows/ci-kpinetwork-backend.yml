@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements/prod.txt
       - name: Run Unit Tests
         run: |
-          python -m unittest discover -s src/tests -p '*_test.py'
+           python -m pytest src/tests
       - name: Generate coverage
         run: |
           python -m pytest --cache-clear --cov=. src/tests/* > pytest-coverage.txt
