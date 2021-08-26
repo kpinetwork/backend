@@ -64,6 +64,7 @@ coverage.xml
 coverage.json
 # PyBuilder
 target/
+pytest-coverage.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints

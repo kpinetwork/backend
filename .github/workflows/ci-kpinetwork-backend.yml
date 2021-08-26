@@ -1,9 +1,14 @@
-name: Python package
+name: CI process for backend app
 
-on: [push]
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+    branches:
+      - master
 
 jobs:
-  build:
+  ci-test:
+    name: Unit tests and CodeCoverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -22,4 +27,8 @@ jobs:
       - name: Generate coverage
         run: |
           coverage run -m unittest discover -s src/tests -p '*_test.py'
-          coverage report -m --fail-under=100
+          coverage report -m --fail-under=100 > pytest-coverage.txt
+      - name: pytest-coverage-commentator
+        uses: coroo/pytest-coverage-commentator@v1.0.2
+        with:
+          pytest-coverage: pytest-coverage.txt
