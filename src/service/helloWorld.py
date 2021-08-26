@@ -3,5 +3,4 @@ class HelloWorld:
         pass
 
     def hello_world(self) -> dict:
-
         return {"message": "hello folks"}
