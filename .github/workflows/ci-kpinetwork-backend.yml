@@ -27,8 +27,10 @@ jobs:
       - name: Generate coverage
         run: |
           python -m pytest --cache-clear --cov=. src/tests/* > pytest-coverage.txt
-          coverage report -m --fail-under=100
-      - name: pytest-coverage-commentator
+      - name: Generate coverage comment
         uses: coroo/pytest-coverage-commentator@v1.0.2
         with:
           pytest-coverage: pytest-coverage.txt
+      - name: Check threshold of coverage
+        run: |
+          coverage report -m --fail-under=100
