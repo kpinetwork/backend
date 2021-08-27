@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: master
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/flake8
+    rev: ''
+    hooks:
+      - id: flake8
+  - repo: local
+    hooks:
+      - id: run-tests
+        name: run-tests
+        entry:  python -m pytest src/tests
+        language: python
+        'types': [python]
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+        additional_dependencies: [pytest, pydash]
