@@ -33,7 +33,7 @@ In Unix based operative systems:
 source .venv/bin/activate
 ```
 
-##Dependencies:
+## Dependencies:
 
 The dependencies are defined inside requirements' folder, here you can 
 define your dependencies to production(prod.txt) or development(dev.txt)
@@ -41,7 +41,7 @@ environment, in prod.txt are defined all required dependencies to project
 can execute, meanwhile in dev.txt are defined dependencies to test 
 or validate the code for example pre-commit package. 
 
-###Installation
+### Installation
 
 Execute the next command once you have created the venv:
 
@@ -49,7 +49,7 @@ Execute the next command once you have created the venv:
 pip install -r requirements/dev.txt
 ```
 
-##Branch names format
+## Branch names format
 
 For example if your task in Jira is **KPI-48 implement semantic versioning** your branch name is:
 
@@ -58,9 +58,11 @@ KPI-48-implement-semantic-versioning
 ```
 
 ## Semantic versioning
-We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) as the
+
+The project use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) as the
 standard commit message style.
-###Commit message style
+
+### Commit message style
 
 Use the following commit message style. e.g:
 
@@ -79,7 +81,26 @@ commit, you can use this command:
 cz check -m "fix: KPI-00 check commit message" 
 ```
 
-##Git hooks
+## Code Style
+
+The project use [PEP 8](https://www.python.org/dev/peps/pep-0008/) as the
+standard code style.
+
+### Validating code style
+
+In pre-commit event the code style is validated, but you can use the following command to validate the style:
+
+```shell
+flake8 src/*
+```
+
+Additionally, you can run the next command to set the correct format in your code,
+
+```shell
+black {source_file_or_directory}
+```
+
+## Git hooks
 
 We use [pre-commit](https://pre-commit.com/) library to manage local git hooks.
 
@@ -88,14 +109,32 @@ This library allows you to execute validations right before the commit, for exam
 - Execute unit tests.
 - Format modified files based on a Style Guide such as PEP 8, etc.
 
-With this command the library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
+#### Pre-commits hooks
+
+The library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
+
+If pre-commits event doesn't validates nothing before a commit has been done,
+you need run the next:
+
+```shell
+pre-commit install
+pre-commit install --hook-type commit-msg 
+```
+
+```shell
+Note: In first commit the event is slow, because preparate the hooks and the environment to run the validations.  
+```
 
 ## Built with
 
 - [Python version 3](https://www.python.org/download/releases/3.0/) as backend programming language. Strong typing for
   the win.
-- [Coverage](https://coverage.readthedocs.io/en/coverage-4.5.4/) for coverage.
-  
+- [Coverage](https://coverage.readthedocs.io/en/coverage-4.5.4/) for code coverage.
+- [Black](https://pypi.org/project/black/) to format the code.
+- [Flake8](https://pypi.org/project/flake8/) to validate the code style.
+- [Pre-commit](https://pre-commit.com) to execute GitHub hooks before a commit.
+- [Commitizen](https://github.com/commitizen-tools/commitizen) to define a standard way of committing rules.
+
 ## License
 
 Copyright 2021 ioet Inc. All Rights Reserved.
