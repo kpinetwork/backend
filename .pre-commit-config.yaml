@@ -14,12 +14,12 @@ repos:
       - id: flake8
   - repo: local
     hooks:
-      - id: unittest
-        name: unittest
-        entry: python -m unittest discover -s src/tests -p '*_test.py'
+      - id: run-tests
+        name: run-tests
+        entry:  python -m pytest src/tests
         language: python
         'types': [python]
         pass_filenames: false
+        always_run: true
         stages: [commit]
-        additional_dependencies: [pydash]
-
+        additional_dependencies: [pytest, pydash]
