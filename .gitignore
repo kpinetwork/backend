@@ -62,10 +62,9 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 coverage.json
-pytest-coverage.txt
-
 # PyBuilder
 target/
+pytest-coverage.txt
 
 # Jupyter Notebook
 .ipynb_checkpoints
