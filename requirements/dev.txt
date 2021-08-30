@@ -1,0 +1,10 @@
+# Include the prod resources
+-r prod.txt
+
+# Pre-commit tools
+black==21.7b0
+pre-commit==2.14.0
+commitizen==2.18.0
+
+# Unit test
+coverage==5.5

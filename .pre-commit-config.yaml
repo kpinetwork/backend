@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: master
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+  - repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+      - id: black
+  - repo: https://github.com/pycqa/flake8
+    rev: ''
+    hooks:
+      - id: flake8
+  - repo: local
+    hooks:
+      - id: unittest
+        name: unittest
+        entry: python -m unittest discover -s src/tests -p '*_test.py'
+        language: python
+        'types': [python]
+        pass_filenames: false
+        stages: [commit]
+        additional_dependencies: [pydash]
+
