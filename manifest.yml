@@ -1,0 +1,9 @@
+functions:
+  # Name the zip file you want juni to create
+  helloWorldHandler:
+    # The dependencies of the helloWorldHandler function.
+    requirements: ./src/handlers/helloWorld/requirements.txt
+    # Include this file in the generated zip artifact.
+    include:
+    - ./src/handlers/helloWorld/helloWorldHandler.py
+    - ./src/service/helloWorld.py
