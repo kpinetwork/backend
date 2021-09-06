@@ -56,12 +56,14 @@ jobs:
           terraform init
       - name: Terraform Validate
         id: validate
-        run: terraform validate -no-color
+        run: |
+          cd infrasctructure
+          terraform validate -no-color
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
         run: |
-          ls
+          cd infrasctructure
           terraform plan -no-color
         continue-on-error: true
       - name: Update Pull Request
