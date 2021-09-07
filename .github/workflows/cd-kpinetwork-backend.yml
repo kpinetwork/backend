@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install 'coverage[toml]' pytest pytest-cov
+          pip install 'coverage[toml]' pytest pytest-cov juniper
           pip install -r requirements/prod.txt
       - name: Run Unit Tests
         run: |
@@ -30,3 +30,42 @@ jobs:
       - name: Check threshold of coverage
         run: |
           coverage report -m --fail-under=100
+      - name: Build lambdas
+        run: |
+          juni build
+      - name: Listing lambdas
+        run: |
+          ls dist
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+      - name: Terraform Init
+        id: init
+        run: |
+          cd infrasctructure
+          terraform init
+      - name: Terraform Validate
+        id: validate
+        run: |
+          cd infrasctructure
+          terraform validate -no-color
+      - name: Terraform Plan
+        id: plan
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          cd infrasctructure
+          terraform plan -no-color
+        continue-on-error: true
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+      - name: Terraform Apply
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          cd infrasctructure
+          terraform apply
