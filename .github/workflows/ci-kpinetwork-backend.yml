@@ -49,6 +49,8 @@ jobs:
       - name: Listing lambdas
         run: |
           ls dist
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Init
@@ -61,13 +63,20 @@ jobs:
         run: |
           cd infrasctructure
           terraform validate -no-color
+      - name: Log vals
+        id: logging
+        run: |
+          cd infrasctructure
+          echo $TF_VAR_aws_access_key_id
+          echo $TF_VAR_aws_secret_access_key
+          echo $TF_VAR_aws_account_id
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
         run: |
           cd infrasctructure
           echo $TF_VAR_aws_access_key_id
-          terraform plan -no-color
+          terraform plan -no-color -detailed-exitcode
         continue-on-error: true
       - name: Update Pull Request
         uses: actions/github-script@0.9.0
