@@ -28,6 +28,9 @@ jobs:
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
            echo injecting
+           export  TF_VAR_aws_access_key_id=$TF_VAR_aws_access_key_id
+           export  TF_VAR_aws_secret_access_key=$TF_VAR_aws_secret_access_key
+           export  TF_VAR_aws_account_id=$TF_VAR_aws_account_id
       - name: Run Unit Tests
         run: |
            python -m pytest src/tests
