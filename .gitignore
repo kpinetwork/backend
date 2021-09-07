@@ -97,7 +97,7 @@ venv.bak/
 .dmypy.json
 dmypy.json
 
-# Compiled files
+# Compiled files terraform
 *.tfstate
 *.tfstate.backup
 *.tfstate.lock.info
@@ -105,7 +105,7 @@ dmypy.json
 # logs
 *.log
 
-# Directories
+# Directories terraform
 .terraform/
 infrasctructure/.terraform/
 .vagrant/

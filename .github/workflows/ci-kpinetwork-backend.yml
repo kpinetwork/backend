@@ -44,9 +44,12 @@ jobs:
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Init
         id: init
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           cd infrasctructure
-          terraform init
+          terraform init -backend-config="access_key=$TF_VAR_aws_access_key_id" -backend-config="secret_key=$TF_VAR_aws_secret_access_key"
       - name: Terraform Validate
         id: validate
         run: |
@@ -94,6 +97,3 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
-      - name: Terraform Plan Status
-        run: |
-          echo "Hello there"
