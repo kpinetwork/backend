@@ -21,15 +21,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install 'coverage[toml]' pytest pytest-cov juniper
           pip install -r requirements/prod.txt
-      - name: Inject secrets
-        env:
-          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-        run: |
-           export  TF_VAR_aws_access_key_id=$TF_VAR_aws_access_key_id
-           export  TF_VAR_aws_secret_access_key=$TF_VAR_aws_secret_access_key
-           export  TF_VAR_aws_account_id=$TF_VAR_aws_account_id
       - name: Run Unit Tests
         run: |
            python -m pytest src/tests
@@ -63,6 +54,10 @@ jobs:
           terraform validate -no-color
       - name: Log vals
         id: logging
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           echo "$TF_VAR_aws_access_key_id"
           echo "$TF_VAR_aws_secret_access_key"
@@ -70,6 +65,10 @@ jobs:
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
+        env:
+          TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
           cd infrasctructure
           echo "$TF_VAR_aws_access_key_id"
