@@ -49,8 +49,6 @@ jobs:
       - name: Listing lambdas
         run: |
           ls dist
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
       - name: Terraform Init
