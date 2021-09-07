@@ -10,7 +10,7 @@ resource "aws_s3_bucket_object" "object" {
   bucket = var.bucket_name
   key = "helloWorldHandler.zip"
   source = "../${path.module}/dist/helloWorldHandler.zip"
-  etag = "${filemd5("../${path.module}/dist/helloWorldHandler.zip")}"
+  etag = filemd5("../${path.module}/dist/helloWorldHandler.zip")
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,8 @@ data "aws_s3_bucket_object" "lambda_zip" {
   bucket = "kpinetwork-backend"
   key = "helloWorldHandler.zip"
   depends_on = [
-    "aws_s3_bucket_object.object"]
+    aws_s3_bucket_object.object
+  ]
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -48,7 +49,8 @@ resource "aws_lambda_function" "lambda_function" {
   function_name = var.function_name
   source_code_hash = base64sha256(data.aws_s3_bucket_object.lambda_zip.etag)
   depends_on = [
-    "aws_s3_bucket_object.object",
+    aws_s3_bucket_object.object,
     aws_iam_role_policy_attachment.lambda_logs,
-    aws_cloudwatch_log_group.example]
+    aws_cloudwatch_log_group.example
+  ]
 }
