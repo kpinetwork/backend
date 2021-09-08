@@ -32,7 +32,7 @@ variable "bucket_name" {
 
 variable "stage_name" {
   default = "prod"
-  type    = string
+  type = string
 }
 
 variable "retention_days" {
