@@ -8,8 +8,7 @@
 # This table is required to keep lock version of terraform
 resource "aws_dynamodb_table" "terraform-state" {
   name = "terraform-state"
-  read_capacity = 20
-  write_capacity = 20
+  billing_mode = "PAY_PER_REQUEST"
   hash_key = "LockID"
 
   attribute {

@@ -1,31 +1,17 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# AWS CREDENTIALS
+# GENERAL CONFIGURATIONS
 # ----------------------------------------------------------------------------------------------------------------------
 
-variable "aws_access_key_id" {
-  description = "AWS access key credential"
-}
-
-variable "aws_secret_access_key" {
-  description = "AWS secret access key credential"
-}
-
-variable "region" {
-  default = "us-west-2"
-}
-
-variable "aws_account_id" {
-  description = "AWS account id"
+variable "retention_days" {
+  default = 14
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
-# LAMBDAS NAMES
+# CLOUDWATCH LOG GROUPS
 # ----------------------------------------------------------------------------------------------------------------------
 
-variable "lambdas_names" {
-  default = {
-    "minimal_lambda_function": "minimal_lambda_function"
-  }
+variable "prefix_lambda_cloudwatch_log_group" {
+  default = "/aws/lambda/"
 }
 
-
+variable "lambdas_names" {}

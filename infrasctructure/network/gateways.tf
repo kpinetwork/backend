@@ -54,7 +54,7 @@ resource "aws_api_gateway_integration" "integration" {
   http_method = aws_api_gateway_method.method.http_method
   integration_http_method = "POST"
   type = "AWS_PROXY"
-  uri = aws_lambda_function.lambda_function.invoke_arn
+  uri = var.lambdas_functions_arn.minimal_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

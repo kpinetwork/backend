@@ -52,9 +52,9 @@ EOF
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function.function_name
+  function_name = var.lambdas_names.minimal_lambda_function
   principal = "apigateway.amazonaws.com"
-  source_arn = "arn:aws:execute-api:${var.region}:${var.aws_account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.resource.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_minimal_lambda_function.api_id}/*/${var.api_gateway_minimal_lambda_function.http_method}${var.api_gateway_minimal_lambda_function.resource_path}"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_logs" {

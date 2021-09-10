@@ -1,31 +1,15 @@
 # ----------------------------------------------------------------------------------------------------------------------
-# AWS CREDENTIALS
+# GENERAL CONFIGURATIONS
 # ----------------------------------------------------------------------------------------------------------------------
 
-variable "aws_access_key_id" {
-  description = "AWS access key credential"
-}
-
-variable "aws_secret_access_key" {
-  description = "AWS secret access key credential"
-}
-
-variable "region" {
-  default = "us-west-2"
-}
-
-variable "aws_account_id" {
-  description = "AWS account id"
+variable "runtime" {
+  default = "python3.8"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
-# LAMBDAS NAMES
+# LAMBDA INPUTS
 # ----------------------------------------------------------------------------------------------------------------------
 
-variable "lambdas_names" {
-  default = {
-    "minimal_lambda_function": "minimal_lambda_function"
-  }
-}
-
-
+variable "minimal_lambda_function_exec_role_arn" {}
+variable "minimal_lambda_function_bucket" {}
+variable "lambdas_names" {}
