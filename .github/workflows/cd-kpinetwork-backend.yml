@@ -43,12 +43,12 @@ jobs:
           TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          cd infrasctructure
+          cd infrastructure
           terraform init -backend-config="access_key=$TF_VAR_aws_access_key_id" -backend-config="secret_key=$TF_VAR_aws_secret_access_key"
       - name: Terraform Validate
         id: validate
         run: |
-          cd infrasctructure
+          cd infrastructure
           terraform validate -no-color
       - name: Terraform Plan
         id: plan
@@ -57,7 +57,7 @@ jobs:
           TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          cd infrasctructure
+          cd infrastructure
           terraform plan -no-color
         continue-on-error: true
       - name: Terraform Plan Status
@@ -69,5 +69,5 @@ jobs:
           TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
         run: |
-          cd infrasctructure
+          cd infrastructure
           terraform apply -auto-approve
