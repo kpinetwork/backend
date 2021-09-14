@@ -1,14 +1,13 @@
 import json
 
-from src.service.helloWorld import HelloWorld
+from helloWorld import HelloWorld
 
 hello_world = HelloWorld()
 
 
-def lambda_handler(event, context):
-
+def handler(event, context):
     return {
-        "statusCode": 200,
+        "statusCode": 202,
         "body": json.dumps(hello_world.hello_world()),
         "headers": {"Content-Type": "application/json"},
     }
