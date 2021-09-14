@@ -107,7 +107,7 @@ dmypy.json
 
 # Directories terraform
 .terraform/
-infrasctructure/.terraform/
+infrastructure/.terraform/
 .vagrant/
 
 # SSH Keys
