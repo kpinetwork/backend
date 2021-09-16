@@ -13,3 +13,7 @@ class TestHelloWorld(TestCase):
     def test_hello_world(self):
         response = self.hello_world_instance.hello_world()
         self.assertTrue(pydash.get(response, "message"))
+
+    def test_sample(self):
+        response = self.hello_world_instance.sample()
+        self.assertTrue(pydash.get(response, "new_message"))
