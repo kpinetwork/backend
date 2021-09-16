@@ -20,3 +20,13 @@ resource "aws_lambda_function" "minimal_lambda_function" {
   function_name = var.lambdas_names.minimal_lambda_function
   source_code_hash = base64sha256(var.minimal_lambda_function_bucket.etag)
 }
+
+resource "aws_lambda_function" "sample_lambda_function" {
+  role = var.minimal_lambda_function_exec_role_arn
+  handler = "testSampleHandler.handler"
+  runtime = var.runtime
+  s3_bucket = var.sample_lambda_function_bucket.bucket
+  s3_key = var.sample_lambda_function_bucket.key
+  function_name = var.lambdas_names.sample_lambda_function
+  source_code_hash = base64sha256(var.sample_lambda_function_bucket.etag)
+}

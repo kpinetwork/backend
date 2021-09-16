@@ -57,6 +57,14 @@ resource "aws_lambda_permission" "apigw_lambda" {
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_minimal_lambda_function.api_id}/*/${var.api_gateway_minimal_lambda_function.http_method}${var.api_gateway_minimal_lambda_function.resource_path}"
 }
 
+resource "aws_lambda_permission" "apigw_sample_lambda" {
+  statement_id = "AllowExecutionFromAPIGateway"
+  action = "lambda:InvokeFunction"
+  function_name = var.lambdas_names.sample_lambda_function
+  principal = "apigateway.amazonaws.com"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_sample_lambda_function.api_id}/*/${var.api_gateway_sample_lambda_function.http_method}${var.api_gateway_sample_lambda_function.resource_path}"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role = aws_iam_role.lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_logging.arn

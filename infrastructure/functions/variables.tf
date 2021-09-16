@@ -12,4 +12,5 @@ variable "runtime" {
 
 variable "minimal_lambda_function_exec_role_arn" {}
 variable "minimal_lambda_function_bucket" {}
+variable "sample_lambda_function_bucket" {}
 variable "lambdas_names" {}
