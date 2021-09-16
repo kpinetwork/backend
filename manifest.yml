@@ -7,3 +7,9 @@ functions:
     include:
     - ./src/handlers/helloWorld/helloWorldHandler.py
     - ./src/service/helloWorld.py
+  
+  testSampleHandler:
+    requirements: ./src/handlers/test_sample/requirements.txt
+    include: 
+    - ./src/handlers/test_sample/testSampleHandler.py
+    - ./src/service/helloWorld.py
