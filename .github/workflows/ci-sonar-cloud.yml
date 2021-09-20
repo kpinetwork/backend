@@ -22,7 +22,7 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.test.exclusions=tests/**
-            -Dsonar.sources=src
+            -Dsonar.sources=service,handlers
             -Dsonar.python.version=3.8.X
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
