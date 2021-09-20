@@ -27,8 +27,8 @@ module "network" {
   lambdas_functions_arn = module.functions.lambdas_invoke_arns
 }
 
-module "database" {
-  source = "./database/"
+module "sql" {
+  source = "./sql/"
   region = var.region
   db_username = var.db_username
   db_password = var.db_password
