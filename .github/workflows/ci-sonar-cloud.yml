@@ -17,10 +17,12 @@ jobs:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         with:
+          projectBaseDir: src/
           args: >
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.test.exclusions=tests/**
+            -Dsonar.sources=service/,handlers/
             -Dsonar.python.version=3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
