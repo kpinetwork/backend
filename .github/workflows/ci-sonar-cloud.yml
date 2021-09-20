@@ -19,8 +19,8 @@ jobs:
         with:
           projectBaseDir: src/
           args: >
-            -Dsonar.organization=${{ secrets.ORGANIZATION }}
-            -Dsonar.projectKey=${{ secrets.PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.test.exclusions=tests/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
