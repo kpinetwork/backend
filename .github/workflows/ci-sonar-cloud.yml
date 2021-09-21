@@ -38,6 +38,7 @@ jobs:
             -Dsonar.sources=service/,handlers/
             -Dsonar.python.version=3
             -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.coverage.exclusions=handlers/**
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
