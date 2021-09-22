@@ -7,6 +7,9 @@ resource "aws_db_instance" "kpinetworks_db" {
   engine_version         = "13.2"
   port                   = "3306"
 
+  db_subnet_group_name   = var.db_subnet_group_name
+  vpc_security_group_ids = [var.db_security_group.id]
+
   availability_zone      = "${var.region}a"
   skip_final_snapshot    = true
 

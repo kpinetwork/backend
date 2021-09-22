@@ -27,9 +27,16 @@ module "network" {
   lambdas_functions_arn = module.functions.lambdas_invoke_arns
 }
 
+
+module "vpc" {
+  source = "./vpc/"
+  region = var.region
+}
+
 module "sql" {
   source = "./sql/"
   region = var.region
   db_username = var.db_username
   db_password = var.db_password
+  db_security_group = module.vpc.security_group
 }
