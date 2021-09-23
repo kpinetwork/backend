@@ -25,4 +25,8 @@ resource "aws_db_instance" "kpinetworks_db" {
   username               = var.db_username
   password               = var.db_password
   name                   = var.db_name
+
+  depends_on = [
+    aws_db_subnet_group.kpinetworks
+  ]
 }
