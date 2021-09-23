@@ -39,4 +39,5 @@ module "sql" {
   db_username = var.db_username
   db_password = var.db_password
   db_security_group = module.vpc.security_group
+  subnet_ids = module.vpc.private_subnet_ids
 }
