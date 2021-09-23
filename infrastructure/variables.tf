@@ -28,4 +28,18 @@ variable "lambdas_names" {
   }
 }
 
+# ----------------------------------------------------------------------------------------------------------------------
+ # DATABASE VARIABLES
+ # ----------------------------------------------------------------------------------------------------------------------
 
+ variable "db_username" {
+   description = "KPI Networks database root username"
+   type        = string
+   sensitive   = true
+ }
+
+ variable "db_password" {
+   description = "KPI Networks database root user password"
+   type        = string
+   sensitive   = true
+ }
