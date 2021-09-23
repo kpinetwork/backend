@@ -27,7 +27,6 @@ module "network" {
   lambdas_functions_arn = module.functions.lambdas_invoke_arns
 }
 
-
 module "vpc" {
   source = "./vpc/"
   region = var.region

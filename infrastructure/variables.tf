@@ -28,4 +28,3 @@ variable "lambdas_names" {
   }
 }
 
-
