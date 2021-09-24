@@ -25,6 +25,7 @@ variable "aws_account_id" {
 variable "lambdas_names" {
   default = {
     "minimal_lambda_function": "minimal_lambda_function"
+    "db_sample_lambda_function": "db_sample_lambda_function"
   }
 }
 
