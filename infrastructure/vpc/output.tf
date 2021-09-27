@@ -25,3 +25,11 @@ output "security_group_lambda" {
         tags :  aws_security_group.kpinetworks_group_lambda.tags_all
     }
 }
+
+output "security_group_codebuild" {
+    value       = {
+        id   :  aws_security_group.kpinetworks_group_codebuild.id
+        arn  :  aws_security_group.kpinetworks_group_codebuild.arn
+        tags :  aws_security_group.kpinetworks_group_codebuild.tags_all
+    }
+}
