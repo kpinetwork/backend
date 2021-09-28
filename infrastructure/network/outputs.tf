@@ -5,3 +5,7 @@ output "api_gateway_minimal_lambda_function" {
     api_id: aws_api_gateway_rest_api.api.id,
   }
 }
+
+output "api_gateway_domain" {
+  value = aws_api_gateway_domain_name.domain
+}

@@ -34,9 +34,11 @@ module "logs" {
 module "network" {
   source = "./network/"
   lambdas_functions_arn = module.functions.lambdas_invoke_arns
-  kpinetworks_private_subnet_a_id = element(module.vpc.private_subnet_ids,0)
+  kpinetworks_private_subnet_a_id = element(module.vpc.private_subnet_ids, 0)
   kpinetworks_public_subnet_a_id = module.vpc.public_subnet_id
   kpinetworks_vpc_id = module.vpc.vpc_kpinetworks_id
+  domain = var.root_domain_name
+  certificate_arn = module.cert.certificate_validation_arn
 }
 
 module "sql" {
@@ -59,4 +61,22 @@ module "codebuild" {
   kpinetworks_vpc_id = module.vpc.vpc_kpinetworks_id
   private_subnet_a_id = element(module.vpc.private_subnet_ids,0)
   codebuild_group_id = module.vpc.security_group_codebuild.id
+}
+
+module "dns" {
+  source = "./dns/"
+  api_gateway_domain = module.network.api_gateway_domain
+  domain = var.root_domain_name
+  hosted_zone_id = aws_route53_zone.kpinetwork.id
+  domain_certificates = module.cert.domain_certificate
+}
+
+
+
+module "cert" {
+  source = "./certificates"
+  cert_validation_fqdn = module.dns.cert_validation_fqdn
+  domain = var.root_domain_name
+  aws_access_key_id = var.aws_access_key_id
+  aws_secret_access_key = var.aws_secret_access_key
 }

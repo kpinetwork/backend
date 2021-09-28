@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_rest_api" "api" {
-  name = "myapi"
+  name = "kpinetwork_api"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -16,8 +16,8 @@ resource "aws_api_gateway_rest_api" "api" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_resource" "resource" {
-  path_part = "resource"
-  parent_id = aws_api_gateway_rest_api.api.root_resource_id
+  path_part   = "resource"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -31,9 +31,9 @@ resource "aws_api_gateway_resource" "resource" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_method" "method" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.resource.id
-  http_method = "GET"
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.resource.id
+  http_method   = "GET"
   authorization = "NONE"
 }
 
@@ -49,12 +49,12 @@ resource "aws_api_gateway_method" "method" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_integration" "integration" {
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  resource_id = aws_api_gateway_resource.resource.id
-  http_method = aws_api_gateway_method.method.http_method
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.resource.id
+  http_method             = aws_api_gateway_method.method.http_method
   integration_http_method = "POST"
-  type = "AWS_PROXY"
-  uri = var.lambdas_functions_arn.minimal_lambda_function
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.minimal_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -62,28 +62,47 @@ resource "aws_api_gateway_integration" "integration" {
 # Manages an API Gateway REST Deployment.
 # @param depends_on Set of dependencies to execute the definition
 # @param rest_api_id  REST API identifier.
-# @param stage_name Name of the stage to create with this deployment
+# @param stage_name Name of the stage to create with this deployment, with this isn't necessary add aws_api_gateway_stage resource
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_api_gateway_deployment" "example" {
+resource "aws_api_gateway_deployment" "gateway_deployment" {
   depends_on = [
-    aws_api_gateway_integration.integration
+    aws_api_gateway_integration.integration,
+    aws_api_gateway_method.method
   ]
 
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  stage_name = ""
+  rest_api_id       = aws_api_gateway_rest_api.api.id
+  stage_name        = var.stage_name
+  stage_description = "Deployed at ${timestamp()}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
-# API GATEWAY STAGE
-# Manages an API Gateway Stage.
-# @param deployment_id The ID of the deployment that the stage points to
-# @param rest_api_id  REST API identifier.
-# @param stage_name The name of the stage
+# API GATEWAY DOMAIN
+# Manages domain SSL certificate
+# @param domain_name Domain name
+# @param certificate_arn  SSL certificate arn
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_api_gateway_stage" "example" {
-  deployment_id = aws_api_gateway_deployment.example.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-  stage_name = var.stage_name
+resource "aws_api_gateway_domain_name" "domain" {
+  domain_name     = "api.${var.domain}"
+  certificate_arn = var.certificate_arn
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# API GATEWAY BASE MAPPING
+# Manages an API Gateway domain association.
+# @param api_id Api identifier
+# @param stage_name  Association between stage and custom domain name
+# @param domain_name  Domain name
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_api_gateway_base_path_mapping" "domain_mapping" {
+  api_id      = aws_api_gateway_rest_api.api.id
+  stage_name  = aws_api_gateway_deployment.gateway_deployment.stage_name
+  domain_name = aws_api_gateway_domain_name.domain.domain_name
+  depends_on  = [aws_api_gateway_deployment.gateway_deployment]
 }

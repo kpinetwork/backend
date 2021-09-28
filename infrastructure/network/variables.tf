@@ -14,7 +14,8 @@ variable "tag_name" {
 }
 
 variable "kpinetworks_vpc_id" {}
-
 variable "kpinetworks_public_subnet_a_id" {}
-
 variable "kpinetworks_private_subnet_a_id" {}
+
+variable "domain" {}
+variable "certificate_arn" {}
