@@ -42,11 +42,9 @@ def upgrade():
                 name VARCHAR(40) NOT NULL,
                 value NUMERIC NOT NULL,
                 type VARCHAR(8) NOT NULL,
-                data_type VARCHAR() NOT NULL,
-                period_id INTEGER,
-                FOREIGN KEY period_id REFERENCES time_period (id),
-                company_id INTEGER,
-                FOREIGN KEY company_id REFERENCES company (id)
+                data_type VARCHAR(15) NOT NULL,
+                period_id INTEGER REFERENCES time_period (id),
+                company_id INTEGER REFERENCES company (id)
             );
     """
 
