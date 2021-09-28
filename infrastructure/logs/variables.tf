@@ -15,3 +15,13 @@ variable "prefix_lambda_cloudwatch_log_group" {
 }
 
 variable "lambdas_names" {}
+
+
+variable "prefix_codebuild_cloudwatch_log_group" {
+  default = "/aws/codebuild/"
+}
+
+
+variable "codebuild_project_name" {
+    default = "rds_migrations"
+}

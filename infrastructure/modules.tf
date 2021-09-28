@@ -46,3 +46,16 @@ module "sql" {
   db_security_group = module.vpc.security_group
   subnet_ids = module.vpc.private_subnet_ids
 }
+
+module "codebuild" {
+  source = "./codebuild/"
+  git_token = var.git_token
+  codebuild_aws_iam_role = module.policy.codebuild_role_arn
+  log_group_name = module.logs.codebuild_log.name
+  db_host = module.sql.kpinetworks_db_host
+  db_username = var.db_username
+  db_password = var.db_password
+  kpinetworks_vpc_id = module.vpc.vpc_kpinetworks_id
+  private_subnet_a_id = element(module.vpc.private_subnet_ids,0)
+  codebuild_group_id = module.vpc.security_group_codebuild.id
+}

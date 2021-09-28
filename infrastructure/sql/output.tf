@@ -15,3 +15,9 @@ output "kpinetworks_db_username" {
   value       = aws_db_instance.kpinetworks_db.username
   sensitive   = true
 }
+
+output "kpinetworks_db_host" {
+  description = "KPI Networks RDS host"
+  value       = aws_db_instance.kpinetworks_db.address
+  sensitive   = true
+}

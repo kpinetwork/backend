@@ -44,3 +44,14 @@ variable "lambdas_names" {
    type        = string
    sensitive   = true
  }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# CODEBUILD VARIABLES
+# ----------------------------------------------------------------------------------------------------------------------
+
+variable "git_token" {
+   description = "Git token to access codebuild"
+   type        = string
+   sensitive   = true
+}
+

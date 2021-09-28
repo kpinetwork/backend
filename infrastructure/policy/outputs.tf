@@ -6,4 +6,6 @@ output "aws_iam_role_policy_attachment_logs" {
   value = aws_iam_role_policy_attachment.lambda_logs
 }
 
-
+output "codebuild_role_arn" {
+  value = aws_iam_role.codebuild_role.arn
+}
