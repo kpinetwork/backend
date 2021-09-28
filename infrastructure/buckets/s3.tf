@@ -19,26 +19,3 @@ resource "aws_s3_bucket_object" "db_sample_function_object" {
   source = "${path.module}/../../dist/dbSampleHandler.zip"
   etag = filemd5("${path.module}/../../dist/dbSampleHandler.zip")
 }
-
-# ----------------------------------------------------------------------------------------------------------------------
-# CREATE REFERENCE FROM S3 FILE UPLOADED
-# @param bucket Bucket reference
-# @param key Object name
-# @param depends_on Set of dependencies to execute the definition
-# ----------------------------------------------------------------------------------------------------------------------
-
-data "aws_s3_bucket_object" "minimal_function_zip" {
-  bucket = "kpinetwork-backend"
-  key = "helloWorldHandler.zip"
-  depends_on = [
-    aws_s3_bucket_object.minimal_function_object
-  ]
-}
-
-data "aws_s3_bucket_object" "db_sample_function_zip" {
-  bucket = "kpinetwork-backend"
-  key = "dbSampleHandler.zip"
-  depends_on = [
-    aws_s3_bucket_object.db_sample_function_object
-  ]
-}
