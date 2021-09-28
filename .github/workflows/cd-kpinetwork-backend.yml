@@ -58,6 +58,7 @@ jobs:
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
           TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
         run: |
           cd infrastructure
           terraform plan -no-color
@@ -72,6 +73,7 @@ jobs:
           TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
           TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
           TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+          TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
         run: |
           cd infrastructure
           terraform apply -auto-approve

@@ -12,4 +12,12 @@ variable "runtime" {
 
 variable "minimal_lambda_function_exec_role_arn" {}
 variable "minimal_lambda_function_bucket" {}
+variable "db_sample_lambda_function_bucket" {}
 variable "lambdas_names" {}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# VPC INPUTS
+# ----------------------------------------------------------------------------------------------------------------------
+
+variable "public_subnet_a_id" {}
+variable "security_group_id" {}
