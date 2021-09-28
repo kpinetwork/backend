@@ -49,6 +49,33 @@ resource "aws_iam_policy" "lambda_logging" {
 EOF
 }
 
+#IAM policy for connect VPC
+
+resource "aws_iam_policy" "lambda_network" {
+
+  name = "iam_policy_lambda_network_function"
+  path = "/"
+  description = "IAM policy for configuring network"
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeNetworkInterfaces",
+        "ec2:CreateNetworkInterface",
+        "ec2:DeleteNetworkInterface",
+        "ec2:DescribeInstances",
+        "ec2:AttachNetworkInterface"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
@@ -60,6 +87,11 @@ resource "aws_lambda_permission" "apigw_lambda" {
 resource "aws_iam_role_policy_attachment" "lambda_logs" {
   role = aws_iam_role.lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_logging.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_vpc" {
+  role = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_network.arn
 }
 
 #IAM Policy for codebuild

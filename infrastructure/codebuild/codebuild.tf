@@ -85,7 +85,7 @@ resource "aws_codebuild_webhook" "rds_migrations" {
   filter_group {
     filter {
       type    = "EVENT"
-      pattern = "PULL_MERGE"
+      pattern = "PULL_REQUEST_MERGED"
     }
   }
 }
