@@ -9,9 +9,7 @@ functions:
     - ./src/service/helloWorld.py
 
   dbSampleHandler:
-    # The dependencies of the helloWorldHandler function.
     requirements: ./src/handlers/dbSample/requirements.txt
-    # Include this file in the generated zip artifact.
     include:
     - ./src/handlers/dbSample/dbSampleHandler.py
     - ./src/service/dbSample.py

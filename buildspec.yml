@@ -26,4 +26,3 @@ phases:
       - cd db
       - alembic upgrade head
       - echo "FINISH"
-  
