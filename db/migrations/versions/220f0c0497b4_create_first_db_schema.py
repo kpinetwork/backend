@@ -24,7 +24,7 @@ def upgrade():
             CREATE TABLE IF NOT EXISTS company (
                 id serial PRIMARY KEY,
                 name VARCHAR(40) NOT NULL,
-                from DATE NOT NULL,
+                from_date DATE NOT NULL,
                 fiscal_year DATE NOT NULL,
                 sector VARCHAR(30) NOT NULL,
                 vertical VARCHAR(30),
