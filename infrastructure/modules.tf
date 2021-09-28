@@ -23,6 +23,7 @@ module "policy" {
   account_id = var.aws_account_id
   lambdas_names = var.lambdas_names
   api_gateway_minimal_lambda_function = module.network.api_gateway_minimal_lambda_function
+  private_subnet_a = element(module.vpc.private_subnet_ids,0)
 }
 
 module "logs" {

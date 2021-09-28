@@ -157,7 +157,7 @@ resource "aws_iam_role_policy" "codebuild_role_policy" {
       "Condition": {
         "StringEquals": {
           "ec2:Subnet": [
-            "arn:aws:ec2:${var.region}:${var.account_id}:subnet/*"
+            "arn:aws:ec2:${var.region}:${var.account_id}:subnet/${var.private_subnet_a}"
           ],
           "ec2:AuthorizedService": "codebuild.amazonaws.com"
         }

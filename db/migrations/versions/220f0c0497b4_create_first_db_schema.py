@@ -20,7 +20,7 @@ def upgrade():
     engine = create_db_engine()
     session = create_db_session(engine)
 
-    query = """"
+    query = """
             CREATE TABLE IF NOT EXISTS company (
                 id serial PRIMARY KEY,
                 name VARCHAR(40) NOT NULL,
@@ -46,7 +46,7 @@ def upgrade():
                 period_id INTEGER REFERENCES time_period (id),
                 company_id INTEGER REFERENCES company (id)
             );
-    """
+        """
 
     session.execute(query)
     session.commit()
