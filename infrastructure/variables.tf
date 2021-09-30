@@ -4,10 +4,12 @@
 
 variable "aws_access_key_id" {
   description = "AWS access key credential"
+  sensitive = true
 }
 
 variable "aws_secret_access_key" {
   description = "AWS secret access key credential"
+  sensitive = true
 }
 
 variable "region" {
@@ -16,6 +18,11 @@ variable "region" {
 
 variable "aws_account_id" {
   description = "AWS account id"
+  sensitive = true
+}
+
+variable "root_domain_name" {
+  default = "kpinetwork.com"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -30,28 +37,27 @@ variable "lambdas_names" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
- # DATABASE VARIABLES
- # ----------------------------------------------------------------------------------------------------------------------
+# DATABASE VARIABLES
+# ----------------------------------------------------------------------------------------------------------------------
 
- variable "db_username" {
-   description = "KPI Networks database root username"
-   type        = string
-   sensitive   = true
- }
+variable "db_username" {
+  description = "KPI Networks database root username"
+  type = string
+  sensitive = true
+}
 
- variable "db_password" {
-   description = "KPI Networks database root user password"
-   type        = string
-   sensitive   = true
- }
+variable "db_password" {
+  description = "KPI Networks database root user password"
+  type = string
+  sensitive = true
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # CODEBUILD VARIABLES
 # ----------------------------------------------------------------------------------------------------------------------
 
 variable "git_token" {
-   description = "Git token to access codebuild"
-   type        = string
-   sensitive   = true
+  description = "Git token to access codebuild"
+  type = string
+  sensitive = true
 }
-
