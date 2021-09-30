@@ -71,8 +71,6 @@ module "dns" {
   domain_certificates = module.cert.domain_certificate
 }
 
-
-
 module "cert" {
   source = "./certificates"
   cert_validation_fqdn = module.dns.cert_validation_fqdn
