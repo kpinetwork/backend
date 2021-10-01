@@ -12,4 +12,4 @@ functions:
     requirements: ./src/handlers/dbSample/requirements.txt
     include:
     - ./src/handlers/dbSample/dbSampleHandler.py
-    - ./src/service/dbSample.py
+    - ./configurations/casbin/model.conf
