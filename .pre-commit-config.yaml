@@ -8,6 +8,11 @@ repos:
     rev: stable
     hooks:
       - id: black
+  - repo: https://github.com/thoughtworks/talisman
+    rev: ''
+    hooks:
+    -   id: talisman-commit
+        entry: cmd --githook pre-commit
   - repo: https://github.com/pycqa/flake8
     rev: ''
     hooks:
