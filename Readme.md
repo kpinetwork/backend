@@ -43,11 +43,35 @@ or validate the code for example pre-commit package.
 
 ### Installation
 
+#### Dependencies
+
 Execute the next command once you have created the venv:
 
 ```shell
 pip install -r requirements/dev.txt
 ```
+
+#### Pre-commits hooks
+
+The library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
+
+If pre-commits event doesn't validates nothing before a commit has been done,
+you need run the next:
+
+```shell
+pre-commit install
+pre-commit install --hook-type commit-msg 
+```
+
+```shell
+Note: In first commit the event is slow, because preparate the hooks and the environment to run the validations.  
+```
+
+### Talisman
+The project uses [talisman](https://github.com/thoughtworks/talisman) to avoid credentials 
+in code, to use this library in a pre-commit hook is necessary the installation of golang, 
+you can use this page https://golang.org/doc/install to install it according to your OS.
+
 
 ## Branch names format
 
@@ -108,22 +132,8 @@ This library allows you to execute validations right before the commit, for exam
 - Check if the commit contains the correct formatting.
 - Execute unit tests.
 - Format modified files based on a Style Guide such as PEP 8, etc.
+- Prevent credentials in code
 
-#### Pre-commits hooks
-
-The library will take configuration from `.pre-commit-config.yaml` and will set up the hooks by us.
-
-If pre-commits event doesn't validates nothing before a commit has been done,
-you need run the next:
-
-```shell
-pre-commit install
-pre-commit install --hook-type commit-msg 
-```
-
-```shell
-Note: In first commit the event is slow, because preparate the hooks and the environment to run the validations.  
-```
 
 ## Built with
 
@@ -134,6 +144,9 @@ Note: In first commit the event is slow, because preparate the hooks and the env
 - [Flake8](https://pypi.org/project/flake8/) to validate the code style.
 - [Pre-commit](https://pre-commit.com) to execute GitHub hooks before a commit.
 - [Commitizen](https://github.com/commitizen-tools/commitizen) to define a standard way of committing rules.
+- [Talisman](https://github.com/thoughtworks/talisman) to ensure that potential secrets or sensitive information do not leave the developer's workstation.
+- [Terraform](https://www.terraform.io) to define the infrastructure as code
+- [Juniper](https://github.com/eabglobal/juniper) to stream and standardize the creation of a zip artifact for a set of AWS Lambda functions.
 
 ## License
 
