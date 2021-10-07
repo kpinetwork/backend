@@ -50,6 +50,7 @@ variable "db_password" {
   description = "KPI Networks database root user password"
   type = string
   sensitive = true
+  value = "c6805bdf-d2b7-4039-81ee-b51516126739"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
