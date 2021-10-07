@@ -13,7 +13,7 @@ resource "aws_db_instance" "kpinetworks_db" {
 
   instance_class         = "db.t3.small"
   engine                 = "postgres"
-  engine_version         = "13.2"
+  engine_version         = "13.3"
   port                   = "5432"
 
   db_subnet_group_name   = aws_db_subnet_group.kpinetworks.name
