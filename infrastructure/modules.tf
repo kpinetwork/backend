@@ -6,7 +6,7 @@ module "buckets" {
 module "shared" {
   source = "./shared/"
   backend = var.backend
-  remote_state_config = var.remote_state_config
+  remote_state_config = local.remote_state_config
 }
 
 module "functions" {

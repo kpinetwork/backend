@@ -66,14 +66,6 @@ variable "git_token" {
 # REMOTE DATA SOURCE VARIABLES
 # ----------------------------------------------------------------------------------------------------------------------
 
-variable "remote_state_config" {
-  description = "Config for getting remote state"
-  default     = {
-      bucket      = "kpinetwork-infrastructure"
-      key         = "key/terraform.tfstate"
-      region      = "us-west-2"
-  }
-}
 
 variable "backend" {
   default     = "s3"
@@ -100,4 +92,12 @@ locals {
     local.domains.demo
   ]
   cert_sans = local.is_production ? local.prod_certs : local.demo_certs
+
+  remote_state_config = {
+      bucket      = "kpinetwork-infrastructure"
+      key         = "key/terraform.tfstate"
+      region      = "us-west-2"
+      access_key = var.aws_access_key_id
+      secret_key = var.aws_secret_access_key
+  }
 }
