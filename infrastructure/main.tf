@@ -7,8 +7,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "kpinetwork-infrastructure"
-    key = "backend/terraform.tfstate"
+    bucket = "kpinetwork-backend"
+    key = "terraform.tfstate"
     region = "us-west-2"
+    workspace_key_prefix = "env:"
   }
 }

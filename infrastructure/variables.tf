@@ -61,3 +61,43 @@ variable "git_token" {
   type = string
   sensitive = true
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# REMOTE DATA SOURCE VARIABLES
+# ----------------------------------------------------------------------------------------------------------------------
+
+variable "remote_state_config" {
+  description = "Config for getting remote state"
+  default     = {
+      bucket      = "kpinetwork-infrastructure"
+      key         = "key/terraform.tfstate"
+      region      = "us-west-2"
+  }
+}
+
+variable "backend" {
+  default     = "s3"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# LOCAL VARIABLES
+# ----------------------------------------------------------------------------------------------------------------------
+
+locals {
+  environment = terraform.workspace
+  is_production = local.environment == "prod"
+  
+  domains = {
+    "root" = var.root_domain_name
+    "prod" = "api.${var.root_domain_name}"
+    "demo" = "api.demo.${var.root_domain_name}"
+  }
+
+  prod_certs = [
+    local.domains.prod
+  ]
+  demo_certs = [
+    local.domains.demo
+  ]
+  cert_sans = local.is_production ? local.prod_certs : local.demo_certs
+}

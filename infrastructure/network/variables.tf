@@ -7,15 +7,15 @@ variable "stage_name" {
   type = string
 }
 
-variable "lambdas_functions_arn" {}
-
-variable "tag_name" {
-  default = "kpinetworks"
+variable "api_name" {
+  default = "kpinetwork_api"
+  type = string
 }
 
-variable "kpinetworks_vpc_id" {}
-variable "kpinetworks_public_subnet_a_id" {}
-variable "kpinetworks_private_subnet_a_id" {}
+variable "lambdas_functions_arn" {}
 
-variable "domain" {}
+variable "domain_name" {}
 variable "certificate_arn" {}
+
+variable "environment" {}
+variable "is_production" {}

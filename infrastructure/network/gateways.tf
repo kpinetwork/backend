@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_rest_api" "api" {
-  name = "kpinetwork_api"
+  name =  var.is_production? var.api_name : "${var.environment}-${var.api_name}"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -72,7 +72,7 @@ resource "aws_api_gateway_deployment" "gateway_deployment" {
   ]
 
   rest_api_id       = aws_api_gateway_rest_api.api.id
-  stage_name        = var.stage_name
+  stage_name        = var.is_production? var.stage_name : var.environment
   stage_description = "Deployed at ${timestamp()}"
 
   lifecycle {
@@ -88,7 +88,7 @@ resource "aws_api_gateway_deployment" "gateway_deployment" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_domain_name" "domain" {
-  domain_name     = "api.${var.domain}"
+  domain_name     = var.domain_name
   certificate_arn = var.certificate_arn
 }
 

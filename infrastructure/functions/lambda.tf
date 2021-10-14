@@ -17,7 +17,7 @@ resource "aws_lambda_function" "minimal_lambda_function" {
   runtime = var.runtime
   s3_bucket = var.minimal_lambda_function_bucket.bucket
   s3_key = var.minimal_lambda_function_bucket.key
-  function_name = var.lambdas_names.minimal_lambda_function
+  function_name = "${var.environment}-${var.lambdas_names.minimal_lambda_function}"
   source_code_hash = base64sha256(var.minimal_lambda_function_bucket.etag)
 }
 
@@ -27,7 +27,7 @@ resource "aws_lambda_function" "db_sample_lambda_function" {
   runtime = var.runtime
   s3_bucket = var.db_sample_lambda_function_bucket.bucket
   s3_key = var.db_sample_lambda_function_bucket.key
-  function_name = var.lambdas_names.db_sample_lambda_function
+  function_name = "${var.environment}-${var.lambdas_names.db_sample_lambda_function}"
   source_code_hash = base64sha256(var.db_sample_lambda_function_bucket.etag)
 
   vpc_config {

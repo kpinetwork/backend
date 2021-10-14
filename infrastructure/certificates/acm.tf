@@ -11,7 +11,7 @@
 
 resource "aws_acm_certificate" "cert" {
   provider = aws.east
-  domain_name = "api.${var.domain}"
+  domain_name = var.domain_name
   validation_method = "DNS"
 
   lifecycle {
