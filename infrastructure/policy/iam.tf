@@ -8,7 +8,7 @@
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id = "AllowExecutionFromAPIGateway"
   action = "lambda:InvokeFunction"
-  function_name = var.lambdas_names.minimal_lambda_function
+  function_name = "${var.environment}_${var.lambdas_names.minimal_lambda_function}"
   principal = "apigateway.amazonaws.com"
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_minimal_lambda_function.api_id}/*/${var.api_gateway_minimal_lambda_function.http_method}${var.api_gateway_minimal_lambda_function.resource_path}"
 }

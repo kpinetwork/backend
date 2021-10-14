@@ -3,3 +3,7 @@ variable "bucket_name" {
 }
 
 variable "environment" {}
+
+variable "lambda_resource_name" {
+  default = "lambdas"
+}

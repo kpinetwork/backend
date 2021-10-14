@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_api_gateway_rest_api" "api" {
-  name =  var.is_production? var.api_name : "${var.environment}-${var.api_name}"
+  name =  var.is_production? var.api_name : "${var.environment}_${var.api_name}"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
