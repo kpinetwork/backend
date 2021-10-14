@@ -11,7 +11,7 @@ resource "aws_db_instance" "kpinetwork_db" {
   identifier             = local.db_name
   allocated_storage      = 5
 
-  instance_class         = var.is_production? "db.t3.small" : "db.t3.micro"
+  instance_class         = local.db_instance[var.environment]
   engine                 = "postgres"
   engine_version         = "13.3"
   port                   = "5432"
