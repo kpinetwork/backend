@@ -5,7 +5,7 @@ resource "aws_codebuild_source_credential" "git_credential" {
 }
 
 resource "aws_codebuild_project" "rds_migrations" {
-    name                   = var.codebuild_project_name
+    name                   = "${var.environment}-${var.codebuild_project_name}"
     description            = "code build project for migrations"
     build_timeout          = 30
 
@@ -55,7 +55,7 @@ resource "aws_codebuild_project" "rds_migrations" {
     }
 
     vpc_config {
-        vpc_id = var.kpinetworks_vpc_id
+        vpc_id = var.kpinetwork_vpc_id
 
         subnets = [
             var.private_subnet_a_id

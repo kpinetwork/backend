@@ -3,7 +3,7 @@
 resource "aws_route53_record" "kpinetwork_domain" {
   zone_id = var.hosted_zone_id
 
-  name = "api.${var.domain}"
+  name = var.domain_name
   type = "A"
 
   alias {
@@ -14,7 +14,7 @@ resource "aws_route53_record" "kpinetwork_domain" {
 }
 
 resource "aws_route53_record" "cert_validations" {
-  count = length(var.domain_certificates.cert.domain_validation_options)
+  count = length(var.cert_sans) + 1
   zone_id = var.hosted_zone_id
   allow_overwrite = true
   name    = element(var.domain_certificates.cert.domain_validation_options.*.resource_record_name, count.index)
