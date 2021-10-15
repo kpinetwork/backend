@@ -25,3 +25,5 @@ variable "prefix_codebuild_cloudwatch_log_group" {
 variable "codebuild_project_name" {
     default = "rds_migrations"
 }
+
+variable "environment" {}
