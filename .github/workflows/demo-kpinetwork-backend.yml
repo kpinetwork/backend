@@ -1,10 +1,9 @@
 name: CD process for backend demo app
 
 on:
-  pull_request:
-    types: [opened, edited, reopened, synchronize]
+  push:
     branches:
-      - master
+      - demo
 
 jobs:
   ci-test:
