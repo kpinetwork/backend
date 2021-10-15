@@ -11,8 +11,6 @@ resource "aws_route53_record" "kpinetwork_domain" {
     zone_id                = var.api_gateway_domain.cloudfront_zone_id
     evaluate_target_health = false
   }
-
-  count = var.is_production ? 1 : 0
 }
 
 resource "aws_route53_record" "cert_validations" {
