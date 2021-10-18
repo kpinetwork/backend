@@ -82,4 +82,8 @@ resource "aws_codebuild_project" "rds_migrations" {
         }
     }
 
+    tags    = {
+        Name    = "${var.environment}_${var.codebuild_project_name}"
+    }
+
 }
