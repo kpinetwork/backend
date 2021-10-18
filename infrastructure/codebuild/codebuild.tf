@@ -5,8 +5,8 @@ resource "aws_codebuild_source_credential" "git_credential" {
 }
 
 resource "aws_codebuild_project" "rds_migrations" {
-    name                   = "${var.environment}-${var.codebuild_project_name}"
-    description            = "code build project for migrations"
+    name                   = "${var.environment}_${var.codebuild_project_name}"
+    description            = "code build project for db migrations"
     build_timeout          = 30
 
     service_role  = var.codebuild_aws_iam_role
@@ -24,6 +24,11 @@ resource "aws_codebuild_project" "rds_migrations" {
         image                       = "aws/codebuild/standard:4.0"
         type                        = "LINUX_CONTAINER"
         image_pull_credentials_type = "CODEBUILD"
+
+        environment_variable {
+            name            = "DB_NAME"
+            value           = var.db_name
+        }
 
         environment_variable {
             name            = "DB_USERNAME"
@@ -86,6 +91,11 @@ resource "aws_codebuild_webhook" "rds_migrations" {
     filter {
       type    = "EVENT"
       pattern = "PULL_REQUEST_MERGED"
+    }
+
+    filter {
+      type    = "BASE_REF"
+      pattern = local.base_ref[var.environment]
     }
   }
 }

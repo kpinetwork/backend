@@ -41,13 +41,13 @@ variable "lambdas_names" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 variable "db_username" {
-  description = "KPI Networks database root username"
+  description = "KPI Network database root username"
   type = string
   sensitive = true
 }
 
 variable "db_password" {
-  description = "KPI Networks database root user password"
+  description = "KPI Network database root user password"
   type = string
   sensitive = true
 }
