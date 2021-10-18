@@ -83,19 +83,3 @@ resource "aws_codebuild_project" "rds_migrations" {
     }
 
 }
-
-resource "aws_codebuild_webhook" "rds_migrations" {
-  project_name = aws_codebuild_project.rds_migrations.name
-  build_type   = "BUILD"
-  filter_group {
-    filter {
-      type    = "EVENT"
-      pattern = "PULL_REQUEST_MERGED"
-    }
-
-    filter {
-      type    = "BASE_REF"
-      pattern = local.base_ref[var.environment]
-    }
-  }
-}
