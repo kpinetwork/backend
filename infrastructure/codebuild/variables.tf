@@ -18,5 +18,13 @@ variable "private_subnet_a_id" {}
 variable "codebuild_group_id" {}
 
 variable "db_host" {}
+variable "db_name" {}
 variable "db_username" {}
 variable "db_password" {}
+
+locals {
+  base_ref = {
+    "prod" = "master"
+    "demo" = "demo"
+  }
+}

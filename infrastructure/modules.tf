@@ -48,26 +48,27 @@ module "sql" {
   source = "./sql/"
   region = var.region
   db_username = var.db_username
-  db_password = var.db_password
+  db_password = local.db_password[local.environment]
   db_security_group = module.shared.resources.security_group_db
   subnet_ids = module.shared.resources.private_subnet_ids
   environment = local.environment
   is_production = local.is_production
 }
 
-# module "codebuild" {
-#   source = "./codebuild/"
-#   git_token = var.git_token
-#   environment = local.environment
-#   codebuild_aws_iam_role = module.shared.resources.codebuild_role_arn
-#   log_group_name = module.logs.codebuild_log.name
-#   db_host = module.sql.kpinetwork_db_host
-#   db_username = var.db_username
-#   db_password = var.db_password
-#   kpinetwork_vpc_id = module.shared.resources.vpc_kpinetwork_id
-#   private_subnet_a_id = element(module.shared.resources.private_subnet_ids,0)
-#   codebuild_group_id = module.shared.resources.security_group_codebuild.id
-# }
+module "codebuild" {
+  source = "./codebuild/"
+  git_token = var.git_token
+  environment = local.environment
+  codebuild_aws_iam_role = module.shared.resources.codebuild_role_arn
+  log_group_name = module.logs.codebuild_log.name
+  db_host = module.sql.kpinetwork_db_host
+  db_name = module.sql.kpinetwork_db_name
+  db_username = var.db_username
+  db_password = local.db_password[local.environment]
+  kpinetwork_vpc_id = module.shared.resources.vpc_kpinetwork_id
+  private_subnet_a_id = element(module.shared.resources.private_subnet_ids,0)
+  codebuild_group_id = module.shared.resources.security_group_codebuild.id
+}
 
 module "dns" {
   source = "./dns/"
