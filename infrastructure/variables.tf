@@ -41,13 +41,19 @@ variable "lambdas_names" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 variable "db_username" {
-  description = "KPI Networks database root username"
+  description = "KPI Network database root username"
   type = string
   sensitive = true
 }
 
-variable "db_password" {
-  description = "KPI Networks database root user password"
+variable "db_prod_password" {
+  description = "KPI Network prod database root user password"
+  type = string
+  sensitive = true
+}
+
+variable "db_demo_password" {
+  description = "KPI Network demo database root user password"
   type = string
   sensitive = true
 }
@@ -78,6 +84,11 @@ variable "backend" {
 locals {
   environment = terraform.workspace
   is_production = local.environment == "prod"
+
+  db_password = {
+    "prod" = var.db_prod_password
+    "demo" = var.db_demo_password
+  }
   
   domains = {
     "root" = var.root_domain_name
