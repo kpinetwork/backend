@@ -20,47 +20,65 @@ def upgrade():
     session = create_db_session(engine)
 
     query = """
+            ALTER TABLE metric
+            DROP COLUMN period_id,
+            DROP COLUMN company_id,
+            ALTER COLUMN id TYPE VARCHAR(36),
+            ALTER COLUMN id DROP DEFAULT;
+
+            ALTER TABLE time_period
+            ALTER COLUMN id TYPE VARCHAR(36),
+            ALTER COLUMN id DROP DEFAULT;
+
+            ALTER TABLE company
+            ALTER COLUMN id TYPE VARCHAR(36),
+            ALTER COLUMN id DROP DEFAULT;
+
+            ALTER TABLE metric
+            ADD COLUMN period_id VARCHAR(36) REFERENCES time_period (id),
+            ADD COLUMN company_id VARCHAR(36) REFERENCES company (id);
+
             CREATE TABLE IF NOT EXISTS currency_metric (
-                id serial PRIMARY KEY,
+                id VARCHAR(36) PRIMARY KEY,
                 currency_iso_code VARCHAR(3) NOT NULL,
-                metric_id INTEGER REFERENCES metric (id)
+                metric_id VARCHAR(36) REFERENCES metric (id)
             );
             CREATE TABLE IF NOT EXISTS custom_metric (
-                id serial PRIMARY KEY,
-                formula VARCHAR(50) NOT NULL,
-                metric_id INTEGER REFERENCES metric (id)
+                id VARCHAR(36) PRIMARY KEY,
+                formula VARCHAR(300) NOT NULL,
+                metric_id VARCHAR(36) REFERENCES metric (id)
             );
             CREATE TABLE IF NOT EXISTS financial_scenario (
-                id serial PRIMARY KEY,
+                id VARCHAR(36) PRIMARY KEY,
                 name VARCHAR(40) NOT NULL,
                 currency VARCHAR(3) NOT NULL,
                 type VARCHAR(30) NOT NULL,
-                period_id INTEGER REFERENCES time_period (id),
-                company_id INTEGER REFERENCES company (id)
+                period_id VARCHAR(36) REFERENCES time_period (id),
+                company_id VARCHAR(36) REFERENCES company (id)
             );
             CREATE TABLE IF NOT EXISTS scenario_metric (
-                id serial PRIMARY KEY,
-                metric_id INTEGER REFERENCES metric (id),
-                scenario_id INTEGER REFERENCES financial_scenario (id)
+                id VARCHAR(36) PRIMARY KEY,
+                metric_id VARCHAR(36) REFERENCES metric (id),
+                scenario_id VARCHAR(36) REFERENCES financial_scenario (id)
             );
-            CREATE TABLE IF NOT EXISTS location (
-                id serial PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS company_location (
+                id VARCHAR(36) PRIMARY KEY,
                 name VARCHAR(40) NOT NULL,
                 country VARCHAR(40) NOT NULL,
                 city VARCHAR(40) NOT NULL,
                 lat NUMERIC NOT NULL,
                 long NUMERIC NOT NULL,
-                company_id INTEGER REFERENCES company (id)
+                company_id VARCHAR(36) REFERENCES company (id)
             );
-            CREATE TABLE IF NOT EXISTS portfolio (
-                id serial PRIMARY KEY,
+            CREATE TABLE IF NOT EXISTS cohort (
+                id VARCHAR(36) PRIMARY KEY,
                 name VARCHAR(40) NOT NULL,
                 tag VARCHAR(40) NOT NULL
             );
-            CREATE TABLE IF NOT EXISTS portfolio_company (
-                id serial PRIMARY KEY,
-                portfolio_id INTEGER REFERENCES portfolio (id),
-                company_id INTEGER REFERENCES company (id)
+            CREATE TABLE IF NOT EXISTS cohort_company (
+                id VARCHAR(36) PRIMARY KEY,
+                cohort_id VARCHAR(36) REFERENCES cohort (id),
+                company_id VARCHAR(36) REFERENCES company (id)
             );
         """
 
