@@ -32,7 +32,9 @@ def upgrade():
 
             ALTER TABLE company
             ALTER COLUMN id TYPE VARCHAR(36),
-            ALTER COLUMN id DROP DEFAULT;
+            ALTER COLUMN name TYPE VARCHAR(180),
+            ALTER COLUMN id DROP DEFAULT,
+            ADD COLUMN margin_group VARCHAR(8) NOT NULL;
 
             ALTER TABLE metric
             ADD COLUMN period_id VARCHAR(36) REFERENCES time_period (id),
@@ -45,7 +47,7 @@ def upgrade():
             );
             CREATE TABLE IF NOT EXISTS custom_metric (
                 id VARCHAR(36) PRIMARY KEY,
-                formula VARCHAR(300) NOT NULL,
+                formula TEXT NOT NULL,
                 metric_id VARCHAR(36) REFERENCES metric (id)
             );
             CREATE TABLE IF NOT EXISTS financial_scenario (
@@ -63,11 +65,10 @@ def upgrade():
             );
             CREATE TABLE IF NOT EXISTS company_location (
                 id VARCHAR(36) PRIMARY KEY,
-                name VARCHAR(40) NOT NULL,
-                country VARCHAR(40) NOT NULL,
-                city VARCHAR(40) NOT NULL,
-                lat NUMERIC NOT NULL,
-                long NUMERIC NOT NULL,
+                address VARCHAR(100),
+                country VARCHAR(60) NOT NULL,
+                city VARCHAR(80) NOT NULL,
+                geo POINT,
                 company_id VARCHAR(36) REFERENCES company (id)
             );
             CREATE TABLE IF NOT EXISTS cohort (
