@@ -1,0 +1,5 @@
+SQLAlchemy==1.4.24
+psycopg2-binary==2.9.1
+casbin==1.9.2
+casbin_sqlalchemy_adapter==0.4.2
+numpy

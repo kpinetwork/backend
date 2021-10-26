@@ -20,7 +20,7 @@ phases:
       python: 3.7
   pre_build:
     commands:
-      - pip3 install -r requirements/db.txt
+      - pip3 install -r requirements/codebuild/db.txt
   build:
     commands:
       - cd db

@@ -13,3 +13,7 @@ functions:
     include:
     - ./src/handlers/dbSample/dbSampleHandler.py
     - ./src/service/dbSample.py
+
+layers:
+  layerLibraries:
+    requirements: ./requirements/lambda_layer/demo.txt
