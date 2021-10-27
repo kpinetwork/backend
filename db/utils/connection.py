@@ -12,16 +12,6 @@ def get_db_uri():
     db_password = os.environ.get("DB_PASSWORD")
     db_name = os.environ.get("DB_NAME")
 
-    t = "postgresql://{username}:{password}@{host}:{port}/{db_name}".format(
-        username=db_username,
-        password=db_password,
-        host=db_host,
-        port="5432",
-        db_name=db_name,
-    )
-
-    print("URI ES ", t)
-
     return "postgresql://{username}:{password}@{host}:{port}/{db_name}".format(
         username=db_username,
         password=db_password,
