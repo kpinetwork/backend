@@ -16,4 +16,4 @@ functions:
 
 layers:
   layerLibraries:
-    requirements: ./requirements/lambda_layer/demo.txt
+    requirements: ./requirements/lambda_layer/requirements.txt
