@@ -74,3 +74,11 @@ output "object_references" {
     }
   }
 }
+
+output "layer_libraries_bucket" {
+  value = {
+    etag : aws_s3_bucket_object.layer_libraries_object.etag,
+    key : aws_s3_bucket_object.layer_libraries_object.key,
+    bucket : aws_s3_bucket_object.layer_libraries_object.bucket
+  }
+}
