@@ -234,6 +234,8 @@ resource "aws_lambda_function" "get_revenue_sum_by_company_lambda_function" {
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
   vpc_config {
     subnet_ids = [var.public_subnet_a_id]
     security_group_ids = [var.security_group_id]
