@@ -13,6 +13,7 @@ module "functions" {
   source = "./functions/"
   minimal_lambda_function_bucket = module.buckets.minimal_function_bucket
   db_sample_lambda_function_bucket = module.buckets.db_sample_function_bucket
+  lambda_layer_bucket = module.buckets.layer_libraries_bucket
   minimal_lambda_function_exec_role_arn = module.shared.resources.lambda_exec_role_arn
   lambdas_names = var.lambdas_names
   security_group_id = module.shared.resources.security_group_lambda.id

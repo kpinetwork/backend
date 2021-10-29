@@ -19,3 +19,10 @@ resource "aws_s3_bucket_object" "db_sample_function_object" {
   source = "${path.module}/../../dist/dbSampleHandler.zip"
   etag = filemd5("${path.module}/../../dist/dbSampleHandler.zip")
 }
+
+resource "aws_s3_bucket_object" "layer_libraries_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_layer_resource_name}/${var.environment}/layerLibraries.zip"
+  source = "${path.module}/../../dist/layerLibraries.zip"
+  etag = filemd5("${path.module}/../../dist/layerLibraries.zip")
+}
