@@ -13,3 +13,14 @@ functions:
     include:
     - ./src/handlers/dbSample/dbSampleHandler.py
     - ./src/service/dbSample.py
+
+  glueTriggerHandler:
+    requirements: ./src/handlers/glueTrigger/requirements.txt
+    include:
+      - ./src/handlers/glueTrigger/glueTriggerHandler.py
+      - ./src/service/glueService.py
+
+layers:
+  layerLibraries:
+    requirements: ./requirements/lambda_layer/requirements.txt
+

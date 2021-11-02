@@ -48,7 +48,7 @@ or validate the code for example pre-commit package.
 Execute the next command once you have created the venv:
 
 ```shell
-pip install -r requirements/dev.txt
+pip install -r requirements/envs/dev.txt
 ```
 
 #### Pre-commits hooks

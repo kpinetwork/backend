@@ -2,8 +2,8 @@ version: 0.2
 env:
   variables:
     DB_PORT: 5234
-    DB_NAME: kpinetworksdb
   exported-variables:
+    DB_NAME
     DB_USERNAME
     DB_PASSWORD
     DB_HOST
@@ -20,7 +20,7 @@ phases:
       python: 3.7
   pre_build:
     commands:
-      - pip3 install -r requirements/db.txt
+      - pip3 install -r requirements/codebuild/db.txt
   build:
     commands:
       - cd db
