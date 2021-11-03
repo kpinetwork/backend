@@ -17,5 +17,5 @@ functions:
     - ./db/utils/connection.py
 
 layers:
-  layerLibraries:
+  layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

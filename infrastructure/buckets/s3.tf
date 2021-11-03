@@ -22,7 +22,7 @@ resource "aws_s3_bucket_object" "get_all_companies_function_object" {
 
 resource "aws_s3_bucket_object" "layer_libraries_object" {
   bucket = var.bucket_name
-  key = "${var.lambda_layer_resource_name}/${var.environment}/layerLibraries.zip"
-  source = "${path.module}/../../dist/layerLibraries.zip"
-  etag = filemd5("${path.module}/../../dist/layerLibraries.zip")
+  key = "${var.lambda_layer_resource_name}/${var.environment}/layer_libraries.zip"
+  source = "${path.module}/../../dist/layer_libraries.zip"
+  etag = filemd5("${path.module}/../../dist/layer_libraries.zip")
 }

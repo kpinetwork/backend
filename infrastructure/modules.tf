@@ -22,7 +22,7 @@ module "sql" {
 
 module "functions" {
   source = "./functions/"
-  lambdas_function_buckets = module.buckets.object_references
+  object_bucket_references= module.buckets.object_references
   lambdas_exec_roles_arn = module.policy.lambdas_exec_roles_arn
   lambdas_names = var.lambdas_names
   security_group_id = module.shared.resources.security_group_lambda.id
