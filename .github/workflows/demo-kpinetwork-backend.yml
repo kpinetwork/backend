@@ -26,7 +26,7 @@ jobs:
            python -m pytest src/tests
       - name: Generate coverage
         run: |
-          python -m pytest --cache-clear --cov-config=.coveragerc --cov=src/ src/tests/* --collect-only > pytest-coverage.txt
+          python -m pytest --cache-clear --cov-config=.coveragerc --cov=src/ src/tests/* > pytest-coverage.txt
       - name: Generate coverage comment
         uses: coroo/pytest-coverage-commentator@v1.0.2
         with:

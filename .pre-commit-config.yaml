@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: run-tests
         name: run-tests
-        entry:  python -m pytest src/tests --collect-only
+        entry:  python -m pytest src/tests
         language: python
         'types': [python]
         pass_filenames: false
