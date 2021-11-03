@@ -13,7 +13,7 @@
 
 resource "aws_lambda_function" "get_company_lambda_function" {
   role = var.lambdas_exec_roles_arn.company_exec_role_arn
-  handler = "getCompanyHandler.handler"
+  handler = "get_company_handler.handler"
   runtime = var.runtime
   s3_bucket = var.object_bucket_references.get_company_function_bucket.bucket
   s3_key = var.object_bucket_references.get_company_function_bucket.key
@@ -43,7 +43,7 @@ resource "aws_lambda_function" "get_company_lambda_function" {
 
 resource "aws_lambda_function" "get_all_companies_lambda_function" {
   role = var.lambdas_exec_roles_arn.companies_exec_role_arn
-  handler = "getAllCompaniesHandler.handler"
+  handler = "get_all_companies_handler.handler"
   runtime = var.runtime
   s3_bucket = var.object_bucket_references.get_all_companies_function_bucket.bucket
   s3_key = var.object_bucket_references.get_all_companies_function_bucket.key
