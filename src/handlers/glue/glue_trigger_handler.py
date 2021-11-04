@@ -1,17 +1,17 @@
 import json
 import logging
 import boto3
-from glueService import GlueService
+from glue_service import GlueService
 
 client = boto3.client("glue")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-glueService = GlueService()
+glue_service = GlueService()
 
 
 def handler(event, context):
     return {
-        "statusCode": 202,
-        "body": json.dumps(glueService.trigger(client, event, logger)),
+        "statusCode": 200,
+        "body": json.dumps(glue_service.trigger(client, event, logger)),
         "headers": {"Content-Type": "application/json"},
     }

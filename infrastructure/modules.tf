@@ -10,29 +10,31 @@ module "shared" {
 }
 
 module "functions" {
-  source                                = "./functions/"
-  minimal_lambda_function_exec_role_arn = module.shared.resources.lambda_exec_role_arn
-  lambdas_names                         = var.lambdas_names
-  security_group_id                     = module.shared.resources.security_group_lambda.id
-  public_subnet_a_id                    = module.shared.resources.public_subnet_id
-  environment                           = local.environment
-  s3_object_references                  = module.buckets.object_references
-  lambda_exec_roles_arn                 = module.policy.lambdas_exec_roles_arn
-  object_buckets_information            = module.buckets.object_references
-  bucket_files                          = var.bucket_files
-  lambda_layer_bucket                   = module.buckets.layer_libraries_bucket
-
+  source                   = "./functions/"
+  object_bucket_references = module.buckets.object_references
+  lambdas_exec_roles_arn   = module.policy.lambdas_exec_roles_arn
+  lambdas_names            = var.lambdas_names
+  security_group_id        = module.shared.resources.security_group_lambda.id
+  public_subnet_a_id       = module.shared.resources.public_subnet_id
+  environment              = local.environment
+  db_host                  = module.sql.kpinetwork_db_host
+  db_name                  = module.sql.kpinetwork_db_name
+  db_username              = var.db_username
+  db_password              = local.db_password[local.environment]
+  bucket_files             = var.bucket_files
 }
 
 module "policy" {
-  source                              = "./policy/"
-  region                              = var.region
-  account_id                          = var.aws_account_id
-  lambdas_names                       = var.lambdas_names
-  api_gateway_minimal_lambda_function = module.network.api_gateway_minimal_lambda_function
-  environment                         = local.environment
-  glue_trigger_arn = module.functions.lambdas_invoke_arns.glue_trigger_lambda_function
-  bucket_files     = var.bucket_files
+  source                     = "./policy/"
+  region                     = var.region
+  account_id                 = var.aws_account_id
+  lambdas_names              = var.lambdas_names
+  api_gateway_references     = module.network.api_gateway_references
+  aws_iam_policy_logs_arn    = module.shared.resources.aws_iam_policy_logs_arn
+  aws_iam_policy_network_arn = module.shared.resources.aws_iam_policy_network_arn
+  environment                = local.environment
+  glue_trigger_arn           = module.functions.lambdas_arns.glue_trigger_lambda_function
+  bucket_files               = var.bucket_files
 }
 
 module "logs" {

@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 import pydash
 import logging
 from unittest.mock import Mock
-from src.service.glueService import GlueService
+from src.service.glue.glue_service import GlueService
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

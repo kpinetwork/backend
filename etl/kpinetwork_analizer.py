@@ -44,9 +44,7 @@ def save_database(env, db_table, dataframe):
         database = "demokpinetworkdb"
 
     print("==========Save in Database===============================")
-    print("env", env)
-    print("database", database)
-    print("db_table", db_table)
+    print("env: {} database: {} db_table: {}".format(env, database, db_table))
     dynamic_frame = DynamicFrame.fromDF(dataframe, glueContext, db_table)
     glueContext.write_dynamic_frame.from_jdbc_conf(
         dynamic_frame,

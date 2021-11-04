@@ -1,26 +1,28 @@
 functions:
   # Name the zip file you want juni to create
-  helloWorldHandler:
-    # The dependencies of the helloWorldHandler function.
-    requirements: ./src/handlers/helloWorld/requirements.txt
-    # Include this file in the generated zip artifact.
+  get_company_handler:
+    requirements: ./src/handlers/company/requirements.txt
     include:
-    - ./src/handlers/helloWorld/helloWorldHandler.py
-    - ./src/service/helloWorld.py
+    - ./src/handlers/company/get_company_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_sql.py
+    - ./db/utils/connection.py
 
-  dbSampleHandler:
-    requirements: ./src/handlers/dbSample/requirements.txt
+  get_all_companies_handler:
+    requirements: ./src/handlers/company/requirements.txt
     include:
-    - ./src/handlers/dbSample/dbSampleHandler.py
-    - ./src/service/dbSample.py
+    - ./src/handlers/company/get_all_companies_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_sql.py
+    - ./db/utils/connection.py
 
-  glueTriggerHandler:
-    requirements: ./src/handlers/glueTrigger/requirements.txt
+  glue_trigger_handler:
+    requirements: ./src/handlers/glue/requirements.txt
     include:
-      - ./src/handlers/glueTrigger/glueTriggerHandler.py
-      - ./src/service/glueService.py
+      - ./src/handlers/glue/glue_trigger_handler.py
+      - ./src/service/glue/glue_service.py
 
 layers:
-  layerLibraries:
+  layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
 

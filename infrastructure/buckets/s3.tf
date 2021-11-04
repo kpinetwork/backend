@@ -6,32 +6,32 @@
 # @param etag Triggers updates when the value changes
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_s3_bucket_object" "minimal_function_object" {
+resource "aws_s3_bucket_object" "get_company_function_object" {
   bucket = var.bucket_name
-  key    = "${var.lambda_resource_name}/${var.environment}/helloWorldHandler.zip"
-  source = "${path.module}/../../dist/helloWorldHandler.zip"
-  etag   = filemd5("${path.module}/../../dist/helloWorldHandler.zip")
+  key = "${var.lambda_resource_name}/${var.environment}/get_company_handler.zip"
+  source = "${path.module}/../../dist/get_company_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_company_handler.zip")
 }
 
-resource "aws_s3_bucket_object" "db_sample_function_object" {
+resource "aws_s3_bucket_object" "get_all_companies_function_object" {
   bucket = var.bucket_name
-  key    = "${var.lambda_resource_name}/${var.environment}/dbSampleHandler.zip"
-  source = "${path.module}/../../dist/dbSampleHandler.zip"
-  etag   = filemd5("${path.module}/../../dist/dbSampleHandler.zip")
+  key = "${var.lambda_resource_name}/${var.environment}/get_all_companies_handler.zip"
+  source = "${path.module}/../../dist/get_all_companies_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_all_companies_handler.zip")
 }
 
 resource "aws_s3_bucket_object" "layer_libraries_object" {
   bucket = var.bucket_name
-  key = "${var.lambda_layer_resource_name}/${var.environment}/layerLibraries.zip"
-  source = "${path.module}/../../dist/layerLibraries.zip"
-  etag = filemd5("${path.module}/../../dist/layerLibraries.zip")
+  key = "${var.lambda_layer_resource_name}/${var.environment}/layer_libraries.zip"
+  source = "${path.module}/../../dist/layer_libraries.zip"
+  etag = filemd5("${path.module}/../../dist/layer_libraries.zip")
 }
 
 resource "aws_s3_bucket_object" "glue_trigger_function_object" {
   bucket = var.bucket_name
-  key    = "${var.lambda_resource_name}/${var.environment}/glueTriggerHandler.zip"
-  source = "${path.module}/../../dist/glueTriggerHandler.zip"
-  etag   = filemd5("${path.module}/../../dist/glueTriggerHandler.zip")
+  key    = "${var.lambda_resource_name}/${var.environment}/glue_trigger_handler.zip"
+  source = "${path.module}/../../dist/glue_trigger_handler.zip"
+  etag   = filemd5("${path.module}/../../dist/glue_trigger_handler.zip")
 }
 
 resource "aws_s3_bucket_object" "etl_script_object" {

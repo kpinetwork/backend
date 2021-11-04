@@ -10,45 +10,74 @@
 # @param depends_on Set of dependencies to execute the definition
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_lambda_function" "minimal_lambda_function" {
-  role             = var.minimal_lambda_function_exec_role_arn
-  handler          = "helloWorldHandler.handler"
-  runtime          = var.runtime
-  s3_bucket        = var.s3_object_references.minimal_function_object.bucket
-  s3_key           = var.s3_object_references.minimal_function_object.key
-  function_name    = "${var.environment}_${var.lambdas_names.minimal_lambda_function}"
-  source_code_hash = base64sha256(var.s3_object_references.minimal_function_object.etag)
-}
-
-resource "aws_lambda_function" "db_sample_lambda_function" {
-  role             = var.minimal_lambda_function_exec_role_arn
-  handler          = "dbSampleHandler.handler"
-  runtime          = var.runtime
-  s3_bucket        = var.s3_object_references.db_sample_function_object.bucket
-  s3_key           = var.s3_object_references.db_sample_function_object.key
-  function_name    = "${var.environment}_${var.lambdas_names.db_sample_lambda_function}"
-  source_code_hash = base64sha256(var.s3_object_references.db_sample_function_object.etag)
+resource "aws_lambda_function" "get_company_lambda_function" {
+  role = var.lambdas_exec_roles_arn.company_exec_role_arn
+  handler = "get_company_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.get_company_function_bucket.bucket
+  s3_key = var.object_bucket_references.get_company_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.get_company_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_company_function_bucket.etag)
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids = [var.public_subnet_a_id]
     security_group_ids = [var.security_group_id]
   }
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
   ]
+
+  environment {
+    variables = {
+      DB_HOST = var.db_host
+      DB_NAME = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "get_all_companies_lambda_function" {
+  role = var.lambdas_exec_roles_arn.companies_exec_role_arn
+  handler = "get_all_companies_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.get_all_companies_function_bucket.bucket
+  s3_key = var.object_bucket_references.get_all_companies_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.get_all_companies_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_all_companies_function_bucket.etag)
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      DB_HOST = var.db_host
+      DB_NAME = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
 }
 
 resource "aws_lambda_function" "glue_trigger_lambda_function" {
-  role             = var.lambda_exec_roles_arn.glue_trigger_lambda_exec_role
-  handler          = "glueTriggerHandler.handler"
+  role             = var.lambdas_exec_roles_arn.glue_trigger_lambda_exec_role
+  handler          = "glue_trigger_handler.handler"
   runtime          = var.runtime
-  s3_bucket        = var.s3_object_references.glue_trigger_function_object.bucket
-  s3_key           = var.s3_object_references.glue_trigger_function_object.key
+  s3_bucket        = var.object_bucket_references.glue_trigger_function_bucket.bucket
+  s3_key           = var.object_bucket_references.glue_trigger_function_bucket.key
   function_name    = "${var.environment}_${var.lambdas_names.glue_trigger_lambda_function}"
-  source_code_hash = base64sha256(var.s3_object_references.glue_trigger_function_object.etag)
+  source_code_hash = base64sha256(var.object_bucket_references.glue_trigger_function_bucket.etag)
   environment {
     variables = {
       ENV          = var.environment
