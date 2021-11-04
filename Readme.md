@@ -48,7 +48,7 @@ or validate the code for example pre-commit package.
 Execute the next command once you have created the venv:
 
 ```shell
-pip install -r requirements/dev.txt
+pip install -r requirements/envs/dev.txt
 ```
 
 #### Pre-commits hooks
@@ -72,6 +72,18 @@ The project uses [talisman](https://github.com/thoughtworks/talisman) to avoid c
 in code, to use this library in a pre-commit hook is necessary the installation of golang, 
 you can use this page https://golang.org/doc/install to install it according to your OS.
 
+## Test
+This project uses [pytest](https://docs.pytest.org/en/6.2.x/) to execute unit tests, you can run the tests with the following command:
+
+```shell
+python -m pytest src/tests/*
+```
+
+In case you get some errors when removing or adding a file, please use these flags:
+
+```shell
+python -m pytest  --cache-clear src/tests/* --collect-only
+```
 
 ## Branch names format
 

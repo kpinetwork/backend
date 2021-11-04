@@ -9,15 +9,29 @@ module "shared" {
   remote_state_config = local.remote_state_config
 }
 
+module "sql" {
+  source = "./sql/"
+  region = var.region
+  db_username = var.db_username
+  db_password = local.db_password[local.environment]
+  db_security_group = module.shared.resources.security_group_db
+  subnet_ids = module.shared.resources.private_subnet_ids
+  environment = local.environment
+  is_production = local.is_production
+}
+
 module "functions" {
   source = "./functions/"
-  minimal_lambda_function_bucket = module.buckets.minimal_function_bucket
-  db_sample_lambda_function_bucket = module.buckets.db_sample_function_bucket
-  minimal_lambda_function_exec_role_arn = module.shared.resources.lambda_exec_role_arn
+  object_bucket_references= module.buckets.object_references
+  lambdas_exec_roles_arn = module.policy.lambdas_exec_roles_arn
   lambdas_names = var.lambdas_names
   security_group_id = module.shared.resources.security_group_lambda.id
   public_subnet_a_id = module.shared.resources.public_subnet_id
   environment = local.environment
+  db_host = module.sql.kpinetwork_db_host
+  db_name = module.sql.kpinetwork_db_name
+  db_username = var.db_username
+  db_password = local.db_password[local.environment]
 }
 
 module "policy" {
@@ -25,7 +39,9 @@ module "policy" {
   region = var.region
   account_id = var.aws_account_id
   lambdas_names = var.lambdas_names
-  api_gateway_minimal_lambda_function = module.network.api_gateway_minimal_lambda_function
+  api_gateway_references = module.network.api_gateway_references
+  aws_iam_policy_logs_arn = module.shared.resources.aws_iam_policy_logs_arn
+  aws_iam_policy_network_arn = module.shared.resources.aws_iam_policy_network_arn
   environment = local.environment
 }
 
@@ -40,17 +56,6 @@ module "network" {
   lambdas_functions_arn = module.functions.lambdas_invoke_arns
   domain_name = local.domains[local.environment]
   certificate_arn = module.cert.certificate_validation_arn
-  environment = local.environment
-  is_production = local.is_production
-}
-
-module "sql" {
-  source = "./sql/"
-  region = var.region
-  db_username = var.db_username
-  db_password = local.db_password[local.environment]
-  db_security_group = module.shared.resources.security_group_db
-  subnet_ids = module.shared.resources.private_subnet_ids
   environment = local.environment
   is_production = local.is_production
 }

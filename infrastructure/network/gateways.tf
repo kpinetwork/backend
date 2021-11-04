@@ -21,6 +21,18 @@ resource "aws_api_gateway_resource" "resource" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "companies" {
+  path_part   = "companies"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "company" {
+  path_part   = "{id}"
+  parent_id   = aws_api_gateway_resource.companies.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -30,9 +42,21 @@ resource "aws_api_gateway_resource" "resource" {
 # @param authorization  The type of authorization used for the method
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_api_gateway_method" "method" {
+resource "aws_api_gateway_method" "get_all_companies_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.resource.id
+  resource_id   = aws_api_gateway_resource.companies.id
+  http_method   = "GET"
+  authorization = "NONE"
+  
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
+resource "aws_api_gateway_method" "get_company_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.company.id
   http_method   = "GET"
   authorization = "NONE"
 }
@@ -48,13 +72,22 @@ resource "aws_api_gateway_method" "method" {
 # @param uri  The input's URI
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_api_gateway_integration" "integration" {
+resource "aws_api_gateway_integration" "companies_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.resource.id
-  http_method             = aws_api_gateway_method.method.http_method
+  resource_id             = aws_api_gateway_resource.companies.id
+  http_method             = aws_api_gateway_method.get_all_companies_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.minimal_lambda_function
+  uri                     = var.lambdas_functions_arn.get_all_companies_lambda_function
+}
+
+resource "aws_api_gateway_integration" "company_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.company.id
+  http_method             = aws_api_gateway_method.get_company_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_company_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -67,8 +100,10 @@ resource "aws_api_gateway_integration" "integration" {
 
 resource "aws_api_gateway_deployment" "gateway_deployment" {
   depends_on = [
-    aws_api_gateway_integration.integration,
-    aws_api_gateway_method.method
+    aws_api_gateway_integration.companies_integration,
+    aws_api_gateway_integration.company_integration,
+    aws_api_gateway_method.get_all_companies_method,
+    aws_api_gateway_method.get_company_method
   ]
 
   rest_api_id       = aws_api_gateway_rest_api.api.id

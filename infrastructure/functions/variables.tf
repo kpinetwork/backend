@@ -3,17 +3,19 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 variable "runtime" {
-  default = "python3.8"
+  default = "python3.6"
 }
 variable "environment" {}
+
+variable "layer_name" {
+  default = "db_lambda_layer"
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # LAMBDA INPUTS
 # ----------------------------------------------------------------------------------------------------------------------
-
-variable "minimal_lambda_function_exec_role_arn" {}
-variable "minimal_lambda_function_bucket" {}
-variable "db_sample_lambda_function_bucket" {}
+variable "lambdas_exec_roles_arn" {}
+variable "object_bucket_references" {}
 variable "lambdas_names" {}
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -22,3 +24,8 @@ variable "lambdas_names" {}
 
 variable "public_subnet_a_id" {}
 variable "security_group_id" {}
+
+variable "db_host" {}
+variable "db_name" {}
+variable "db_username" {}
+variable "db_password" {}
