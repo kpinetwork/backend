@@ -5,7 +5,7 @@
 # http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html (aws_lambda_permission)
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "companies_lambda_exec_role" {
-  name = "companies_lambda_exec"
+  name = "${var.environment}_companies_lambda_exec_role"
   path = "/"
   description = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
@@ -25,7 +25,7 @@ EOF
 }
 
 resource "aws_iam_role" "company_lambda_exec_role" {
-  name = "company_lambda_exec"
+  name = "${var.environment}_company_lambda_exec_role"
   path = "/"
   description = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
