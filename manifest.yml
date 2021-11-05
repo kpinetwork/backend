@@ -140,6 +140,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
