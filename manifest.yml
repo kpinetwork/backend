@@ -97,6 +97,12 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  glue_trigger_handler:
+    requirements: ./src/handlers/glue/requirements.txt
+    include:
+      - ./src/handlers/glue/glue_trigger_handler.py
+      - ./src/service/glue/glue_service.py
+
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
