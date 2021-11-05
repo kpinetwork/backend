@@ -118,4 +118,3 @@ functions:
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
-
