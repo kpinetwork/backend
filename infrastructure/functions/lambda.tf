@@ -1,4 +1,3 @@
-
 # ----------------------------------------------------------------------------------------------------------------------
 # CREATE THE LAMBDA FUNCTION
 # @param role Amazon Resource Name (ARN) of the function's execution role
@@ -60,7 +59,7 @@ resource "aws_lambda_function" "get_all_companies_lambda_function" {
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
   ]
-  
+
   environment {
     variables = {
       DB_HOST = var.db_host
@@ -69,4 +68,42 @@ resource "aws_lambda_function" "get_all_companies_lambda_function" {
       DB_PASSWORD = var.db_password
     }
   }
+}
+
+resource "aws_lambda_function" "glue_trigger_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.glue_trigger_lambda_exec_role
+  handler          = "glue_trigger_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.glue_trigger_function_bucket.bucket
+  s3_key           = var.object_bucket_references.glue_trigger_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.glue_trigger_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.glue_trigger_function_bucket.etag)
+  environment {
+    variables = {
+      ENV          = var.environment
+      BUCKET_FILES = var.bucket_files
+    }
+  }
+}
+
+resource "aws_lambda_permission" "glue_trigger_event_permission" {
+  statement_id  = "AllowExecutionFromS3Bucket"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.glue_trigger_lambda_function.function_name
+  principal     = "s3.amazonaws.com"
+  source_arn    = "arn:aws:s3:::${var.bucket_files}"
+}
+
+resource "aws_s3_bucket_notification" "files_bucket_notification" {
+  bucket     = var.bucket_files
+  lambda_function {
+    id                  = "aws_s3_bucket_notification_${aws_lambda_function.glue_trigger_lambda_function.function_name}"
+    lambda_function_arn = aws_lambda_function.glue_trigger_lambda_function.arn
+    events              = ["s3:ObjectCreated:Put"]
+    filter_prefix       = "${var.environment}/"
+  }
+  depends_on = [
+    aws_lambda_function.glue_trigger_lambda_function,
+    aws_lambda_permission.glue_trigger_event_permission
+  ]
 }
