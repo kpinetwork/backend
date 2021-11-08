@@ -20,6 +20,16 @@ output "object_references" {
       key : aws_s3_bucket_object.glue_trigger_function_object.key,
       bucket : aws_s3_bucket_object.glue_trigger_function_object.bucket
     }
+    "get_metric_by_id_function_bucket" : {
+      etag : aws_s3_bucket_object.get_metric_by_id_function_object.etag,
+      key : aws_s3_bucket_object.get_metric_by_id_function_object.key,
+      bucket : aws_s3_bucket_object.get_metric_by_id_function_object.bucket
+    }
+    "get_metrics_function_bucket" : {
+      etag : aws_s3_bucket_object.get_metrics_function_object.etag,
+      key : aws_s3_bucket_object.get_metrics_function_object.key,
+      bucket : aws_s3_bucket_object.get_metrics_function_object.bucket
+    }
   }
 }
 

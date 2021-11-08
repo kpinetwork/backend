@@ -33,6 +33,8 @@ variable "lambdas_names" {
   default = {
     "get_company_lambda_function": "get_company_lambda_function"
     "get_all_companies_lambda_function": "get_all_companies_lambda_function"
+    "get_metric_by_id_lambda_function": "get_metric_by_id_lambda_function"
+    "get_metrics_lambda_function": "get_metrics_lambda_function"
     "glue_trigger_lambda_function": "glue_trigger_lambda_function"
   }
 }

@@ -1,16 +1,17 @@
-class CompanyService:
-    def __init__(self, session, query_sql, response_sql) -> None:
-        self.table_name = "company"
+class MetricsService:
+    def __init__(self, session, query_sql, logger, response_sql):
         self.session = session
+        self.table_name = "metric"
         self.query_sql = query_sql
         self.response_sql = response_sql
+        self.logger = logger
         pass
 
-    def get_company(self, company_id: str) -> dict:
+    def get_metric_by_id(self, metric_id: str) -> dict:
         try:
-            if company_id and company_id.strip():
+            if metric_id and metric_id.strip():
                 query = self.query_sql.get_select_by_id_query(
-                    self.table_name, company_id
+                    self.table_name, metric_id
                 )
 
                 result = self.session.execute(query)
@@ -20,18 +21,20 @@ class CompanyService:
             return dict()
 
         except Exception as error:
+            self.logger.info(error)
             raise error
 
-    def get_all_companies(self, offset=0, max_count=20) -> list:
+    def get_metrics(self, offset=0, max_count=20) -> list:
         try:
             query = self.query_sql.get_select_query(self.table_name, offset, max_count)
 
             results = self.session.execute(query)
             self.session.commit()
 
-            companies = []
-            [companies.append(dict(record)) for record in results]
-            return companies
+            metrics = []
+            [metrics.append(dict(record)) for record in results]
+            return metrics
 
         except Exception as error:
+            self.logger.info(error)
             raise error
