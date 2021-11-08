@@ -31,8 +31,9 @@ variable "root_domain_name" {
 
 variable "lambdas_names" {
   default = {
-    "minimal_lambda_function": "minimal_lambda_function"
-    "db_sample_lambda_function": "db_sample_lambda_function"
+    "get_company_lambda_function": "get_company_lambda_function"
+    "get_all_companies_lambda_function": "get_all_companies_lambda_function"
+    "glue_trigger_lambda_function": "glue_trigger_lambda_function"
   }
 }
 
@@ -80,6 +81,10 @@ variable "backend" {
 # ----------------------------------------------------------------------------------------------------------------------
 # LOCAL VARIABLES
 # ----------------------------------------------------------------------------------------------------------------------
+
+variable "bucket_files" {
+  default = "kpinetwork-files"
+}
 
 locals {
   environment = terraform.workspace
