@@ -50,11 +50,13 @@ class TestMetricsService(TestCase):
         self.assertEqual(response, dict())
         self.metrics_service_instance.session.execute.assert_not_called()
 
-    def test_get_metric_failed(self):
+    def test_get_metric_by_id_failed(self):
         self.metrics_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.metrics_service_instance.get_company(self.query_response.get("id"))
+                self.metrics_service_instance.get_metric_by_id(
+                    self.query_response.get("id")
+                )
             )
 
             self.assertTrue("error" in context.exception)
