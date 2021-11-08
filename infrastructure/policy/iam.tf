@@ -106,7 +106,7 @@ EOF
 
 # IAM policy for logging from a lambda
 resource "aws_iam_policy" "lambda_logging" {
-  name = "iam_policy_lambda_logging_function_back"
+  name = "${var.environment}_iam_policy_lambda_logging_function_back"
   path = "/"
   description = "IAM policy for logging from a lambda"
   policy = <<EOF
@@ -129,7 +129,7 @@ EOF
 
 # IAM policy to call glue from a lambda
 resource "aws_iam_policy" "lambda_glue_access" {
-  name = "iam_policy_lambda_glue_access"
+  name = "${var.environment}_iam_policy_lambda_glue_access"
   path = "/"
   description = "IAM policy to call glue from a lambda"
   policy = <<EOF
