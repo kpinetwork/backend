@@ -85,7 +85,7 @@ resource "aws_lambda_permission" "apigw_get_company_lambda" {
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_iam_role" "get_metric_by_id_lambda_exec_role" {
-  name               = "get_metric_by_id_lambda_exec_role"
+  name               = "${var.environment}_get_metric_by_id_lambda_exec_role"
   path               = "/"
   description        = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
@@ -105,7 +105,7 @@ EOF
 }
 
 resource "aws_iam_role" "get_metrics_lambda_exec_role" {
-  name               = "get_metrics_lambda_exec_role"
+  name               = "${var.environment}_get_metrics_lambda_exec_role"
   path               = "/"
   description        = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
