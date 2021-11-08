@@ -26,3 +26,17 @@ resource "aws_s3_bucket_object" "layer_libraries_object" {
   source = "${path.module}/../../dist/layer_libraries.zip"
   etag = filemd5("${path.module}/../../dist/layer_libraries.zip")
 }
+
+resource "aws_s3_bucket_object" "glue_trigger_function_object" {
+  bucket = var.bucket_name
+  key    = "${var.lambda_resource_name}/${var.environment}/glue_trigger_handler.zip"
+  source = "${path.module}/../../dist/glue_trigger_handler.zip"
+  etag   = filemd5("${path.module}/../../dist/glue_trigger_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "etl_script_object" {
+  bucket = var.bucket_name
+  key    = "pyspark/kpinetwork_analizer.py"
+  source = "${path.module}/../../etl/kpinetwork_analizer.py"
+  etag   = filemd5("${path.module}/../../etl/kpinetwork_analizer.py")
+}

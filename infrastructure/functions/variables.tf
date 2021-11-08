@@ -17,6 +17,7 @@ variable "layer_name" {
 variable "lambdas_exec_roles_arn" {}
 variable "object_bucket_references" {}
 variable "lambdas_names" {}
+variable "bucket_files" {}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # VPC INPUTS
