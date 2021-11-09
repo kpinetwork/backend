@@ -33,9 +33,21 @@ resource "aws_api_gateway_resource" "metrics" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "scenarios" {
+  path_part   = "scenarios"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "metric" {
   path_part   = "{company_id}"
   parent_id   = aws_api_gateway_resource.metrics.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "scenarios_list" {
+  path_part   = "list"
+  parent_id   = aws_api_gateway_resource.scenarios.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -79,9 +91,29 @@ resource "aws_api_gateway_method" "get_metrics_method" {
   }
 }
 
+resource "aws_api_gateway_method" "get_company_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios.id
+  http_method   = "GET"
+  authorization = "NONE"
+  
+  request_parameters = {
+    "method.request.querystring.company" = false
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
 resource "aws_api_gateway_method" "get_metric_by_company_id_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.metric.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "list_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios_list.id
   http_method   = "GET"
   authorization = "NONE"
 }
@@ -133,6 +165,24 @@ resource "aws_api_gateway_integration" "metric_by_company_id_integration" {
   uri                     = var.lambdas_functions_arn.get_metric_by_company_id_lambda_function
 }
 
+resource "aws_api_gateway_integration" "company_scenarios_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios.id
+  http_method             = aws_api_gateway_method.get_company_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_company_lambda_function
+}
+
+resource "aws_api_gateway_integration" "scenarios_list_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios_list.id
+  http_method             = aws_api_gateway_method.list_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_company_lambda_function
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY DEPLOYMENT
 # Manages an API Gateway REST Deployment.
@@ -151,6 +201,10 @@ resource "aws_api_gateway_deployment" "gateway_deployment" {
     aws_api_gateway_method.get_company_method,
     aws_api_gateway_method.get_metrics_method,
     aws_api_gateway_method.get_metric_by_company_id_method
+    aws_api_gateway_integration.company_scenarios_integration,
+    aws_api_gateway_integration.scenarios_list_integration,
+    aws_api_gateway_method.get_company_scenarios_method,
+    aws_api_gateway_method.list_scenarios_method,
   ]
 
   rest_api_id       = aws_api_gateway_rest_api.api.id

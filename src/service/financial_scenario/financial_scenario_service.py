@@ -1,0 +1,92 @@
+class FinancialScenarioService:
+    def __init__(self, session, query_builder) -> None:
+        self.table_name = "financial_scenario"
+        self.session = session
+        self.query_builder = query_builder
+        pass
+
+    def get_company_scenarios(self, company_id: str, offset=0, max_count=20) -> list:
+        columns = [
+            f"{self.table_name}.id",
+            f"{self.table_name}.name",
+            f"{self.table_name}.currency",
+            f"{self.table_name}.type",
+            "mtr.name as metric_name",
+            "mtr.value as metric_value",
+            "mtr.type as metric_type",
+            "mtr.data_type as as metric_data_type",
+            "tp.id as metric_period_id",
+            "tp.start_at as metric_start_at",
+            "tp.end_at as metric_end_at",
+        ]
+        try:
+            if company_id and company_id.strip():
+                query = (
+                    self.query_builder.add_table_name(self.table_name)
+                    .add_select_conditions(columns)
+                    .add_join_clause(
+                        {
+                            "scenario_metric": {
+                                "alias": "scn_mtr",
+                                "from": "scn_mtr.metric_id",
+                                "to": f"{self.table_name}.id",
+                            }
+                        }
+                    )
+                    .add_join_clause(
+                        {
+                            "metric": {
+                                "alias": "mtr",
+                                "from": "mtr.id",
+                                "to": "scn_mtr.metric_id",
+                            }
+                        }
+                    )
+                    .add_join_clause(
+                        {
+                            "time_period": {
+                                "alias": "tp",
+                                "from": "tp.id",
+                                "to": "mtr.id",
+                            }
+                        }
+                    )
+                    .add_sql_where_equal_condition(
+                        {f"{self.table_name}.company_id": company_id}
+                    )
+                    .add_sql_offset_condition(offset)
+                    .add_sql_limit_condition(max_count)
+                    .build()
+                    .get_query()
+                )
+
+                results = self.session.execute(query)
+                self.session.commit()
+
+                companies = []
+                [companies.append(dict(record)) for record in results]
+                return companies
+            return []
+        except Exception as error:
+            raise error
+
+    def list_scenarios(self, offset=0, max_count=20) -> list:
+        try:
+            query = (
+                self.query_builder.add_select_conditions(["id", "name"])
+                .add_table_name(self.table_name)
+                .add_sql_offset_condition(offset)
+                .add_sql_limit_condition(max_count)
+                .build()
+                .get_query()
+            )
+
+            results = self.session.execute(query)
+            self.session.commit()
+
+            companies = []
+            [companies.append(dict(record)) for record in results]
+            return companies
+
+        except Exception as error:
+            raise error

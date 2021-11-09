@@ -1,12 +1,12 @@
 import json
 from company_service import CompanyService
 from connection import create_db_engine, create_db_session
-from query_sql import QuerySQL
+from query_builder import QuerySQLBuilder
 
 engine = create_db_engine()
 session = create_db_session(engine)
-query_sql = QuerySQL()
-company_service = CompanyService(session, query_sql)
+query_builder = QuerySQLBuilder()
+company_service = CompanyService(session, query_builder)
 
 
 def handler(event, context):
