@@ -1,8 +1,9 @@
 class CompanyService:
-    def __init__(self, session, query_sql) -> None:
+    def __init__(self, session, query_sql, response_sql) -> None:
         self.table_name = "company"
         self.session = session
         self.query_sql = query_sql
+        self.response_sql = response_sql
         pass
 
     def get_company(self, company_id: str) -> dict:
@@ -14,9 +15,8 @@ class CompanyService:
 
                 result = self.session.execute(query)
                 self.session.commit()
-
-                company = next(result)
-                return dict(company) if company else dict()
+                records = result.fetchall()
+                return self.response_sql.process_query_results(records)
             return dict()
 
         except Exception as error:

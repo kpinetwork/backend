@@ -40,3 +40,17 @@ resource "aws_s3_bucket_object" "etl_script_object" {
   source = "${path.module}/../../etl/kpinetwork_analizer.py"
   etag   = filemd5("${path.module}/../../etl/kpinetwork_analizer.py")
 }
+
+resource "aws_s3_bucket_object" "get_metric_by_company_id_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_metric_by_company_id_handler.zip"
+  source = "${path.module}/../../dist/get_metric_by_company_id_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_metric_by_company_id_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_metrics_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_metrics_handler.zip"
+  source = "${path.module}/../../dist/get_metrics_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_metrics_handler.zip")
+}
