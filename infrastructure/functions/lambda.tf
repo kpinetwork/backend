@@ -107,7 +107,6 @@ resource "aws_s3_bucket_notification" "files_bucket_notification" {
     aws_lambda_permission.glue_trigger_event_permission
   ]
 }
-
 resource "aws_lambda_function" "get_metric_by_company_id_function" {
   role               = var.lambdas_exec_roles_arn.metric_exec_role_arn
   handler            = "get_metric_by_company_id_handler.handler"
