@@ -25,3 +25,13 @@ class TestResponseBuilder(TestCase):
         records = []
         response = self.response_sql_instance.process_query_results(records)
         self.assertEqual(response, {})
+
+    def test_process_query_list_results_success(self):
+        records = [self.record]
+        response = self.response_sql_instance.process_query_list_results(records)
+        self.assertEqual(response, [self.record])
+
+    def test_process_query_list_results_with_empty_response(self):
+        records = []
+        response = self.response_sql_instance.process_query_list_results(records)
+        self.assertEqual(response, [])
