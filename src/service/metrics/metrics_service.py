@@ -7,17 +7,23 @@ class MetricsService:
         self.logger = logger
         pass
 
-    def get_metric_by_id(self, metric_id: str) -> dict:
+    def get_metric_by_company_id(self, company_id: str) -> dict:
         try:
-            if metric_id and metric_id.strip():
-                query = self.query_sql.get_select_by_id_query(
-                    self.table_name, metric_id
+            if company_id and company_id.strip():
+                query = (
+                    "SELECT "
+                    "metric.id , metric.name , metric.value, metric.type , "
+                    "metric.data_type,metric.period_id ,time_period.start_at,"
+                    "time_period.end_at FROM {table_name} "
+                    "INNER JOIN time_period ON time_period.id = metric.period_id "
+                    "WHERE company_id='{company_id}' ORDER BY start_at DESC".format(
+                        table_name=self.table_name, company_id=company_id
+                    )
                 )
 
                 result = self.session.execute(query)
                 self.session.commit()
-                records = result.fetchall()
-                return self.response_sql.process_query_results(records)
+                return self.response_sql.process_query_list_results(result)
             return dict()
 
         except Exception as error:
@@ -31,9 +37,7 @@ class MetricsService:
             results = self.session.execute(query)
             self.session.commit()
 
-            metrics = []
-            [metrics.append(dict(record)) for record in results]
-            return metrics
+            return self.response_sql.process_query_list_results(results)
 
         except Exception as error:
             self.logger.info(error)

@@ -107,14 +107,14 @@ resource "aws_s3_bucket_notification" "files_bucket_notification" {
     aws_lambda_permission.glue_trigger_event_permission
   ]
 }
-resource "aws_lambda_function" "get_metric_by_id_function" {
+resource "aws_lambda_function" "get_metric_by_company_id_function" {
   role               = var.lambdas_exec_roles_arn.metric_exec_role_arn
-  handler            = "get_metric_by_id_handler.handler"
+  handler            = "get_metric_by_company_id_handler.handler"
   runtime            = var.runtime
-  s3_bucket          = var.object_bucket_references.get_metric_by_id_function_bucket.bucket
-  s3_key             = var.object_bucket_references.get_metric_by_id_function_bucket.key
-  function_name      = "${var.environment}_${var.lambdas_names.get_metric_by_id_lambda_function}"
-  source_code_hash   = base64sha256(var.object_bucket_references.get_metric_by_id_function_bucket.etag)
+  s3_bucket          = var.object_bucket_references.get_metric_by_company_id_function_bucket.bucket
+  s3_key             = var.object_bucket_references.get_metric_by_company_id_function_bucket.key
+  function_name      = "${var.environment}_${var.lambdas_names.get_metric_by_company_id_lambda_function}"
+  source_code_hash   = base64sha256(var.object_bucket_references.get_metric_by_company_id_function_bucket.etag)
   layers             = [aws_lambda_layer_version.db_lambda_layer.arn]
   depends_on         = [
     aws_lambda_layer_version.db_lambda_layer

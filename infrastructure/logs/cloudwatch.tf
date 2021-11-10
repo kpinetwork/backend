@@ -28,7 +28,7 @@ resource "aws_cloudwatch_log_group" "glue_trigger_lambda_function" {
 }
 
 resource "aws_cloudwatch_log_group" "get_metric_by_id_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metric_by_id_lambda_function}"
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metric_by_company_id_lambda_function}"
   retention_in_days = var.retention_days
 }
 

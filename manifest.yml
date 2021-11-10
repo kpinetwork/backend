@@ -16,12 +16,13 @@ functions:
     - ./src/utils/query_sql.py
     - ./db/utils/connection.py
 
-  get_metric_by_id_handler:
+  get_metric_by_company_id_handler:
     requirements: ./src/handlers/metrics/requirements.txt
     include:
-    - ./src/handlers/metrics/get_metric_by_id_handler.py
+    - ./src/handlers/metrics/get_metric_by_company_id_handler.py
     - ./src/service/metrics/metrics_service.py
     - ./src/utils/query_sql.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   get_metrics_handler:
@@ -31,6 +32,7 @@ functions:
     - ./src/service/metrics/metrics_service.py
     - ./src/utils/query_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/response_sql.py
 
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt

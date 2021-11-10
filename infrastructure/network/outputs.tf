@@ -18,9 +18,9 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_get_metric_by_id_lambda_function": {
+    "apigw_get_metric_by_company_id_lambda_function": {
       resource_path: aws_api_gateway_resource.metric.path,
-      http_method: aws_api_gateway_method.get_metric_by_id_method.http_method,
+      http_method: aws_api_gateway_method.get_metric_by_company_id_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

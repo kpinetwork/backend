@@ -34,7 +34,7 @@ resource "aws_api_gateway_resource" "metrics" {
 }
 
 resource "aws_api_gateway_resource" "metric" {
-  path_part   = "{id}"
+  path_part   = "{company_id}"
   parent_id   = aws_api_gateway_resource.metrics.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
@@ -79,7 +79,7 @@ resource "aws_api_gateway_method" "get_metrics_method" {
   }
 }
 
-resource "aws_api_gateway_method" "get_metric_by_id_method" {
+resource "aws_api_gateway_method" "get_metric_by_company_id_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.metric.id
   http_method   = "GET"
@@ -124,13 +124,13 @@ resource "aws_api_gateway_integration" "metrics_integration" {
   uri                     = var.lambdas_functions_arn.get_metrics_lambda_function
 }
 
-resource "aws_api_gateway_integration" "metric_by_id_integration" {
+resource "aws_api_gateway_integration" "metric_by_company_id_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.metric.id
-  http_method             = aws_api_gateway_method.get_metric_by_id_method.http_method
+  http_method             = aws_api_gateway_method.get_metric_by_company_id_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_metric_by_id_lambda_function
+  uri                     = var.lambdas_functions_arn.get_metric_by_company_id_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -146,11 +146,11 @@ resource "aws_api_gateway_deployment" "gateway_deployment" {
     aws_api_gateway_integration.companies_integration,
     aws_api_gateway_integration.company_integration,
     aws_api_gateway_integration.metrics_integration,
-    aws_api_gateway_integration.metric_by_id_integration,
+    aws_api_gateway_integration.metric_by_company_id_integration,
     aws_api_gateway_method.get_all_companies_method,
     aws_api_gateway_method.get_company_method,
     aws_api_gateway_method.get_metrics_method,
-    aws_api_gateway_method.get_metric_by_id_method
+    aws_api_gateway_method.get_metric_by_company_id_method
   ]
 
   rest_api_id       = aws_api_gateway_rest_api.api.id

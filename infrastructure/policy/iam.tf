@@ -84,8 +84,8 @@ resource "aws_lambda_permission" "apigw_get_company_lambda" {
 # AWS IAM METRICS
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_iam_role" "get_metric_by_id_lambda_exec_role" {
-  name               = "${var.environment}_get_metric_by_id_lambda_exec_role"
+resource "aws_iam_role" "get_metric_by_company_id_lambda_exec_role" {
+  name               = "${var.environment}_get_metric_by_company_id_lambda_exec_role"
   path               = "/"
   description        = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
@@ -124,8 +124,8 @@ resource "aws_iam_role" "get_metrics_lambda_exec_role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "get_metric_by_id_lambda_logs" {
-  role       = aws_iam_role.get_metric_by_id_lambda_exec_role.name
+resource "aws_iam_role_policy_attachment" "get_metric_by_company_id_lambda_logs" {
+  role       = aws_iam_role.get_metric_by_company_id_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
 }
 
@@ -140,7 +140,7 @@ resource "aws_iam_role_policy_attachment" "get_metrics_lambda_vpc" {
 }
 
 resource "aws_iam_role_policy_attachment" "get_metric_by_id_lambda_vpc" {
-  role       = aws_iam_role.get_metric_by_id_lambda_exec_role.name
+  role       = aws_iam_role.get_metric_by_company_id_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
 }
 
@@ -152,12 +152,12 @@ resource "aws_lambda_permission" "apigw_get_metrics_lambda" {
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_metrics_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_metrics_lambda_function.http_method}${var.api_gateway_references.apigw_get_metrics_lambda_function.resource_path}"
 }
 
-resource "aws_lambda_permission" "apigw_get_metric_by_id_lambda" {
+resource "aws_lambda_permission" "apigw_get_metric_by_company_id_lambda" {
   statement_id  = "AllowExecutionFromAPIGatewayCompanyId"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.environment}_${var.lambdas_names.get_metric_by_id_lambda_function}"
+  function_name = "${var.environment}_${var.lambdas_names.get_metric_by_company_id_lambda_function}"
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_metric_by_id_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_metric_by_id_lambda_function.http_method}${var.api_gateway_references.apigw_get_metric_by_id_lambda_function.resource_path}"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_metric_by_company_id_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_metric_by_company_id_lambda_function.http_method}${var.api_gateway_references.apigw_get_metric_by_company_id_lambda_function.resource_path}"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
