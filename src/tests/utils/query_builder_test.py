@@ -291,7 +291,7 @@ class TestQueryBuilder(TestCase):
             SELECT name FROM test
             WHERE name = 'test'
             OFFSET 2
-            LIMIT 10
+            LIMIT 10 ;
         """
 
         query = query_builder.get_query()

@@ -139,7 +139,7 @@ class QuerySQLBuilder:
             {where_conditions}
             {order_by_condition}
             {offset_condition}
-            {limit_condition}
+            {limit_condition} ;
         """.format(
             table_name=self.table_name,
             select_conditions=self.__build_select(),
@@ -159,6 +159,7 @@ class QuerySQLBuilder:
         self.order_by = None
         self.limit = None
         self.offset = None
+        self.join_clauses = []
 
     def get_query(self):
         query = self.query
