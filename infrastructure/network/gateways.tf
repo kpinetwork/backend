@@ -108,7 +108,6 @@ resource "aws_api_gateway_method" "get_company_scenarios_method" {
   resource_id   = aws_api_gateway_resource.scenarios.id
   http_method   = "GET"
   authorization = "NONE"
-
   request_parameters = {
     "method.request.querystring.company" = false
     "method.request.querystring.offset" = false
