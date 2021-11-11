@@ -19,7 +19,7 @@ class CompanyService:
 
                 result = self.session.execute(query).fetchall()
                 self.session.commit()
-                
+
                 return self.response_sql.process_query_result(result)
             return dict()
 

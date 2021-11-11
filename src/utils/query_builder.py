@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class QuerySQLBuilder:
     query: str
 
@@ -14,8 +15,8 @@ class QuerySQLBuilder:
         self.order_by = None
 
     class Order(Enum):
-        DESC = 'DESC'
-        ASC = 'ASC'
+        DESC = "DESC"
+        ASC = "ASC"
 
     def __is_valid_name(self, name: str):
         return name and isinstance(name, str) and name.strip()
@@ -95,8 +96,8 @@ class QuerySQLBuilder:
             raise Exception("No valid offset value")
 
     def add_sql_order_by_condition(self, attribute: str, order: Order):
-            self.order_by = (attribute, order.name)
-            return self
+        self.order_by = (attribute, order.name)
+        return self
 
     def __build_select(self):
         if len(self.select_conditions) < 1:

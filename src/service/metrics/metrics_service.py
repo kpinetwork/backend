@@ -18,29 +18,32 @@ class MetricsService:
                     f"{self.table_name}.data_type",
                     f"{self.table_name}.period_id",
                     "time_period.start_at",
-                    "time_period.end_at"
+                    "time_period.end_at",
                 ]
 
-                query = (self.query_builder.add_table_name(self.table_name)
+                query = (
+                    self.query_builder.add_table_name(self.table_name)
                     .add_select_conditions(columns)
                     .add_join_clause(
-                            {
-                                "time_period": {
-                                    "from": "time_period.id",
-                                    "to": f"{self.table_name}.period_id",
-                                }
+                        {
+                            "time_period": {
+                                "from": "time_period.id",
+                                "to": f"{self.table_name}.period_id",
                             }
+                        }
                     )
                     .add_sql_where_equal_condition(
-                            {f"{self.table_name}.company_id": f"'{company_id}'"}
+                        {f"{self.table_name}.company_id": f"'{company_id}'"}
                     )
-                    .add_sql_order_by_condition("time_period.start_at", self.query_builder.Order.DESC)
+                    .add_sql_order_by_condition(
+                        "time_period.start_at", self.query_builder.Order.DESC
+                    )
                     .build()
                     .get_query()
                 )
                 result = self.session.execute(query).fetchall()
                 self.session.commit()
-                
+
                 return self.response_sql.process_query_list_results(result)
             return dict()
 
@@ -50,7 +53,8 @@ class MetricsService:
 
     def get_metrics(self, offset=0, max_count=20) -> list:
         try:
-            query = (self.query_builder.add_table_name(self.table_name)
+            query = (
+                self.query_builder.add_table_name(self.table_name)
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()

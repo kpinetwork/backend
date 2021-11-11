@@ -51,7 +51,9 @@ class TestQueryBuilder(TestCase):
         clause = query_builder.join_clauses[0]
 
         self.assertEqual(len(query_builder.join_clauses), len([expected_join_clause]))
-        self.assertEqual(remove_white_spaces(clause), remove_white_spaces(expected_join_clause))
+        self.assertEqual(
+            remove_white_spaces(clause), remove_white_spaces(expected_join_clause)
+        )
 
     def test_add_join_clause_with_invalid_table_name(self):
 
@@ -67,7 +69,7 @@ class TestQueryBuilder(TestCase):
         join_dict = {
             "other": {"alias": "", "from": "o.id", "to": f"{self.table_name}.id"}
         }
-        
+
         query_builder = QuerySQLBuilder().add_join_clause(join_dict)
 
         expected_clause = f"""
@@ -76,8 +78,10 @@ class TestQueryBuilder(TestCase):
             """
 
         self.assertEqual(len(query_builder.join_clauses), len([expected_clause]))
-        self.assertEqual(remove_white_spaces(query_builder.join_clauses[0]), remove_white_spaces(expected_clause))
-
+        self.assertEqual(
+            remove_white_spaces(query_builder.join_clauses[0]),
+            remove_white_spaces(expected_clause),
+        )
 
     def test_add_join_clause_with_invalid_on_values(self):
 
@@ -221,7 +225,6 @@ class TestQueryBuilder(TestCase):
         result = query_builder._QuerySQLBuilder__build_limit()
 
         self.assertEqual(result, expected_limit_condition)
-
 
     def test__build_order_by_with_value(self):
         query_builder = QuerySQLBuilder()

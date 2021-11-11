@@ -20,7 +20,7 @@ class FinancialScenarioService:
             "metric.name as metric_name",
             "metric.value as metric_value",
             "metric.type as metric_type",
-            "metric.data_type as metric_data_type"
+            "metric.data_type as metric_data_type",
         ]
         try:
             if company_id and company_id.strip():

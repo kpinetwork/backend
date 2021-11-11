@@ -11,7 +11,9 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-scenario_service = FinancialScenarioService(session, query_builder, logger, response_sql)
+scenario_service = FinancialScenarioService(
+    session, query_builder, logger, response_sql
+)
 
 
 def handler(event, context):
@@ -21,7 +23,7 @@ def handler(event, context):
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            offset = int(params.get("offset", offset)) 
+            offset = int(params.get("offset", offset))
             max_count = int(params.get("limit", max_count))
 
         scenarios = scenario_service.list_scenarios(offset, max_count)

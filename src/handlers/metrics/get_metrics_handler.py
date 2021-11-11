@@ -21,7 +21,7 @@ def handler(event, context):
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            offset = int(params.get("offset", offset)) 
+            offset = int(params.get("offset", offset))
             max_count = int(params.get("limit", max_count))
 
         metrics = metrics_service.get_metrics(offset, max_count)
