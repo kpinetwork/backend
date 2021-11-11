@@ -1,8 +1,12 @@
 from unittest import TestCase
+import logging
 from unittest.mock import Mock
 from src.service.financial_scenario.financial_scenario_service import (
     FinancialScenarioService,
 )
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class TestFinancialScenarioService(TestCase):
@@ -23,29 +27,29 @@ class TestFinancialScenarioService(TestCase):
             "metric_end_at": "2020-12-31",
         }
         self.mock_session = Mock()
-        self.mock_query_sql = Mock()
+        self.mock_query_builder = Mock()
+        self.mock_response_sql = Mock()
+        self.mock_response_sql = Mock()
         self.financial_scenario_service_instance = FinancialScenarioService(
-            self.mock_session, self.mock_query_sql
+            self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )
         return
 
-    def test_get_company_scenarios_success(self):
+    def mock_response_list_query_sql(self, response):
+        attrs = {"process_query_list_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
 
-        self.financial_scenario_service_instance.session.execute.return_value = iter(
-            [self.scenario]
-        )
+    def test_get_company_scenarios_success(self):
+        self.mock_response_list_query_sql([self.scenario])
 
         get_scenarios_out = (
-            self.financial_scenario_service_instance.get_company_scenarios("123")
+            self.financial_scenario_service_instance.get_company_scenarios("id")
         )
 
         self.assertEqual(get_scenarios_out, [self.scenario])
         self.financial_scenario_service_instance.session.execute.assert_called_once()
 
     def test_get_company_scenarios_with_empty_id(self):
-        self.financial_scenario_service_instance.session.execute.return_value = iter(
-            [self.scenario]
-        )
 
         get_scenarios_out = (
             self.financial_scenario_service_instance.get_company_scenarios("")
@@ -53,6 +57,16 @@ class TestFinancialScenarioService(TestCase):
 
         self.assertEqual(get_scenarios_out, [])
         self.financial_scenario_service_instance.session.execute.assert_not_called()
+
+    def test_get_company_scenarios_with_empty_response_success(self):
+        self.mock_response_list_query_sql([])
+
+        get_scenarios_out = (
+            self.financial_scenario_service_instance.get_company_scenarios("id")
+        )
+
+        self.assertEqual(get_scenarios_out, [])
+        self.financial_scenario_service_instance.session.execute.assert_called_once()
 
     def test_get_company_scenarios_failed(self):
         self.financial_scenario_service_instance.session.execute.side_effect = (
@@ -69,10 +83,16 @@ class TestFinancialScenarioService(TestCase):
             self.assertEqual(exception, Exception)
             self.financial_scenario_service_instance.session.execute.assert_called_once()
 
+    def test_list_scenarios_with_empty_response_success(self):
+        self.mock_response_list_query_sql([])
+
+        scenarios_out = self.financial_scenario_service_instance.list_scenarios()
+
+        self.assertEqual(scenarios_out, [])
+        self.financial_scenario_service_instance.session.execute.assert_called_once()
+
     def test_list_scenarios_success(self):
-        self.financial_scenario_service_instance.session.execute.return_value = iter(
-            [self.scenario]
-        )
+        self.mock_response_list_query_sql([self.scenario])
 
         scenarios_out = self.financial_scenario_service_instance.list_scenarios()
 

@@ -21,6 +21,8 @@ output "api_gateway_references" {
     "apigw_get_metric_by_company_id_lambda_function": {
       resource_path: aws_api_gateway_resource.metric.path,
       http_method: aws_api_gateway_method.get_metric_by_company_id_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
     
     "apigw_get_company_scenarios_lambda_function": {
       resource_path: aws_api_gateway_resource.scenarios.path,
@@ -38,4 +40,8 @@ output "api_gateway_references" {
 
 output "api_gateway_domain" {
   value = aws_api_gateway_domain_name.domain
+}
+
+output "api_gateway_rest_api_id" {
+  value = aws_api_gateway_rest_api.api.id
 }

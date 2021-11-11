@@ -10,22 +10,19 @@ logger.setLevel(logging.INFO)
 class TestMetricsService(TestCase):
     def setUp(self):
         self.mock_session = Mock()
-        self.mock_query_sql = Mock()
+        self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
 
         self.query_response = {"id": "1234", "value": "3", "type": "standard"}
         self.mock_session.commit.return_value = {}
         self.metrics_service_instance = MetricsService(
-            self.mock_session, self.mock_query_sql, logger, self.mock_response_sql
+            self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )
         return
 
     def mock_query_result(self, response):
-        mock_cursor = Mock()
-        cursor_attrs = {"fetchall.return_value": response}
-        mock_cursor.configure_mock(**cursor_attrs)
-        engine_attrs = {"execute.return_value": mock_cursor}
-        self.mock_session.configure_mock(**engine_attrs)
+        attrs = {"process_query_result.return_value": response}
+        self.mock_session.configure_mock(**attrs)
 
     def mock_response_list_query_sql(self, response):
         attrs = {"process_query_list_results.return_value": response}
@@ -64,9 +61,6 @@ class TestMetricsService(TestCase):
             self.metrics_service_instance.session.execute.assert_called_once()
 
     def test_get_all_metrics_success(self):
-        self.metrics_service_instance.session.execute.return_value = iter(
-            [self.query_response]
-        )
         self.mock_response_list_query_sql([self.query_response])
         response = self.metrics_service_instance.get_metrics()
 

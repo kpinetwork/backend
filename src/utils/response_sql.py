@@ -2,10 +2,11 @@ class ResponseSQL:
     def __init__(self) -> None:
         pass
 
-    def process_query_results(self, records) -> dict:
-        response = []
+    def process_query_result(self, records) -> dict:
         if len(records) == 0:
             return dict()
+            
+        response = []
         for row in records:
             response.append(dict(row))
         return response[0]

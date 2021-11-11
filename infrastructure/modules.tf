@@ -50,6 +50,14 @@ module "network" {
   certificate_arn       = module.cert.certificate_validation_arn
   environment           = local.environment
   is_production         = local.is_production
+  gateway_deployment    = module.gateway_deployment.gateway_deployment
+}
+
+module "gateway_deployment" {
+  source            = "./gateway_deploymnet/"
+  environment           = local.environment
+  is_production         = local.is_production
+  api_gateway_rest_api_id = module.network.api_gateway_rest_api_id
 }
 
 module "sql" {

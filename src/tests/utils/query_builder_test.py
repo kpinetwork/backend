@@ -41,7 +41,7 @@ class TestQueryBuilder(TestCase):
         self.assertEqual(query_builder.select_conditions, expected_columns)
 
     def test_add_join_clause_with_valid_dict(self):
-        join_clauses = f"""
+        expected_join_clause = f"""
                 JOIN other AS o
                 ON o.id = {self.table_name}.id
             """
@@ -50,8 +50,8 @@ class TestQueryBuilder(TestCase):
 
         clause = query_builder.join_clauses[0]
 
-        self.assertEqual(len(query_builder.join_clauses), len([join_clauses]))
-        self.assertEqual(remove_white_spaces(clause), remove_white_spaces(join_clauses))
+        self.assertEqual(len(query_builder.join_clauses), len([expected_join_clause]))
+        self.assertEqual(remove_white_spaces(clause), remove_white_spaces(expected_join_clause))
 
     def test_add_join_clause_with_invalid_table_name(self):
 
@@ -67,11 +67,17 @@ class TestQueryBuilder(TestCase):
         join_dict = {
             "other": {"alias": "", "from": "o.id", "to": f"{self.table_name}.id"}
         }
+        
+        query_builder = QuerySQLBuilder().add_join_clause(join_dict)
 
-        with self.assertRaises(Exception):
-            exception = self.assertRaises(QuerySQLBuilder().add_join_clause(join_dict))
+        expected_clause = f"""
+                JOIN other
+                ON o.id = {self.table_name}.id
+            """
 
-            self.assertEqual(exception, Exception)
+        self.assertEqual(len(query_builder.join_clauses), len([expected_clause]))
+        self.assertEqual(remove_white_spaces(query_builder.join_clauses[0]), remove_white_spaces(expected_clause))
+
 
     def test_add_join_clause_with_invalid_on_values(self):
 
@@ -139,6 +145,14 @@ class TestQueryBuilder(TestCase):
             )
 
             self.assertEqual(exception, Exception)
+
+    def test_add_sql_order_by_condition(self):
+        query_builder = QuerySQLBuilder()
+        query_builder.add_sql_order_by_condition("id", query_builder.Order.DESC)
+
+        expected_order_by = ("id", "DESC")
+
+        self.assertEqual(query_builder.order_by, expected_order_by)
 
     def test__build_select_with_condition(self):
         columns = ["id", "name"]
@@ -208,12 +222,30 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(result, expected_limit_condition)
 
+
+    def test__build_order_by_with_value(self):
+        query_builder = QuerySQLBuilder()
+        query_builder.add_sql_order_by_condition("id", query_builder.Order.DESC)
+
+        expected_order_by_condition = "ORDER BY id DESC"
+        result = query_builder._QuerySQLBuilder__build_order_by()
+
+        self.assertEqual(result, expected_order_by_condition)
+
+    def test__build_order_by_with_None(self):
+        query_builder = QuerySQLBuilder()
+
+        expected_order_by_condition = ""
+        result = query_builder._QuerySQLBuilder__build_order_by()
+
+        self.assertEqual(result, expected_order_by_condition)
+
     def test__clear(self):
         query_builder = (
             QuerySQLBuilder()
             .add_table_name(self.table_name)
             .add_select_conditions(["name"])
-            .add_sql_where_equal_condition({"name": "test"})
+            .add_sql_where_equal_condition({"name": "'test'"})
             .add_sql_offset_condition(2)
             .add_sql_limit_condition(10)
             .build()
@@ -221,14 +253,18 @@ class TestQueryBuilder(TestCase):
 
         query_builder._QuerySQLBuilder__clear()
 
-        self.assertEqual(len(query_builder.where_conditions), 0)
+        self.assertEqual(query_builder.table_name, "")
+        self.assertEqual(query_builder.select_conditions, [])
+        self.assertEqual(query_builder.where_conditions, [])
+        self.assertIsNone(query_builder.limit)
+        self.assertIsNone(query_builder.offset)
 
     def test_build_with_all_conditions(self):
         query_builder = (
             QuerySQLBuilder()
             .add_table_name(self.table_name)
             .add_select_conditions(["name"])
-            .add_sql_where_equal_condition({"name": "test"})
+            .add_sql_where_equal_condition({"name": "'test'"})
             .add_sql_offset_condition(2)
             .add_sql_limit_condition(10)
             .build()
@@ -242,7 +278,7 @@ class TestQueryBuilder(TestCase):
             QuerySQLBuilder()
             .add_table_name(self.table_name)
             .add_select_conditions(["name"])
-            .add_sql_where_equal_condition({"name": "test"})
+            .add_sql_where_equal_condition({"name": "'test'"})
             .add_sql_offset_condition(2)
             .add_sql_limit_condition(10)
             .build()
@@ -250,7 +286,7 @@ class TestQueryBuilder(TestCase):
 
         expected_query = """
             SELECT name FROM test
-            WHERE name = test
+            WHERE name = 'test'
             OFFSET 2
             LIMIT 10
         """

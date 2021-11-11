@@ -6,6 +6,7 @@ functions:
     - ./src/handlers/company/get_company_handler.py
     - ./src/service/company/company_service.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   get_all_companies_handler:
@@ -14,6 +15,7 @@ functions:
     - ./src/handlers/company/get_all_companies_handler.py
     - ./src/service/company/company_service.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   
@@ -23,6 +25,7 @@ functions:
     - ./src/handlers/financial_scenario/get_company_scenarios_handler.py
     - ./src/service/financial_scenario/financial_scenario_service.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   list_scenarios_handler:
@@ -31,6 +34,7 @@ functions:
     - ./src/handlers/financial_scenario/list_scenarios_handler.py
     - ./src/service/financial_scenario/financial_scenario_service.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   get_metric_by_company_id_handler:
@@ -38,7 +42,7 @@ functions:
     include:
     - ./src/handlers/metrics/get_metric_by_company_id_handler.py
     - ./src/service/metrics/metrics_service.py
-    - ./src/utils/query_sql.py
+    - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
@@ -47,7 +51,7 @@ functions:
     include:
     - ./src/handlers/metrics/get_metrics_handler.py
     - ./src/service/metrics/metrics_service.py
-    - ./src/utils/query_sql.py
+    - ./src/utils/query_builder.py
     - ./db/utils/connection.py
     - ./src/utils/response_sql.py
 

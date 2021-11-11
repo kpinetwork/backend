@@ -1,12 +1,17 @@
 import json
+import logging
 from financial_scenario_service import FinancialScenarioService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
-scenario_service = FinancialScenarioService(session, query_builder)
+response_sql = ResponseSQL()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+scenario_service = FinancialScenarioService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):
@@ -16,8 +21,8 @@ def handler(event, context):
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            offset = params.get("offset", offset)
-            max_count = params.get("limit", max_count)
+            offset = int(params.get("offset", offset)) 
+            max_count = int(params.get("limit", max_count))
 
         scenarios = scenario_service.list_scenarios(offset, max_count)
 
