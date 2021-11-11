@@ -19,3 +19,5 @@ variable "certificate_arn" {}
 
 variable "environment" {}
 variable "is_production" {}
+
+variable "gateway_deployment" {}

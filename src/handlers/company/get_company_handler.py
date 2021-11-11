@@ -1,12 +1,17 @@
 import json
+import logging
 from company_service import CompanyService
 from connection import create_db_engine, create_db_session
-from query_sql import QuerySQL
+from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 
 engine = create_db_engine()
 session = create_db_session(engine)
-query_sql = QuerySQL()
-company_service = CompanyService(session, query_sql)
+query_builder = QuerySQLBuilder()
+response_sql = ResponseSQL()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+company_service = CompanyService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):

@@ -27,6 +27,18 @@ resource "aws_api_gateway_resource" "company" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "scenarios" {
+  path_part   = "scenarios"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "scenarios_list" {
+  path_part   = "list"
+  parent_id   = aws_api_gateway_resource.scenarios.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "metrics" {
   path_part   = "metrics"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -65,6 +77,31 @@ resource "aws_api_gateway_method" "get_company_method" {
   resource_id   = aws_api_gateway_resource.company.id
   http_method   = "GET"
   authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "get_company_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios.id
+  http_method   = "GET"
+  authorization = "NONE"
+  
+  request_parameters = {
+    "method.request.querystring.company" = false
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
+resource "aws_api_gateway_method" "list_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios_list.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
 }
 
 resource "aws_api_gateway_method" "get_metrics_method" {
@@ -133,33 +170,22 @@ resource "aws_api_gateway_integration" "metric_by_company_id_integration" {
   uri                     = var.lambdas_functions_arn.get_metric_by_company_id_lambda_function
 }
 
-# ----------------------------------------------------------------------------------------------------------------------
-# API GATEWAY DEPLOYMENT
-# Manages an API Gateway REST Deployment.
-# @param depends_on Set of dependencies to execute the definition
-# @param rest_api_id  REST API identifier.
-# @param stage_name Name of the stage to create with this deployment, with this isn't necessary add aws_api_gateway_stage resource
-# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_api_gateway_integration" "company_scenarios_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios.id
+  http_method             = aws_api_gateway_method.get_company_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_company_scenarios_lambda_function
+}
 
-resource "aws_api_gateway_deployment" "gateway_deployment" {
-  depends_on = [
-    aws_api_gateway_integration.companies_integration,
-    aws_api_gateway_integration.company_integration,
-    aws_api_gateway_integration.metrics_integration,
-    aws_api_gateway_integration.metric_by_company_id_integration,
-    aws_api_gateway_method.get_all_companies_method,
-    aws_api_gateway_method.get_company_method,
-    aws_api_gateway_method.get_metrics_method,
-    aws_api_gateway_method.get_metric_by_company_id_method
-  ]
-
-  rest_api_id       = aws_api_gateway_rest_api.api.id
-  stage_name        = var.is_production? var.stage_name : var.environment
-  stage_description = "Deployed at ${timestamp()}"
-
-  lifecycle {
-    create_before_destroy = true
-  }
+resource "aws_api_gateway_integration" "scenarios_list_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios_list.id
+  http_method             = aws_api_gateway_method.list_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.list_scenarios_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -184,7 +210,7 @@ resource "aws_api_gateway_domain_name" "domain" {
 
 resource "aws_api_gateway_base_path_mapping" "domain_mapping" {
   api_id      = aws_api_gateway_rest_api.api.id
-  stage_name  = aws_api_gateway_deployment.gateway_deployment.stage_name
+  stage_name  = var.gateway_deployment.stage_name
   domain_name = aws_api_gateway_domain_name.domain.domain_name
-  depends_on  = [aws_api_gateway_deployment.gateway_deployment]
+  depends_on  = [var.gateway_deployment]
 }

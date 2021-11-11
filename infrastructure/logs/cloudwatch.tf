@@ -14,10 +14,10 @@ resource "aws_cloudwatch_log_group" "get_all_companies_lambda_function" {
 }
 
 resource "aws_cloudwatch_log_group" "codebuild_rds_migrations" {
-  name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}/${var.codebuild_project_name}"
+  name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}_${var.codebuild_project_name}"
   retention_in_days = var.retention_days
   tags = {
-      Name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}/${var.codebuild_project_name}"
+      Name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}_${var.codebuild_project_name}"
       Environment   =  var.environment
   }
 }
@@ -34,5 +34,15 @@ resource "aws_cloudwatch_log_group" "get_metric_by_id_lambda_function" {
 
 resource "aws_cloudwatch_log_group" "get_metrics_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metrics_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_company_scenarios_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_scenarios_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "list_scenarios_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.list_scenarios_lambda_function}"
   retention_in_days = var.retention_days
 }

@@ -1,6 +1,6 @@
 import json
 import logging
-from metrics_service import MetricsService
+from financial_scenario_service import FinancialScenarioService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -11,7 +11,9 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-metrics_service = MetricsService(session, query_builder, logger, response_sql)
+scenario_service = FinancialScenarioService(
+    session, query_builder, logger, response_sql
+)
 
 
 def handler(event, context):
@@ -24,11 +26,11 @@ def handler(event, context):
             offset = int(params.get("offset", offset))
             max_count = int(params.get("limit", max_count))
 
-        metrics = metrics_service.get_metrics(offset, max_count)
+        scenarios = scenario_service.list_scenarios(offset, max_count)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(metrics, default=str),
+            "body": json.dumps(scenarios, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 

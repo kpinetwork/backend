@@ -54,3 +54,17 @@ resource "aws_s3_bucket_object" "get_metrics_function_object" {
   source = "${path.module}/../../dist/get_metrics_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_metrics_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "get_company_scenarios_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_company_scenarios_handler.zip"
+  source = "${path.module}/../../dist/get_company_scenarios_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_company_scenarios_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "list_scenarios_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/list_scenarios_handler.zip"
+  source = "${path.module}/../../dist/list_scenarios_handler.zip"
+  etag = filemd5("${path.module}/../../dist/list_scenarios_handler.zip")
+}
