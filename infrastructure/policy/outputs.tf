@@ -8,6 +8,7 @@ output "lambdas_exec_roles_arn" {
       "glue_trigger_lambda_exec_role": aws_iam_role.glue_trigger_lambda_exec_role.arn
       "get_company_scenarios_exec_role_arn": aws_iam_role.get_company_scenarios_lambda_exec_role.arn
       "list_scenarios_exec_role_arn": aws_iam_role.list_scenarios_lambda_exec_role.arn
+      "get_revenue_sum_by_company_exec_role_arn": aws_iam_role.get_revenue_sum_by_company_lambda_exec_role.arn
   }
 }
 

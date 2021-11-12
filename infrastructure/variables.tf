@@ -37,7 +37,8 @@ variable "lambdas_names" {
     "get_metrics_lambda_function": "get_metrics_lambda_function"
     "glue_trigger_lambda_function": "glue_trigger_lambda_function"
     "get_company_scenarios_lambda_function": "get_company_scenarios_lambda_function"
-    "list_scenarios_lambda_function": "list_scenarios_lambda_function"
+    "list_scenarios_lambda_function": "list_scenarios_lambda_function",
+    "get_revenue_sum_by_company_lambda_function": "get_revenue_sum_by_company_lambda_function"
   }
 }
 
