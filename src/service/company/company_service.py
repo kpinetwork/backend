@@ -46,7 +46,7 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_revenue_sum_by_company(self, offset=0, max_count=20) -> list:
+    def get_revenue_sum_by_company(self) -> list:
         columns = [
             f"{self.table_name}.id",
             f"{self.table_name}.name",
@@ -75,8 +75,6 @@ class CompanyService:
                         }
                     }
                 )
-                .add_sql_offset_condition(offset)
-                .add_sql_limit_condition(max_count)
                 .build()
                 .get_query()
             )

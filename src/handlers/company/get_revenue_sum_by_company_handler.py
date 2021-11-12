@@ -16,17 +16,7 @@ company_service = CompanyService(session, query_builder, logger, response_sql)
 
 def handler(event, context):
     try:
-        offset = 0
-        max_count = 20
-
-        if event.get("queryStringParameters"):
-            params = event.get("queryStringParameters")
-            offset = int(params.get("offset", offset))
-            max_count = int(params.get("limit", max_count))
-
-        sum_revenue_by_companies = company_service.get_revenue_sum_by_company(
-            offset, max_count
-        )
+        sum_revenue_by_companies = company_service.get_revenue_sum_by_company()
 
         return {
             "statusCode": 200,

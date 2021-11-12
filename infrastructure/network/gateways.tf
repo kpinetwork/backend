@@ -134,11 +134,6 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_company_method" {
   resource_id   = aws_api_gateway_resource.company_revenue.id
   http_method   = "GET"
   authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.offset" = false
-    "method.request.querystring.limit" = false
-  }
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
