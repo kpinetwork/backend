@@ -70,6 +70,33 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  get_cohort_by_id_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohort_by_id_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_cohort_scenarios_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohort_scenarios_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_cohorts_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohorts_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

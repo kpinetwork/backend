@@ -62,9 +62,9 @@ class CohortService:
                     )
                     .add_sql_where_equal_condition(
                         {
-                            "cohort_id": cohort_id,
-                            "financial_scenario.type": scenario_type,
-                            "financial_scenario.name": scenario_name,
+                            "cohort_id": f"'{cohort_id}'",
+                            "financial_scenario.type": f"'{scenario_type}'",
+                            "financial_scenario.name": f"'{scenario_name}'",
                         }
                     )
                     .add_sql_offset_condition(offset)
@@ -95,8 +95,16 @@ class CohortService:
                 ]
 
                 query = (
-                    self.query_builder.add_table_name(f"{self.table_name}_company")
+                    self.query_builder.add_table_name(f"{self.table_name}")
                     .add_select_conditions(columns)
+                    .add_join_clause(
+                        {
+                            f"{self.table_name}_company": {
+                                "from": f"{self.table_name}_company.cohort_id",
+                                "to": f"{self.table_name}.id",
+                            }
+                        }
+                    )
                     .add_join_clause(
                         {
                             "company": {
@@ -105,17 +113,10 @@ class CohortService:
                             }
                         }
                     )
-                    .add_join_clause(
-                        {
-                            f"{self.table_name}": {
-                                "from": f"{self.table_name}.id",
-                                "to": f"{self.table_name}_company.cohort_id",
-                            }
-                        }
-                    )
                     .add_sql_where_equal_condition(
-                        {f"{self.table_name}_company.cohort_id": cohort_id}
+                        {f"{self.table_name}_company.cohort_id": f"'{cohort_id}'"}
                     )
+                    .add_sql_group_by_condition("cohort.id")
                     .build()
                     .get_query()
                 )
@@ -143,8 +144,16 @@ class CohortService:
             ]
 
             query = (
-                self.query_builder.add_table_name(f"{self.table_name}_company")
+                self.query_builder.add_table_name(f"{self.table_name}")
                 .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        f"{self.table_name}_company": {
+                            "from": f"{self.table_name}_company.cohort_id",
+                            "to": f"{self.table_name}.id",
+                        }
+                    }
+                )
                 .add_join_clause(
                     {
                         "company": {
@@ -153,19 +162,11 @@ class CohortService:
                         }
                     }
                 )
-                .add_join_clause(
-                    {
-                        f"{self.table_name}": {
-                            "from": f"{self.table_name}.id",
-                            "to": f"{self.table_name}_company.cohort_id",
-                        }
-                    }
-                )
+                .add_sql_group_by_condition("cohort.id")
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
                 .get_query()
-                # GROUP BY cohort.id
             )
 
             result = self.session.execute(query).fetchall()

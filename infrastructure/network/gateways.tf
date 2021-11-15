@@ -279,7 +279,7 @@ resource "aws_api_gateway_integration" "cohort_scenarios_integration" {
   http_method             = aws_api_gateway_method.get_cohort_scenarios_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_cohorts_scenarios_function
+  uri                     = var.lambdas_functions_arn.get_cohort_scenarios_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
