@@ -35,6 +35,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.list_scenarios_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_revenue_sum_by_company_lambda_function": {
+      resource_path: aws_api_gateway_resource.company_revenue.path,
+      http_method: aws_api_gateway_method.get_revenue_sum_by_company_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

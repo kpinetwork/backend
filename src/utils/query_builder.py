@@ -12,6 +12,7 @@ class QuerySQLBuilder:
         self.where_conditions = []
         self.limit = None
         self.offset = None
+        self.group_by = None
         self.order_by = None
 
     class Order(Enum):
@@ -81,6 +82,13 @@ class QuerySQLBuilder:
                 self.where_conditions.append(condition)
         return self
 
+    def add_sql_group_by_condition(self, column_name: str):
+        if self.__is_valid_name(column_name):
+            self.group_by = column_name
+            return self
+        else:
+            raise Exception("No valid column for group by")
+
     def add_sql_limit_condition(self, limit):
         if self.__is_valid_number(limit):
             self.limit = limit
@@ -113,6 +121,12 @@ class QuerySQLBuilder:
         else:
             return ""
 
+    def __build_group_by(self):
+        if self.group_by:
+            return f"GROUP BY {self.group_by}"
+        else:
+            return ""
+
     def __build_offset(self):
         if self.offset is not None:
             return "OFFSET {offset}".format(offset=self.offset)
@@ -137,14 +151,16 @@ class QuerySQLBuilder:
             SELECT {select_conditions} FROM {table_name}
             {join_clauses}
             {where_conditions}
+            {group_by_condition}
             {order_by_condition}
             {offset_condition}
-            {limit_condition} ;
+            {limit_condition}
         """.format(
             table_name=self.table_name,
             select_conditions=self.__build_select(),
             join_clauses=self.__build_join(),
             where_conditions=self.__build_where(),
+            group_by_condition=self.__build_group_by(),
             order_by_condition=self.__build_order_by(),
             offset_condition=self.__build_offset(),
             limit_condition=self.__build_limit(),
@@ -157,6 +173,7 @@ class QuerySQLBuilder:
         self.select_conditions = []
         self.where_conditions = []
         self.order_by = None
+        self.group_by = None
         self.limit = None
         self.offset = None
         self.join_clauses = []
