@@ -6,6 +6,7 @@ from src.service.company.company_service import CompanyService
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 class TestCompanyService(TestCase):
     def setUp(self):
         self.company = {
