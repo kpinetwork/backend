@@ -154,7 +154,7 @@ class QuerySQLBuilder:
             {group_by_condition}
             {order_by_condition}
             {offset_condition}
-            {limit_condition} ;
+            {limit_condition}
         """.format(
             table_name=self.table_name,
             select_conditions=self.__build_select(),

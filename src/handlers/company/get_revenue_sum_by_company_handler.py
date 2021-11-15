@@ -20,7 +20,7 @@ def handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps(sum_revenue_by_companies),
+            "body": json.dumps(sum_revenue_by_companies, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 

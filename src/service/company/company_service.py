@@ -69,7 +69,7 @@ class CompanyService:
                 .add_select_conditions(columns)
                 .add_join_clause(
                     {
-                        f"{subquery} metrics": {
+                        f"( {subquery} ) metrics ": {
                             "from": "metrics.company_id",
                             "to": f"{self.table_name}.id",
                         }

@@ -325,7 +325,7 @@ class TestQueryBuilder(TestCase):
             WHERE name = 'test'
             GROUP BY {table_name}.name
             OFFSET 2
-            LIMIT 10 ;
+            LIMIT 10
         """.format(
             table_name=self.table_name
         )
