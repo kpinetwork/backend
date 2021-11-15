@@ -250,3 +250,83 @@ resource "aws_lambda_function" "get_revenue_sum_by_company_lambda_function" {
     }
   }
 }
+
+resource "aws_lambda_function" "get_cohort_by_id_function" {
+  role               = var.lambdas_exec_roles_arn.cohort_exec_role_arn
+  handler            = "get_cohort_by_id_handler.handler"
+  runtime            = var.runtime
+  s3_bucket          = var.object_bucket_references.get_cohort_by_id_function_bucket.bucket
+  s3_key             = var.object_bucket_references.get_cohort_by_id_function_bucket.key
+  function_name      = "${var.environment}_${var.lambdas_names.get_cohort_by_id_lambda_function}"
+  source_code_hash   = base64sha256(var.object_bucket_references.get_cohort_by_id_function_bucket.etag)
+  layers             = [aws_lambda_layer_version.db_lambda_layer.arn]
+  depends_on         = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+  vpc_config {
+    subnet_ids         = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+  environment {
+    variables = {
+      DB_HOST     = var.db_host
+      DB_NAME     = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "get_cohorts_function" {
+  role               = var.lambdas_exec_roles_arn.cohorts_exec_role_arn
+  handler            = "get_cohort_scenarios_handler.handler"
+  runtime            = var.runtime
+  s3_bucket          = var.object_bucket_references.get_cohorts_function_bucket.bucket
+  s3_key             = var.object_bucket_references.get_cohorts_function_bucket.key
+  function_name      = "${var.environment}_${var.lambdas_names.get_cohorts_lambda_function}"
+  source_code_hash   = base64sha256(var.object_bucket_references.get_cohorts_function_bucket.etag)
+  layers             = [aws_lambda_layer_version.db_lambda_layer.arn]
+  depends_on         = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+  vpc_config {
+    subnet_ids         = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST     = var.db_host
+      DB_NAME     = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "get_cohorts_scenarios_function" {
+  role               = var.lambdas_exec_roles_arn.cohort_scenario_exec_role_arn
+  handler            = "get_cohorts_handler.handler"
+  runtime            = var.runtime
+  s3_bucket          = var.object_bucket_references.get_cohort_scenarios_function_bucket.bucket
+  s3_key             = var.object_bucket_references.get_cohort_scenarios_function_bucket.key
+  function_name      = "${var.environment}_${var.lambdas_names.get_cohort_scenarios_lambda_function}"
+  source_code_hash   = base64sha256(var.object_bucket_references.get_cohort_scenarios_function_bucket.etag)
+  layers             = [aws_lambda_layer_version.db_lambda_layer.arn]
+  depends_on         = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+  vpc_config {
+    subnet_ids         = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+
+  environment {
+    variables = {
+      DB_HOST     = var.db_host
+      DB_NAME     = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}

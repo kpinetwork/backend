@@ -57,6 +57,18 @@ resource "aws_api_gateway_resource" "company_revenue" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "cohorts" {
+  path_part   = "cohorts"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "cohort" {
+  path_part   = "{id}"
+  parent_id   = aws_api_gateway_resource.cohorts.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -90,7 +102,7 @@ resource "aws_api_gateway_method" "get_company_scenarios_method" {
   resource_id   = aws_api_gateway_resource.scenarios.id
   http_method   = "GET"
   authorization = "NONE"
-  
+
   request_parameters = {
     "method.request.querystring.company" = false
     "method.request.querystring.offset" = false
@@ -134,6 +146,39 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_company_method" {
   resource_id   = aws_api_gateway_resource.company_revenue.id
   http_method   = "GET"
   authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "get_cohorts_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.cohorts.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
+resource "aws_api_gateway_method" "get_cohort_by_id_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.cohort.id
+  http_method   = "GET"
+  authorization = "NONE"
+}
+
+resource "aws_api_gateway_method" "get_cohort_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.cohort.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+    "method.request.querystring.scenario_type" = false
+    "method.request.querystring.year" = false
+  }
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -208,6 +253,33 @@ resource "aws_api_gateway_integration" "revenue_sum_by_company_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_revenue_sum_by_company_lambda_function
+}
+
+resource "aws_api_gateway_integration" "cohorts_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.cohorts.id
+  http_method             = aws_api_gateway_method.get_cohorts_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_cohorts_lambda_function
+}
+
+resource "aws_api_gateway_integration" "cohort_by_id_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.cohort.id
+  http_method             = aws_api_gateway_method.get_cohort_by_id_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_cohort_by_id_lambda_function
+}
+
+resource "aws_api_gateway_integration" "cohort_scenarios_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.cohort.id
+  http_method             = aws_api_gateway_method.get_cohort_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_cohorts_scenarios_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

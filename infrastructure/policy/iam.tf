@@ -359,3 +359,122 @@ resource "aws_iam_role_policy_attachment" "glue_trigger_lambda_glue_access" {
   role = aws_iam_role.glue_trigger_lambda_exec_role.name
   policy_arn = aws_iam_policy.lambda_glue_access.arn
 }
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM COHORTS
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "get_cohort_by_id_lambda_exec_role" {
+  name               = "${var.environment}_get_cohort_by_id_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "get_cohorts_lambda_exec_role" {
+  name               = "${var.environment}_get_cohorts_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "get_cohort_scenarios_lambda_exec_role" {
+  name               = "${var.environment}_get_cohort_scenarios_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "get_cohort_by_id_lambda_logs" {
+  role       = aws_iam_role.get_cohort_by_id_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_cohorts_lambda_logs" {
+  role       = aws_iam_role.get_cohorts_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+
+resource "aws_iam_role_policy_attachment" "get_cohort_scenarios_lambda_logs" {
+  role       = aws_iam_role.get_cohort_scenarios_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_cohort_scenarios_lambda_vpc" {
+  role       = aws_iam_role.get_cohort_scenarios_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_cohorts_lambda_vpc" {
+  role       = aws_iam_role.get_cohorts_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+resource "aws_iam_role_policy_attachment" "get_cohort_by_id_lambda_vpc" {
+  role       = aws_iam_role.get_cohort_by_id_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_get_cohorts_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_cohorts_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_cohorts_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_cohorts_lambda_function.http_method}${var.api_gateway_references.apigw_get_cohorts_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_get_cohort_by_id_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayCompanyId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_cohort_by_id_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_cohort_by_id_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_cohort_by_id_lambda_function.http_method}${var.api_gateway_references.apigw_get_cohort_by_id_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_get_cohort_scenarios_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayCompanyId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_cohort_scenarios_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.http_method}${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.resource_path}"
+}
