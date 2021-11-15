@@ -173,6 +173,7 @@ class QuerySQLBuilder:
         self.select_conditions = []
         self.where_conditions = []
         self.order_by = None
+        self.group_by = None
         self.limit = None
         self.offset = None
         self.join_clauses = []
