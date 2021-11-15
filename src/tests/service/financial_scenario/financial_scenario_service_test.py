@@ -29,7 +29,6 @@ class TestFinancialScenarioService(TestCase):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.mock_response_sql = Mock()
         self.financial_scenario_service_instance = FinancialScenarioService(
             self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )

@@ -1,18 +1,18 @@
-import datetime
 import json
 import logging
+import datetime
 from cohort_service import CohortService
 from connection import create_db_engine, create_db_session
-from query_sql import QuerySQL
+from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 
 engine = create_db_engine()
 session = create_db_session(engine)
-query_sql = QuerySQL()
+query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-cohort_service = CohortService(session, query_sql, logger, response_sql)
+cohort_service = CohortService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):
@@ -30,7 +30,9 @@ def handler(event, context):
             cohort_id = params.get("pathParameters").get("id")
             year = params.get("year", year)
 
-        cohorts = cohort_service.get_cohort_scenarios(cohort_id, scenario_type, year, offset, max_count)
+        cohorts = cohort_service.get_cohort_scenarios(
+            cohort_id, scenario_type, year, offset, max_count
+        )
 
         return {
             "statusCode": 200,

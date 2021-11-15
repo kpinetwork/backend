@@ -1,28 +1,28 @@
 import json
 import logging
-from metrics_service import MetricsService
+from cohort_service import CohortService
 from connection import create_db_engine, create_db_session
-from query_sql import QuerySQL
+from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 
 engine = create_db_engine()
 session = create_db_session(engine)
-query_sql = QuerySQL()
+query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-metrics_service = MetricsService(session, query_sql, logger, response_sql)
+cohort_service = CohortService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):
 
     try:
-        company_id = event.get("pathParameters").get("id")
-        metric = metrics_service.get_metric_by_company_id(company_id)
+        cohort_id = event.get("pathParameters").get("id")
+        cohort = cohort_service.get_cohort_information_by_id(cohort_id)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(metric, default=str),
+            "body": json.dumps(cohort, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 
