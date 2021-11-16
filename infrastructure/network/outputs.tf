@@ -55,7 +55,7 @@ output "api_gateway_references" {
     }
 
     "apigw_get_cohort_scenarios_lambda_function": {
-      resource_path: aws_api_gateway_resource.cohort.path,
+      resource_path: aws_api_gateway_resource.cohort_scenarios.path,
       http_method: aws_api_gateway_method.get_cohort_scenarios_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }

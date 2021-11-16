@@ -21,6 +21,7 @@ def handler(event, context):
         max_count = 20
         year = datetime.datetime.today().year
         scenario_type = "Budget"
+        cohort_id = ""
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")

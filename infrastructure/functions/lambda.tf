@@ -279,7 +279,7 @@ resource "aws_lambda_function" "get_cohort_by_id_function" {
 
 resource "aws_lambda_function" "get_cohorts_function" {
   role               = var.lambdas_exec_roles_arn.cohorts_exec_role_arn
-  handler            = "get_cohort_scenarios_handler.handler"
+  handler            = "get_cohorts_handler.handler"
   runtime            = var.runtime
   s3_bucket          = var.object_bucket_references.get_cohorts_function_bucket.bucket
   s3_key             = var.object_bucket_references.get_cohorts_function_bucket.key
@@ -306,7 +306,7 @@ resource "aws_lambda_function" "get_cohorts_function" {
 
 resource "aws_lambda_function" "get_cohorts_scenarios_function" {
   role               = var.lambdas_exec_roles_arn.cohort_scenario_exec_role_arn
-  handler            = "get_cohorts_handler.handler"
+  handler            = "get_cohort_scenarios_handler.handler"
   runtime            = var.runtime
   s3_bucket          = var.object_bucket_references.get_cohort_scenarios_function_bucket.bucket
   s3_key             = var.object_bucket_references.get_cohort_scenarios_function_bucket.key
