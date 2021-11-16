@@ -7,6 +7,9 @@ output "lambdas_invoke_arns" {
     "get_company_scenarios_lambda_function" : aws_lambda_function.get_company_scenarios_lambda_function.invoke_arn
     "list_scenarios_lambda_function" : aws_lambda_function.list_scenarios_lambda_function.invoke_arn
     "get_revenue_sum_by_company_lambda_function" : aws_lambda_function.get_revenue_sum_by_company_lambda_function.invoke_arn
+    "get_cohorts_lambda_function": aws_lambda_function.get_cohorts_function.invoke_arn
+    "get_cohort_by_id_lambda_function": aws_lambda_function.get_cohort_by_id_function.invoke_arn
+    "get_cohort_scenarios_lambda_function": aws_lambda_function.get_cohorts_scenarios_function.invoke_arn
   }
 }
 

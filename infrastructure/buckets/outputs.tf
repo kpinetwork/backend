@@ -45,5 +45,20 @@ output "object_references" {
       key : aws_s3_bucket_object.get_revenue_sum_by_company_function_object.key,
       bucket : aws_s3_bucket_object.get_revenue_sum_by_company_function_object.bucket
     }
+    "get_cohort_by_id_function_bucket" : {
+      etag : aws_s3_bucket_object.get_cohort_by_id_function_object.etag,
+      key : aws_s3_bucket_object.get_cohort_by_id_function_object.key,
+      bucket : aws_s3_bucket_object.get_cohort_by_id_function_object.bucket
+    }
+    "get_cohort_scenarios_function_bucket" : {
+      etag : aws_s3_bucket_object.get_cohort_scenarios_function_object.etag,
+      key : aws_s3_bucket_object.get_cohort_scenarios_function_object.key,
+      bucket : aws_s3_bucket_object.get_cohort_scenarios_function_object.bucket
+    }
+    "get_cohorts_function_bucket" : {
+      etag : aws_s3_bucket_object.get_cohorts_function_object.etag,
+      key : aws_s3_bucket_object.get_cohorts_function_object.key,
+      bucket : aws_s3_bucket_object.get_cohorts_function_object.bucket
+    }
   }
 }
