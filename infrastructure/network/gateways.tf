@@ -192,6 +192,10 @@ resource "aws_api_gateway_method" "get_scenarios_method" {
   resource_id   = aws_api_gateway_resource.scenarios.id
   http_method   = "GET"
   authorization = "NONE"
+<<<<<<< HEAD
+=======
+
+>>>>>>> 5c3c701 (feat: KPI-55 create lambda to retrieve cohorts (#37))
   request_parameters = {
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
