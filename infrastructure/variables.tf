@@ -42,7 +42,6 @@ variable "lambdas_names" {
     "get_cohort_by_id_lambda_function": "get_cohort_by_id_lambda_function"
     "get_cohorts_lambda_function": "get_cohorts_lambda_function"
     "get_cohort_scenarios_lambda_function": "get_cohort_scenarios_lambda_function"
-    "list_scenarios_lambda_function": "list_scenarios_lambda_function"
   }
 }
 
