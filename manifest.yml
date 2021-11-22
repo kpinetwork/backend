@@ -5,7 +5,8 @@ functions:
     include:
     - ./src/handlers/company/get_company_handler.py
     - ./src/service/company/company_service.py
-    - ./src/utils/query_sql.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
   get_all_companies_handler:
@@ -13,14 +14,88 @@ functions:
     include:
     - ./src/handlers/company/get_all_companies_handler.py
     - ./src/service/company/company_service.py
-    - ./src/utils/query_sql.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+
+  
+  get_company_scenarios_handler:
+    requirements: ./src/handlers/financial_scenario/requirements.txt
+    include:
+    - ./src/handlers/financial_scenario/get_company_scenarios_handler.py
+    - ./src/service/financial_scenario/financial_scenario_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  list_scenarios_handler:
+    requirements: ./src/handlers/financial_scenario/requirements.txt
+    include:
+    - ./src/handlers/financial_scenario/list_scenarios_handler.py
+    - ./src/service/financial_scenario/financial_scenario_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_metric_by_company_id_handler:
+    requirements: ./src/handlers/metrics/requirements.txt
+    include:
+    - ./src/handlers/metrics/get_metric_by_company_id_handler.py
+    - ./src/service/metrics/metrics_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_metrics_handler:
+    requirements: ./src/handlers/metrics/requirements.txt
+    include:
+    - ./src/handlers/metrics/get_metrics_handler.py
+    - ./src/service/metrics/metrics_service.py
+    - ./src/utils/query_builder.py
+    - ./db/utils/connection.py
+    - ./src/utils/response_sql.py
 
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt
     include:
       - ./src/handlers/glue/glue_trigger_handler.py
       - ./src/service/glue/glue_service.py
+
+  get_revenue_sum_by_company_handler:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company/get_revenue_sum_by_company_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_cohort_by_id_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohort_by_id_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_cohort_scenarios_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohort_scenarios_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_cohorts_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_cohorts_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
 
 layers:
   layer_libraries:
