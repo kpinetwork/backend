@@ -30,6 +30,12 @@ output "object_references" {
       key : aws_s3_bucket_object.get_metrics_function_object.key,
       bucket : aws_s3_bucket_object.get_metrics_function_object.bucket
     }
+
+    "get_average_metrics_function_bucket" : {
+      etag : aws_s3_bucket_object.get_average_metrics_function_object.etag,
+      key : aws_s3_bucket_object.get_average_metrics_function_object.key,
+      bucket : aws_s3_bucket_object.get_average_metrics_function_object.bucket
+    }
     "get_company_scenarios_function_bucket" : {
       etag : aws_s3_bucket_object.get_company_scenarios_function_object.etag,
       key : aws_s3_bucket_object.get_company_scenarios_function_object.key,

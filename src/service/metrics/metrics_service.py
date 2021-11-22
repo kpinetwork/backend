@@ -1,8 +1,9 @@
+from src.utils.query_builder import QuerySQLBuilder
 class MetricsService:
     def __init__(self, session, query_builder, logger, response_sql):
         self.session = session
         self.table_name = "metric"
-        self.query_builder = query_builder
+        self.query_builder = QuerySQLBuilder()
         self.response_sql = response_sql
         self.logger = logger
         pass
@@ -69,3 +70,26 @@ class MetricsService:
         except Exception as error:
             self.logger.info(error)
             raise error
+
+    def get_average_metrics(self, name: str, company_id: str) -> int:
+        try:
+            if name and name.strip() and company_id and company_id.strip():
+                query = (
+                    self.query_builder.add_table_name(self.table_name)
+                    .add_select_conditions(["AVG(value) as average"])
+                    .add_sql_where_equal_condition({"name": f"'{name}'", "company_id": f"'{company_id}'"})
+                    .build()
+                    .get_query()
+                )   
+
+                result = self.session.execute(query).fetchall()
+                self.session.commit()
+
+                return self.response_sql.process_query_average_result(result)
+            return dict()
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+

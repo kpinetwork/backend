@@ -18,20 +18,45 @@ class TestResponseBuilder(TestCase):
 
     def test_process_query_result_success(self):
         records = [self.record]
+        
         response = self.response_sql_instance.process_query_result(records)
+        
         self.assertEqual(response, self.record)
 
     def test_process_query_result_with_empty_response(self):
         records = []
+        
         response = self.response_sql_instance.process_query_result(records)
+        
         self.assertEqual(response, {})
 
     def test_process_query_list_results_success(self):
         records = [self.record]
+        
         response = self.response_sql_instance.process_query_list_results(records)
+        
         self.assertEqual(response, [self.record])
 
     def test_process_query_list_results_with_empty_response(self):
         records = []
+        
         response = self.response_sql_instance.process_query_list_results(records)
+        
         self.assertEqual(response, [])
+
+
+    def test_process_query_average_result_with_average_in_dict(self):
+        expected_average = {"average": 123}
+        
+        response = self.response_sql_instance.process_query_average_result([expected_average])
+        
+        self.assertEqual(response,expected_average)
+
+
+    def test_process_query_average_result_without_average_in_dict(self):
+        record = {"average": None}
+        expected_average = dict()
+
+        response = self.response_sql_instance.process_query_average_result([record])
+        
+        self.assertEqual(response,expected_average)
