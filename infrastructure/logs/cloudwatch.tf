@@ -13,6 +13,11 @@ resource "aws_cloudwatch_log_group" "get_all_companies_lambda_function" {
   retention_in_days = var.retention_days
 }
 
+resource "aws_cloudwatch_log_group" "get_revenue_sum_by_company_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_company_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
 resource "aws_cloudwatch_log_group" "codebuild_rds_migrations" {
   name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}_${var.codebuild_project_name}"
   retention_in_days = var.retention_days
@@ -64,5 +69,10 @@ resource "aws_cloudwatch_log_group" "get_cohort_scenarios_lambda_function" {
 
 resource "aws_cloudwatch_log_group" "get_cohorts_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_cohorts_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_revenue_sum_by_cohort_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_cohort_lambda_function}"
   retention_in_days = var.retention_days
 }

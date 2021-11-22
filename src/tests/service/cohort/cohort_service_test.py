@@ -33,6 +33,11 @@ class TestCohortService(TestCase):
             "metric_start_at": "2020-01-31",
             "metric_end_at": "2020-12-31",
         }
+        self.revenue_sum = {
+            "id": "cohort_id",
+            "name": "Test Cohort",
+            "revenue_sum": 123,
+        }
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
@@ -145,6 +150,26 @@ class TestCohortService(TestCase):
         self.cohort_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(self.cohort_service_instance.get_cohorts())
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.cohort_service_instance.session.execute.assert_called_once()
+
+    def test_get_revenue_sum_by_cohort_success(self):
+        self.mock_response_list_query_sql([self.revenue_sum])
+
+        get_revenue_sum_out = self.cohort_service_instance.get_revenue_sum_by_cohort()
+
+        self.assertEqual(get_revenue_sum_out, [self.revenue_sum])
+        self.assertEqual(len(get_revenue_sum_out), len([self.revenue_sum]))
+        self.cohort_service_instance.session.execute.assert_called_once()
+
+    def test_get_revenue_sum_by_cohort_failed(self):
+        self.cohort_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.cohort_service_instance.get_revenue_sum_by_cohort()
+            )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)

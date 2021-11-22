@@ -43,6 +43,7 @@ variable "lambdas_names" {
     "get_cohort_by_id_lambda_function": "get_cohort_by_id_lambda_function"
     "get_cohorts_lambda_function": "get_cohorts_lambda_function"
     "get_cohort_scenarios_lambda_function": "get_cohort_scenarios_lambda_function"
+    "get_revenue_sum_by_cohort_lambda_function": "get_revenue_sum_by_cohort_lambda_function"
   }
 }
 
