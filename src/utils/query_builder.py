@@ -153,36 +153,16 @@ class QuerySQLBuilder:
             SELECT {select_conditions} FROM {table_name}
             {join_clauses}
             {where_conditions}
-<<<<<<< HEAD
-<<<<<<< HEAD
             {group_by_condition}
             {order_by_condition}
             {offset_condition}
             {limit_condition}
-=======
-            {order_by_condition}
-            {offset_condition}
-            {limit_condition} ;
->>>>>>> 7317739 (feat: KPI-52-financial-scenarios (#34))
-=======
-            {group_by_condition}
-            {order_by_condition}
-            {offset_condition}
-            {limit_condition}
->>>>>>> e600d56 (feat: KPI-58-revenue-sum-by-company (#36))
         """.format(
             table_name=self.table_name,
             select_conditions=self.__build_select(),
             join_clauses=self.__build_join(),
             where_conditions=self.__build_where(),
-<<<<<<< HEAD
-<<<<<<< HEAD
             group_by_condition=self.__build_group_by(),
-=======
->>>>>>> 7317739 (feat: KPI-52-financial-scenarios (#34))
-=======
-            group_by_condition=self.__build_group_by(),
->>>>>>> e600d56 (feat: KPI-58-revenue-sum-by-company (#36))
             order_by_condition=self.__build_order_by(),
             offset_condition=self.__build_offset(),
             limit_condition=self.__build_limit(),
