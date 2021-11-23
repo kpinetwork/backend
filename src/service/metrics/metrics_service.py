@@ -7,7 +7,9 @@ class MetricsService:
         self.logger = logger
         pass
 
-    def get_metric_by_company_id(self, company_id: str) -> dict:
+    def get_metric_by_company_id(
+        self, company_id: str, name: str, scenario_type: str
+    ) -> dict:
         try:
             if company_id and company_id.strip():
                 columns = [
@@ -19,7 +21,18 @@ class MetricsService:
                     f"{self.table_name}.period_id",
                     "time_period.start_at",
                     "time_period.end_at",
+                    "financial_scenario.name as scenario",
                 ]
+
+                where_condition = {
+                    f"{self.table_name}.company_id": f"'{company_id}'",
+                }
+
+                if name and name.strip():
+                    where_condition[f"{self.table_name}.name"] = f"'{name}'"
+
+                if scenario_type and scenario_type.strip():
+                    where_condition["scenario_type"] = f"'{scenario_type}'"
 
                 query = (
                     self.query_builder.add_table_name(self.table_name)
@@ -32,9 +45,23 @@ class MetricsService:
                             }
                         }
                     )
-                    .add_sql_where_equal_condition(
-                        {f"{self.table_name}.company_id": f"'{company_id}'"}
+                    .add_join_clause(
+                        {
+                            "scenario_metric": {
+                                "from": "scenario_metric.metric_id",
+                                "to": f"{self.table_name}.period_id",
+                            }
+                        }
                     )
+                    .add_join_clause(
+                        {
+                            "financial_scenario": {
+                                "from": "financial_scenario.id",
+                                "to": "scenario_metric.scenario_id",
+                            }
+                        }
+                    )
+                    .add_sql_where_equal_condition(where_condition)
                     .add_sql_order_by_condition(
                         "time_period.start_at", self.query_builder.Order.DESC
                     )

@@ -35,19 +35,23 @@ class TestMetricsService(TestCase):
     def test_success_get_metric_by_company_id(self):
         self.mock_query_result([self.query_response])
         self.mock_response_list_query_sql([self.query_response])
-        response = self.metrics_service_instance.get_metric_by_company_id("1234")
+        response = self.metrics_service_instance.get_metric_by_company_id(
+            "1234", "test", "type"
+        )
         self.assertEqual(response, [self.query_response])
         self.assertEqual(self.mock_session.execute.call_count, 1)
 
     def test_success_get_metric_by_company_id_with_empty_response(self):
         self.mock_query_result([])
         self.mock_response_list_query_sql([])
-        response = self.metrics_service_instance.get_metric_by_company_id("1234")
+        response = self.metrics_service_instance.get_metric_by_company_id(
+            "1234", "", ""
+        )
         self.assertEqual(response, [])
         self.assertEqual(self.mock_session.execute.call_count, 1)
 
     def test_get_metric_by_company_id_with_empty_id(self):
-        response = self.metrics_service_instance.get_metric_by_company_id("")
+        response = self.metrics_service_instance.get_metric_by_company_id("", "", "")
         self.assertEqual(response, dict())
         self.metrics_service_instance.session.execute.assert_not_called()
 
@@ -56,7 +60,7 @@ class TestMetricsService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.metrics_service_instance.get_metric_by_company_id(
-                    self.query_response.get("id")
+                    self.query_response.get("id"), "", ""
                 )
             )
 
