@@ -116,7 +116,7 @@ class CohortService:
                     .add_sql_where_equal_condition(
                         {f"{self.table_name}_company.cohort_id": f"'{cohort_id}'"}
                     )
-                    .add_sql_group_by_condition("cohort.id")
+                    .add_sql_group_by_condition(["cohort.id"])
                     .build()
                     .get_query()
                 )
@@ -162,9 +162,52 @@ class CohortService:
                         }
                     }
                 )
-                .add_sql_group_by_condition("cohort.id")
+                .add_sql_group_by_condition(["cohort.id"])
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
+                .build()
+                .get_query()
+            )
+
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_list_results(result)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_revenue_sum_by_cohort(self) -> list:
+        try:
+            columns = [
+                "cohort_company.cohort_id",
+                f"{self.table_name}.name",
+                "SUM(metric.value) as revenue_sum ",
+            ]
+            print("her")
+            query = (
+                self.query_builder.add_table_name("metric")
+                .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        "cohort_company": {
+                            "from": "cohort_company.company_id",
+                            "to": "metric.company_id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{self.table_name}": {
+                            "from": f"{self.table_name}.id",
+                            "to": "cohort_company.cohort_id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition({"metric.name": "'Revenue'"})
+                .add_sql_group_by_condition(
+                    ["cohort_company.cohort_id", f"{self.table_name}.name"]
+                )
                 .build()
                 .get_query()
             )

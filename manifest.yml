@@ -55,6 +55,16 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/response_sql.py
 
+  get_average_metrics_handler:
+    requirements: ./src/handlers/metrics/requirements.txt
+    include:
+    - ./src/handlers/metrics/get_average_metrics_handler.py
+    - ./src/service/metrics/metrics_service.py
+    - ./src/utils/query_builder.py
+    - ./db/utils/connection.py
+    - ./src/utils/response_sql.py
+
+
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt
     include:
@@ -96,7 +106,15 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
-
+  
+  get_revenue_sum_by_cohort_handler:
+    requirements: ./src/handlers/cohort/requirements.txt
+    include:
+    - ./src/handlers/cohort/get_revenue_sum_by_cohort_handler.py
+    - ./src/service/cohort/cohort_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

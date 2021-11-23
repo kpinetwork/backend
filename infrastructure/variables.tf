@@ -35,6 +35,7 @@ variable "lambdas_names" {
     "get_all_companies_lambda_function": "get_all_companies_lambda_function"
     "get_metric_by_company_id_lambda_function": "get_metric_by_company_id_lambda_function"
     "get_metrics_lambda_function": "get_metrics_lambda_function"
+    "get_average_metrics_lambda_function": "get_average_metrics_lambda_function"
     "glue_trigger_lambda_function": "glue_trigger_lambda_function"
     "get_company_scenarios_lambda_function": "get_company_scenarios_lambda_function"
     "list_scenarios_lambda_function": "list_scenarios_lambda_function",
@@ -42,6 +43,7 @@ variable "lambdas_names" {
     "get_cohort_by_id_lambda_function": "get_cohort_by_id_lambda_function"
     "get_cohorts_lambda_function": "get_cohorts_lambda_function"
     "get_cohort_scenarios_lambda_function": "get_cohort_scenarios_lambda_function"
+    "get_revenue_sum_by_cohort_lambda_function": "get_revenue_sum_by_cohort_lambda_function"
   }
 }
 

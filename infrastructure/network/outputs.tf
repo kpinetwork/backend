@@ -23,6 +23,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_metric_by_company_id_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_average_metrics_lambda_function": {
+      resource_path: aws_api_gateway_resource.average_metrics.path,
+      http_method: aws_api_gateway_method.get_average_metrics_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
     
     "apigw_get_company_scenarios_lambda_function": {
       resource_path: aws_api_gateway_resource.scenarios.path,
@@ -57,6 +63,12 @@ output "api_gateway_references" {
     "apigw_get_cohort_scenarios_lambda_function": {
       resource_path: aws_api_gateway_resource.cohort_scenarios.path,
       http_method: aws_api_gateway_method.get_cohort_scenarios_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_get_revenue_sum_by_cohort_lambda_function": {
+      resource_path: aws_api_gateway_resource.cohort_revenue.path,
+      http_method: aws_api_gateway_method.get_revenue_sum_by_cohort_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

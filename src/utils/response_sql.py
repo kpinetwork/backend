@@ -2,7 +2,7 @@ class ResponseSQL:
     def __init__(self) -> None:
         pass
 
-    def process_query_result(self, records) -> dict:
+    def process_query_result(self, records: list) -> dict:
         if len(records) == 0:
             return dict()
 
@@ -15,3 +15,10 @@ class ResponseSQL:
         response = []
         [response.append(dict(record)) for record in records]
         return response
+
+    def process_query_average_result(self, records) -> dict:
+        result = self.process_query_result(records)
+
+        average = result.get("average")
+
+        return result if average else dict()
