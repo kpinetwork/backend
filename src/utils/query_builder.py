@@ -12,7 +12,7 @@ class QuerySQLBuilder:
         self.where_conditions = []
         self.limit = None
         self.offset = None
-        self.group_by = None
+        self.group_by = []
         self.order_by = None
 
     class Order(Enum):
@@ -82,12 +82,12 @@ class QuerySQLBuilder:
                 self.where_conditions.append(condition)
         return self
 
-    def add_sql_group_by_condition(self, column_name: str):
-        if self.__is_valid_name(column_name):
-            self.group_by = column_name
+    def add_sql_group_by_condition(self, columns: list):
+        if columns:
+            self.group_by = columns
             return self
         else:
-            raise Exception("No valid column for group by")
+            raise Exception("No valid columns for group by")
 
     def add_sql_limit_condition(self, limit):
         if self.__is_valid_number(limit):
@@ -122,8 +122,10 @@ class QuerySQLBuilder:
             return ""
 
     def __build_group_by(self):
-        if self.group_by:
-            return f"GROUP BY {self.group_by}"
+        if len(self.group_by) > 0:
+            groups = ", ".join(self.group_by)
+            print(groups)
+            return f"GROUP BY {groups}"
         else:
             return ""
 
@@ -193,7 +195,7 @@ class QuerySQLBuilder:
         self.select_conditions = []
         self.where_conditions = []
         self.order_by = None
-        self.group_by = None
+        self.group_by = []
         self.limit = None
         self.offset = None
         self.join_clauses = []

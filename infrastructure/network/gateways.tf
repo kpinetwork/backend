@@ -51,6 +51,12 @@ resource "aws_api_gateway_resource" "metric" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "average_metrics" {
+  path_part   = "avg"
+  parent_id   = aws_api_gateway_resource.metric.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "company_revenue" {
   path_part   = "company-revenue"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -72,6 +78,12 @@ resource "aws_api_gateway_resource" "cohort" {
 resource "aws_api_gateway_resource" "cohort_scenarios" {
   path_part   = "scenarios"
   parent_id   = aws_api_gateway_resource.cohort.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "cohort_revenue" {
+  path_part   = "cohort-revenue"
+  parent_id   = aws_api_gateway_resource.cohorts.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -150,6 +162,17 @@ resource "aws_api_gateway_method" "get_metric_by_company_id_method" {
   authorization = "NONE"
 }
 
+resource "aws_api_gateway_method" "get_average_metrics_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.average_metrics.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.name" = true
+  }
+}
+
 resource "aws_api_gateway_method" "get_revenue_sum_by_company_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_revenue.id
@@ -188,6 +211,13 @@ resource "aws_api_gateway_method" "get_cohort_scenarios_method" {
     "method.request.querystring.scenario_type" = false
     "method.request.querystring.year" = false
   }
+}
+
+resource "aws_api_gateway_method" "get_revenue_sum_by_cohort_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.cohort_revenue.id
+  http_method   = "GET"
+  authorization = "NONE"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -235,6 +265,15 @@ resource "aws_api_gateway_integration" "metric_by_company_id_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_metric_by_company_id_lambda_function
+}
+
+resource "aws_api_gateway_integration" "average_metrics_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.average_metrics.id
+  http_method             = aws_api_gateway_method.get_average_metrics_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_average_metrics_lambda_function
 }
 
 resource "aws_api_gateway_integration" "company_scenarios_integration" {
@@ -289,6 +328,15 @@ resource "aws_api_gateway_integration" "cohort_scenarios_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_cohort_scenarios_lambda_function
+}
+
+resource "aws_api_gateway_integration" "revenue_sum_by_cohort_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.cohort_revenue.id
+  http_method             = aws_api_gateway_method.get_revenue_sum_by_cohort_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_revenue_sum_by_cohort_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

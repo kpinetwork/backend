@@ -59,7 +59,7 @@ class CompanyService:
                     ["SUM(metric.value) as revenue_sum", "metric.company_id"]
                 )
                 .add_sql_where_equal_condition({"metric.name": "'Revenue'"})
-                .add_sql_group_by_condition("metric.company_id")
+                .add_sql_group_by_condition(["metric.company_id"])
                 .build()
                 .get_query()
             )

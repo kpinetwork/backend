@@ -116,17 +116,17 @@ class TestQueryBuilder(TestCase):
         self.assertEqual(len(query_builder.where_conditions), 0)
         self.assertEqual(query_builder.where_conditions, [])
 
-    def test_add_sql_group_by_condition_with_valid_column_name(self):
-        column_name = f"{self.table_name}.name"
-        query_builder = QuerySQLBuilder().add_sql_group_by_condition(column_name)
+    def test_add_sql_group_by_condition_with_valid_columns_name(self):
+        columns = [f"{self.table_name}.name"]
+        query_builder = QuerySQLBuilder().add_sql_group_by_condition(columns)
 
-        self.assertEqual(query_builder.group_by, column_name)
+        self.assertEqual(query_builder.group_by, columns)
 
-    def test_add_sql_group_by_condition_with_invalid_column_name(self):
-        column_name = ""
+    def test_add_sql_group_by_condition_with_invalid_columns_name(self):
+        columns = []
         with self.assertRaises(Exception):
             exception = self.assertRaises(
-                QuerySQLBuilder().add_sql_group_by_condition(column_name)
+                QuerySQLBuilder().add_sql_group_by_condition(columns)
             )
 
             self.assertEqual(exception, Exception)
@@ -208,15 +208,15 @@ class TestQueryBuilder(TestCase):
         self.assertEqual(result, expected_condition)
 
     def test__build_group_by_condition_with_value(self):
-        column_name = f"{self.table_name}.name"
-        query_builder = QuerySQLBuilder().add_sql_group_by_condition(column_name)
+        columns = [f"{self.table_name}.name"]
+        query_builder = QuerySQLBuilder().add_sql_group_by_condition(columns)
 
-        expected_group_by_condition = f"GROUP BY {column_name}"
+        expected_group_by_condition = f"GROUP BY {columns[0]}"
         result = query_builder._QuerySQLBuilder__build_group_by()
 
         self.assertEqual(result, expected_group_by_condition)
 
-    def test__build_group_by_condition_with_None(self):
+    def test__build_group_by_condition_with_empty_list(self):
         query_builder = QuerySQLBuilder()
 
         expected_group_by_condition = ""
@@ -315,7 +315,7 @@ class TestQueryBuilder(TestCase):
             .add_select_conditions(["name"])
             .add_sql_where_equal_condition({"name": "'test'"})
             .add_sql_offset_condition(2)
-            .add_sql_group_by_condition(f"{self.table_name}.name")
+            .add_sql_group_by_condition([f"{self.table_name}.name"])
             .add_sql_limit_condition(10)
             .build()
         )
