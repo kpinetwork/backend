@@ -59,7 +59,7 @@ resource "aws_api_gateway_resource" "average_metrics" {
 
 resource "aws_api_gateway_resource" "company_revenue" {
   path_part   = "company-revenue"
-  parent_id   = aws_api_gateway_rest_api.api.companies.id
+  parent_id   = aws_api_gateway_resource.companies.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
