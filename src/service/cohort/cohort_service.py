@@ -184,7 +184,6 @@ class CohortService:
                 f"{self.table_name}.name",
                 "SUM(metric.value) as revenue_sum ",
             ]
-            print("her")
             query = (
                 self.query_builder.add_table_name("metric")
                 .add_select_conditions(columns)

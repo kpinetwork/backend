@@ -59,7 +59,7 @@ resource "aws_api_gateway_resource" "average_metrics" {
 
 resource "aws_api_gateway_resource" "company_revenue" {
   path_part   = "company-revenue"
-  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  parent_id   = aws_api_gateway_rest_api.api.companies.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -122,6 +122,7 @@ resource "aws_api_gateway_method" "get_company_scenarios_method" {
   authorization = "NONE"
   request_parameters = {
     "method.request.querystring.company" = false
+    "method.request.querystring.scenario_type" = false
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
   }
@@ -134,6 +135,7 @@ resource "aws_api_gateway_method" "list_scenarios_method" {
   authorization = "NONE"
 
   request_parameters = {
+    "method.request.querystring.company_id" = false
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
   }
