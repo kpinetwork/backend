@@ -176,17 +176,6 @@ resource "aws_api_gateway_method" "get_average_metrics_method" {
   }
 }
 
-resource "aws_api_gateway_method" "get_average_metrics_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.average_metrics.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.name" = true
-  }
-}
-
 resource "aws_api_gateway_method" "get_revenue_sum_by_company_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_revenue.id
