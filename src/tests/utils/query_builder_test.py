@@ -42,7 +42,7 @@ class TestQueryBuilder(TestCase):
 
     def test_add_join_clause_with_valid_dict(self):
         expected_join_clause = f"""
-                JOIN other AS o
+                INNER JOIN other AS o
                 ON o.id = {self.table_name}.id
             """
 
@@ -73,7 +73,7 @@ class TestQueryBuilder(TestCase):
         query_builder = QuerySQLBuilder().add_join_clause(join_dict)
 
         expected_clause = f"""
-                JOIN other
+                INNER JOIN other
                 ON o.id = {self.table_name}.id
             """
 

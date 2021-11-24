@@ -20,7 +20,7 @@ class QuerySQLBuilder:
         ASC = "ASC"
 
     class JoinType(Enum):
-        JOIN = ""
+        JOIN = "INNER"
         LEFT = "LEFT"
         RIGTH = "RIGHT"
 
