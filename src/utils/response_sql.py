@@ -11,12 +11,12 @@ class ResponseSQL:
             response.append(dict(row))
         return response[0]
 
-    def process_query_list_results(self, records) -> list:
+    def process_query_list_results(self, records: list) -> list:
         response = []
         [response.append(dict(record)) for record in records]
         return response
 
-    def process_query_average_result(self, records) -> dict:
+    def process_query_average_result(self, records: list) -> dict:
         result = self.process_query_result(records)
 
         average = result.get("average")

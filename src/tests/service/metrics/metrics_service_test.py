@@ -52,7 +52,7 @@ class TestMetricsService(TestCase):
 
     def test_get_metric_by_company_id_with_empty_id(self):
         response = self.metrics_service_instance.get_metric_by_company_id("", "", "")
-        self.assertEqual(response, dict())
+        self.assertEqual(response, [])
         self.metrics_service_instance.session.execute.assert_not_called()
 
     def test_get_metric_by_company_id_failed(self):
@@ -95,7 +95,6 @@ class TestMetricsService(TestCase):
         self.assertEqual(response, expected_output)
         self.metrics_service_instance.session.execute.assert_not_called()
 
-
     def test_get_average_metrics_with_invalid_company_id(self):
         name = "test"
         company_id = " "
@@ -126,7 +125,7 @@ class TestMetricsService(TestCase):
         result = self.metrics_service_instance.get_average_metrics(name, company_id)
 
         self.assertEqual(result, expected_average)
-        self.metrics_service_instance.session.execute.assert_called_once()    
+        self.metrics_service_instance.session.execute.assert_called_once()
 
     def test_get_average_metrics_failed(self):
         name = "test"
@@ -134,9 +133,10 @@ class TestMetricsService(TestCase):
 
         self.metrics_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.metrics_service_instance.get_average_metrics(name, company_id))
+            exception = self.assertRaises(
+                self.metrics_service_instance.get_average_metrics(name, company_id)
+            )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.metrics_service_instance.session.execute.assert_called_once()
-

@@ -9,7 +9,7 @@ class MetricsService:
 
     def get_metric_by_company_id(
         self, company_id: str, name: str, scenario_type: str
-    ) -> dict:
+    ) -> list:
         try:
             if company_id and company_id.strip():
                 columns = [
@@ -32,7 +32,7 @@ class MetricsService:
                     where_condition[f"{self.table_name}.name"] = f"'{name}'"
 
                 if scenario_type and scenario_type.strip():
-                    where_condition["scenario_type"] = f"'{scenario_type}'"
+                    where_condition["financial_scenario.type"] = f"'{scenario_type}'"
 
                 query = (
                     self.query_builder.add_table_name(self.table_name)
@@ -49,7 +49,7 @@ class MetricsService:
                         {
                             "scenario_metric": {
                                 "from": "scenario_metric.metric_id",
-                                "to": f"{self.table_name}.period_id",
+                                "to": f"{self.table_name}.id",
                             }
                         }
                     )
@@ -72,7 +72,7 @@ class MetricsService:
                 self.session.commit()
 
                 return self.response_sql.process_query_list_results(result)
-            return dict()
+            return []
 
         except Exception as error:
             self.logger.info(error)
