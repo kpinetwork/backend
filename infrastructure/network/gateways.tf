@@ -156,6 +156,11 @@ resource "aws_api_gateway_method" "get_metric_by_company_id_method" {
   resource_id   = aws_api_gateway_resource.metric.id
   http_method   = "GET"
   authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.name" = false
+    "method.request.querystring.scenario_type" = false
+  }
 }
 
 resource "aws_api_gateway_method" "get_average_metrics_method" {

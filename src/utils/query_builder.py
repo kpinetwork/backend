@@ -20,7 +20,8 @@ class QuerySQLBuilder:
         ASC = "ASC"
 
     def __is_valid_name(self, name: str):
-        return name and isinstance(name, str) and name.strip()
+        no_invalid_strings = name != "''" and name != "'None'"
+        return name and isinstance(name, str) and name.strip() and no_invalid_strings
 
     def __is_valid_number(self, number: int):
         return number is not None and isinstance(number, int)
@@ -78,8 +79,9 @@ class QuerySQLBuilder:
     def add_sql_where_equal_condition(self, conditions: dict = None):
         if conditions:
             for k, v in conditions.items():
-                condition = f"{k} = {v}"
-                self.where_conditions.append(condition)
+                if self.__is_valid_name(v):
+                    condition = f"{k} = {v}"
+                    self.where_conditions.append(condition)
         return self
 
     def add_sql_group_by_condition(self, columns: list):
