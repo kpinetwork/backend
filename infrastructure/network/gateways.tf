@@ -33,6 +33,18 @@ resource "aws_api_gateway_resource" "scenarios" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "scenario_company" {
+  path_part   = "company"
+  parent_id   = aws_api_gateway_resource.scenarios.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "scenarios_company_id" {
+  path_part   = "{company_id}"
+  parent_id   = aws_api_gateway_resource.scenario_company.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "scenarios_list" {
   path_part   = "list"
   parent_id   = aws_api_gateway_resource.scenarios.id
@@ -145,13 +157,24 @@ resource "aws_api_gateway_method" "get_company_method" {
   authorization = "NONE"
 }
 
+# resource "aws_api_gateway_method" "get_scenarios_method" {
+#   rest_api_id   = aws_api_gateway_rest_api.api.id
+#   resource_id   = aws_api_gateway_resource.scenarios.id
+#   http_method   = "GET"
+#   authorization = "NONE"
+#   request_parameters = {
+#     "method.request.querystring.scenario_type" = false
+#     "method.request.querystring.offset" = false
+#     "method.request.querystring.limit" = false
+#   }
+# }
+
 resource "aws_api_gateway_method" "get_company_scenarios_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.scenarios.id
+  resource_id   = aws_api_gateway_resource.scenarios_company_id.id
   http_method   = "GET"
   authorization = "NONE"
   request_parameters = {
-    "method.request.querystring.company" = false
     "method.request.querystring.scenario_type" = false
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
@@ -350,9 +373,18 @@ resource "aws_api_gateway_integration" "metrics_by_cohort_id_integration" {
   uri                     = var.lambdas_functions_arn.get_metrics_by_cohort_id_lambda_function
 }
 
+# resource "aws_api_gateway_integration" "scenarios_integration" {
+#   rest_api_id             = aws_api_gateway_rest_api.api.id
+#   resource_id             = aws_api_gateway_resource.scenarios.id
+#   http_method             = aws_api_gateway_method.get_scenarios_method.http_method
+#   integration_http_method = "POST"
+#   type                    = "AWS_PROXY"
+#   uri                     = var.lambdas_functions_arn.get_scenarios_lambda_function
+# }
+
 resource "aws_api_gateway_integration" "company_scenarios_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.scenarios.id
+  resource_id             = aws_api_gateway_resource.scenarios_company_id.id
   http_method             = aws_api_gateway_method.get_company_scenarios_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"

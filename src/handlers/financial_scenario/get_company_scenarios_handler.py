@@ -19,14 +19,13 @@ scenario_service = FinancialScenarioService(
 def handler(event, context):
     try:
         offset = 0
-        max_count = 20
-        company_id = ""
+        max_count = 40
         scenario_type = ""
+        company_id = event.get("pathParameters", dict()).get("company_id")
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            company_id = params.get("company", company_id)
-            scenario_type = params.get("scenario_type", scenario_type)
+            scenario_type = params.get("scenario_type", "")
             offset = int(params.get("offset", offset))
             max_count = int(params.get("limit", max_count))
 

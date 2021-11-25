@@ -13,15 +13,16 @@ class CohortService:
         try:
             if cohort_id and cohort_id.strip():
                 columns = [
-                    "financial_scenario.name as scenario_name",
-                    "financial_scenario.currency as scenario_currency",
-                    "financial_scenario.type as scenario_type",
+                    "financial_scenario.id" "financial_scenario.name",
+                    "financial_scenario.currency",
+                    "financial_scenario.type",
+                    "company.id as company_id",
                     "company.name as company_name",
+                    "metric.id as metric_id",
                     "metric.name as metric_name",
                     "metric.value as metric_value",
                     "metric.type as metric_type",
                     "metric.data_type as metric_data_type",
-                    "metric.name as metric_name",
                 ]
                 scenario_name = f"{scenario_type}-{year}"
 
