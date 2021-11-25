@@ -45,9 +45,15 @@ resource "aws_api_gateway_resource" "metrics" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "company_metric" {
+  path_part   = "company"
+  parent_id   = aws_api_gateway_resource.metrics.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "metric" {
   path_part   = "{company_id}"
-  parent_id   = aws_api_gateway_resource.metrics.id
+  parent_id   = aws_api_gateway_resource.company_metric.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -65,7 +71,7 @@ resource "aws_api_gateway_resource" "metric_cohort" {
 
 resource "aws_api_gateway_resource" "metric_cohort_id" {
   path_part   = "{cohort_id}"
-  parent_id   = aws_api_gateway_resource.metrics.id
+  parent_id   = aws_api_gateway_resource.metric_cohort.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
