@@ -331,7 +331,6 @@ class TestQueryBuilder(TestCase):
         )
 
         query = query_builder.get_query()
-        print("QUERY ", remove_white_spaces(query))
         self.assertEqual(
             remove_white_spaces(query), remove_white_spaces(expected_query)
         )

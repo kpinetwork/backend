@@ -133,7 +133,6 @@ class QuerySQLBuilder:
     def __build_group_by(self):
         if len(self.group_by) > 0:
             groups = ", ".join(self.group_by)
-            print(groups)
             return f"GROUP BY {groups}"
         else:
             return ""
