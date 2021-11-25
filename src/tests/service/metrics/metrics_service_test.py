@@ -140,3 +140,69 @@ class TestMetricsService(TestCase):
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.metrics_service_instance.session.execute.assert_called_once()
+
+    def test_get_average_metrics_by_cohort_with_invalid_name(self):
+        name = " "
+        cohort_id = "1"
+        expected_output = dict()
+
+        response = self.metrics_service_instance.get_average_metrics_by_cohort(
+            name, cohort_id
+        )
+
+        self.assertEqual(response, expected_output)
+        self.metrics_service_instance.session.execute.assert_not_called()
+
+    def test_get_average_metrics_by_cohort_with_invalid_cohort_id(self):
+        name = "test"
+        cohort_id = " "
+        expected_output = dict()
+
+        response = self.metrics_service_instance.get_average_metrics_by_cohort(
+            name, cohort_id
+        )
+
+        self.assertEqual(response, expected_output)
+        self.metrics_service_instance.session.execute.assert_not_called()
+
+    def test_get_average_metrics_by_cohort_success(self):
+        expected_average = {"average": 123}
+        name = "test"
+        cohort_id = "1"
+        self.mock_process_query_average_result(expected_average)
+
+        result = self.metrics_service_instance.get_average_metrics_by_cohort(
+            name, cohort_id
+        )
+
+        self.assertEqual(result, expected_average)
+        self.metrics_service_instance.session.execute.assert_called_once()
+
+    def test_get_average_metrics_by_cohort_success_with_empty_response(self):
+        expected_average = dict()
+        name = "test"
+        cohort_id = "1"
+        self.mock_process_query_average_result(expected_average)
+
+        result = self.metrics_service_instance.get_average_metrics_by_cohort(
+            name, cohort_id
+        )
+
+        self.assertEqual(result, expected_average)
+        self.metrics_service_instance.session.execute.assert_called_once()
+
+    def test_get_average_metrics_by_cohort_failed(self):
+        name = "test"
+        cohort_id = "1"
+
+        self.metrics_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.metrics_service_instance.get_average_metrics_by_cohort(
+                    name, cohort_id
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.metrics_service_instance.session.execute.assert_called_once()

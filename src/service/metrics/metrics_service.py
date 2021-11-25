@@ -119,3 +119,38 @@ class MetricsService:
         except Exception as error:
             self.logger.info(error)
             raise error
+
+    def get_average_metrics_by_cohort(self, name: str, cohort_id: str) -> int:
+        try:
+            if name and name.strip() and cohort_id and cohort_id.strip():
+                query = (
+                    self.query_builder.add_table_name(self.table_name)
+                    .add_select_conditions(["AVG(metric.value) as average"])
+                    .add_join_clause(
+                        {
+                            "cohort_company": {
+                                "from": "cohort_company.company_id",
+                                "to": f"{self.table_name}.company_id",
+                            }
+                        }
+                    )
+                    .add_sql_where_equal_condition(
+                        {
+                            f"{self.table_name}.name": f"'{name}'",
+                            "cohort_company.cohort_id": f"'{cohort_id}'",
+                        }
+                    )
+                    .add_sql_group_by_condition(["cohort_company.cohort_id"])
+                    .build()
+                    .get_query()
+                )
+
+                result = self.session.execute(query).fetchall()
+                self.session.commit()
+
+                return self.response_sql.process_query_average_result(result)
+            return dict()
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
