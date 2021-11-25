@@ -18,6 +18,14 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  get_scenarios_handler:
+    requirements: ./src/handlers/financial_scenario/requirements.txt
+    include:
+    - ./src/handlers/financial_scenario/get_scenarios_handler.py
+    - ./src/service/financial_scenario/financial_scenario_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
   
   get_company_scenarios_handler:
     requirements: ./src/handlers/financial_scenario/requirements.txt

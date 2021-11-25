@@ -1,6 +1,6 @@
 import json
 import logging
-from metrics_service import MetricsService
+from financial_scenario_service import FinancialScenarioService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -11,23 +11,26 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-metrics_service = MetricsService(session, query_builder, logger, response_sql)
+scenario_service = FinancialScenarioService(
+    session, query_builder, logger, response_sql
+)
 
 
 def handler(event, context):
-
     try:
-        cohort_id = event.get("pathParameters").get("cohort_id")
-        name = ""
-        if event.get("queryStringParameters"):
-            params = event.get("queryStringParameters", {})
-            name = params.get("name", name)
+        offset = 0
+        max_count = 40
 
-        metric = metrics_service.get_average_metrics_by_cohort(name, cohort_id)
+        if event.get("queryStringParameters"):
+            params = event.get("queryStringParameters")
+            offset = int(params.get("offset", offset))
+            max_count = int(params.get("limit", max_count))
+
+        scenarios = scenario_service.get_scenarios(offset, max_count)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(metric, default=str),
+            "body": json.dumps(scenarios, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 

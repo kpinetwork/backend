@@ -15,12 +15,14 @@ metrics_service = MetricsService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):
-
     try:
         cohort_id = event.get("pathParameters", dict()).get("cohort_id")
-        params = event.get("queryStringParameters", dict())
-        name = params.get("name", "")
-        scenario_type = params.get("scenario_type", "")
+        name = ""
+        scenario_type = ""
+        if event.get("queryStringParameters"):
+            params = event.get("queryStringParameters", dict())
+            name = params.get("name", "")
+            scenario_type = params.get("scenario_type", "")
 
         metrics = metrics_service.get_metrics_by_cohort_id(
             cohort_id, name, scenario_type

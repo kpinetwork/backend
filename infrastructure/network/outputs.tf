@@ -41,6 +41,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_metrics_by_cohort_id_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_scenarios_lambda_function": {
+      resource_path: aws_api_gateway_resource.scenarios.path,
+      http_method: aws_api_gateway_method.get_scenarios_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
     
     "apigw_get_company_scenarios_lambda_function": {
       resource_path: aws_api_gateway_resource.scenarios_company_id.path,

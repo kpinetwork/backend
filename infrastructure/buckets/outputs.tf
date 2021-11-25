@@ -47,6 +47,13 @@ output "object_references" {
       key : aws_s3_bucket_object.get_metrics_by_cohort_id_function_object.key,
       bucket : aws_s3_bucket_object.get_metrics_by_cohort_id_function_object.bucket
     }
+
+    "get_scenarios_function_bucket" : {
+      etag : aws_s3_bucket_object.get_scenarios_function_object.etag,
+      key : aws_s3_bucket_object.get_scenarios_function_object.key,
+      bucket : aws_s3_bucket_object.get_scenarios_function_object.bucket
+    }
+
     "get_company_scenarios_function_bucket" : {
       etag : aws_s3_bucket_object.get_company_scenarios_function_object.etag,
       key : aws_s3_bucket_object.get_company_scenarios_function_object.key,

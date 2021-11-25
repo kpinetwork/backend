@@ -9,6 +9,7 @@ output "lambdas_exec_roles_arn" {
       "get_average_metrics_by_cohort_exec_role_arn": aws_iam_role.get_average_metrics_by_cohort_lambda_exec_role.arn
       "get_metrics_by_cohort_id_exec_role_arn": aws_iam_role.get_metrics_by_cohort_id_lambda_exec_role.arn
       "glue_trigger_lambda_exec_role": aws_iam_role.glue_trigger_lambda_exec_role.arn
+      "get_scenarios_exec_role_arn": aws_iam_role.get_scenarios_lambda_exec_role.arn
       "get_company_scenarios_exec_role_arn": aws_iam_role.get_company_scenarios_lambda_exec_role.arn
       "list_scenarios_exec_role_arn": aws_iam_role.list_scenarios_lambda_exec_role.arn
       "get_revenue_sum_by_company_exec_role_arn": aws_iam_role.get_revenue_sum_by_company_lambda_exec_role.arn
