@@ -20,18 +20,13 @@ def handler(event, context):
     try:
         offset = 0
         max_count = 40
-        scenario_type = ""
-        company_id = event.get("pathParameters", dict()).get("company_id")
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            scenario_type = params.get("scenario_type", "")
             offset = int(params.get("offset", offset))
             max_count = int(params.get("limit", max_count))
 
-        scenarios = scenario_service.get_company_scenarios(
-            company_id, scenario_type, offset, max_count
-        )
+        scenarios = scenario_service.get_scenarios(offset, max_count)
 
         return {
             "statusCode": 200,

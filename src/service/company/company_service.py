@@ -12,7 +12,21 @@ class CompanyService:
             if company_id and company_id.strip():
                 query = (
                     self.query_builder.add_table_name(self.table_name)
-                    .add_sql_where_equal_condition({"id": f"'{company_id}'"})
+                    .add_select_conditions(
+                        [f"{self.table_name}.*", "company_location.city"]
+                    )
+                    .add_join_clause(
+                        {
+                            "company_location": {
+                                "from": f"{self.table_name}.id",
+                                "to": "company_location.company_id",
+                            }
+                        },
+                        self.query_builder.JoinType.LEFT,
+                    )
+                    .add_sql_where_equal_condition(
+                        {f"{self.table_name}.id": f"'{company_id}'"}
+                    )
                     .build()
                     .get_query()
                 )
@@ -31,15 +45,25 @@ class CompanyService:
         try:
             query = (
                 self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(
+                    [f"{self.table_name}.*", "company_location.city"]
+                )
+                .add_join_clause(
+                    {
+                        "company_location": {
+                            "from": f"{self.table_name}.id",
+                            "to": "company_location.company_id",
+                        }
+                    },
+                    self.query_builder.JoinType.LEFT,
+                )
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
                 .get_query()
             )
-
             results = self.session.execute(query).fetchall()
             self.session.commit()
-
             return self.response_sql.process_query_list_results(results)
 
         except Exception as error:
@@ -78,7 +102,6 @@ class CompanyService:
                 .build()
                 .get_query()
             )
-
             results = self.session.execute(query).fetchall()
             self.session.commit()
 
