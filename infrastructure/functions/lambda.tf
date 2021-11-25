@@ -186,6 +186,36 @@ resource "aws_lambda_function" "get_average_metrics_by_cohort_function" {
   }
 }
 
+resource "aws_lambda_function" "get_metrics_by_cohort_id_function" {
+  role               = var.lambdas_exec_roles_arn.get_metrics_by_cohort_id_exec_role_arn
+  handler            = "get_metrics_by_cohort_id_handler.handler"
+  runtime            = var.runtime
+  s3_bucket          = var.object_bucket_references.get_metrics_by_cohort_id_function_object.bucket
+  s3_key             = var.object_bucket_references.get_metrics_by_cohort_id_function_object.key
+  function_name      = "${var.environment}_${var.lambdas_names.get_metrics_by_cohort_id_lambda_function}"
+  source_code_hash   = base64sha256(var.object_bucket_references.get_metrics_by_cohort_id_function_object.etag)
+  
+  layers             = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      DB_HOST     = var.db_host
+      DB_NAME     = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
 resource "aws_lambda_function" "get_company_scenarios_lambda_function" {
   role = var.lambdas_exec_roles_arn.get_company_scenarios_exec_role_arn
   handler = "get_company_scenarios_handler.handler"

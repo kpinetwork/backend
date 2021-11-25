@@ -206,3 +206,39 @@ class TestMetricsService(TestCase):
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.metrics_service_instance.session.execute.assert_called_once()
+
+    def test_success_get_metrics_by_cohort_id(self):
+        self.mock_query_result([self.query_response])
+        self.mock_response_list_query_sql([self.query_response])
+        response = self.metrics_service_instance.get_metrics_by_cohort_id(
+            "1234", "test", "type"
+        )
+        self.assertEqual(response, [self.query_response])
+        self.assertEqual(self.mock_session.execute.call_count, 1)
+
+    def test_success_get_metrics_by_cohort_id_with_empty_response(self):
+        self.mock_query_result([])
+        self.mock_response_list_query_sql([])
+        response = self.metrics_service_instance.get_metrics_by_cohort_id(
+            "1234", "", ""
+        )
+        self.assertEqual(response, [])
+        self.assertEqual(self.mock_session.execute.call_count, 1)
+
+    def test_get_metrics_by_cohort_id_with_empty_id(self):
+        response = self.metrics_service_instance.get_metrics_by_cohort_id("", "", "")
+        self.assertEqual(response, [])
+        self.metrics_service_instance.session.execute.assert_not_called()
+
+    def test_get_metrics_by_cohort_id_failed(self):
+        self.metrics_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.metrics_service_instance.get_metrics_by_cohort_id(
+                    self.query_response.get("id"), "", ""
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.metrics_service_instance.session.execute.assert_called_once()

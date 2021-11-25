@@ -73,6 +73,15 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/response_sql.py
 
+  get_metrics_by_cohort_id_handler:
+    requirements: ./src/handlers/metrics/requirements.txt
+    include:
+    - ./src/handlers/metrics/get_metrics_by_cohort_id_handler.py
+    - ./src/service/metrics/metrics_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt
     include:
