@@ -19,15 +19,21 @@ class QuerySQLBuilder:
         DESC = "DESC"
         ASC = "ASC"
 
+    class JoinType(Enum):
+        JOIN = "INNER"
+        LEFT = "LEFT"
+        RIGTH = "RIGHT"
+
     def __is_valid_name(self, name: str):
-        return name and isinstance(name, str) and name.strip()
+        no_invalid_strings = name != "''" and name != "'None'"
+        return name and isinstance(name, str) and name.strip() and no_invalid_strings
 
     def __is_valid_number(self, number: int):
         return number is not None and isinstance(number, int)
 
-    def __get_join_table_name(self, table_name: str):
+    def __get_join_table_name(self, table_name: str, join_type: JoinType):
         if self.__is_valid_name(table_name):
-            return f"JOIN {table_name}"
+            return f"{join_type.value} JOIN {table_name}"
         else:
             raise Exception("No valid table name")
 
@@ -57,11 +63,13 @@ class QuerySQLBuilder:
         self.select_conditions.extend(columns)
         return self
 
-    def add_join_clause(self, clauses: dict = None):
+    def add_join_clause(
+        self, clauses: dict = None, join_type: JoinType = JoinType.JOIN
+    ):
         try:
             if clauses:
                 for table_name, values in clauses.items():
-                    join = self.__get_join_table_name(table_name)
+                    join = self.__get_join_table_name(table_name, join_type)
                     alias = self.__get_alias_table_clause(values.get("alias", ""))
                     on = self.__get_on_join_condition_clause(values)
 
@@ -78,8 +86,9 @@ class QuerySQLBuilder:
     def add_sql_where_equal_condition(self, conditions: dict = None):
         if conditions:
             for k, v in conditions.items():
-                condition = f"{k} = {v}"
-                self.where_conditions.append(condition)
+                if self.__is_valid_name(v):
+                    condition = f"{k} = {v}"
+                    self.where_conditions.append(condition)
         return self
 
     def add_sql_group_by_condition(self, columns: list):
@@ -124,7 +133,6 @@ class QuerySQLBuilder:
     def __build_group_by(self):
         if len(self.group_by) > 0:
             groups = ", ".join(self.group_by)
-            print(groups)
             return f"GROUP BY {groups}"
         else:
             return ""
