@@ -96,6 +96,139 @@ class TestCompanyService(TestCase):
             self.assertEqual(exception, Exception)
             self.company_service_instance.session.execute.assert_called_once()
 
+    def test_get_companies_kpi_average_with_all_arguments_success(self):
+        self.mock_response_query_sql([self.company])
+
+        get_companies_kpi_average_out = (
+            self.company_service_instance.get_companies_kpi_average(
+                "Budget", "Ebitda", "2021", "Semiconductors", "Transportation"
+            )
+        )
+
+        self.assertEqual(get_companies_kpi_average_out, [self.company])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_kpi_average_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_companies_kpi_average(
+                    "Budget", "Ebitda", "2021", "Semiconductors", "Transportation"
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_kpi_average_without_sector_success(self):
+        self.mock_response_query_sql([self.company])
+
+        get_companies_kpi_average_out = (
+            self.company_service_instance.get_companies_kpi_average(
+                "Budget", "Ebitda", "2021", "", "Transportation"
+            )
+        )
+
+        self.assertEqual(get_companies_kpi_average_out, [self.company])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_kpi_average_without_vertical_success(self):
+        self.mock_response_query_sql([self.company])
+
+        get_companies_kpi_average_out = (
+            self.company_service_instance.get_companies_kpi_average(
+                "Budget", "Ebitda", "2021", "Sector", ""
+            )
+        )
+
+        self.assertEqual(get_companies_kpi_average_out, [self.company])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_kpi_average_without_sector_and_vertical_success(self):
+        self.mock_response_query_sql([self.company])
+
+        get_companies_kpi_average_out = (
+            self.company_service_instance.get_companies_kpi_average(
+                "Budget", "Ebitda", "2021", "", ""
+            )
+        )
+
+        self.assertEqual(get_companies_kpi_average_out, [self.company])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_success(self):
+        self.mock_response_list_query_sql([self.company])
+
+        get_companies_count_by_size_out = (
+            self.company_service_instance.get_companies_count_by_size(
+                "Sector test", "Vertical test", "2021"
+            )
+        )
+
+        self.assertEqual(get_companies_count_by_size_out, [self.company])
+        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_with_empty_arguments_success(self):
+        self.mock_response_list_query_sql([self.company])
+
+        get_companies_count_by_size_out = (
+            self.company_service_instance.get_companies_count_by_size("", "", "")
+        )
+
+        self.assertEqual(get_companies_count_by_size_out, [self.company])
+        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_with_sector_success(self):
+        self.mock_response_list_query_sql([self.company])
+
+        get_companies_count_by_size_out = (
+            self.company_service_instance.get_companies_count_by_size("Sector", "", "")
+        )
+
+        self.assertEqual(get_companies_count_by_size_out, [self.company])
+        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_with_vertical_success(self):
+        self.mock_response_list_query_sql([self.company])
+
+        get_companies_count_by_size_out = (
+            self.company_service_instance.get_companies_count_by_size(
+                "", "vertical", ""
+            )
+        )
+
+        self.assertEqual(get_companies_count_by_size_out, [self.company])
+        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_with_year_success(self):
+        self.mock_response_list_query_sql([self.company])
+
+        get_companies_count_by_size_out = (
+            self.company_service_instance.get_companies_count_by_size("", "", "2021")
+        )
+
+        self.assertEqual(get_companies_count_by_size_out, [self.company])
+        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_companies_count_by_size_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_companies_count_by_size(
+                    "Sector test", "Vertical test", "2021"
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
     def test_get_revenue_sum_by_company_success(self):
         self.mock_response_list_query_sql([self.revenue_sum])
 

@@ -33,6 +33,8 @@ variable "lambdas_names" {
   default = {
     "get_company_lambda_function": "get_company_lambda_function"
     "get_all_companies_lambda_function": "get_all_companies_lambda_function"
+    "get_companies_kpi_average_lambda_function": "get_companies_kpi_average_lambda_function"
+    "get_companies_count_by_size_lambda_function": "get_companies_count_by_size_lambda_function"
     "get_metric_by_company_id_lambda_function": "get_metric_by_company_id_lambda_function"
     "get_metrics_lambda_function": "get_metrics_lambda_function"
     "get_average_metrics_lambda_function": "get_average_metrics_lambda_function"
