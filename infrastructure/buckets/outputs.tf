@@ -10,6 +10,16 @@ output "object_references" {
       key : aws_s3_bucket_object.get_all_companies_function_object.key,
       bucket : aws_s3_bucket_object.get_all_companies_function_object.bucket
     }
+    "get_companies_kpi_average_function_bucket" : {
+      etag : aws_s3_bucket_object.get_companies_kpi_average_function_object.etag,
+      key : aws_s3_bucket_object.get_companies_kpi_average_function_object.key,
+      bucket : aws_s3_bucket_object.get_companies_kpi_average_function_object.bucket
+    }
+    "get_companies_count_by_size_function_bucket" : {
+      etag : aws_s3_bucket_object.get_companies_count_by_size_function_object.etag,
+      key : aws_s3_bucket_object.get_companies_count_by_size_function_object.key,
+      bucket : aws_s3_bucket_object.get_companies_count_by_size_function_object.bucket
+    }
     "lambda_layer_bucket" : {
       etag : aws_s3_bucket_object.layer_libraries_object.etag,
       key : aws_s3_bucket_object.layer_libraries_object.key,
@@ -89,6 +99,12 @@ output "object_references" {
       etag : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.etag,
       key : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.key,
       bucket : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.bucket
+    }
+    
+    "get_growth_and_margin_function_bucket" : {
+      etag : aws_s3_bucket_object.get_growth_and_margin_function_object.etag,
+      key : aws_s3_bucket_object.get_growth_and_margin_function_object.key,
+      bucket : aws_s3_bucket_object.get_growth_and_margin_function_object.bucket
     }
   }
 }

@@ -1,3 +1,6 @@
+from itertools import groupby
+
+
 class ResponseSQL:
     def __init__(self) -> None:
         pass
@@ -41,3 +44,14 @@ class ResponseSQL:
                 data[company_id]["scenarios"] = [record]
 
         return list(data.values())
+
+    def process_metrics_group_by_size_cohort_results(self, records: list) -> list:
+        def get_key(elem) -> str:
+            return elem.get("size_cohort")
+
+        data = dict()
+        records.sort(key=get_key)
+
+        for size_cohort, value in groupby(records, key=get_key):
+            data[size_cohort] = list(value)
+        return data
