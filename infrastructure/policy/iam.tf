@@ -159,7 +159,7 @@ resource "aws_lambda_permission" "apigw_get_company_lambda" {
 # AWS IAM ROLE OVERVIEW
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "get_growth_and_margin_lambda_exec_role" {
-  name               = "${var.environment}_get_growth_and_margin_id_lambda_exec_role"
+  name               = "${var.environment}_get_growth_and_margin_lambda_exec_role"
   path               = "/"
   description        = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
