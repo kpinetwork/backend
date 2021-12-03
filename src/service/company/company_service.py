@@ -70,6 +70,87 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
+    def get_companies_kpi_average(
+        self, scenario_type: str, metric: str, year: str, sector: str, vertical: str
+    ) -> dict:
+        try:
+            where_condition = {
+                "financial_scenario.name": f"'{scenario_type}-{year}'",
+                "metric.name": f"'{metric}'",
+            }
+
+            if sector and sector.strip():
+                where_condition[f"{self.table_name}.sector"] = f"'{sector}'"
+
+            if vertical and vertical.strip():
+                where_condition[f"{self.table_name}.vertical"] = f"{vertical}"
+
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(["AVG(metric.value) as average"])
+                .add_join_clause(
+                    {
+                        "financial_scenario": {
+                            "from": "financial_scenario.company_id",
+                            "to": f"{self.table_name}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        "scenario_metric": {
+                            "from": "scenario_metric.scenario_id",
+                            "to": "financial_scenario.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        "metric": {
+                            "from": "scenario_metric.metric_id",
+                            "to": "metric.id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(where_condition)
+                .build()
+                .get_query()
+            )
+
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_result(result)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_companies_count_by_size(self, sector: str, vertical: str) -> list:
+        try:
+            where_conditions = dict()
+            if sector and sector.strip():
+                where_conditions[f"{self.table_name}.sector"] = f"'{sector}'"
+            if vertical and vertical.strip():
+                where_conditions[f"{self.table_name}.vertical"] = f"'{vertical}'"
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(
+                    [f"{self.table_name}.size_cohort", f"COUNT({self.table_name}.id)"]
+                )
+                .add_sql_where_equal_condition(where_conditions)
+                .add_sql_group_by_condition([f"{self.table_name}.size_cohort"])
+                .build()
+                .get_query()
+            )
+
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_list_results(results)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
     def get_revenue_sum_by_company(self) -> list:
         columns = [
             f"{self.table_name}.id",

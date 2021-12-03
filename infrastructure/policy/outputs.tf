@@ -2,6 +2,8 @@
 output "lambdas_exec_roles_arn" {
   value = {
       "companies_exec_role_arn": aws_iam_role.companies_lambda_exec_role.arn
+      "companies_kpi_average_exec_role_arn": aws_iam_role.companies_kpi_average_lambda_exec_role.arn
+      "companies_count_by_size_exec_role_arn": aws_iam_role.companies_count_by_size_lambda_exec_role.arn
       "company_exec_role_arn": aws_iam_role.company_lambda_exec_role.arn
       "metric_exec_role_arn": aws_iam_role.get_metric_by_company_id_lambda_exec_role.arn
       "metrics_exec_role_arn": aws_iam_role.get_metrics_lambda_exec_role.arn

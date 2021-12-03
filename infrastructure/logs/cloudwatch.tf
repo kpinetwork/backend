@@ -13,6 +13,15 @@ resource "aws_cloudwatch_log_group" "get_all_companies_lambda_function" {
   retention_in_days = var.retention_days
 }
 
+resource "aws_cloudwatch_log_group" "get_companies_kpi_average_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_companies_kpi_average_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_companies_count_by_size_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_companies_count_by_size_lambda_function}"
+  retention_in_days = var.retention_days
+}
 resource "aws_cloudwatch_log_group" "get_revenue_sum_by_company_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_company_lambda_function}"
   retention_in_days = var.retention_days
