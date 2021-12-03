@@ -23,6 +23,8 @@ class TestCompanyService(TestCase):
             "name": "Test Company",
             "revenue_sum": 123,
         }
+        self.metric_size_cohort = {"size_cohort": "1", "growth": "123"}
+
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
@@ -37,6 +39,10 @@ class TestCompanyService(TestCase):
 
     def mock_response_list_query_sql(self, response):
         attrs = {"process_query_list_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
+
+    def mock_response_metrics_group_by_size_cohort_results(self, response):
+        attrs = {"process_metrics_group_by_size_cohort_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
     def test_get_company_success(self):
@@ -112,6 +118,109 @@ class TestCompanyService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_revenue_sum_by_company()
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_size_cohort_with_valid_metric_and_scenario(self):
+        self.mock_response_list_query_sql([self.metric_size_cohort])
+
+        get_metric_avg_by_size_cohort_out = (
+            self.company_service_instance.get_metric_avg_by_size_cohort(
+                "Budget", "Revenue", "", "", "2020", "growth"
+            )
+        )
+
+        self.assertEqual(get_metric_avg_by_size_cohort_out, [self.metric_size_cohort])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_size_cohort_without_valid_metric_and_scenario(self):
+        get_metric_avg_by_size_cohort_out = (
+            self.company_service_instance.get_metric_avg_by_size_cohort(
+                "", "", "", "", "2020", "growth"
+            )
+        )
+
+        self.assertEqual(get_metric_avg_by_size_cohort_out, [])
+        self.company_service_instance.session.execute.assert_not_called()
+
+    def test_get_metric_avg_by_size_cohort_with_all_params(self):
+        self.mock_response_list_query_sql([self.metric_size_cohort])
+
+        get_metric_avg_by_size_cohort_out = (
+            self.company_service_instance.get_metric_avg_by_size_cohort(
+                "Budget", "Revenue", "Science", "Maths", "2020", "growth"
+            )
+        )
+
+        self.assertEqual(get_metric_avg_by_size_cohort_out, [self.metric_size_cohort])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_size_cohort_with_empty_response(self):
+        self.mock_response_list_query_sql([])
+
+        get_metric_avg_by_size_cohort_out = (
+            self.company_service_instance.get_metric_avg_by_size_cohort(
+                "Budget", "Revenue", "Science", "Maths", "2020", "growth"
+            )
+        )
+
+        self.assertEqual(get_metric_avg_by_size_cohort_out, [])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_size_cohort_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_metric_avg_by_size_cohort(
+                    "Budget", "Revenue", "Science", "Maths", "2020", "growth"
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_growth_and_margin_by_size_cohort_success(self):
+        record = self.metric_size_cohort.copy()
+        record["margin"] = record.pop("growth")
+
+        expected_out = {"1": [self.metric_size_cohort, record]}
+
+        self.mock_response_metrics_group_by_size_cohort_results(expected_out)
+
+        get_growth_and_margin_by_size_cohort_out = (
+            self.company_service_instance.get_growth_and_margin_by_size_cohort(
+                "", "", "2020"
+            )
+        )
+
+        self.assertEqual(get_growth_and_margin_by_size_cohort_out, expected_out)
+        self.company_service_instance.session.execute.assert_called()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
+
+    def test_get_growth_and_margin_by_size_cohort_success_with_empty_response(self):
+        self.mock_response_metrics_group_by_size_cohort_results(dict())
+
+        get_growth_and_margin_by_size_cohort_out = (
+            self.company_service_instance.get_growth_and_margin_by_size_cohort(
+                "", "", "2020"
+            )
+        )
+
+        self.assertEqual(get_growth_and_margin_by_size_cohort_out, dict())
+        self.company_service_instance.session.execute.assert_called()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
+
+    def test_get_growth_and_margin_by_size_cohort_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_growth_and_margin_by_size_cohort(
+                    "", "", "2020"
+                )
             )
 
             self.assertTrue("error" in context.exception)

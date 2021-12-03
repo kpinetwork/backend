@@ -93,3 +93,35 @@ class TestResponseBuilder(TestCase):
 
         response = self.response_sql_instance.process_scenarios_list_results(records)
         self.assertEqual(response, expected_record)
+
+    def test_process_metrics_group_by_size_cohort_results_success(self):
+        records = [
+            {"size_cohort": "1", "growth": "12"},
+            {"size_cohort": "2", "growth": "178"},
+            {"size_cohort": "1", "margin": "34"},
+        ]
+        expected_record = {
+            "1": [
+                {"size_cohort": "1", "growth": "12"},
+                {"size_cohort": "1", "margin": "34"},
+            ],
+            "2": [{"size_cohort": "2", "growth": "178"}],
+        }
+
+        response = (
+            self.response_sql_instance.process_metrics_group_by_size_cohort_results(
+                records
+            )
+        )
+        self.assertEqual(response, expected_record)
+
+    def test_process_metrics_group_by_size_cohort_results_with_empty_list(self):
+        records = []
+        expected_record = {}
+
+        response = (
+            self.response_sql_instance.process_metrics_group_by_size_cohort_results(
+                records
+            )
+        )
+        self.assertEqual(response, expected_record)

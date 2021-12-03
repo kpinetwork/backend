@@ -15,6 +15,7 @@ output "lambdas_invoke_arns" {
     "get_cohort_by_id_lambda_function": aws_lambda_function.get_cohort_by_id_function.invoke_arn
     "get_cohort_scenarios_lambda_function": aws_lambda_function.get_cohorts_scenarios_function.invoke_arn
     "get_revenue_sum_by_cohort_lambda_function" : aws_lambda_function.get_revenue_sum_by_cohort_lambda_function.invoke_arn
+    "get_growth_and_margin_lambda_function": aws_lambda_function.get_growth_and_margin_lambda_function.invoke_arn
   }
 }
 
