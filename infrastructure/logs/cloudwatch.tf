@@ -100,3 +100,8 @@ resource "aws_cloudwatch_log_group" "get_revenue_sum_by_cohort_lambda_function" 
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_cohort_lambda_function}"
   retention_in_days = var.retention_days
 }
+
+resource "aws_cloudwatch_log_group" "get_growth_and_margin_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_growth_and_margin_lambda_function}"
+  retention_in_days = var.retention_days
+}

@@ -158,6 +158,15 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+
+  get_growth_and_margin_hanlder:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company/get_growth_and_margin_hanlder.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

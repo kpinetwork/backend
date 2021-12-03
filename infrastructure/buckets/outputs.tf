@@ -100,5 +100,11 @@ output "object_references" {
       key : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.key,
       bucket : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.bucket
     }
+    
+    "get_growth_and_margin_function_bucket" : {
+      etag : aws_s3_bucket_object.get_growth_and_margin_function_object.etag,
+      key : aws_s3_bucket_object.get_growth_and_margin_function_object.key,
+      bucket : aws_s3_bucket_object.get_growth_and_margin_function_object.bucket
+    }
   }
 }
