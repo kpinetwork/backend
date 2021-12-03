@@ -79,11 +79,11 @@ class CompanyService:
                 "metric.name": f"'{metric}'",
             }
 
-            # if sector and sector.strip():
-            #     where_condition[f"{self.table_name}.sector"] = f"'{sector}'"
+            if sector and sector.strip():
+                where_condition[f"{self.table_name}.sector"] = f"'{sector}'"
 
-            # if vertical and vertical.strip():
-            #     where_condition[f"{self.table_name}.vertical"] = f"{vertical}"
+            if vertical and vertical.strip():
+                where_condition[f"{self.table_name}.vertical"] = f"{vertical}"
 
             query = (
                 self.query_builder.add_table_name(self.table_name)
@@ -125,19 +125,13 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_companies_count_by_size(
-        self, sector: str, vertical: str, year: str
-    ) -> list:
+    def get_companies_count_by_size(self, sector: str, vertical: str) -> list:
         try:
             where_conditions = dict()
             if sector and sector.strip():
                 where_conditions[f"{self.table_name}.sector"] = f"'{sector}'"
             if vertical and vertical.strip():
                 where_conditions[f"{self.table_name}.vertical"] = f"'{vertical}'"
-            if year and year.strip():
-                where_conditions[
-                    f"EXTRACT(YEAR FROM {self.table_name}.fiscal_year)"
-                ] = f"'{year}'"
             query = (
                 self.query_builder.add_table_name(self.table_name)
                 .add_select_conditions(

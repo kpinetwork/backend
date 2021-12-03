@@ -169,8 +169,8 @@ resource "aws_api_gateway_method" "get_companies_kpi_average_method" {
   authorization = "NONE"
   
   request_parameters = {
-    "method.request.querystring.scenario_type" = false
-    "method.request.querystring.metric" = false
+    "method.request.querystring.scenario_type" = true
+    "method.request.querystring.metric" = true
     "method.request.querystring.year" = false
     "method.request.querystring.sector" = false
     "method.request.querystring.vertical" = false
@@ -186,7 +186,6 @@ resource "aws_api_gateway_method" "get_companies_count_by_size_method" {
   request_parameters = {
     "method.request.querystring.sector" = false
     "method.request.querystring.vertical" = false
-    "method.request.querystring.year" = false
   }
   
 }

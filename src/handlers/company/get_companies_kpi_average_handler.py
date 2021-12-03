@@ -15,7 +15,7 @@ logger.setLevel(logging.INFO)
 company_service = CompanyService(session, query_builder, logger, response_sql)
 
 
-def handler(event):
+def handler(event, context):
     try:
         scenario_type = "Actuals"
         metric = "Revenue"

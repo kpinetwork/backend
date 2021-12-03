@@ -14,20 +14,18 @@ logger.setLevel(logging.INFO)
 company_service = CompanyService(session, query_builder, logger, response_sql)
 
 
-def handler(event):
+def handler(event, context):
     try:
         sector = ""
         vertical = ""
-        year = ""
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             sector = params.get("sector", sector)
             vertical = params.get("vertical", vertical)
-            year = params.get("year", year)
 
         companies_count_by_size = company_service.get_companies_count_by_size(
-            sector, vertical, year
+            sector, vertical
         )
 
         return {

@@ -162,7 +162,7 @@ class TestCompanyService(TestCase):
 
         get_companies_count_by_size_out = (
             self.company_service_instance.get_companies_count_by_size(
-                "Sector test", "Vertical test", "2021"
+                "Sector test", "Vertical test"
             )
         )
 
@@ -174,7 +174,7 @@ class TestCompanyService(TestCase):
         self.mock_response_list_query_sql([self.company])
 
         get_companies_count_by_size_out = (
-            self.company_service_instance.get_companies_count_by_size("", "", "")
+            self.company_service_instance.get_companies_count_by_size("", "")
         )
 
         self.assertEqual(get_companies_count_by_size_out, [self.company])
@@ -185,7 +185,7 @@ class TestCompanyService(TestCase):
         self.mock_response_list_query_sql([self.company])
 
         get_companies_count_by_size_out = (
-            self.company_service_instance.get_companies_count_by_size("Sector", "", "")
+            self.company_service_instance.get_companies_count_by_size("Sector", "")
         )
 
         self.assertEqual(get_companies_count_by_size_out, [self.company])
@@ -196,20 +196,7 @@ class TestCompanyService(TestCase):
         self.mock_response_list_query_sql([self.company])
 
         get_companies_count_by_size_out = (
-            self.company_service_instance.get_companies_count_by_size(
-                "", "vertical", ""
-            )
-        )
-
-        self.assertEqual(get_companies_count_by_size_out, [self.company])
-        self.assertEqual(len(get_companies_count_by_size_out), len([self.company]))
-        self.company_service_instance.session.execute.assert_called_once()
-
-    def test_get_companies_count_by_size_with_year_success(self):
-        self.mock_response_list_query_sql([self.company])
-
-        get_companies_count_by_size_out = (
-            self.company_service_instance.get_companies_count_by_size("", "", "2021")
+            self.company_service_instance.get_companies_count_by_size("", "vertical")
         )
 
         self.assertEqual(get_companies_count_by_size_out, [self.company])
@@ -221,7 +208,7 @@ class TestCompanyService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_companies_count_by_size(
-                    "Sector test", "Vertical test", "2021"
+                    "Sector test", "Vertical test"
                 )
             )
 
