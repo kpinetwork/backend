@@ -301,3 +301,22 @@ class CompanyService:
         except Exception as error:
             self.logger.info(error)
             raise error
+
+    def get_revenue_and_ebitda_by_size_cohort(
+        self, sector: str, vertical: str, year: str
+    ) -> dict:
+        try:
+            revenue = self.get_metric_avg_by_size_cohort(
+                "Actual vs budget", "Revenue", sector, vertical, year, "Revenue"
+            )
+            ebitda = self.get_metric_avg_by_size_cohort(
+                "Actual vs budget", "Ebitda", sector, vertical, year, "Ebitda"
+            )
+
+            revenue.extend(ebitda)
+            return self.response_sql.process_metrics_group_by_size_cohort_results(
+                revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            raise error

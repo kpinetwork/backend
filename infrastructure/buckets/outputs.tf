@@ -112,5 +112,11 @@ output "object_references" {
       key : aws_s3_bucket_object.get_expected_growth_and_margin_function_object.key,
       bucket : aws_s3_bucket_object.get_expected_growth_and_margin_function_object.bucket
     }
+    
+    "get_revenue_and_ebitda_function_bucket" : {
+      etag : aws_s3_bucket_object.get_revenue_and_ebitda_function_object.etag,
+      key : aws_s3_bucket_object.get_revenue_and_ebitda_function_object.key,
+      bucket : aws_s3_bucket_object.get_revenue_and_ebitda_function_object.bucket
+    }
   }
 }
