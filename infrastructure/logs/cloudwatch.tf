@@ -95,13 +95,10 @@ resource "aws_cloudwatch_log_group" "get_revenue_sum_by_cohort_lambda_function" 
 resource "aws_cloudwatch_log_group" "get_universe_overview_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_universe_overview_lambda_function}"
   retention_in_days = var.retention_days
-<<<<<<< HEAD
+
 }
 
 resource "aws_cloudwatch_log_group" "get_company_report_vs_peers_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_report_vs_peers_lambda_function}"
   retention_in_days = var.retention_days
 }
-=======
-}
->>>>>>> 0d22ac4 (feat: KPI-70 rule of 40 lambda (#51))
