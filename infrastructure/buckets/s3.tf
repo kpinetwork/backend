@@ -152,3 +152,10 @@ resource "aws_s3_bucket_object" "get_growth_and_margin_function_object" {
   source = "${path.module}/../../dist/get_growth_and_margin_hanlder.zip"
   etag = filemd5("${path.module}/../../dist/get_growth_and_margin_hanlder.zip")
 }
+
+resource "aws_s3_bucket_object" "get_expected_growth_and_margin_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_expected_growth_and_margin_hanlder.zip"
+  source = "${path.module}/../../dist/get_expected_growth_and_margin_hanlder.zip"
+  etag = filemd5("${path.module}/../../dist/get_expected_growth_and_margin_hanlder.zip")
+}
