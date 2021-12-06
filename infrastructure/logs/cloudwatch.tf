@@ -107,3 +107,4 @@ resource "aws_cloudwatch_log_group" "get_comparison_vs_peers_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_comparison_vs_peers_lambda_function}"
   retention_in_days = var.retention_days
 }
+
