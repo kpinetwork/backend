@@ -346,3 +346,51 @@ class TestCompanyService(TestCase):
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_expected_growth_and_margin_by_size_cohort_success(self):
+        record = self.metric_size_cohort.copy()
+        record["margin"] = record.pop("growth")
+
+        expected_out = {"1": [self.metric_size_cohort, record]}
+
+        self.mock_response_metrics_group_by_size_cohort_results(expected_out)
+
+        get_expected_growth_and_margin_by_size_cohort_out = (
+            self.company_service_instance.get_expected_growth_and_margin_by_size_cohort(
+                "", "", "2020"
+            )
+        )
+
+        self.assertEqual(
+            get_expected_growth_and_margin_by_size_cohort_out, expected_out
+        )
+        self.company_service_instance.session.execute.assert_called()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
+
+    def test_get_expected_growth_and_margin_by_size_cohort_success_with_empty_response(
+        self,
+    ):
+        self.mock_response_metrics_group_by_size_cohort_results(dict())
+
+        get_expected_growth_and_margin_by_size_cohort_out = (
+            self.company_service_instance.get_expected_growth_and_margin_by_size_cohort(
+                "", "", "2020"
+            )
+        )
+
+        self.assertEqual(get_expected_growth_and_margin_by_size_cohort_out, dict())
+        self.company_service_instance.session.execute.assert_called()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
+
+    def test_get_expected_growth_and_margin_by_size_cohort_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_expected_growth_and_margin_by_size_cohort(
+                    "", "", "2020"
+                )
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
