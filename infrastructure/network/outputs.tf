@@ -106,6 +106,18 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_growth_and_margin_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_expected_growth_and_margin_lambda_function": {
+      resource_path: aws_api_gateway_resource.expected_growth_and_margin.path,
+      http_method: aws_api_gateway_method.get_expected_growth_and_margin_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_get_revenue_and_ebitda_lambda_function": {
+      resource_path: aws_api_gateway_resource.revenue_and_ebitda.path,
+      http_method: aws_api_gateway_method.get_revenue_and_ebitda_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

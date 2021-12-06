@@ -147,6 +147,18 @@ resource "aws_api_gateway_resource" "growth_and_margin" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "expected_growth_and_margin" {
+  path_part   = "expected_growth_and_margin"
+  parent_id   = aws_api_gateway_resource.companies.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "revenue_and_ebitda" {
+  path_part   = "revenue_and_ebitda"
+  parent_id   = aws_api_gateway_resource.companies.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -357,6 +369,32 @@ resource "aws_api_gateway_method" "get_growth_and_margin_method" {
   }
 }
 
+resource "aws_api_gateway_method" "get_expected_growth_and_margin_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.expected_growth_and_margin.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.vertical" = false
+    "method.request.querystring.sector" = false
+    "method.request.querystring.year" = false
+  }
+}
+
+resource "aws_api_gateway_method" "get_revenue_and_ebitda_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.revenue_and_ebitda.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.vertical" = false
+    "method.request.querystring.sector" = false
+    "method.request.querystring.year" = false
+  }
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
 # Provides an HTTP Method Integration for an API Gateway Integration.
@@ -528,6 +566,24 @@ resource "aws_api_gateway_integration" "growth_and_margin_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_growth_and_margin_lambda_function
+}
+
+resource "aws_api_gateway_integration" "expected_growth_and_margin_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.expected_growth_and_margin.id
+  http_method             = aws_api_gateway_method.get_expected_growth_and_margin_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_expected_growth_and_margin_lambda_function
+}
+
+resource "aws_api_gateway_integration" "revenue_and_ebitda_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.revenue_and_ebitda.id
+  http_method             = aws_api_gateway_method.get_revenue_and_ebitda_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_revenue_and_ebitda_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

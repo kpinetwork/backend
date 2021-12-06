@@ -167,6 +167,24 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+
+  get_expected_growth_and_margin_hanlder:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company/get_expected_growth_and_margin_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    
+  get_revenue_and_ebitda_handler:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company/get_revenue_and_ebitda_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py  
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

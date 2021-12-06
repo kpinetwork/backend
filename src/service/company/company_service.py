@@ -269,6 +269,25 @@ class CompanyService:
     ) -> dict:
         try:
             growth_revenue = self.get_metric_avg_by_size_cohort(
+                "Actual growth", "Revenue", sector, vertical, year, "growth"
+            )
+            margin_ebitda = self.get_metric_avg_by_size_cohort(
+                "Actual margin", "Ebitda", sector, vertical, year, "margin"
+            )
+
+            growth_revenue.extend(margin_ebitda)
+            return self.response_sql.process_metrics_group_by_size_cohort_results(
+                growth_revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_expected_growth_and_margin_by_size_cohort(
+        self, sector: str, vertical: str, year: str
+    ) -> dict:
+        try:
+            growth_revenue = self.get_metric_avg_by_size_cohort(
                 "Budgeted growth", "Revenue", sector, vertical, year, "growth"
             )
             margin_ebitda = self.get_metric_avg_by_size_cohort(
@@ -278,6 +297,25 @@ class CompanyService:
             growth_revenue.extend(margin_ebitda)
             return self.response_sql.process_metrics_group_by_size_cohort_results(
                 growth_revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_revenue_and_ebitda_by_size_cohort(
+        self, sector: str, vertical: str, year: str
+    ) -> dict:
+        try:
+            revenue = self.get_metric_avg_by_size_cohort(
+                "Actual vs budget", "Revenue", sector, vertical, year, "Revenue"
+            )
+            ebitda = self.get_metric_avg_by_size_cohort(
+                "Actual vs budget", "Ebitda", sector, vertical, year, "Ebitda"
+            )
+
+            revenue.extend(ebitda)
+            return self.response_sql.process_metrics_group_by_size_cohort_results(
+                revenue
             )
         except Exception as error:
             self.logger.info(error)
