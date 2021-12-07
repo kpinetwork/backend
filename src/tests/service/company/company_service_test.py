@@ -401,7 +401,7 @@ class TestCompanyService(TestCase):
         record2["ebitda"] = record1.pop("revenue")
 
         expected_out = {"1": [record1, record2]}
-        print(expected_out)
+
         self.mock_response_metrics_group_by_size_cohort_results(expected_out)
 
         get_revenue_and_ebitda_by_size_cohort_out = (
@@ -438,4 +438,36 @@ class TestCompanyService(TestCase):
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
-            self.company_service_instance.session.execute.assert_called_once()        
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_rule_of_40_success(self):
+        expected_out = []
+        self.mock_response_list_query_sql(expected_out)
+
+        get_rule_of_40_out = self.company_service_instance.get_rule_of_40(
+            "Test", "Test", "2020"
+        )
+
+        self.assertEqual(get_rule_of_40_out, expected_out)
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_rule_of_40_success_with_empty_response(self):
+        self.mock_response_list_query_sql([])
+
+        get_rule_of_40_out = self.company_service_instance.get_rule_of_40(
+            "", "", "2020"
+        )
+
+        self.assertEqual(get_rule_of_40_out, [])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_rule_of_40_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_rule_of_40("", "", "2020")
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()

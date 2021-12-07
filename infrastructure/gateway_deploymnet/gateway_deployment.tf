@@ -9,7 +9,7 @@
 resource "aws_api_gateway_deployment" "gateway_deployment" {
   rest_api_id       = var.api_gateway_rest_api_id
   stage_name        = var.is_production? var.stage_name : var.environment
-  stage_description = "Deployed at d ${timestamp()}"
+  stage_description = "Deployed at ${timestamp()}"
 
   lifecycle {
     create_before_destroy = true

@@ -320,3 +320,77 @@ class CompanyService:
         except Exception as error:
             self.logger.info(error)
             raise error
+
+    def get_rule_of_40(self, sector: str, vertical: str, year: str) -> dict:
+        def get_case_statement(scenario: str, metric: str, alias: str) -> str:
+            return """
+                SUM(
+                    CASE WHEN financial_scenario.name = '{scenario}'
+                    AND metric.name = '{metric}'
+                    THEN metric.value ELSE 0 END
+                ) AS {alias}
+            """.format(
+                scenario=scenario, metric=metric, alias=alias
+            )
+
+        try:
+            scenario = "financial_scenario"
+            columns = [
+                f"{scenario}.{self.table_name}_id",
+                f"{self.table_name}.name",
+                get_case_statement(
+                    f"Actual growth-{year}", "Revenue", "revenue_growth_rate"
+                ),
+                get_case_statement(f"Actual margin-{year}", "Ebitda", "ebitda_margin"),
+                get_case_statement(f"Actuals-{year}", "Revenue", "revenue"),
+            ]
+
+            where_condictions = dict()
+
+            if sector and sector.strip():
+                where_condictions[f"{self.table_name}.sector"] = f"'{sector}'"
+
+            if vertical and vertical.strip():
+                where_condictions[f"{self.table_name}.vertical"] = f"'{vertical}'"
+
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        f"{scenario}": {
+                            "from": f"{scenario}.{self.table_name}_id",
+                            "to": f"{self.table_name}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        "scenario_metric": {
+                            "from": "scenario_metric.scenario_id",
+                            "to": f"{scenario}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        "metric": {
+                            "from": "scenario_metric.metric_id",
+                            "to": "metric.id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(where_condictions)
+                .add_sql_group_by_condition(
+                    [f"{scenario}.{self.table_name}_id", f"{self.table_name}.name"]
+                )
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+
+            return self.response_sql.process_query_list_results(results)
+        except Exception as error:
+            self.logger.info(error)
+            raise error

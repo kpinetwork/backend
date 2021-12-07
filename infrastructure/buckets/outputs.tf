@@ -118,5 +118,11 @@ output "object_references" {
       key : aws_s3_bucket_object.get_revenue_and_ebitda_function_object.key,
       bucket : aws_s3_bucket_object.get_revenue_and_ebitda_function_object.bucket
     }
+
+    "get_rule_of_40_function_bucket" : {
+      etag : aws_s3_bucket_object.get_rule_of_40_function_object.etag,
+      key : aws_s3_bucket_object.get_rule_of_40_function_object.key,
+      bucket : aws_s3_bucket_object.get_rule_of_40_function_object.bucket
+    }
   }
 }

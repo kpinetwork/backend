@@ -22,6 +22,7 @@ output "lambdas_exec_roles_arn" {
       "get_growth_and_margin_exec_role_arn": aws_iam_role.get_growth_and_margin_lambda_exec_role.arn
       "get_expected_growth_and_margin_exec_role_arn": aws_iam_role.get_expected_growth_and_margin_lambda_exec_role.arn
       "get_revenue_and_ebitda_exec_role_arn": aws_iam_role.get_revenue_and_ebitda_lambda_exec_role.arn
+      "get_rule_of_40_exec_role_arn": aws_iam_role.get_rule_of_40_lambda_exec_role.arn
   }
 }
 

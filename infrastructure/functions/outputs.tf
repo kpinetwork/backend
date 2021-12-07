@@ -20,6 +20,7 @@ output "lambdas_invoke_arns" {
     "get_growth_and_margin_lambda_function": aws_lambda_function.get_growth_and_margin_lambda_function.invoke_arn
     "get_expected_growth_and_margin_lambda_function": aws_lambda_function.get_expected_growth_and_margin_lambda_function.invoke_arn
     "get_revenue_and_ebitda_lambda_function": aws_lambda_function.get_revenue_and_ebitda_lambda_function.invoke_arn
+    "get_rule_of_40_lambda_function": aws_lambda_function.get_rule_of_40_lambda_function.invoke_arn
   }
 }
 

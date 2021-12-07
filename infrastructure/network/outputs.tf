@@ -118,6 +118,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_revenue_and_ebitda_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_rule_of_40_lambda_function": {
+      resource_path: aws_api_gateway_resource.rule_of_40.path,
+      http_method: aws_api_gateway_method.get_rule_of_40_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 
