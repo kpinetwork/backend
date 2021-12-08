@@ -2,8 +2,6 @@
 output "lambdas_exec_roles_arn" {
   value = {
       "companies_exec_role_arn": aws_iam_role.companies_lambda_exec_role.arn
-      "companies_kpi_average_exec_role_arn": aws_iam_role.companies_kpi_average_lambda_exec_role.arn
-      "companies_count_by_size_exec_role_arn": aws_iam_role.companies_count_by_size_lambda_exec_role.arn
       "company_exec_role_arn": aws_iam_role.company_lambda_exec_role.arn
       "metric_exec_role_arn": aws_iam_role.get_metric_by_company_id_lambda_exec_role.arn
       "metrics_exec_role_arn": aws_iam_role.get_metrics_lambda_exec_role.arn
@@ -19,9 +17,6 @@ output "lambdas_exec_roles_arn" {
       "cohorts_exec_role_arn": aws_iam_role.get_cohorts_lambda_exec_role.arn
       "cohort_scenario_exec_role_arn": aws_iam_role.get_cohort_scenarios_lambda_exec_role.arn
       "get_revenue_sum_by_cohort_exec_role_arn": aws_iam_role.get_revenue_sum_by_cohort_lambda_exec_role.arn
-      "get_growth_and_margin_exec_role_arn": aws_iam_role.get_growth_and_margin_lambda_exec_role.arn
-      "get_expected_growth_and_margin_exec_role_arn": aws_iam_role.get_expected_growth_and_margin_lambda_exec_role.arn
-      "get_revenue_and_ebitda_exec_role_arn": aws_iam_role.get_revenue_and_ebitda_lambda_exec_role.arn
       "get_rule_of_40_exec_role_arn": aws_iam_role.get_rule_of_40_lambda_exec_role.arn
   }
 }
