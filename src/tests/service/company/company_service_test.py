@@ -24,6 +24,7 @@ class TestCompanyService(TestCase):
             "revenue_sum": 123,
         }
         self.metric_size_cohort = {"size_cohort": "1", "growth": "123"}
+        self.metric_avg = {"revenue": "100"}
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
@@ -102,65 +103,65 @@ class TestCompanyService(TestCase):
             self.company_service_instance.session.execute.assert_called_once()
 
     def test_get_companies_kpi_average_with_all_arguments_success(self):
-        self.mock_response_query_sql([self.company])
+        self.mock_response_list_query_sql([self.company])
 
         get_companies_kpi_average_out = (
             self.company_service_instance.get_companies_kpi_average(
-                "Budget", "Ebitda", "2021", "Semiconductors", "Transportation"
+                "2021", "Semiconductors", "Transportation"
             )
         )
 
         self.assertEqual(get_companies_kpi_average_out, [self.company])
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 3)
 
     def test_get_companies_kpi_average_failed(self):
         self.company_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_companies_kpi_average(
-                    "Budget", "Ebitda", "2021", "Semiconductors", "Transportation"
+                    "2021", "Semiconductors", "Transportation"
                 )
             )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
-            self.company_service_instance.session.execute.assert_called_once()
+            self.assertEqual(
+                self.company_service_instance.session.execute.call_count, 3
+            )
 
     def test_get_companies_kpi_average_without_sector_success(self):
-        self.mock_response_query_sql([self.company])
+        self.mock_response_list_query_sql([self.company])
 
         get_companies_kpi_average_out = (
             self.company_service_instance.get_companies_kpi_average(
-                "Budget", "Ebitda", "2021", "", "Transportation"
+                "2021", "", "Transportation"
             )
         )
 
         self.assertEqual(get_companies_kpi_average_out, [self.company])
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 3)
 
     def test_get_companies_kpi_average_without_vertical_success(self):
-        self.mock_response_query_sql([self.company])
+        self.mock_response_list_query_sql([self.company])
 
         get_companies_kpi_average_out = (
             self.company_service_instance.get_companies_kpi_average(
-                "Budget", "Ebitda", "2021", "Sector", ""
+                "2021", "Sector", ""
             )
         )
 
         self.assertEqual(get_companies_kpi_average_out, [self.company])
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 3)
 
     def test_get_companies_kpi_average_without_sector_and_vertical_success(self):
-        self.mock_response_query_sql([self.company])
+        self.mock_response_list_query_sql([self.company])
 
         get_companies_kpi_average_out = (
-            self.company_service_instance.get_companies_kpi_average(
-                "Budget", "Ebitda", "2021", "", ""
-            )
+            self.company_service_instance.get_companies_kpi_average("2021", "", "")
         )
 
         self.assertEqual(get_companies_kpi_average_out, [self.company])
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 3)
 
     def test_get_companies_count_by_size_success(self):
         self.mock_response_list_query_sql([self.company])
@@ -466,6 +467,61 @@ class TestCompanyService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_rule_of_40("", "", "2020")
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_scenario_of_all_companies_with_valid_metric_and_scenario(
+        self,
+    ):
+        self.mock_response_query_sql([self.metric_avg])
+
+        get_metric_avg_by_scenario_of_all_companies_out = (
+            self.company_service_instance.get_metric_avg_by_scenario_of_all_companies(
+                "Budget", "Revenue", "2020", "", "", "growth"
+            )
+        )
+
+        self.assertEqual(
+            get_metric_avg_by_scenario_of_all_companies_out, [self.metric_avg]
+        )
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_scenario_of_all_companies_with_all_params(self):
+        self.mock_response_query_sql([self.metric_size_cohort])
+
+        get_metric_avg_by_scenario_of_all_companies_out = (
+            self.company_service_instance.get_metric_avg_by_scenario_of_all_companies(
+                "Budget", "Revenue", "Science", "Maths", "2020", "growth"
+            )
+        )
+
+        self.assertEqual(
+            get_metric_avg_by_scenario_of_all_companies_out, [self.metric_size_cohort]
+        )
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_scenario_of_all_companies_with_empty_response(self):
+        self.mock_response_query_sql([])
+
+        get_metric_avg_by_scenario_of_all_companies_out = (
+            self.company_service_instance.get_metric_avg_by_scenario_of_all_companies(
+                "Budget", "Revenue", "2020", "Maths", "Science", "growth"
+            )
+        )
+
+        self.assertEqual(get_metric_avg_by_scenario_of_all_companies_out, [])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_metric_avg_by_scenario_of_all_companies_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_metric_avg_by_scenario_of_all_companies(
+                    "Budget", "Revenue", "2020", "Maths", "Science", "growth"
+                )
             )
 
             self.assertTrue("error" in context.exception)
