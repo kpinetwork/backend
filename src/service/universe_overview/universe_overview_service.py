@@ -9,6 +9,96 @@ class UniverseOverviewService:
         self.scenario_table = "financial_scenario"
         self.scenario_metric_table = "scenario_metric"
 
+    def get_metric_avg_by_scenario(
+        self,
+        scenario_type: str,
+        metric: str,
+        year: str,
+        sector: str,
+        vertical: str,
+        avg_alias: str,
+    ) -> dict:
+        try:
+            where_condition = {
+                f"{self.scenario_table}.name": f"'{scenario_type}-{year}'",
+                f"{self.metric_table}.name": f"'{metric}'",
+            }
+
+            if sector and sector.strip():
+                where_condition[f"{self.company_table}.sector"] = f"'{sector}'"
+
+            if vertical and vertical.strip():
+                where_condition[f"{self.company_table}.vertical"] = f"{vertical}"
+
+            query = (
+                self.query_builder.add_table_name(self.company_table)
+                .add_select_conditions(
+                    [f"AVG({self.metric_table}.value) as {avg_alias}"]
+                )
+                .add_join_clause(
+                    {
+                        f"{self.scenario_table}": {
+                            "from": f"{self.scenario_table}.company_id",
+                            "to": f"{self.company_table}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{self.scenario_metric_table}": {
+                            "from": f"{self.scenario_metric_table}.scenario_id",
+                            "to": f"{self.scenario_table}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{self.metric_table}": {
+                            "from": f"{self.scenario_metric_table}.metric_id",
+                            "to": f"{self.metric_table}.id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(where_condition)
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_result(result)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_companies_kpi_average(self, year: str, sector: str, vertical: str) -> list:
+        try:
+            kpi_averages = []
+            metrics = [
+                {"scenario": "Actual growth", "metric": "Revenue", "alias": "growth"},
+                {
+                    "scenario": "Actual margin",
+                    "metric": "Ebitda",
+                    "alias": "ebitda_margin",
+                },
+                {"scenario": "Actuals", "metric": "Rule of 40", "alias": "rule_of_40"},
+            ]
+            for metric in metrics:
+                metric_average = self.get_metric_avg_by_scenario(
+                    metric.get("scenario"),
+                    metric.get("metric"),
+                    year,
+                    sector,
+                    vertical,
+                    metric.get("alias"),
+                )
+                kpi_averages.append(metric_average)
+
+            return self.response_sql.process_query_list_results(kpi_averages)
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
     def get_companies_count_by_size(self, sector: str, vertical: str) -> list:
         try:
             where_conditions = dict()
@@ -119,8 +209,8 @@ class UniverseOverviewService:
     def get_scenarios_pair_by_size_cohort(
         self,
         scenarios: list,
-        vertical: str,
         sector: str,
+        vertical: str,
         year: str,
     ) -> list:
         try:
@@ -163,7 +253,7 @@ class UniverseOverviewService:
             ]
 
             return self.get_scenarios_pair_by_size_cohort(
-                scenarios, vertical, sector, year
+                scenarios, sector, vertical, year
             )
         except Exception as error:
             self.logger.info(error)
@@ -187,7 +277,7 @@ class UniverseOverviewService:
                 },
             ]
             return self.get_scenarios_pair_by_size_cohort(
-                scenarios, vertical, sector, year
+                scenarios, sector, vertical, year
             )
         except Exception as error:
             self.logger.info(error)
@@ -275,6 +365,7 @@ class UniverseOverviewService:
 
     def get_universe_overview(self, sector: str, vertical: str, year: str) -> dict:
         try:
+            kpi_average = self.get_companies_kpi_average(year, sector, vertical)
             count_by_size = self.get_companies_count_by_size(sector, vertical)
             growth_and_margin = self.get_growth_and_margin_by_size_cohort(
                 sector, vertical, year, True
@@ -288,6 +379,7 @@ class UniverseOverviewService:
             rule_of_40 = self.get_rule_of_40(sector, vertical, year)
 
             return {
+                "kpi_average": kpi_average,
                 "count_by_size": count_by_size,
                 "growth_and_margin": growth_and_margin,
                 "expected_growth_and_margin": expected_growth_and_margin,
