@@ -21,18 +21,6 @@ resource "aws_api_gateway_resource" "companies" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
-resource "aws_api_gateway_resource" "companies_kpi_average" {
-  path_part   = "kpi-average"
-  parent_id   = aws_api_gateway_resource.companies.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
-resource "aws_api_gateway_resource" "companies_count_by_size" {
-  path_part   = "count-by-size"
-  parent_id   = aws_api_gateway_resource.companies.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
 resource "aws_api_gateway_resource" "company" {
   path_part   = "{id}"
   parent_id   = aws_api_gateway_resource.companies.id
@@ -141,24 +129,6 @@ resource "aws_api_gateway_resource" "cohort_revenue" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
-resource "aws_api_gateway_resource" "growth_and_margin" {
-  path_part   = "growth_and_margin"
-  parent_id   = aws_api_gateway_resource.companies.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
-resource "aws_api_gateway_resource" "expected_growth_and_margin" {
-  path_part   = "expected_growth_and_margin"
-  parent_id   = aws_api_gateway_resource.companies.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
-resource "aws_api_gateway_resource" "revenue_and_ebitda" {
-  path_part   = "revenue_and_ebitda"
-  parent_id   = aws_api_gateway_resource.companies.id
-  rest_api_id = aws_api_gateway_rest_api.api.id
-}
-
 resource "aws_api_gateway_resource" "rule_of_40" {
   path_part   = "rule_of_40"
   parent_id   = aws_api_gateway_resource.companies.id
@@ -184,34 +154,6 @@ resource "aws_api_gateway_method" "get_all_companies_method" {
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
   }
-}
-
-resource "aws_api_gateway_method" "get_companies_kpi_average_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.companies_kpi_average.id
-  http_method   = "GET"
-  authorization = "NONE"
-  
-  request_parameters = {
-    "method.request.querystring.scenario_type" = true
-    "method.request.querystring.metric" = true
-    "method.request.querystring.year" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.vertical" = false
-  }
-}
-
-resource "aws_api_gateway_method" "get_companies_count_by_size_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.companies_count_by_size.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.sector" = false
-    "method.request.querystring.vertical" = false
-  }
-  
 }
 
 resource "aws_api_gateway_method" "get_company_method" {
@@ -362,45 +304,6 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_cohort_method" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_method" "get_growth_and_margin_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.growth_and_margin.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.vertical" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.year" = false
-  }
-}
-
-resource "aws_api_gateway_method" "get_expected_growth_and_margin_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.expected_growth_and_margin.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.vertical" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.year" = false
-  }
-}
-
-resource "aws_api_gateway_method" "get_revenue_and_ebitda_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.revenue_and_ebitda.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.vertical" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.year" = false
-  }
-}
-
 resource "aws_api_gateway_method" "get_rule_of_40_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.rule_of_40.id
@@ -432,24 +335,6 @@ resource "aws_api_gateway_integration" "companies_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_all_companies_lambda_function
-}
-
-resource "aws_api_gateway_integration" "companies_kpi_average_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.companies_kpi_average.id
-  http_method             = aws_api_gateway_method.get_companies_kpi_average_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_companies_kpi_average_lambda_function
-}
-
-resource "aws_api_gateway_integration" "companies_count_by_size_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.companies_count_by_size.id
-  http_method             = aws_api_gateway_method.get_companies_count_by_size_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_companies_count_by_size_lambda_function
 }
 
 resource "aws_api_gateway_integration" "company_integration" {
@@ -576,33 +461,6 @@ resource "aws_api_gateway_integration" "revenue_sum_by_cohort_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_revenue_sum_by_cohort_lambda_function
-}
-
-resource "aws_api_gateway_integration" "growth_and_margin_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.growth_and_margin.id
-  http_method             = aws_api_gateway_method.get_growth_and_margin_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_growth_and_margin_lambda_function
-}
-
-resource "aws_api_gateway_integration" "expected_growth_and_margin_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.expected_growth_and_margin.id
-  http_method             = aws_api_gateway_method.get_expected_growth_and_margin_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_expected_growth_and_margin_lambda_function
-}
-
-resource "aws_api_gateway_integration" "revenue_and_ebitda_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.revenue_and_ebitda.id
-  http_method             = aws_api_gateway_method.get_revenue_and_ebitda_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_revenue_and_ebitda_lambda_function
 }
 
 resource "aws_api_gateway_integration" "rule_of_40_integration" {
