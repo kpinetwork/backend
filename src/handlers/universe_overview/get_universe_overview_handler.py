@@ -1,7 +1,7 @@
 import json
 import logging
 import datetime
-from company_service import CompanyService
+from universe_overview_service import UniverseOverviewService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -12,32 +12,27 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-company_service = CompanyService(session, query_builder, logger, response_sql)
+overview_service = UniverseOverviewService(session, query_builder, logger, response_sql)
 
 
 def handler(event, context):
     try:
-        scenario_type = "Actuals"
-        metric = "Revenue"
-        year = datetime.datetime.today().year
         sector = ""
         vertical = ""
-
+        year = datetime.datetime.today().year
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            scenario_type = params.get("scenario_type", scenario_type)
-            metric = params.get("metric", metric)
-            year = params.get("year", year)
             sector = params.get("sector", sector)
             vertical = params.get("vertical", vertical)
+            year = params.get("year", year)
 
-        companies_kpi_average = company_service.get_companies_kpi_average(
-            scenario_type, metric, year, sector, vertical
+        growth_and_margin = overview_service.get_universe_overview(
+            sector, vertical, year
         )
 
         return {
             "statusCode": 200,
-            "body": json.dumps(companies_kpi_average, default=str),
+            "body": json.dumps(growth_and_margin, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 
