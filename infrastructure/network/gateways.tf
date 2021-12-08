@@ -129,8 +129,8 @@ resource "aws_api_gateway_resource" "cohort_revenue" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
-resource "aws_api_gateway_resource" "rule_of_40" {
-  path_part   = "rule_of_40"
+resource "aws_api_gateway_resource" "universe_overview" {
+  path_part   = "universe_overview"
   parent_id   = aws_api_gateway_resource.companies.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
@@ -304,9 +304,9 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_cohort_method" {
   authorization = "NONE"
 }
 
-resource "aws_api_gateway_method" "get_rule_of_40_method" {
+resource "aws_api_gateway_method" "get_universe_overview_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.rule_of_40.id
+  resource_id   = aws_api_gateway_resource.universe_overview.id
   http_method   = "GET"
   authorization = "NONE"
 
@@ -463,13 +463,13 @@ resource "aws_api_gateway_integration" "revenue_sum_by_cohort_integration" {
   uri                     = var.lambdas_functions_arn.get_revenue_sum_by_cohort_lambda_function
 }
 
-resource "aws_api_gateway_integration" "rule_of_40_integration" {
+resource "aws_api_gateway_integration" "universe_overview_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.rule_of_40.id
-  http_method             = aws_api_gateway_method.get_rule_of_40_method.http_method
+  resource_id             = aws_api_gateway_resource.universe_overview.id
+  http_method             = aws_api_gateway_method.get_universe_overview_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_rule_of_40_lambda_function
+  uri                     = var.lambdas_functions_arn.get_universe_overview_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

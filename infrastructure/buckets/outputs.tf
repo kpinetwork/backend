@@ -91,10 +91,10 @@ output "object_references" {
       bucket : aws_s3_bucket_object.get_revenue_sum_by_cohort_function_object.bucket
     }
     
-    "get_rule_of_40_function_bucket" : {
-      etag : aws_s3_bucket_object.get_rule_of_40_function_object.etag,
-      key : aws_s3_bucket_object.get_rule_of_40_function_object.key,
-      bucket : aws_s3_bucket_object.get_rule_of_40_function_object.bucket
+    "get_universe_overview_function_bucket" : {
+      etag : aws_s3_bucket_object.get_universe_overview_function_object.etag,
+      key : aws_s3_bucket_object.get_universe_overview_function_object.key,
+      bucket : aws_s3_bucket_object.get_universe_overview_function_object.bucket
     }
   }
 }

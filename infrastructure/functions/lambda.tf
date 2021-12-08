@@ -472,14 +472,14 @@ resource "aws_lambda_function" "get_revenue_sum_by_cohort_lambda_function" {
   }
 }
 
-resource "aws_lambda_function" "get_rule_of_40_lambda_function" {
-  role = var.lambdas_exec_roles_arn.get_rule_of_40_exec_role_arn
-  handler = "get_rule_of_40_handler.handler"
+resource "aws_lambda_function" "get_universe_overview_lambda_function" {
+  role = var.lambdas_exec_roles_arn.get_universe_overview_exec_role_arn
+  handler = "get_universe_overview_handler.handler"
   runtime = var.runtime
-  s3_bucket = var.object_bucket_references.get_rule_of_40_function_bucket.bucket
-  s3_key = var.object_bucket_references.get_rule_of_40_function_bucket.key
-  function_name = "${var.environment}_${var.lambdas_names.get_rule_of_40_lambda_function}"
-  source_code_hash = base64sha256(var.object_bucket_references.get_rule_of_40_function_bucket.etag)
+  s3_bucket = var.object_bucket_references.get_universe_overview_function_bucket.bucket
+  s3_key = var.object_bucket_references.get_universe_overview_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.get_universe_overview_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_universe_overview_function_bucket.etag)
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 

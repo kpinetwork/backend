@@ -90,9 +90,9 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_get_rule_of_40_lambda_function": {
-      resource_path: aws_api_gateway_resource.rule_of_40.path,
-      http_method: aws_api_gateway_method.get_rule_of_40_method.http_method,
+    "apigw_get_universe_overview_lambda_function": {
+      resource_path: aws_api_gateway_resource.universe_overview.path,
+      http_method: aws_api_gateway_method.get_universe_overview_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

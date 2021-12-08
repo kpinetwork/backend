@@ -83,8 +83,8 @@ resource "aws_lambda_permission" "apigw_get_company_lambda" {
 # ----------------------------------------------------------------------------------------------------------------------
 # AWS IAM ROLE OVERVIEW
 # ----------------------------------------------------------------------------------------------------------------------
-resource "aws_iam_role" "get_rule_of_40_lambda_exec_role" {
-  name               = "${var.environment}_get_rule_of_40_lambda_exec_role"
+resource "aws_iam_role" "get_universe_overview_lambda_exec_role" {
+  name               = "${var.environment}_get_universe_overview_lambda_exec_role"
   path               = "/"
   description        = "Allows Lambda Function to call AWS services on your behalf."
   assume_role_policy = <<EOF
@@ -103,22 +103,22 @@ resource "aws_iam_role" "get_rule_of_40_lambda_exec_role" {
 EOF
 }
 
-resource "aws_iam_role_policy_attachment" "get_rule_of_40_lambda_logs" {
-  role       = aws_iam_role.get_rule_of_40_lambda_exec_role.name
+resource "aws_iam_role_policy_attachment" "get_universe_overview_lambda_logs" {
+  role       = aws_iam_role.get_universe_overview_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
 }
 
-resource "aws_iam_role_policy_attachment" "get_rule_of_40_lambda_vpc" {
-  role       = aws_iam_role.get_rule_of_40_lambda_exec_role.name
+resource "aws_iam_role_policy_attachment" "get_universe_overview_lambda_vpc" {
+  role       = aws_iam_role.get_universe_overview_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
 }
 
-resource "aws_lambda_permission" "apigw_get_rule_of_40_lambda" {
+resource "aws_lambda_permission" "apigw_get_universe_overview_lambda" {
   statement_id  = "AllowExecutionFromAPIGatewayRuleOf40"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.environment}_${var.lambdas_names.get_rule_of_40_lambda_function}"
+  function_name = "${var.environment}_${var.lambdas_names.get_universe_overview_lambda_function}"
   principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_rule_of_40_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_rule_of_40_lambda_function.http_method}${var.api_gateway_references.apigw_get_rule_of_40_lambda_function.resource_path}"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_universe_overview_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_universe_overview_lambda_function.http_method}${var.api_gateway_references.apigw_get_universe_overview_lambda_function.resource_path}"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

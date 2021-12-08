@@ -132,9 +132,9 @@ resource "aws_s3_bucket_object" "get_revenue_sum_by_cohort_function_object" {
   etag = filemd5("${path.module}/../../dist/get_revenue_sum_by_cohort_handler.zip")
 }
 
-resource "aws_s3_bucket_object" "get_rule_of_40_function_object" {
+resource "aws_s3_bucket_object" "get_universe_overview_function_object" {
   bucket = var.bucket_name
-  key = "${var.lambda_resource_name}/${var.environment}/get_rule_of_40_handler.zip"
-  source = "${path.module}/../../dist/get_rule_of_40_handler.zip"
-  etag = filemd5("${path.module}/../../dist/get_rule_of_40_handler.zip")
+  key = "${var.lambda_resource_name}/${var.environment}/get_universe_overview_handler.zip"
+  source = "${path.module}/../../dist/get_universe_overview_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_universe_overview_handler.zip")
 }
