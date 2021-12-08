@@ -17,22 +17,18 @@ company_service = CompanyService(session, query_builder, logger, response_sql)
 
 def handler(event, context):
     try:
-        scenario_type = "Actuals"
-        metric = "Revenue"
         year = datetime.datetime.today().year
         sector = ""
         vertical = ""
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            scenario_type = params.get("scenario_type", scenario_type)
-            metric = params.get("metric", metric)
             year = params.get("year", year)
             sector = params.get("sector", sector)
             vertical = params.get("vertical", vertical)
 
         companies_kpi_average = company_service.get_companies_kpi_average(
-            scenario_type, metric, year, sector, vertical
+            year, sector, vertical
         )
 
         return {

@@ -69,8 +69,14 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_companies_kpi_average(
-        self, scenario_type: str, metric: str, year: str, sector: str, vertical: str
+    def get_metric_avg_by_scenario_of_all_companies(
+        self,
+        scenario_type: str,
+        metric: str,
+        year: str,
+        sector: str,
+        vertical: str,
+        avg_alias: str,
     ) -> dict:
         try:
             where_condition = {
@@ -84,9 +90,11 @@ class CompanyService:
             if vertical and vertical.strip():
                 where_condition[f"{self.table_name}.vertical"] = f"{vertical}"
 
+            avg_alias = avg_alias.replace(" ", "_")
+
             query = (
                 self.query_builder.add_table_name(self.table_name)
-                .add_select_conditions(["AVG(metric.value) as average"])
+                .add_select_conditions([f"AVG(metric.value) as {avg_alias}"])
                 .add_join_clause(
                     {
                         "financial_scenario": {
@@ -115,11 +123,35 @@ class CompanyService:
                 .build()
                 .get_query()
             )
-
             result = self.session.execute(query).fetchall()
             self.session.commit()
             return self.response_sql.process_query_result(result)
 
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_companies_kpi_average(self, year: str, sector: str, vertical: str) -> list:
+        try:
+            kpi_averages = []
+            actual_growth = self.get_metric_avg_by_scenario_of_all_companies(
+                "Actual growth", "Revenue", year, sector, vertical, "Actual growth"
+            )
+            actual_ebitda_margins = self.get_metric_avg_by_scenario_of_all_companies(
+                "Actuals",
+                "Ebitda margins",
+                year,
+                sector,
+                vertical,
+                "Actual ebitda margins",
+            )
+            actual_rule_of_40 = self.get_metric_avg_by_scenario_of_all_companies(
+                "Actuals", "Rule of 40", year, sector, vertical, "Rule of 40"
+            )
+            kpi_averages.append(actual_growth)
+            kpi_averages.append(actual_ebitda_margins)
+            kpi_averages.append(actual_rule_of_40)
+            return self.response_sql.process_query_list_results(kpi_averages)
         except Exception as error:
             self.logger.info(error)
             raise error
