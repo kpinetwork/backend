@@ -131,7 +131,7 @@ resource "aws_api_gateway_resource" "cohort_revenue" {
 
 resource "aws_api_gateway_resource" "universe_overview" {
   path_part   = "universe_overview"
-  parent_id   = aws_api_gateway_resource.companies.id
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
