@@ -13,6 +13,11 @@ jobs:
     env:
       TF_VAR_aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       TF_VAR_aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
+      TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
+      TF_VAR_db_prod_password: ${{ secrets.DB_PROD_PASSWORD }}
+      TF_VAR_db_demo_password: ${{ secrets.DB_DEMO_PASSWORD }}
+      TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up python
@@ -64,12 +69,6 @@ jobs:
           terraform validate -no-color
       - name: Terraform Plan Prod Env
         id: plan-prod
-        env:
-          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
-          TF_VAR_db_prod_password: ${{ secrets.DB_PROD_PASSWORD }}
-          TF_VAR_db_demo_password: ${{ secrets.DB_DEMO_PASSWORD }}
-          TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
         working-directory: "./infrastructure"
         run: |
           terraform plan -no-color
@@ -118,12 +117,6 @@ jobs:
           terraform validate -no-color
       - name: Terraform Plan
         id: plan
-        env:
-          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
-          TF_VAR_db_prod_password: ${{ secrets.DB_PROD_PASSWORD }}
-          TF_VAR_db_demo_password: ${{ secrets.DB_DEMO_PASSWORD }}
-          TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
         working-directory: "./infrastructure"
         run: |
           terraform plan -no-color
@@ -132,12 +125,6 @@ jobs:
         if: steps.plan.outcome == 'failure'
         run: exit 1
       - name: Terraform Apply
-        env:
-          TF_VAR_aws_account_id: ${{ secrets.AWS_ACCOUNT_ID }}
-          TF_VAR_db_username: ${{ secrets.DB_USERNAME }}
-          TF_VAR_db_prod_password: ${{ secrets.DB_PROD_PASSWORD }}
-          TF_VAR_db_demo_password: ${{ secrets.DB_DEMO_PASSWORD }}
-          TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
         run: |
           cd infrastructure
           terraform apply -auto-approve
