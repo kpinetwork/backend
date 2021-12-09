@@ -62,7 +62,6 @@ jobs:
         working-directory: "./infrastructure"
         run: |
           terraform workspace select prod
-          terraform init -backend-config="access_key=$TF_VAR_aws_access_key_id" -backend-config="secret_key=$TF_VAR_aws_secret_access_key"
       - name: Terraform Validate Prod Env
         id: validate-prod
         working-directory: "./infrastructure"
