@@ -2,8 +2,6 @@ output "lambdas_invoke_arns" {
   value = {
     "get_company_lambda_function": aws_lambda_function.get_company_lambda_function.invoke_arn
     "get_all_companies_lambda_function": aws_lambda_function.get_all_companies_lambda_function.invoke_arn
-    "get_companies_kpi_average_lambda_function": aws_lambda_function.get_companies_kpi_average_lambda_function.invoke_arn
-    "get_companies_count_by_size_lambda_function": aws_lambda_function.get_companies_count_by_size_lambda_function.invoke_arn
     "get_metrics_lambda_function": aws_lambda_function.get_metrics_function.invoke_arn
     "get_metric_by_company_id_lambda_function": aws_lambda_function.get_metric_by_company_id_function.invoke_arn
     "get_average_metrics_lambda_function": aws_lambda_function.get_average_metrics_function.invoke_arn
@@ -17,9 +15,7 @@ output "lambdas_invoke_arns" {
     "get_cohort_by_id_lambda_function": aws_lambda_function.get_cohort_by_id_function.invoke_arn
     "get_cohort_scenarios_lambda_function": aws_lambda_function.get_cohorts_scenarios_function.invoke_arn
     "get_revenue_sum_by_cohort_lambda_function" : aws_lambda_function.get_revenue_sum_by_cohort_lambda_function.invoke_arn
-    "get_growth_and_margin_lambda_function": aws_lambda_function.get_growth_and_margin_lambda_function.invoke_arn
-    "get_expected_growth_and_margin_lambda_function": aws_lambda_function.get_expected_growth_and_margin_lambda_function.invoke_arn
-    "get_revenue_and_ebitda_lambda_function": aws_lambda_function.get_revenue_and_ebitda_lambda_function.invoke_arn
+    "get_universe_overview_lambda_function": aws_lambda_function.get_universe_overview_lambda_function.invoke_arn
   }
 }
 

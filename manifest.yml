@@ -18,24 +18,6 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
-  get_companies_kpi_average_handler:
-    requirements: ./src/handlers/company/requirements.txt
-    include:
-    - ./src/handlers/company/get_companies_kpi_average_handler.py
-    - ./src/service/company/company_service.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py  
-
-  get_companies_count_by_size_handler:
-    requirements: ./src/handlers/company/requirements.txt
-    include:
-    - ./src/handlers/company/get_companies_count_by_size_handler.py
-    - ./src/service/company/company_service.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py    
-
   get_scenarios_handler:
     requirements: ./src/handlers/financial_scenario/requirements.txt
     include:
@@ -159,32 +141,15 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
-  get_growth_and_margin_hanlder:
+  get_universe_overview_handler:
     requirements: ./src/handlers/company/requirements.txt
     include:
-    - ./src/handlers/company/get_growth_and_margin_handler.py
-    - ./src/service/company/company_service.py
+    - ./src/handlers/universe_overview/get_universe_overview_handler.py
+    - ./src/service/universe_overview/universe_overview_service.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
-  get_expected_growth_and_margin_hanlder:
-    requirements: ./src/handlers/company/requirements.txt
-    include:
-    - ./src/handlers/company/get_expected_growth_and_margin_handler.py
-    - ./src/service/company/company_service.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py
-    
-  get_revenue_and_ebitda_handler:
-    requirements: ./src/handlers/company/requirements.txt
-    include:
-    - ./src/handlers/company/get_revenue_and_ebitda_handler.py
-    - ./src/service/company/company_service.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py  
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

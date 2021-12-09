@@ -6,17 +6,6 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_get_companies_kpi_average_lambda_function": {
-      resource_path: aws_api_gateway_resource.companies_kpi_average.path,
-      http_method: aws_api_gateway_method.get_companies_kpi_average_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
-
-    "apigw_get_companies_count_by_size_lambda_function": {
-      resource_path: aws_api_gateway_resource.companies_count_by_size.path,
-      http_method: aws_api_gateway_method.get_companies_count_by_size_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
     "apigw_get_company_lambda_function": {
       resource_path: aws_api_gateway_resource.company.path,
       http_method: aws_api_gateway_method.get_company_method.http_method,
@@ -101,21 +90,9 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_get_growth_and_margin_lambda_function": {
-      resource_path: aws_api_gateway_resource.growth_and_margin.path,
-      http_method: aws_api_gateway_method.get_growth_and_margin_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
-
-    "apigw_get_expected_growth_and_margin_lambda_function": {
-      resource_path: aws_api_gateway_resource.expected_growth_and_margin.path,
-      http_method: aws_api_gateway_method.get_expected_growth_and_margin_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
-
-    "apigw_get_revenue_and_ebitda_lambda_function": {
-      resource_path: aws_api_gateway_resource.revenue_and_ebitda.path,
-      http_method: aws_api_gateway_method.get_revenue_and_ebitda_method.http_method,
+    "apigw_get_universe_overview_lambda_function": {
+      resource_path: aws_api_gateway_resource.universe_overview.path,
+      http_method: aws_api_gateway_method.get_universe_overview_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }
