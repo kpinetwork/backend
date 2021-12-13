@@ -18,6 +18,7 @@ class FinancialScenarioService:
             "metric.value as metric_value",
             "metric.type as metric_type",
             "metric.data_type as metric_data_type",
+            "scenario_metric.id as scenario_metric_id",
         ]
         try:
             query = (
