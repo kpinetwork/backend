@@ -42,7 +42,15 @@ class TestUniverseOverview(TestCase):
 
         get_metric_avg_by_scenario_out = (
             self.overview_service_instance.get_metric_avg_by_scenario(
-                "Budget", "Revenue", "2020", "Sector", "Vertical", "growth"
+                "Budget",
+                "Revenue",
+                "2020",
+                ["Sector"],
+                ["Vertical"],
+                ["Investor profiles"],
+                ["Growth Profile"],
+                ["size"],
+                "growth",
             )
         )
 
@@ -54,7 +62,15 @@ class TestUniverseOverview(TestCase):
 
         get_metric_avg_by_scenario_out = (
             self.overview_service_instance.get_metric_avg_by_scenario(
-                "Budget", "Revenue", "2020", "Maths", "Science", "growth"
+                "Budget",
+                "Revenue",
+                "2020",
+                ["Sector"],
+                ["Vertical"],
+                ["Investor profiles"],
+                ["Growth Profile"],
+                ["size"],
+                "growth",
             )
         )
 
@@ -66,7 +82,15 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_metric_avg_by_scenario(
-                    "Budget", "Revenue", "2020", "Maths", "Science", "growth"
+                    "Budget",
+                    "Revenue",
+                    "2020",
+                    ["Sector"],
+                    ["Vertical"],
+                    ["Investor profiles"],
+                    ["Growth Profile"],
+                    ["size"],
+                    "growth",
                 )
             )
 
@@ -80,7 +104,12 @@ class TestUniverseOverview(TestCase):
 
         get_companies_kpi_average_out = (
             self.overview_service_instance.get_companies_kpi_average(
-                "2021", "Semiconductors", "Transportation"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2021",
             )
         )
 
@@ -92,7 +121,12 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_companies_kpi_average(
-                    "2021", "Semiconductors", "Transportation"
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2021",
                 )
             )
 
@@ -107,7 +141,11 @@ class TestUniverseOverview(TestCase):
 
         get_companies_count_by_size_out = (
             self.overview_service_instance.get_companies_count_by_size(
-                "Sector test", "Vertical test"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
             )
         )
 
@@ -119,7 +157,9 @@ class TestUniverseOverview(TestCase):
         self.mock_response_list_query_sql([self.size_cohort])
 
         get_companies_count_by_size_out = (
-            self.overview_service_instance.get_companies_count_by_size("", "")
+            self.overview_service_instance.get_companies_count_by_size(
+                [], [], [], [], []
+            )
         )
 
         self.assertEqual(get_companies_count_by_size_out, [self.size_cohort])
@@ -131,7 +171,11 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_companies_count_by_size(
-                    "Sector test", "Vertical test"
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
                 )
             )
 
@@ -144,7 +188,15 @@ class TestUniverseOverview(TestCase):
 
         get_metric_avg_by_size_cohort_out = (
             self.overview_service_instance.get_metric_avg_by_size_cohort(
-                "Budget", "Revenue", "", "", "2020", "count"
+                "Budget",
+                "Revenue",
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                "Ebitda",
             )
         )
 
@@ -154,7 +206,15 @@ class TestUniverseOverview(TestCase):
     def test_get_metric_avg_by_size_cohort_without_valid_metric_and_scenario(self):
         get_metric_avg_by_size_cohort_out = (
             self.overview_service_instance.get_metric_avg_by_size_cohort(
-                "", "", "", "", "2020", "count"
+                "",
+                "",
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                "Ebitda",
             )
         )
 
@@ -166,7 +226,15 @@ class TestUniverseOverview(TestCase):
 
         get_metric_avg_by_size_cohort_out = (
             self.overview_service_instance.get_metric_avg_by_size_cohort(
-                "Budget", "Revenue", "Science", "Maths", "2020", "count"
+                "Budget",
+                "Revenue",
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                "Ebitda",
             )
         )
 
@@ -178,7 +246,15 @@ class TestUniverseOverview(TestCase):
 
         get_metric_avg_by_size_cohort_out = (
             self.overview_service_instance.get_metric_avg_by_size_cohort(
-                "Budget", "Revenue", "Science", "Maths", "2020", "count"
+                "Budget",
+                "Revenue",
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                "Ebitda",
             )
         )
 
@@ -190,7 +266,15 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_metric_avg_by_size_cohort(
-                    "Budget", "Revenue", "Science", "Maths", "2020", "count"
+                    "Budget",
+                    "Revenue",
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
+                    "Ebitda",
                 )
             )
 
@@ -207,7 +291,13 @@ class TestUniverseOverview(TestCase):
 
         get_scenarios_pair_by_size_cohort_out = (
             self.overview_service_instance.get_scenarios_pair_by_size_cohort(
-                self.scenarios, "Sector", "Vertical", "2020"
+                self.scenarios,
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -221,7 +311,13 @@ class TestUniverseOverview(TestCase):
 
         get_scenarios_pair_by_size_cohort_out = (
             self.overview_service_instance.get_scenarios_pair_by_size_cohort(
-                self.scenarios, "Sector", "Vertical", "2020"
+                self.scenarios,
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -234,7 +330,13 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_scenarios_pair_by_size_cohort(
-                    self.scenarios, "Sector", "Vertical", "2020"
+                    self.scenarios,
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
                 )
             )
 
@@ -251,7 +353,13 @@ class TestUniverseOverview(TestCase):
 
         get_growth_and_margin_by_size_cohort_out = (
             self.overview_service_instance.get_growth_and_margin_by_size_cohort(
-                "Sector", "Vertical", "2020"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                True,
             )
         )
 
@@ -268,7 +376,13 @@ class TestUniverseOverview(TestCase):
 
         get_growth_and_margin_by_size_cohort_out = (
             self.overview_service_instance.get_growth_and_margin_by_size_cohort(
-                "Sector", "Vertical", "2020", False
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
+                False,
             )
         )
 
@@ -281,7 +395,13 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_growth_and_margin_by_size_cohort(
-                    "Sector", "Vertical", "2020"
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
+                    True,
                 )
             )
 
@@ -299,7 +419,12 @@ class TestUniverseOverview(TestCase):
 
         get_revenue_and_ebitda_by_size_cohort_out = (
             self.overview_service_instance.get_revenue_and_ebitda_by_size_cohort(
-                "Sector", "Vertical", "2020"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -313,7 +438,12 @@ class TestUniverseOverview(TestCase):
 
         get_revenue_and_ebitda_by_size_cohort_out = (
             self.overview_service_instance.get_revenue_and_ebitda_by_size_cohort(
-                "Sector", "Vertical", "2020"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -326,7 +456,12 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_revenue_and_ebitda_by_size_cohort(
-                    "Sector", "Vertical", "2020"
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
                 )
             )
 
@@ -339,7 +474,12 @@ class TestUniverseOverview(TestCase):
         self.mock_response_list_query_sql(expected_out)
 
         get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            "Test", "Test", "2020"
+            ["Semiconductors"],
+            ["Transportation"],
+            ["Investor"],
+            ["Growth"],
+            ["Size", "Size2"],
+            "2020",
         )
 
         self.assertEqual(get_rule_of_40_out, expected_out)
@@ -349,7 +489,7 @@ class TestUniverseOverview(TestCase):
         self.mock_response_list_query_sql([])
 
         get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            "", "", "2020"
+            [], [], [], [], [], "2020"
         )
 
         self.assertEqual(get_rule_of_40_out, [])
@@ -359,7 +499,15 @@ class TestUniverseOverview(TestCase):
         self.overview_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.overview_service_instance.get_rule_of_40("", "", "2020")
+                self.overview_service_instance.get_rule_of_40(
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
+                    True,
+                )
             )
 
             self.assertTrue("error" in context.exception)
@@ -377,7 +525,12 @@ class TestUniverseOverview(TestCase):
 
         get_universe_overview_out = (
             self.overview_service_instance.get_universe_overview(
-                "Sector", "Vertical", "2020"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -400,7 +553,12 @@ class TestUniverseOverview(TestCase):
 
         get_universe_overview_out = (
             self.overview_service_instance.get_universe_overview(
-                "Sector", "Vertical", "2020"
+                ["Semiconductors"],
+                ["Transportation"],
+                ["Investor"],
+                ["Growth"],
+                ["Size", "Size2"],
+                "2020",
             )
         )
 
@@ -422,10 +580,34 @@ class TestUniverseOverview(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_universe_overview(
-                    "Sector", "Vertical", "2020"
+                    ["Semiconductors"],
+                    ["Transportation"],
+                    ["Investor"],
+                    ["Growth"],
+                    ["Size", "Size2"],
+                    "2020",
                 )
             )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.overview_service_instance.session.execute.assert_called_once()
+
+    def test_add_company_filters(self):
+        expected_result = {
+            "company.vertical": ["'Banking'"],
+            "company.sector": ["'Application software'"],
+        }
+
+        result = self.overview_service_instance.add_company_filters(
+            vertical=["Banking"], sector=["Application software"]
+        )
+
+        self.assertEqual(expected_result, result)
+
+    def test_add_company_filters_with_empty_response(self):
+        expected_result = {}
+
+        result = self.overview_service_instance.add_company_filters()
+
+        self.assertEqual(expected_result, result)

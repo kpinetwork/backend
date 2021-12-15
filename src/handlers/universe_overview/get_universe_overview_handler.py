@@ -17,17 +17,23 @@ overview_service = UniverseOverviewService(session, query_builder, logger, respo
 
 def handler(event, context):
     try:
-        sector = ""
-        vertical = ""
+        sectors = []
+        verticals = []
+        investor_profile = []
+        growth_profile = []
+        size = []
         year = datetime.datetime.today().year
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            sector = params.get("sector", sector)
-            vertical = params.get("vertical", vertical)
+            sectors = params.get("sector", sectors)
+            verticals = params.get("vertical", verticals)
+            investor_profile = params.get("investor_profile", investor_profile)
+            growth_profile = params.get("growth_profile", growth_profile)
+            size = params.get("size", size)
             year = params.get("year", year)
 
         growth_and_margin = overview_service.get_universe_overview(
-            sector, vertical, year
+            sectors, verticals, investor_profile, growth_profile, size, year
         )
 
         return {

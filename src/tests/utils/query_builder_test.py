@@ -199,6 +199,15 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(result, expected_condition)
 
+    def test__build_where_with_condition_if_value_is_a_list(self):
+        conditions = {"name": ["test"]}
+        query_builder = QuerySQLBuilder().add_sql_where_equal_condition(conditions)
+
+        expected_condition = "WHERE name = test"
+        result = query_builder._QuerySQLBuilder__build_where()
+
+        self.assertEqual(result, expected_condition)
+
     def test__build_where_without_condition(self):
         query_builder = QuerySQLBuilder()
         expected_condition = ""

@@ -84,11 +84,18 @@ class QuerySQLBuilder:
             raise error
 
     def add_sql_where_equal_condition(self, conditions: dict = None):
+        def add_condition(argument: str, value: str):
+            if self.__is_valid_name(value):
+                condition = f"{argument} = {value}"
+                self.where_conditions.append(condition)
+
         if conditions:
             for k, v in conditions.items():
-                if self.__is_valid_name(v):
-                    condition = f"{k} = {v}"
-                    self.where_conditions.append(condition)
+                if isinstance(v, list):
+                    for element in v:
+                        add_condition(k, element)
+                else:
+                    add_condition(k, v)
         return self
 
     def add_sql_group_by_condition(self, columns: list):
