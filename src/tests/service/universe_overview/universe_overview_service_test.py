@@ -470,6 +470,15 @@ class TestUniverseOverview(TestCase):
             self.overview_service_instance.session.execute.assert_called_once()
 
     def test_get_rule_of_40_success(self):
+        expected_out = [
+            {
+                "company_id": "da610d0a-e1ff-4653-a07f-27f7c99b6a3f",
+                "name": "SEVCON, INC.",
+                "revenue_growth_rate": "129",
+                "ebitda_margin": "-15",
+                "revenue": "60",
+            }
+        ]
         expected_out = []
         self.mock_response_list_query_sql(expected_out)
 
@@ -489,7 +498,12 @@ class TestUniverseOverview(TestCase):
         self.mock_response_list_query_sql([])
 
         get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            [], [], [], [], [], "2020"
+            ["Semiconductors"],
+            ["Transportation"],
+            ["Investor"],
+            ["Growth"],
+            ["Size", "Size2"],
+            "2020",
         )
 
         self.assertEqual(get_rule_of_40_out, [])
@@ -506,7 +520,6 @@ class TestUniverseOverview(TestCase):
                     ["Growth"],
                     ["Size", "Size2"],
                     "2020",
-                    True,
                 )
             )
 

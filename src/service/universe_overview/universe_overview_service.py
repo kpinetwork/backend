@@ -33,7 +33,6 @@ class UniverseOverviewService:
                 f"{self.scenario_table}.name": f"'{scenario_type}-{year}'",
                 f"{self.metric_table}.name": f"'{metric}'",
             }
-
             filters = self.add_company_filters(
                 sector=sectors,
                 vertical=verticals,
@@ -154,7 +153,6 @@ class UniverseOverviewService:
                 .build()
                 .get_query()
             )
-
             results = self.session.execute(query).fetchall()
             self.session.commit()
             return self.response_sql.process_query_list_results(results)
@@ -359,7 +357,7 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
-    ) -> dict:
+    ) -> list:
         def get_case_statement(scenario: str, metric: str, alias: str) -> str:
             return """
                 SUM(
@@ -433,7 +431,6 @@ class UniverseOverviewService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-
             return self.response_sql.process_query_list_results(results)
         except Exception as error:
             self.logger.info(error)
