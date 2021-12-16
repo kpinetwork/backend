@@ -9,7 +9,8 @@ class QuerySQLBuilder:
         self.table_name = ""
         self.select_conditions = []
         self.join_clauses = []
-        self.where_conditions = []
+        self.where_conditions_conj = []
+        self.where_conditions_disj = []
         self.limit = None
         self.offset = None
         self.group_by = []
@@ -86,9 +87,20 @@ class QuerySQLBuilder:
     def add_sql_where_equal_condition(self, conditions: dict = None):
         if conditions:
             for k, v in conditions.items():
-                if self.__is_valid_name(v):
-                    condition = f"{k} = {v}"
-                    self.where_conditions.append(condition)
+                if isinstance(v, list):
+                    values = [
+                        element
+                        for element in v
+                        if self.__is_valid_name(element) and len(v) > 0
+                    ]
+                    if values:
+                        joined_values = "(" + ", ".join(values) + ")"
+                        condition = f"{k} IN {joined_values}"
+                        self.where_conditions_disj.append(condition)
+                else:
+                    if self.__is_valid_name(v):
+                        condition = f"{k} = {v}"
+                        self.where_conditions_conj.append(condition)
         return self
 
     def add_sql_group_by_condition(self, columns: list):
@@ -125,10 +137,15 @@ class QuerySQLBuilder:
         return """ """.join(self.join_clauses)
 
     def __build_where(self):
-        if len(self.where_conditions) > 0:
-            return "WHERE " + " AND ".join(self.where_conditions)
-        else:
-            return ""
+        where_query = ""
+        if len(self.where_conditions_conj) > 0:
+            where_query += "WHERE " + " AND ".join(self.where_conditions_conj)
+            if len(self.where_conditions_disj) > 0:
+                where_query += " AND " + " AND ".join(self.where_conditions_disj)
+        if not len(self.where_conditions_conj):
+            if len(self.where_conditions_disj) > 0:
+                where_query += "WHERE " + " AND ".join(self.where_conditions_disj)
+        return where_query
 
     def __build_group_by(self):
         if len(self.group_by) > 0:
@@ -181,7 +198,8 @@ class QuerySQLBuilder:
         self.query = ""
         self.table_name = ""
         self.select_conditions = []
-        self.where_conditions = []
+        self.where_conditions_conj = []
+        self.where_conditions_disj = []
         self.order_by = None
         self.group_by = []
         self.limit = None

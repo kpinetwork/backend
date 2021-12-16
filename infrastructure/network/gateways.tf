@@ -313,6 +313,9 @@ resource "aws_api_gateway_method" "get_universe_overview_method" {
   request_parameters = {
     "method.request.querystring.vertical" = false
     "method.request.querystring.sector" = false
+    "method.request.querystring.investor_profile" = false
+    "method.request.querystring.growth_profile" = false
+    "method.request.querystring.size" = false
     "method.request.querystring.year" = false
   }
 }

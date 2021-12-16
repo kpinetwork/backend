@@ -107,14 +107,33 @@ class TestQueryBuilder(TestCase):
 
         expected_where_condition = "name = test"
 
-        self.assertEqual(len(query_builder.where_conditions), len(conditions))
-        self.assertEqual(query_builder.where_conditions, [expected_where_condition])
+        self.assertEqual(len(query_builder.where_conditions_conj), len(conditions))
+        self.assertEqual(
+            query_builder.where_conditions_conj, [expected_where_condition]
+        )
 
     def test_add_sql_where_equal_condition_with_None_dict(self):
         query_builder = QuerySQLBuilder().add_sql_where_equal_condition(None)
 
-        self.assertEqual(len(query_builder.where_conditions), 0)
-        self.assertEqual(query_builder.where_conditions, [])
+        self.assertEqual(len(query_builder.where_conditions_conj), 0)
+        self.assertEqual(query_builder.where_conditions_conj, [])
+
+    def test_add_sql_where_in_condition_with_valid_dict(self):
+        conditions = {"name": ["test"]}
+        query_builder = QuerySQLBuilder().add_sql_where_equal_condition(conditions)
+
+        expected_where_condition = "name IN (test)"
+
+        self.assertEqual(len(query_builder.where_conditions_disj), len(conditions))
+        self.assertEqual(
+            query_builder.where_conditions_disj, [expected_where_condition]
+        )
+
+    def test_add_sql_where_in_condition_with_None_dict(self):
+        query_builder = QuerySQLBuilder().add_sql_where_equal_condition(None)
+
+        self.assertEqual(len(query_builder.where_conditions_disj), 0)
+        self.assertEqual(query_builder.where_conditions_disj, [])
 
     def test_add_sql_group_by_condition_with_valid_columns_name(self):
         columns = [f"{self.table_name}.name"]
@@ -195,6 +214,15 @@ class TestQueryBuilder(TestCase):
         query_builder = QuerySQLBuilder().add_sql_where_equal_condition(conditions)
 
         expected_condition = "WHERE name = test"
+        result = query_builder._QuerySQLBuilder__build_where()
+
+        self.assertEqual(result, expected_condition)
+
+    def test__build_where_with_condition_if_value_is_a_list(self):
+        conditions = {"name": ["test"]}
+        query_builder = QuerySQLBuilder().add_sql_where_equal_condition(conditions)
+
+        expected_condition = "WHERE name IN (test)"
         result = query_builder._QuerySQLBuilder__build_where()
 
         self.assertEqual(result, expected_condition)
@@ -290,7 +318,8 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(query_builder.table_name, "")
         self.assertEqual(query_builder.select_conditions, [])
-        self.assertEqual(query_builder.where_conditions, [])
+        self.assertEqual(query_builder.where_conditions_conj, [])
+        self.assertEqual(query_builder.where_conditions_disj, [])
         self.assertIsNone(query_builder.limit)
         self.assertIsNone(query_builder.offset)
 
@@ -299,13 +328,16 @@ class TestQueryBuilder(TestCase):
             QuerySQLBuilder()
             .add_table_name(self.table_name)
             .add_select_conditions(["name"])
-            .add_sql_where_equal_condition({"name": "'test'"})
+            .add_sql_where_equal_condition(
+                {"name": "'test'", "name2": ["'test1'", "'test2'"]}
+            )
             .add_sql_offset_condition(2)
             .add_sql_limit_condition(10)
             .build()
         )
 
-        self.assertTrue(len(query_builder.where_conditions) > 0)
+        self.assertTrue(len(query_builder.where_conditions_conj) > 0)
+        self.assertTrue(len(query_builder.where_conditions_disj) > 0)
         self.assertTrue(len(query_builder.select_conditions) > 0)
 
     def test_get_query(self):
