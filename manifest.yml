@@ -150,6 +150,15 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  get_company_report_vs_peers_handler:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company_report_vs_peers/get_company_report_vs_peers_handler.py
+    - ./src/service/company_report_vs_peers/company_report_vs_peers.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py  
+
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

@@ -135,6 +135,18 @@ resource "aws_api_gateway_resource" "universe_overview" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "company_report_vs_peers" {
+  path_part   = "company_report"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "company_report_vs_peers_id" {
+  path_part   = "{company_id}"
+  parent_id   = aws_api_gateway_resource.company_report_vs_peers.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -320,6 +332,22 @@ resource "aws_api_gateway_method" "get_universe_overview_method" {
   }
 }
 
+resource "aws_api_gateway_method" "get_company_report_vs_peers_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.company_report_vs_peers_id.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.vertical" = false
+    "method.request.querystring.sector" = false
+    "method.request.querystring.investor_profile" = false
+    "method.request.querystring.growth_profile" = false
+    "method.request.querystring.size" = false
+    "method.request.querystring.year" = false
+  }
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
 # Provides an HTTP Method Integration for an API Gateway Integration.
@@ -473,6 +501,15 @@ resource "aws_api_gateway_integration" "universe_overview_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_universe_overview_lambda_function
+}
+
+resource "aws_api_gateway_integration" "company_report_vs_peers_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.company_report_vs_peers_id.id
+  http_method             = aws_api_gateway_method.get_company_report_vs_peers_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_company_report_vs_peers_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
