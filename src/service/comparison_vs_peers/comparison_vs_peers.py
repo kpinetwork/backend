@@ -87,63 +87,65 @@ class ComparisonvsPeersService:
         company_id: str,
     ) -> dict:
         try:
-            financial_scenarios = dict()
-            metrics = [
-                {"scenario": "Actuals", "metric": "Revenue", "alias": "revenue"},
-                {"scenario": "Actuals", "metric": "Ebitda", "alias": "growth"},
-                {
-                    "scenario": "Budgeted margin",
-                    "metric": "Ebitda",
-                    "alias": "ebitda_margin",
-                },
-                {
-                    "scenario": "Actual vs budget",
-                    "metric": "Revenue",
-                    "alias": "revenue_vs_budget",
-                },
-                {
-                    "scenario": "Actual vs budget",
-                    "metric": "Ebitda",
-                    "alias": "ebitda_vs_budget",
-                },
-                {
-                    "scenario": "Actuals",
-                    "metric": "Rule of 40",
-                    "alias": "rule_of_40",
-                },
-            ]
-            for metric in metrics:
-                metric_average = self.get_most_recent_metric_by_scenario(
-                    company_id,
-                    metric.get("scenario"),
-                    metric.get("metric"),
-                    metric.get("alias"),
-                )
+            if company_id and company_id.strip():
+                financial_scenarios = dict()
+                metrics = [
+                    {"scenario": "Actuals", "metric": "Revenue", "alias": "revenue"},
+                    {"scenario": "Actuals", "metric": "Ebitda", "alias": "growth"},
+                    {
+                        "scenario": "Actual margin",
+                        "metric": "Ebitda",
+                        "alias": "ebitda_margin",
+                    },
+                    {
+                        "scenario": "Actual vs budget",
+                        "metric": "Revenue",
+                        "alias": "revenue_vs_budget",
+                    },
+                    {
+                        "scenario": "Actual vs budget",
+                        "metric": "Ebitda",
+                        "alias": "ebitda_vs_budget",
+                    },
+                    {
+                        "scenario": "Actuals",
+                        "metric": "Rule of 40",
+                        "alias": "rule_of_40",
+                    },
+                ]
+                for metric in metrics:
+                    metric_average = self.get_most_recent_metric_by_scenario(
+                        company_id,
+                        metric.get("scenario"),
+                        metric.get("metric"),
+                        metric.get("alias"),
+                    )
 
-                if metric_average:
-                    financial_scenarios.update(metric_average)
+                    if metric_average:
+                        financial_scenarios.update(metric_average)
 
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(
-                    [
-                        f"{self.company_table}.name",
-                        f"{self.company_table}.sector",
-                        f"{self.company_table}.vertical",
-                    ]
+                query = (
+                    self.query_builder.add_table_name(self.company_table)
+                    .add_select_conditions(
+                        [
+                            f"{self.company_table}.id",
+                            f"{self.company_table}.name",
+                            f"{self.company_table}.sector",
+                            f"{self.company_table}.vertical",
+                        ]
+                    )
+                    .add_sql_where_equal_condition(
+                        {f"{self.company_table}.id": f"'{company_id}'"}
+                    )
+                    .build()
+                    .get_query()
                 )
-                .add_sql_where_equal_condition(
-                    {f"{self.company_table}.id": f"'{company_id}'"}
-                )
-                .build()
-                .get_query()
-            )
-            result = self.session.execute(query).fetchall()
-            response = self.response_sql.process_query_result(result)
-            response.update(financial_scenarios)
-            self.session.commit()
-            return response
-
+                result = self.session.execute(query).fetchall()
+                response = self.response_sql.process_query_result(result)
+                response.update(financial_scenarios)
+                self.session.commit()
+                return response
+            return dict()
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -200,6 +202,7 @@ class ComparisonvsPeersService:
         try:
 
             metrics = [
+                {"scenario": "Actuals", "metric": "Revenue", "alias": "revenue"},
                 {"scenario": "Actuals", "metric": "Ebitda", "alias": "growth"},
                 {
                     "scenario": "Budgeted margin",
@@ -229,12 +232,7 @@ class ComparisonvsPeersService:
             peers_data = []
             for peer in peers:
                 if peer.get("id") != company_id:
-                    peer_data = {
-                        "name": peer.get("name", ""),
-                        "sector": peer.get("sector", ""),
-                        "vertical": peer.get("vertical", ""),
-                        "revenue": peer.get("size_cohort", ""),
-                    }
+                    peer_data = peer.copy()
                     for metric in metrics:
                         metric_average = self.get_most_recent_metric_by_scenario(
                             peer.get("id"),
@@ -251,6 +249,28 @@ class ComparisonvsPeersService:
             self.logger.info(error)
             raise error
 
+    def get_rank(self, company_data: dict, peer_data: list):
+        no_metrics = ["id", "name", "sector", "vertical", "size_cohort"]
+
+        data = []
+        data.extend(peer_data)
+        data.append(company_data.copy())
+        rank = dict()
+
+        for key in company_data.keys():
+            if key not in no_metrics:
+                metric_order = sorted(
+                    data, key=lambda company: company.get(key), reverse=True
+                )
+                index = (
+                    metric_order.index(company_data) + 1
+                    if company_data in metric_order
+                    else -1
+                )
+                rank[key] = f"{index} of {len(metric_order)}"
+
+        return rank
+
     def get_comparison_vs_peers(
         self,
         company_id: str,
@@ -266,9 +286,14 @@ class ComparisonvsPeersService:
             peers_comparison_data = self.get_peers_comparison_data(
                 company_id, sectors, verticals, investor_profile, growth_profile, size
             )
+            rank = self.get_rank(company_comparison_data, peers_comparison_data)
+
+            for company in peers_comparison_data:
+                company["revenue"] = company.pop("size_cohort", "")
 
             return {
                 "company_comparison_data": company_comparison_data,
+                "rank": rank,
                 "peers_comparison_data": peers_comparison_data,
             }
         except Exception as error:
