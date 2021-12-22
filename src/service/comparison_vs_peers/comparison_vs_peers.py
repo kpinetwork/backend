@@ -282,10 +282,27 @@ class ComparisonvsPeersService:
         year: str,
     ) -> dict:
         try:
+
+            def is_valid_sector(data: dict) -> bool:
+                if data:
+                    sector = data.get("sector")
+                    return sector and sector in sectors
+                return False
+
+            peers_comparison_data = []
             company_comparison_data = self.get_company_comparison_data(company_id)
-            peers_comparison_data = self.get_peers_comparison_data(
-                company_id, sectors, verticals, investor_profile, growth_profile, size
-            )
+
+            if is_valid_sector(company_comparison_data):
+                sectors.append(company_comparison_data.get("sector"))
+            if company_comparison_data:
+                peers_comparison_data = self.get_peers_comparison_data(
+                    company_id,
+                    sectors,
+                    verticals,
+                    investor_profile,
+                    growth_profile,
+                    size,
+                )
             rank = self.get_rank(company_comparison_data, peers_comparison_data)
 
             for company in peers_comparison_data:

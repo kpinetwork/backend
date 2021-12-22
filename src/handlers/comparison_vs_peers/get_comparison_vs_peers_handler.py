@@ -17,34 +17,38 @@ comparison_vs_peers_service = ComparisonvsPeersService(
 )
 
 
+def get_param(param: str) -> list:
+    if param and param.strip() and len(param.strip()) > 1:
+        return param.split(",")
+    return []
+
+
 def handler(event, context):
     try:
         company_id = event.get("pathParameters").get("company_id")
-        sectors = ""
-        verticals = ""
-        investor_profile = ""
-        growth_profile = ""
-        size = ""
+        sectors = []
+        verticals = []
+        investor_profile = []
+        growth_profile = []
+        size = []
         year = datetime.datetime.today().year
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            sectors = params.get("sector", sectors).split(",")
-            verticals = params.get("vertical", verticals).split(",")
-            investor_profile = params.get("investor_profile", investor_profile).split(
-                ","
-            )
-            growth_profile = params.get("growth_profile", growth_profile).split(",")
-            size = params.get("size", size).split(",")
+            sectors = get_param(params.get("sector"))
+            verticals = get_param(params.get("vertical"))
+            investor_profile = get_param(params.get("investor_profile"))
+            growth_profile = get_param(params.get("growth_profile"))
+            size = get_param(params.get("size"))
             year = params.get("year", year)
 
-        growth_and_margin = comparison_vs_peers_service.get_comparison_vs_peers(
+        comparison_peers = comparison_vs_peers_service.get_comparison_vs_peers(
             company_id, sectors, verticals, investor_profile, growth_profile, size, year
         )
 
         return {
             "statusCode": 200,
-            "body": json.dumps(growth_and_margin, default=str),
+            "body": json.dumps(comparison_peers, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
