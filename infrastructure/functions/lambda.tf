@@ -540,6 +540,7 @@ resource "aws_lambda_function" "get_comparison_vs_peers_lambda_function" {
   s3_key = var.object_bucket_references.get_comparison_vs_peers_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_comparison_vs_peers_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_comparison_vs_peers_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
