@@ -17,19 +17,20 @@ class TestComparisonvsPeers(TestCase):
         ]
         self.metric_value = {"growth": 15}
         self.company = {
-            "id": "id",
+            "id": "1",
             "name": "Company",
             "sector": "Science",
             "vertical": "Maths",
             "size_cohort": "100+",
+            "growth": 17,
         }
         self.comparison = {
-            "id": "id",
+            "id": "2",
             "name": "Test",
             "sector": "Science",
             "vertical": "Maths",
             "size_cohort": "100+",
-            "growth": 17,
+            "growth": 34,
         }
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
@@ -47,114 +48,70 @@ class TestComparisonvsPeers(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_most_recent_metric_by_scenario_with_valid_metric_and_scenario(self):
-        self.mock_response_query_sql(self.metric_value)
+    def mock_proccess_comparison_results(self, response):
+        attrs = {"proccess_comparison_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
 
-        get_most_recent_metric_by_scenario_out = (
-            self.comparison_service_instance.get_most_recent_metric_by_scenario(
-                "1",
-                "Actuals",
-                "Revenue",
-                "growth",
-            )
+    def test_add_company_filters_with_data(self):
+        expected_out = {"company.sector": ["'Application'"]}
+
+        filters_out = self.comparison_service_instance.add_company_filters(
+            sector=["Application"]
         )
 
-        self.assertEqual(get_most_recent_metric_by_scenario_out, self.metric_value)
+        self.assertEqual(filters_out, expected_out)
+
+    def test_remove_revenue(self):
+        data = {"size_cohort": "100+", "revenue": 34}
+        expected_out = {"revenue": "100+"}
+
+        self.comparison_service_instance.remove_revenue([data])
+
+        self.assertEqual([data], [expected_out])
+
+    def test_get_company_success(self):
+        expected_out = {"sector": "Test"}
+        self.mock_response_query_sql(expected_out)
+
+        get_company_out = self.comparison_service_instance.get_company("id")
+
+        self.assertEqual(get_company_out, expected_out)
         self.comparison_service_instance.session.execute.assert_called_once()
 
-    def test_get_most_recent_metric_by_scenario_with_empty_response(self):
-        self.mock_response_query_sql(dict())
-
-        get_most_recent_metric_by_scenario_out = (
-            self.comparison_service_instance.get_most_recent_metric_by_scenario(
-                "1",
-                "Actuals",
-                "Revenue",
-                "growth",
-            )
-        )
-
-        self.assertEqual(get_most_recent_metric_by_scenario_out, dict())
-        self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_most_recent_metric_by_scenario_failed(self):
+    def test_get_company_failed(self):
         self.comparison_service_instance.session.execute.side_effect = Exception(
             "error"
         )
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.comparison_service_instance.get_most_recent_metric_by_scenario(
-                    "1",
-                    "Actuals",
-                    "Revenue",
-                    "growth",
-                )
+                self.comparison_service_instance.get_company("1")
             )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.comparison_service_instance.session.execute.assert_called_once()
 
-    def test_get_company_comparison_data_success(self):
-        self.mock_response_list_query_sql([self.metric_value])
-        self.mock_response_query_sql(self.metric_value)
-
-        get_company_comparison_data_out = (
-            self.comparison_service_instance.get_company_comparison_data("id")
-        )
-
-        self.assertEqual(get_company_comparison_data_out, self.metric_value)
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 7)
-
-    def test_get_company_comparison_data_with_empty_company_id(self):
-        get_company_comparison_data_out = (
-            self.comparison_service_instance.get_company_comparison_data("")
-        )
-
-        self.assertEqual(get_company_comparison_data_out, dict())
-        self.comparison_service_instance.session.execute.assert_not_called()
-
-    def test_get_company_comparison_data_failed(self):
-        self.comparison_service_instance.session.execute.side_effect = Exception(
-            "error"
-        )
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.comparison_service_instance.get_company_comparison_data("id")
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_with_full_data(self):
+    def test_get_peers_comparison_metric_success(self):
         self.mock_response_list_query_sql([self.company])
 
-        get_peers_out = self.comparison_service_instance.get_peers(
-            ["Science"], ["Maths"], ["Family office"], ["Negative"], ["100+"]
+        get_peers_comparison_metric_out = (
+            self.comparison_service_instance.get_peers_comparison_metric(
+                {"metric": "growth", "scenario": "Actuals", "alias": "growth"}, {}
+            )
         )
 
-        self.assertEqual(get_peers_out, [self.company])
+        self.assertEqual(get_peers_comparison_metric_out, [self.company])
         self.comparison_service_instance.session.execute.assert_called_once()
 
-    def test_get_peers_with_empty_response(self):
-        self.mock_response_list_query_sql([])
-
-        get_peers_out = self.comparison_service_instance.get_peers(
-            ["Science"], ["Maths"], ["Family office"], ["Negative"], ["100+"]
-        )
-
-        self.assertEqual(get_peers_out, [])
-        self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_failed(self):
+    def test_get_peers_comparison_metric_failed(self):
         self.comparison_service_instance.session.execute.side_effect = Exception(
             "error"
         )
+
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.comparison_service_instance.get_peers(
-                    ["Science"], ["Maths"], ["Family office"], ["Negative"], ["100+"]
+                self.comparison_service_instance.get_peers_comparison_metric(
+                    {"metric": "growth", "scenario": "Actuals", "alias": "growth"}, {}
                 )
             )
 
@@ -163,38 +120,40 @@ class TestComparisonvsPeers(TestCase):
             self.comparison_service_instance.session.execute.assert_called_once()
 
     def test_get_peers_comparison_data_success(self):
-        company_data = self.company.copy()
-        company_data.update(self.metric_value)
-        self.mock_response_list_query_sql([company_data])
-        self.mock_response_query_sql(self.metric_value)
+        self.mock_response_list_query_sql([self.company])
+        self.mock_proccess_comparison_results({"1": self.company})
 
         get_peers_comparison_data_out = (
             self.comparison_service_instance.get_peers_comparison_data(
-                "id 2",
-                ["Science"],
-                ["Maths"],
-                ["Family office"],
-                ["Negative"],
-                ["100+"],
+                "1", [], [], [], [], []
             )
         )
 
-        self.assertEqual(get_peers_comparison_data_out, [company_data])
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 7)
+        self.assertEqual(get_peers_comparison_data_out, {"1": self.company})
+        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
+
+    def test_get_peers_comparison_data_with_empty_company_id(self):
+        self.mock_response_list_query_sql([])
+        self.mock_proccess_comparison_results(dict())
+
+        get_peers_comparison_data_out = (
+            self.comparison_service_instance.get_peers_comparison_data(
+                " ", [], [], [], [], []
+            )
+        )
+
+        self.assertEqual(get_peers_comparison_data_out, dict())
+        self.comparison_service_instance.session.execute.assert_not_called()
 
     def test_get_peers_comparison_data_failed(self):
         self.comparison_service_instance.session.execute.side_effect = Exception(
             "error"
         )
+
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.comparison_service_instance.get_peers_comparison_data(
-                    "id",
-                    ["Science"],
-                    ["Maths"],
-                    ["Family office"],
-                    ["Negative"],
-                    ["100+"],
+                    "1", [], [], [], [], []
                 )
             )
 
@@ -220,56 +179,48 @@ class TestComparisonvsPeers(TestCase):
 
         self.assertEqual(get_rank_out, dict())
 
-    def test_get_rank_success_with_empty_peer_data(self):
-        company_data = self.company.copy()
-        company_data.update(self.metric_value)
-        expected_out = {"growth": "1 of 1"}
+    def test_get_peers_comparison_success(self):
+        self.mock_response_query_sql(self.company)
+        self.mock_response_list_query_sql([self.company, self.comparison])
+        self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
 
-        get_rank_out = self.comparison_service_instance.get_rank(company_data, [])
-
-        self.assertEqual(get_rank_out, expected_out)
-
-    def test_get_comparison_vs_peers_success(self):
-        company_data = self.company.copy()
-        company_data.update(self.metric_value)
-        self.mock_response_list_query_sql([company_data])
-        self.mock_response_query_sql(self.metric_value)
-
+        peers = self.comparison.copy()
+        peers["revenue"] = peers.pop("size_cohort")
         expected_out = {
-            "company_comparison_data": self.metric_value,
+            "company_comparison_data": self.company,
             "rank": {"growth": "2 of 2"},
-            "peers_comparison_data": [company_data],
+            "peers_comparison_data": [peers],
         }
-
-        get_comparison_vs_peers__out = (
-            self.comparison_service_instance.get_comparison_vs_peers(
-                "id",
-                ["Science"],
-                ["Maths"],
-                ["Family office"],
-                ["Negative"],
-                ["100+"],
-                "2021",
+        get_peers_comparison_out = (
+            self.comparison_service_instance.get_peers_comparison(
+                "1", [], [], [], [], []
             )
         )
 
-        self.assertEqual(get_comparison_vs_peers__out, expected_out)
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 8)
+        self.assertEqual(get_peers_comparison_out, expected_out)
+        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 7)
 
-    def test_get_comparison_vs_peers_failed(self):
+    def test_get_peers_comparison_success_with_no_company_data(self):
+        self.mock_response_query_sql(dict())
+
+        get_peers_comparison_out = (
+            self.comparison_service_instance.get_peers_comparison(
+                "1", [], [], [], [], []
+            )
+        )
+
+        self.assertEqual(get_peers_comparison_out, dict())
+        self.comparison_service_instance.session.execute.assert_called_once()
+
+    def test_get_peers_comparison_failed(self):
         self.comparison_service_instance.session.execute.side_effect = Exception(
             "error"
         )
+
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.comparison_service_instance.get_comparison_vs_peers(
-                    "id",
-                    ["Science"],
-                    ["Maths"],
-                    ["Family office"],
-                    ["Negative"],
-                    ["100+"],
-                    "2021",
+                self.comparison_service_instance.get_peers_comparison(
+                    "1", [], [], [], [], []
                 )
             )
 

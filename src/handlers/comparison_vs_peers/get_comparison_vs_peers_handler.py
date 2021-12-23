@@ -1,6 +1,5 @@
 import json
 import logging
-import datetime
 from comparison_vs_peers import ComparisonvsPeersService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
@@ -31,7 +30,6 @@ def handler(event, context):
         investor_profile = []
         growth_profile = []
         size = []
-        year = datetime.datetime.today().year
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
@@ -40,10 +38,9 @@ def handler(event, context):
             investor_profile = get_param(params.get("investor_profile"))
             growth_profile = get_param(params.get("growth_profile"))
             size = get_param(params.get("size"))
-            year = params.get("year", year)
 
-        comparison_peers = comparison_vs_peers_service.get_comparison_vs_peers(
-            company_id, sectors, verticals, investor_profile, growth_profile, size, year
+        comparison_peers = comparison_vs_peers_service.get_peers_comparison(
+            company_id, sectors, verticals, investor_profile, growth_profile, size
         )
 
         return {

@@ -63,7 +63,7 @@ class MetricsService:
                     )
                     .add_sql_where_equal_condition(where_condition)
                     .add_sql_order_by_condition(
-                        "time_period.start_at", self.query_builder.Order.DESC
+                        ["time_period.start_at"], self.query_builder.Order.DESC
                     )
                     .build()
                     .get_query()
@@ -221,7 +221,7 @@ class MetricsService:
                         ]
                     )
                     .add_sql_order_by_condition(
-                        "time_period.start_at", self.query_builder.Order.ASC
+                        ["time_period.start_at"], self.query_builder.Order.ASC
                     )
                     .build()
                     .get_query()

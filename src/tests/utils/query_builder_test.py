@@ -186,9 +186,9 @@ class TestQueryBuilder(TestCase):
 
     def test_add_sql_order_by_condition(self):
         query_builder = QuerySQLBuilder()
-        query_builder.add_sql_order_by_condition("id", query_builder.Order.DESC)
+        query_builder.add_sql_order_by_condition(["id"], query_builder.Order.DESC)
 
-        expected_order_by = ("id", "DESC")
+        expected_order_by = (["id"], "DESC")
 
         self.assertEqual(query_builder.order_by, expected_order_by)
 
@@ -288,7 +288,7 @@ class TestQueryBuilder(TestCase):
 
     def test__build_order_by_with_value(self):
         query_builder = QuerySQLBuilder()
-        query_builder.add_sql_order_by_condition("id", query_builder.Order.DESC)
+        query_builder.add_sql_order_by_condition(["id"], query_builder.Order.DESC)
 
         expected_order_by_condition = "ORDER BY id DESC"
         result = query_builder._QuerySQLBuilder__build_order_by()
