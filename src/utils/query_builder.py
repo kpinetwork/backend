@@ -14,7 +14,7 @@ class QuerySQLBuilder:
         self.limit = None
         self.offset = None
         self.group_by = []
-        self.order_by = None
+        self.order_by: tuple[list, self.Order] = None
 
     class Order(Enum):
         DESC = "DESC"
@@ -124,8 +124,9 @@ class QuerySQLBuilder:
         else:
             raise Exception("No valid offset value")
 
-    def add_sql_order_by_condition(self, attribute: str, order: Order):
-        self.order_by = (attribute, order.name)
+    def add_sql_order_by_condition(self, attributes: list, order: Order):
+        if attributes:
+            self.order_by = (attributes, order.name)
         return self
 
     def __build_select(self):
@@ -168,8 +169,9 @@ class QuerySQLBuilder:
 
     def __build_order_by(self):
         if self.order_by:
-            attribute, order = self.order_by
-            return f"ORDER BY {attribute} {order}"
+            attributes, order = self.order_by
+            values = ",".join(attributes)
+            return f"ORDER BY {values} {order}"
         else:
             return ""
 

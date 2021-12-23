@@ -102,5 +102,11 @@ output "object_references" {
       key : aws_s3_bucket_object.get_company_report_vs_peers_function_object.key,
       bucket : aws_s3_bucket_object.get_company_report_vs_peers_function_object.bucket
     }
+
+    "get_comparison_vs_peers_function_bucket" : {
+      etag : aws_s3_bucket_object.get_comparison_vs_peers_function_object.etag,
+      key : aws_s3_bucket_object.get_comparison_vs_peers_function_object.key,
+      bucket : aws_s3_bucket_object.get_comparison_vs_peers_function_object.bucket
+    }
   }
 }

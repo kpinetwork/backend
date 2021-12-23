@@ -17,6 +17,7 @@ output "lambdas_invoke_arns" {
     "get_revenue_sum_by_cohort_lambda_function" : aws_lambda_function.get_revenue_sum_by_cohort_lambda_function.invoke_arn
     "get_universe_overview_lambda_function": aws_lambda_function.get_universe_overview_lambda_function.invoke_arn
     "get_company_report_vs_peers_lambda_function": aws_lambda_function.get_company_report_vs_peers_lambda_function.invoke_arn
+    "get_comparison_vs_peers_lambda_function": aws_lambda_function.get_comparison_vs_peers_lambda_function.invoke_arn
   }
 }
 

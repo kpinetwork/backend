@@ -55,3 +55,11 @@ class ResponseSQL:
         for size_cohort, value in groupby(records, key=get_key):
             data[size_cohort] = list(value)
         return data
+
+    def proccess_comparison_results(self, records: list) -> dict:
+        from collections import defaultdict
+
+        data = defaultdict(dict)
+
+        [data[metric.get("id")].update(metric) for metric in records]
+        return data
