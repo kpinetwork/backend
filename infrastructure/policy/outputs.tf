@@ -19,6 +19,7 @@ output "lambdas_exec_roles_arn" {
       "get_revenue_sum_by_cohort_exec_role_arn": aws_iam_role.get_revenue_sum_by_cohort_lambda_exec_role.arn
       "get_universe_overview_exec_role_arn": aws_iam_role.get_universe_overview_lambda_exec_role.arn
       "get_company_report_vs_peers_exec_role_arn": aws_iam_role.get_company_report_vs_peers_lambda_exec_role.arn
+      "get_comparison_vs_peers_exec_role_arn": aws_iam_role.get_comparison_vs_peers_lambda_exec_role.arn
   }
 }
 

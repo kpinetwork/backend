@@ -125,3 +125,18 @@ class TestResponseBuilder(TestCase):
             )
         )
         self.assertEqual(response, expected_record)
+
+    def test_proccess_comparison_results_update_success_dict(self):
+        records = [{"id": "id", "name": "test"}, {"id": "id", "extra": "test"}]
+        expected_out = {"id": {"id": "id", "name": "test", "extra": "test"}}
+
+        response = self.response_sql_instance.proccess_comparison_results(records)
+
+        self.assertEqual(response, expected_out)
+
+    def test_proccess_comparison_results_with_empty_list(self):
+        records = []
+
+        response = self.response_sql_instance.proccess_comparison_results(records)
+
+        self.assertEqual(response, dict())

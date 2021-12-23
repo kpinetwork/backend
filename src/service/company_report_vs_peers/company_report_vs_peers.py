@@ -101,7 +101,7 @@ class CompanyReportvsPeersService:
                 )
                 .add_sql_where_equal_condition(where_condition)
                 .add_sql_order_by_condition(
-                    "time_period.start_at", self.query_builder.Order.DESC
+                    ["time_period.start_at"], self.query_builder.Order.DESC
                 )
                 .add_sql_limit_condition(1)
                 .build()

@@ -49,6 +49,7 @@ variable "lambdas_names" {
     "get_revenue_sum_by_cohort_lambda_function": "get_revenue_sum_by_cohort_lambda_function"
     "get_universe_overview_lambda_function": "get_universe_overview_lambda_function"
     "get_company_report_vs_peers_lambda_function": "get_company_report_vs_peers_lambda_function"
+    "get_comparison_vs_peers_lambda_function": "get_comparison_vs_peers_lambda_function"
   }
 }
 

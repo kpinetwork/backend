@@ -47,7 +47,9 @@ class FinancialScenarioService:
                         }
                     }
                 )
-                .add_sql_order_by_condition("company.id", self.query_builder.Order.ASC)
+                .add_sql_order_by_condition(
+                    ["company.id"], self.query_builder.Order.ASC
+                )
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
