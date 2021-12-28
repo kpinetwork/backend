@@ -1,6 +1,7 @@
 import json
 import logging
 from comparison_vs_peers import ComparisonvsPeersService
+from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -16,12 +17,6 @@ comparison_vs_peers_service = ComparisonvsPeersService(
 )
 
 
-def get_param(param: str) -> list:
-    if param and param.strip() and len(param.strip()) > 1:
-        return param.split(",")
-    return []
-
-
 def handler(event, context):
     try:
         company_id = event.get("pathParameters").get("company_id")
@@ -33,11 +28,11 @@ def handler(event, context):
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            sectors = get_param(params.get("sector"))
-            verticals = get_param(params.get("vertical"))
-            investor_profile = get_param(params.get("investor_profile"))
-            growth_profile = get_param(params.get("growth_profile"))
-            size = get_param(params.get("size"))
+            sectors = get_list_param(params.get("sector"))
+            verticals = get_list_param(params.get("vertical"))
+            investor_profile = get_list_param(params.get("investor_profile"))
+            growth_profile = get_list_param(params.get("growth_profile"))
+            size = get_list_param(params.get("size"))
 
         comparison_peers = comparison_vs_peers_service.get_peers_comparison(
             company_id, sectors, verticals, investor_profile, growth_profile, size
