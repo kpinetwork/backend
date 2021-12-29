@@ -104,3 +104,8 @@ module "cert" {
   aws_secret_access_key = var.aws_secret_access_key
   cert_sans             = local.cert_sans
 }
+
+module "cognito" {
+  source = "./cognito/"
+  environment = local.environment
+}
