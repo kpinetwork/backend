@@ -146,6 +146,7 @@ functions:
     include:
     - ./src/handlers/universe_overview/get_universe_overview_handler.py
     - ./src/service/universe_overview/universe_overview_service.py
+    - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
@@ -155,6 +156,7 @@ functions:
     include:
     - ./src/handlers/company_report_vs_peers/get_company_report_vs_peers_handler.py
     - ./src/service/company_report_vs_peers/company_report_vs_peers.py
+    - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py  
@@ -164,6 +166,7 @@ functions:
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
     - ./src/service/comparison_vs_peers/comparison_vs_peers.py
+    - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py    

@@ -2,6 +2,7 @@ import json
 import logging
 import datetime
 from company_report_vs_peers import CompanyReportvsPeersService
+from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -20,31 +21,29 @@ company_report_service = CompanyReportvsPeersService(
 def handler(event, context):
     try:
         company_id = event.get("pathParameters").get("company_id")
-        sectors = ""
-        verticals = ""
-        investor_profile = ""
-        growth_profile = ""
-        size = ""
+        sectors = []
+        verticals = []
+        investor_profile = []
+        growth_profile = []
+        size = []
         year = datetime.datetime.today().year
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            sectors = params.get("sector", sectors).split(",")
-            verticals = params.get("vertical", verticals).split(",")
-            investor_profile = params.get("investor_profile", investor_profile).split(
-                ","
-            )
-            growth_profile = params.get("growth_profile", growth_profile).split(",")
-            size = params.get("size", size).split(",")
+            sectors = get_list_param(params.get("sector"))
+            verticals = get_list_param(params.get("vertical"))
+            investor_profile = get_list_param(params.get("investor_profile"))
+            growth_profile = get_list_param(params.get("growth_profile"))
+            size = get_list_param(params.get("size"))
             year = params.get("year", year)
 
-        growth_and_margin = company_report_service.get_company_report_vs_peers(
+        company_report = company_report_service.get_company_report_vs_peers(
             company_id, sectors, verticals, investor_profile, growth_profile, size, year
         )
 
         return {
             "statusCode": 200,
-            "body": json.dumps(growth_and_margin, default=str),
+            "body": json.dumps(company_report, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",

@@ -207,8 +207,6 @@ class ComparisonvsPeersService:
             company = self.get_company(company_id)
 
             if company:
-                sectors.append(company.get("sector"))
-
                 data = self.get_peers_comparison_data(
                     company_id,
                     sectors,
