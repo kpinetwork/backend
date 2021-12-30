@@ -32,17 +32,9 @@ resource "aws_cognito_user_group" "customer" {
 # CLIENTS
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_cognito_user_pool_client" "client" {
-  name = "${var.environment}-client"
+resource "aws_cognito_user_pool_client" "amplify" {
+  name = "${var.environment}-amplify"
   user_pool_id = aws_cognito_user_pool.pool.id
   generate_secret = false
-  
-  token_validity_units {
-     access_token  = "hours"
-     id_token      = "hours"
-     refresh_token = "minutes"
-     // valid values: seconds | minutes | hours | days
-  }
-
-  refresh_token_validity = 60
+  refresh_token_validity = 10
 }
