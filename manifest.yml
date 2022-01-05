@@ -169,8 +169,13 @@ functions:
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-    - ./db/utils/connection.py    
+    - ./db/utils/connection.py 
 
+  add_user_to_customer_group_handler:
+    requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
+    include:
+    - ./src/handlers/post_confirmation_trigger/add_user_to_customer_group_handler.py
+    
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt

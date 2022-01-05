@@ -10,6 +10,11 @@
 resource "aws_cognito_user_pool" "pool" {
   name = "${var.environment}_pool"
   alias_attributes = ["email"]
+
+  lambda_config {
+	post_confirmation = var.lambda_trigger_arn
+  }
+
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
