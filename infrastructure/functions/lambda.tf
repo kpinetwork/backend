@@ -578,6 +578,7 @@ resource "aws_lambda_function" "add_user_to_customer_group_lambda_function" {
     variables = {
       ACCESS_KEY = var.aws_access_key_id
       SECRET_KEY = var.aws_secret_access_key
+      ENVIRONMENT = var.environment
     }
   }
 }
