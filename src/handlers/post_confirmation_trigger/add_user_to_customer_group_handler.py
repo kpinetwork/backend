@@ -5,16 +5,15 @@ import boto3
 
 def handler(event, context):
     try:
-        session = boto3.Session(
+        boto3.Session(
             aws_access_key_id=os.environ.get("ACCESS_KEY"),
             aws_secret_access_key=os.environ.get("SECRET_KEY"),
         )
 
         client = boto3.client("cognito-idp")
-
         username = event["userName"]
         poolId = event["userPoolId"]
-        group = "customer"
+        group = f"{os.environ.get('ENVIRONMENT')}_customer_group"
 
         client.admin_add_user_to_group(
             UserPoolId=poolId, Username=username, GroupName=group
