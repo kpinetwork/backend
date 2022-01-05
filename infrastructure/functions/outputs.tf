@@ -18,6 +18,13 @@ output "lambdas_invoke_arns" {
     "get_universe_overview_lambda_function": aws_lambda_function.get_universe_overview_lambda_function.invoke_arn
     "get_company_report_vs_peers_lambda_function": aws_lambda_function.get_company_report_vs_peers_lambda_function.invoke_arn
     "get_comparison_vs_peers_lambda_function": aws_lambda_function.get_comparison_vs_peers_lambda_function.invoke_arn
+    "add_user_to_customer_group_lambda_function": aws_lambda_function.add_user_to_customer_group_lambda_function.invoke_arn
+  }
+}
+
+output "lambda_post_confirmation_trigger"{
+  value = {
+    "add_user_to_customer_group_lambda_function": aws_lambda_function.add_user_to_customer_group_lambda_function.arn
   }
 }
 
