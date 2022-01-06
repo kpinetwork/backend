@@ -47,7 +47,7 @@ resource "aws_cognito_user_pool_client" "amplify" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
-# LAMBDA PERMISSION
+# LAMBDA TRIGGER PERMISSION
 # ----------------------------------------------------------------------------------------------------------------------
 
 resource "aws_lambda_permission" "allow_post_confirmation_from_user_pool" {
