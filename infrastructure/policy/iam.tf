@@ -821,7 +821,7 @@ EOF
 }
 
 resource "aws_iam_policy" "add_user_to_customer_group_policy" {
-  name        = "post-configuration-trigger-policy"
+  name        = "${var.environment}_post_configuration_trigger_policy"
   description = "A policy to add user to customer group"
 
   policy = <<EOF
