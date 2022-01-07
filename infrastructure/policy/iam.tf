@@ -795,3 +795,59 @@ resource "aws_lambda_permission" "apigw_get_cohort_scenarios_lambda" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.http_method}${var.api_gateway_references.apigw_get_cohort_scenarios_lambda_function.resource_path}"
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM COGNITO TRIGGER POST CONFIRMATION
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "add_user_to_customer_group_lambda_exec_role" {
+  name               = "${var.environment}_add_user_to_customer_group_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_policy" "add_user_to_customer_group_policy" {
+  name        = "post-configuration-trigger-policy"
+  description = "A policy to add user to customer group"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:AdminAddUserToGroup",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Resource": "${var.cognito_user_pool_arn}"
+      }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "add_user_to_customer_group_lambda_cognito_policy" {
+  role       = aws_iam_role.add_user_to_customer_group_lambda_exec_role.name
+  policy_arn = aws_iam_policy.add_user_to_customer_group_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_user_to_customer_group_lambda_logs" {
+  role       = aws_iam_role.add_user_to_customer_group_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}

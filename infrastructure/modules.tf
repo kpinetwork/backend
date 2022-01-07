@@ -21,6 +21,8 @@ module "functions" {
   db_name                  = module.sql.kpinetwork_db_name
   db_username              = var.db_username
   db_password              = local.db_password[local.environment]
+  aws_access_key_id        = var.aws_access_key_id
+  aws_secret_access_key    = var.aws_secret_access_key
   bucket_files             = var.bucket_files
 }
 
@@ -32,6 +34,7 @@ module "policy" {
   api_gateway_references     = module.network.api_gateway_references
   aws_iam_policy_logs_arn    = module.shared.resources.aws_iam_policy_logs_arn
   aws_iam_policy_network_arn = module.shared.resources.aws_iam_policy_network_arn
+  cognito_user_pool_arn      = module.cognito.cognito_arn
   environment                = local.environment
   glue_trigger_arn           = module.functions.lambdas_arns.glue_trigger_lambda_function
   bucket_files               = var.bucket_files
@@ -108,4 +111,5 @@ module "cert" {
 module "cognito" {
   source = "./cognito/"
   environment = local.environment
+  lambda_trigger_arn = module.functions.lambda_post_confirmation_trigger.add_user_to_customer_group_lambda_function
 }
