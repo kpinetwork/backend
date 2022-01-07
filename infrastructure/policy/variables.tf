@@ -7,3 +7,4 @@ variable "aws_iam_policy_logs_arn" {}
 variable "environment" {}
 variable "glue_trigger_arn" {}
 variable "bucket_files" {}
+variable "cognito_user_pool_arn" {}

@@ -9,7 +9,13 @@
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_cognito_user_pool" "pool" {
   name = "${var.environment}_pool"
-  alias_attributes = ["email"]
+  username_attributes = ["email"]
+  auto_verified_attributes = ["email"]
+  
+  lambda_config {
+  post_confirmation = var.lambda_trigger_arn
+  }
+
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -37,4 +43,16 @@ resource "aws_cognito_user_pool_client" "amplify" {
   user_pool_id = aws_cognito_user_pool.pool.id
   generate_secret = false
   refresh_token_validity = 10
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# LAMBDA TRIGGER PERMISSION
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_lambda_permission" "allow_post_confirmation_from_user_pool" {
+  statement_id = "AllowPostConfirmationFromUserPool"
+  action = "lambda:InvokeFunction"
+  function_name = var.lambda_trigger_arn
+  principal = "cognito-idp.amazonaws.com"
+  source_arn = aws_cognito_user_pool.pool.arn
 }
