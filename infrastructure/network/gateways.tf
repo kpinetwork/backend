@@ -172,7 +172,8 @@ resource "aws_api_gateway_method" "get_all_companies_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.companies.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
   
   request_parameters = {
     "method.request.querystring.offset" = false
@@ -184,14 +185,16 @@ resource "aws_api_gateway_method" "get_company_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_scenarios_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.scenarios.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
   request_parameters = {
     "method.request.querystring.offset" = false
     "method.request.querystring.limit" = false
@@ -202,7 +205,8 @@ resource "aws_api_gateway_method" "get_company_scenarios_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.scenarios_company_id.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
   request_parameters = {
     "method.request.querystring.scenario_type" = false
     "method.request.querystring.offset" = false
@@ -214,7 +218,8 @@ resource "aws_api_gateway_method" "list_scenarios_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.scenarios_list.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.company_id" = false
@@ -227,7 +232,8 @@ resource "aws_api_gateway_method" "get_metrics_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.metrics.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.offset" = false
@@ -239,7 +245,8 @@ resource "aws_api_gateway_method" "get_metric_by_company_id_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.metric.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.name" = false
@@ -251,7 +258,8 @@ resource "aws_api_gateway_method" "get_average_metrics_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.average_metrics.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.name" = true
@@ -262,7 +270,8 @@ resource "aws_api_gateway_method" "get_metrics_by_cohort_id_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohort_metrics.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.name" = false
@@ -274,7 +283,8 @@ resource "aws_api_gateway_method" "get_average_metrics_by_cohort_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohort_average_metric.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.name" = true
@@ -285,14 +295,16 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_company_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_revenue.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_cohorts_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohorts.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.offset" = false
@@ -304,14 +316,16 @@ resource "aws_api_gateway_method" "get_cohort_by_id_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohort.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_cohort_scenarios_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohort_scenarios.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.offset" = false
@@ -325,14 +339,16 @@ resource "aws_api_gateway_method" "get_revenue_sum_by_cohort_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.cohort_revenue.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_universe_overview_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.universe_overview.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.vertical" = false
@@ -348,7 +364,8 @@ resource "aws_api_gateway_method" "get_company_report_vs_peers_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_report_vs_peers_id.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.vertical" = false
@@ -364,7 +381,8 @@ resource "aws_api_gateway_method" "get_comparison_vs_peers_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.comparison_vs_peers_id.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
     "method.request.querystring.vertical" = false
@@ -574,4 +592,15 @@ resource "aws_api_gateway_base_path_mapping" "domain_mapping" {
   stage_name  = var.gateway_deployment.stage_name
   domain_name = aws_api_gateway_domain_name.domain.domain_name
   depends_on  = [var.gateway_deployment]
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# API GATEWAY AUTHORIZER
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_api_gateway_authorizer" "kpi_authorizer" {
+  name                   = "${var.environment}_kpi_authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.api.id
+  authorizer_uri         = var.lambdas_functions_arn.authorize_lambda_function
+  authorizer_credentials = var.apigw_invokes_role_arn.authorize_lambda_invoke_role_arn
 }
