@@ -174,7 +174,12 @@ functions:
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
     include:
-    - ./src/handlers/post_confirmation_trigger/add_user_to_customer_group_handler.py    
+    - ./src/handlers/post_confirmation_trigger/add_user_to_customer_group_handler.py
+
+  authorize_handler:
+    requirements: ./src/handlers/authorizer/requirements.txt
+    include:
+    - ./src/handlers/authorizer/authorize_handler.py   
 
 layers:
   layer_libraries:

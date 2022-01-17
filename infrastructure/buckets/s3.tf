@@ -159,3 +159,11 @@ resource "aws_s3_bucket_object" "add_user_to_customer_group_function_object" {
   source = "${path.module}/../../dist/add_user_to_customer_group_handler.zip"
   etag = filemd5("${path.module}/../../dist/add_user_to_customer_group_handler.zip")
 }
+
+
+resource "aws_s3_bucket_object" "authorize_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/authorize_handler.zip"
+  source = "${path.module}/../../dist/authorize_handler.zip"
+  etag = filemd5("${path.module}/../../dist/authorize_handler.zip")
+}

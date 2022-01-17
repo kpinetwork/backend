@@ -21,3 +21,5 @@ variable "environment" {}
 variable "is_production" {}
 
 variable "gateway_deployment" {}
+
+variable "apigw_invokes_role_arn" {}
