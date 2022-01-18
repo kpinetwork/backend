@@ -573,11 +573,41 @@ resource "aws_lambda_function" "add_user_to_customer_group_lambda_function" {
   source_code_hash = base64sha256(var.object_bucket_references.add_user_to_customer_group_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
   environment {
     variables = {
       ACCESS_KEY = var.aws_access_key_id
       SECRET_KEY = var.aws_secret_access_key
       ENVIRONMENT = var.environment
+    }
+  }
+}
+
+
+resource "aws_lambda_function" "authorize_lambda_function" {
+  role = var.lambdas_exec_roles_arn.authorize_exec_role_arn
+  handler = "authorize_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.authorize_function_bucket.bucket
+  s3_key = var.object_bucket_references.authorize_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.authorize_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.authorize_function_bucket.etag)
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      REGION = var.region
+      API_GATEWAY = var.api_gateway
+      USER_POOL_ID = var.user_pool_id
+      APP_CLIENT_ID = var.app_client_id
+      AWS_ACCOUNT_ID = var.aws_account_id
     }
   }
 }

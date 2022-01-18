@@ -24,6 +24,11 @@ module "functions" {
   aws_access_key_id        = var.aws_access_key_id
   aws_secret_access_key    = var.aws_secret_access_key
   bucket_files             = var.bucket_files
+  region                   = var.region
+  api_gateway              = module.network.api_gateway_rest_api_id
+  user_pool_id             = module.cognito.id
+  app_client_id            = module.cognito.amplify_client_id
+  aws_account_id           = var.aws_account_id
 }
 
 module "policy" {
@@ -47,13 +52,14 @@ module "logs" {
 }
 
 module "network" {
-  source                = "./network/"
-  lambdas_functions_arn = module.functions.lambdas_invoke_arns
-  domain_name           = local.domains[local.environment]
-  certificate_arn       = module.cert.certificate_validation_arn
-  environment           = local.environment
-  is_production         = local.is_production
-  gateway_deployment    = module.gateway_deployment.gateway_deployment
+  source                 = "./network/"
+  lambdas_functions_arn  = module.functions.lambdas_invoke_arns
+  domain_name            = local.domains[local.environment]
+  certificate_arn        = module.cert.certificate_validation_arn
+  environment            = local.environment
+  is_production          = local.is_production
+  gateway_deployment     = module.gateway_deployment.gateway_deployment
+  apigw_invokes_role_arn = module.policy.apigw_invokes_role_arn
 }
 
 module "gateway_deployment" {

@@ -851,3 +851,77 @@ resource "aws_iam_role_policy_attachment" "add_user_to_customer_group_lambda_log
   role       = aws_iam_role.add_user_to_customer_group_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS API GATEWAY AUTHORIZATION
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "authorize_lambda_exec_role" {
+  name = "${var.environment}_authorize_lambda_exec_role"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "authorize_lambda_logs" {
+  role       = aws_iam_role.authorize_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_lambda_permission" "apigw_authorize_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.authorize_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+}
+
+resource "aws_iam_role" "authorize_lambda_invoke_role" {
+  name               = "${var.environment}_authorize_lambda_invoke_role"
+  path               = "/"
+  description        = "Allows API Gateway to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "apigateway.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "authorize_lambda_invoke_policy" {
+  name        = "${var.environment}_authorize_lambda_invoke_policy"
+  role        = aws_iam_role.authorize_lambda_invoke_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "lambda:InvokeFunction",
+      "Effect": "Allow",
+      "Resource": "arn:aws:lambda:${var.region}:${var.account_id}:function:${var.environment}_${var.lambdas_names.authorize_lambda_function}"
+    }
+  ]
+}
+EOF
+}

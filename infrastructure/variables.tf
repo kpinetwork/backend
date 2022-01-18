@@ -51,6 +51,7 @@ variable "lambdas_names" {
     "get_company_report_vs_peers_lambda_function": "get_company_report_vs_peers_lambda_function"
     "get_comparison_vs_peers_lambda_function": "get_comparison_vs_peers_lambda_function"
     "add_user_to_customer_group_lambda_function": "add_user_to_customer_group_lambda_function"
+    "authorize_lambda_function": "authorize_lambda_function"
   }
 }
 
