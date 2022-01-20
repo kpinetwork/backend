@@ -148,7 +148,7 @@ class CompanyReportvsPeersService:
                     "alias": "current_ebitda_margin",
                 },
                 {
-                    "scenario": f"Budgeted-{year}",
+                    "scenario": f"Budget-{year}",
                     "metric": "Rule of 40",
                     "alias": "current_rule_of_40",
                 },
