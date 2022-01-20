@@ -125,7 +125,7 @@ class TestComparisonvsPeers(TestCase):
 
         get_peers_comparison_data_out = (
             self.comparison_service_instance.get_peers_comparison_data(
-                "1", [], [], [], [], []
+                "1", [], [], [], [], [], "2020"
             )
         )
 
@@ -138,7 +138,7 @@ class TestComparisonvsPeers(TestCase):
 
         get_peers_comparison_data_out = (
             self.comparison_service_instance.get_peers_comparison_data(
-                " ", [], [], [], [], []
+                " ", [], [], [], [], [], "2020"
             )
         )
 
@@ -153,7 +153,7 @@ class TestComparisonvsPeers(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.comparison_service_instance.get_peers_comparison_data(
-                    "1", [], [], [], [], []
+                    "1", [], [], [], [], [], "2020"
                 )
             )
 
@@ -193,7 +193,7 @@ class TestComparisonvsPeers(TestCase):
         }
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], []
+                "1", [], [], [], [], [], "2020"
             )
         )
 
@@ -205,7 +205,7 @@ class TestComparisonvsPeers(TestCase):
 
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], []
+                "1", [], [], [], [], [], "2020"
             )
         )
 
@@ -220,7 +220,7 @@ class TestComparisonvsPeers(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.comparison_service_instance.get_peers_comparison(
-                    "1", [], [], [], [], []
+                    "1", [], [], [], [], [], "2020"
                 )
             )
 
