@@ -75,7 +75,12 @@ class ResponseSQL:
                 peer_data["growth"] -= 100
 
         def calculate_rule_of_40(peer_data: dict):
-            if peer_data.get("rule_of_40") is not None:
+            has_data = (
+                peer_data.get("growth") is not None
+                or peer_data.get("ebitda_margin") is not None
+            )
+
+            if peer_data.get("rule_of_40") is None and has_data:
                 revenue = peer_data.get("growth", 0)
                 ebitda = peer_data.get("ebitda_margin", 0)
                 peer_data["rule_of_40"] = (revenue - 100) + ebitda
@@ -83,7 +88,6 @@ class ResponseSQL:
             format_growth(peer_data)
 
         data = defaultdict(dict)
-
         [data[metric.get("id")].update(metric) for metric in records]
         [calculate_rule_of_40(peer) for company_id, peer in data.items()]
 

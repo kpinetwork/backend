@@ -141,7 +141,9 @@ class TestResponseBuilder(TestCase):
 
     def test_proccess_comparison_results_without_rule_of_40(self):
         records = [{"id": "id", "ebitda_margin": 10}, {"id": "id", "extra": "test"}]
-        expected_out = {"id": {"id": "id", "ebitda_margin": 10, "extra": "test"}}
+        expected_out = {
+            "id": {"id": "id", "ebitda_margin": 10, "extra": "test", "rule_of_40": -90}
+        }
 
         response = self.response_sql_instance.proccess_comparison_results(records)
 
@@ -153,7 +155,13 @@ class TestResponseBuilder(TestCase):
             {"id": "id", "extra": "test"},
         ]
         expected_out = {
-            "id": {"id": "id", "ebitda_margin": 10, "extra": "test", "growth": 56}
+            "id": {
+                "id": "id",
+                "ebitda_margin": 10,
+                "extra": "test",
+                "growth": 56,
+                "rule_of_40": 66,
+            }
         }
 
         response = self.response_sql_instance.proccess_comparison_results(records)
