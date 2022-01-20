@@ -17,22 +17,34 @@ class ComparisonvsPeersService:
             filters[f"{self.company_table}.{k}"] = values
         return filters
 
-    def get_metrics(self) -> list:
+    def get_metrics(self, year: str) -> list:
         return [
-            {"scenario": "Actuals", "metric": "Revenue", "alias": "revenue"},
-            {"scenario": "Actuals", "metric": "Ebitda", "alias": "growth"},
-            {"scenario": "Actual margin", "metric": "Ebitda", "alias": "ebitda_margin"},
+            {"scenario": f"Actuals-{year}", "metric": "Revenue", "alias": "revenue"},
             {
-                "scenario": "Actual vs budget",
+                "scenario": f"Actual growth-{year}",
+                "metric": "Revenue",
+                "alias": "growth",
+            },
+            {
+                "scenario": f"Actual margin-{year}",
+                "metric": "Ebitda",
+                "alias": "ebitda_margin",
+            },
+            {
+                "scenario": f"Actual vs budget-{year}",
                 "metric": "Revenue",
                 "alias": "revenue_vs_budget",
             },
             {
-                "scenario": "Actual vs budget",
+                "scenario": f"Actual vs budget-{year}",
                 "metric": "Ebitda",
                 "alias": "ebitda_vs_budget",
             },
-            {"scenario": "Actuals", "metric": "Rule of 40", "alias": "rule_of_40"},
+            {
+                "scenario": f"Actuals-{year}",
+                "metric": "Rule of 40",
+                "alias": "rule_of_40",
+            },
         ]
 
     def remove_revenue(self, peers):
@@ -72,8 +84,8 @@ class ComparisonvsPeersService:
             ]
 
             where_conditions = {
-                f"{self.scenario_table}.type": "'{type}'".format(
-                    type=metric_data.get("scenario")
+                f"{self.scenario_table}.name": "'{name}'".format(
+                    name=metric_data.get("scenario")
                 ),
                 f"{self.metric_table}.name": "'{metric}'".format(
                     metric=metric_data.get("metric")
@@ -152,10 +164,11 @@ class ComparisonvsPeersService:
         investor_profile: list,
         growth_profile: list,
         size: list,
+        year: str,
     ) -> dict:
         try:
             if company_id and company_id.strip():
-                metrics = self.get_metrics()
+                metrics = self.get_metrics(year)
                 data = []
                 filters = self.add_company_filters(
                     sector=sectors,
@@ -202,6 +215,7 @@ class ComparisonvsPeersService:
         investor_profile: list,
         growth_profile: list,
         size: list,
+        year: str,
     ) -> dict:
         try:
             company = self.get_company(company_id)
@@ -214,6 +228,7 @@ class ComparisonvsPeersService:
                     investor_profile,
                     growth_profile,
                     size,
+                    year,
                 )
 
                 company = data.pop(company_id, dict())

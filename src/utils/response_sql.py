@@ -19,6 +19,17 @@ class ResponseSQL:
         [response.append(dict(record)) for record in records]
         return response
 
+    def process_rule_of_40_chart_results(self, records: list) -> list:
+        result = self.process_query_list_results(records)
+
+        values = filter(
+            lambda elem: elem.get("revenue_growth_rate") is not None
+            and elem.get("ebitda_margin") is not None
+            and elem.get("revenue") is not None,
+            result,
+        )
+        return list(values)
+
     def process_query_average_result(self, records: list) -> dict:
         result = self.process_query_result(records)
 
@@ -59,7 +70,21 @@ class ResponseSQL:
     def proccess_comparison_results(self, records: list) -> dict:
         from collections import defaultdict
 
+        def format_growth(peer_data: dict):
+            if peer_data.get("growth"):
+                peer_data["growth"] -= 100
+
+        def calculate_rule_of_40(peer_data: dict):
+            if peer_data.get("rule_of_40") is not None:
+                revenue = peer_data.get("growth", 0)
+                ebitda = peer_data.get("ebitda_margin", 0)
+                peer_data["rule_of_40"] = (revenue - 100) + ebitda
+
+            format_growth(peer_data)
+
         data = defaultdict(dict)
 
         [data[metric.get("id")].update(metric) for metric in records]
+        [calculate_rule_of_40(peer) for company_id, peer in data.items()]
+
         return data

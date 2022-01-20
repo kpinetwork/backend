@@ -126,9 +126,35 @@ class TestResponseBuilder(TestCase):
         )
         self.assertEqual(response, expected_record)
 
-    def test_proccess_comparison_results_update_success_dict(self):
-        records = [{"id": "id", "name": "test"}, {"id": "id", "extra": "test"}]
-        expected_out = {"id": {"id": "id", "name": "test", "extra": "test"}}
+    def test_proccess_comparison_results_with_rule_of_40(self):
+        records = [
+            {"id": "id", "ebitda_margin": 10},
+            {"id": "id", "extra": "test", "rule_of_40": -90},
+        ]
+        expected_out = {
+            "id": {"id": "id", "ebitda_margin": 10, "extra": "test", "rule_of_40": -90}
+        }
+
+        response = self.response_sql_instance.proccess_comparison_results(records)
+
+        self.assertEqual(response, expected_out)
+
+    def test_proccess_comparison_results_without_rule_of_40(self):
+        records = [{"id": "id", "ebitda_margin": 10}, {"id": "id", "extra": "test"}]
+        expected_out = {"id": {"id": "id", "ebitda_margin": 10, "extra": "test"}}
+
+        response = self.response_sql_instance.proccess_comparison_results(records)
+
+        self.assertEqual(response, expected_out)
+
+    def test_proccess_comparison_results_with_growth(self):
+        records = [
+            {"id": "id", "ebitda_margin": 10, "growth": 156},
+            {"id": "id", "extra": "test"},
+        ]
+        expected_out = {
+            "id": {"id": "id", "ebitda_margin": 10, "extra": "test", "growth": 56}
+        }
 
         response = self.response_sql_instance.proccess_comparison_results(records)
 
@@ -140,3 +166,14 @@ class TestResponseBuilder(TestCase):
         response = self.response_sql_instance.proccess_comparison_results(records)
 
         self.assertEqual(response, dict())
+
+    def test_process_rule_of_40_chart_results_filter(self):
+        records = [
+            {"revenue_growth_rate": 0, "ebitda_margin": 10, "revenue": 6},
+            {"id": "id", "extra": "test"},
+        ]
+        expected_out = [{"revenue_growth_rate": 0, "ebitda_margin": 10, "revenue": 6}]
+
+        response = self.response_sql_instance.process_rule_of_40_chart_results(records)
+
+        self.assertEqual(response, expected_out)
