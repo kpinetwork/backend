@@ -14,6 +14,7 @@ resource "aws_cognito_user_pool" "pool" {
   
   lambda_config {
   post_confirmation = var.lambda_trigger_arn
+  pre_sign_up = var.lambda_pre_signup_trigger_arn
   }
 
 }
@@ -43,6 +44,14 @@ resource "aws_cognito_user_pool_client" "amplify" {
   user_pool_id = aws_cognito_user_pool.pool.id
   generate_secret = false
   refresh_token_validity = 10
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows = ["implicit"]
+  allowed_oauth_scopes = ["email", "openid", "phone", "profile"]
+  callback_urls = var.callback_urls
+  explicit_auth_flows = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_SRP_AUTH"]
+  logout_urls = var.logout_urls
+  prevent_user_existence_errors = "LEGACY"
+  supported_identity_providers = ["COGNITO", "Google"]
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

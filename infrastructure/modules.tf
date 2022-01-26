@@ -118,4 +118,7 @@ module "cognito" {
   source = "./cognito/"
   environment = local.environment
   lambda_trigger_arn = module.functions.lambda_post_confirmation_trigger.add_user_to_customer_group_lambda_function
+  lambda_pre_signup_trigger_arn = module.functions.lambda_pre_signup_trigger.verify_users_with_same_email_lambda_function
+  callback_urls = local.callback_urls
+  logout_urls = local.logout_urls
 }
