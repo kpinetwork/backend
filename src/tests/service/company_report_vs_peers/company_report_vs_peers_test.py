@@ -33,6 +33,10 @@ class TestCompanyReportvsPeers(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
+    def mock_response_rule_of_40_chart_query_sql(self, response):
+        attrs = {"process_rule_of_40_chart_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
+
     def mock_response_metrics_group_by_size_cohort_results(self, response):
         attrs = {"process_metrics_group_by_size_cohort_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
@@ -67,11 +71,11 @@ class TestCompanyReportvsPeers(TestCase):
             self.assertEqual(exception, Exception)
             self.overview_service_instance.session.execute.assert_called_once()
 
-    def test_get_most_recent_metric_by_scenario_with_valid_metric_and_scenario(self):
+    def test_get_metric_by_scenario_with_valid_metric_and_scenario(self):
         self.mock_response_query_sql([self.metric_value])
 
-        get_most_recent_metric_by_scenario_out = (
-            self.overview_service_instance.get_most_recent_metric_by_scenario(
+        get_metric_by_scenario_out = (
+            self.overview_service_instance.get_metric_by_scenario(
                 "1",
                 "Actuals",
                 "Revenue",
@@ -79,14 +83,14 @@ class TestCompanyReportvsPeers(TestCase):
             )
         )
 
-        self.assertEqual(get_most_recent_metric_by_scenario_out, [self.metric_value])
+        self.assertEqual(get_metric_by_scenario_out, [self.metric_value])
         self.overview_service_instance.session.execute.assert_called_once()
 
-    def test_get_most_recent_metric_by_scenario_with_empty_response(self):
+    def test_get_metric_by_scenario_with_empty_response(self):
         self.mock_response_query_sql([])
 
-        get_most_recent_metric_by_scenario_out = (
-            self.overview_service_instance.get_most_recent_metric_by_scenario(
+        get_metric_by_scenario_out = (
+            self.overview_service_instance.get_metric_by_scenario(
                 "1",
                 "Actuals",
                 "Revenue",
@@ -94,14 +98,14 @@ class TestCompanyReportvsPeers(TestCase):
             )
         )
 
-        self.assertEqual(get_most_recent_metric_by_scenario_out, [])
+        self.assertEqual(get_metric_by_scenario_out, [])
         self.overview_service_instance.session.execute.assert_called_once()
 
-    def test_get_most_recent_metric_by_scenario_failed(self):
+    def test_get_metric_by_scenario_failed(self):
         self.overview_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.overview_service_instance.get_most_recent_metric_by_scenario(
+                self.overview_service_instance.get_metric_by_scenario(
                     "1",
                     "Actuals",
                     "Revenue",
@@ -118,7 +122,7 @@ class TestCompanyReportvsPeers(TestCase):
         self.mock_response_query_sql(expected_out)
 
         get_company_financial_profile_out = (
-            self.overview_service_instance.get_company_financial_profile("1")
+            self.overview_service_instance.get_company_financial_profile("1", "2020")
         )
 
         self.assertEqual(get_company_financial_profile_out, expected_out)
@@ -129,7 +133,7 @@ class TestCompanyReportvsPeers(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.overview_service_instance.get_company_financial_profile(
-                    "1",
+                    "1", "2020"
                 )
             )
 
@@ -150,7 +154,7 @@ class TestCompanyReportvsPeers(TestCase):
             }
         ]
         expected_out = []
-        self.mock_response_list_query_sql(expected_out)
+        self.mock_response_rule_of_40_chart_query_sql(expected_out)
 
         get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
             ["Sector"],
@@ -165,7 +169,7 @@ class TestCompanyReportvsPeers(TestCase):
         self.overview_service_instance.session.execute.assert_called_once()
 
     def test_get_rule_of_40_success_with_empty_response(self):
-        self.mock_response_list_query_sql([])
+        self.mock_response_rule_of_40_chart_query_sql([])
 
         get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
             ["Sector"],
@@ -203,6 +207,7 @@ class TestCompanyReportvsPeers(TestCase):
         expected_out = {"revenue": "100"}
         self.mock_response_query_sql(expected_out)
         self.mock_response_list_query_sql([self.size_cohort, record])
+        self.mock_response_rule_of_40_chart_query_sql([self.size_cohort, record])
 
         get_company_report_vs_peers_out = (
             self.overview_service_instance.get_company_report_vs_peers(
@@ -229,6 +234,7 @@ class TestCompanyReportvsPeers(TestCase):
     def test_get_get_company_report_vs_peers_with_empty_response(self):
         self.mock_response_list_query_sql([])
         self.mock_response_query_sql(dict())
+        self.mock_response_rule_of_40_chart_query_sql([])
 
         get_company_report_vs_peers_out = (
             self.overview_service_instance.get_company_report_vs_peers(

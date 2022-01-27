@@ -24,7 +24,6 @@ class CompanyReportvsPeersService:
                     self.query_builder.add_table_name(self.company_table)
                     .add_select_conditions(
                         [
-                            f"{self.company_table}.name",
                             f"{self.company_table}.id",
                             f"{self.company_table}.name",
                             f"{self.company_table}.sector",
@@ -50,17 +49,17 @@ class CompanyReportvsPeersService:
             self.logger.info(error)
             raise error
 
-    def get_most_recent_metric_by_scenario(
+    def get_metric_by_scenario(
         self,
         company_id: str,
-        scenario_type: str,
+        scenario_name: str,
         metric: str,
         value_alias: str,
     ) -> dict:
         try:
             where_condition = {
                 f"{self.company_table}.id": f"'{company_id}'",
-                f"{self.scenario_table}.type": f"'{scenario_type}'",
+                f"{self.scenario_table}.name": f"'{scenario_name}'",
                 f"{self.metric_table}.name": f"'{metric}'",
             }
 
@@ -118,35 +117,44 @@ class CompanyReportvsPeersService:
     def get_company_financial_profile(
         self,
         company_id: str,
+        year: str,
     ) -> dict:
         try:
             financial_profile = dict()
             metrics = [
-                {"scenario": "Actuals", "metric": "Revenue", "alias": "annual_revenue"},
-                {"scenario": "Actuals", "metric": "Ebitda", "alias": "annual_ebitda"},
                 {
-                    "scenario": "Actuals",
+                    "scenario": f"Actuals-{year}",
+                    "metric": "Revenue",
+                    "alias": "annual_revenue",
+                },
+                {
+                    "scenario": f"Actuals-{year}",
+                    "metric": "Ebitda",
+                    "alias": "annual_ebitda",
+                },
+                {
+                    "scenario": f"Actuals-{year}",
                     "metric": "Rule of 40",
                     "alias": "anual_rule_of_40",
                 },
                 {
-                    "scenario": "Budgeted growth",
+                    "scenario": f"Budgeted growth-{year}",
                     "metric": "Revenue",
                     "alias": "current_revenue_growth",
                 },
                 {
-                    "scenario": "Budgeted margin",
+                    "scenario": f"Budgeted margin-{year}",
                     "metric": "Ebitda",
                     "alias": "current_ebitda_margin",
                 },
                 {
-                    "scenario": "Budgeted",
+                    "scenario": f"Budget-{year}",
                     "metric": "Rule of 40",
                     "alias": "current_rule_of_40",
                 },
             ]
             for metric in metrics:
-                metric_average = self.get_most_recent_metric_by_scenario(
+                metric_average = self.get_metric_by_scenario(
                     company_id,
                     metric.get("scenario"),
                     metric.get("metric"),
@@ -174,7 +182,7 @@ class CompanyReportvsPeersService:
                 SUM(
                     CASE WHEN {scenario_table}.name = '{scenario}'
                     AND {metric_table}.name = '{metric}'
-                    THEN {metric_table}.value ELSE 0 END
+                    THEN {metric_table}.value ELSE NULL END
                 ) AS {alias}
             """.format(
                 scenario=scenario,
@@ -242,7 +250,7 @@ class CompanyReportvsPeersService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(results)
+            return self.response_sql.process_rule_of_40_chart_results(results)
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -259,7 +267,9 @@ class CompanyReportvsPeersService:
     ) -> dict:
         try:
             company_description = self.get_description(company_id)
-            company_financial_profile = self.get_company_financial_profile(company_id)
+            company_financial_profile = self.get_company_financial_profile(
+                company_id, year
+            )
             rule_of_40 = self.get_rule_of_40(
                 sectors, verticals, investor_profile, growth_profile, size, year
             )
