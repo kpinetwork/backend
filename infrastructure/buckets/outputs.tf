@@ -127,5 +127,10 @@ output "object_references" {
       bucket : aws_s3_bucket_object.verify_users_with_same_email_function_object.bucket
     }
 
+    "get_users_function_bucket" : {
+      etag: aws_s3_bucket_object.get_users_function_object.etag,
+      key : aws_s3_bucket_object.get_users_function_object.key,
+      bucket : aws_s3_bucket_object.get_users_function_object.bucket
+    }
   }
 }

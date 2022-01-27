@@ -185,6 +185,11 @@ functions:
     requirements: ./src/handlers/pre_signup_trigger/requirements.txt
     include:
     - ./src/handlers/pre_signup_trigger/verify_users_with_same_email_handler.py
+    
+  get_users_handler:
+    requirements: ./src/handlers/users/requirements.txt
+    include:
+    - ./src/handlers/users/get_users_handler.py
 
 layers:
   layer_libraries:

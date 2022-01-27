@@ -107,6 +107,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_comparison_vs_peers_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_users_lambda_function": {
+      resource_path: aws_api_gateway_resource.users.path,
+      http_method: aws_api_gateway_method.get_users_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 
