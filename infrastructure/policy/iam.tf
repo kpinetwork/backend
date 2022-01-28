@@ -950,30 +950,21 @@ resource "aws_iam_role" "verify_users_with_same_email_lambda_exec_role" {
 EOF
 }
 
-resource "aws_iam_policy" "verify_users_with_same_email_policy" {
-  name        = "${var.environment}_pre_signup_trigger_policy"
-  description = "A policy to verify if it already exists email adress"
-
+resource "aws_iam_role_policy" "verify_users_with_same_email_lambda_list_users_policy" {
+  name        = "${var.environment}_verify_users_with_same_email_lambda_list_users_policy"
+  role        = aws_iam_role.verify_users_with_same_email_lambda_exec_role.id
   policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "VisualEditor0",
+      "Action": "cognito-idp:ListUsers",
       "Effect": "Allow",
-      "Action": [
-        "cognito-idp:ListUsers"
-      ],
       "Resource": "${var.cognito_user_pool_arn}"
-      }
+    }
   ]
 }
 EOF
-}
-
-resource "aws_iam_role_policy_attachment" "verify_users_with_same_email_cognito_policy" {
-  role       = aws_iam_role.verify_users_with_same_email_lambda_exec_role.name
-  policy_arn = aws_iam_policy.verify_users_with_same_email_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "verify_users_with_same_email_lambda_logs" {

@@ -24,15 +24,10 @@ output "lambdas_invoke_arns" {
   }
 }
 
-output "lambda_post_confirmation_trigger"{
+output "lambda_trigger_arns"{
   value = {
     "add_user_to_customer_group_lambda_function": aws_lambda_function.add_user_to_customer_group_lambda_function.arn
-  }
-}
-
-output "lambda_pre_signup_trigger"{
-  value = {
-     "verify_users_with_same_email_lambda_function": aws_lambda_function.verify_users_with_same_email_lambda_function.invoke_arn
+    "verify_users_with_same_email_lambda_function": aws_lambda_function.verify_users_with_same_email_lambda_function.arn
   }
 }
 

@@ -20,8 +20,6 @@ def handler(event, context):
         }
 
         result = cognito.list_users(**params)
-        print("results", result)
-        print("results[users]", result["Users"])
         if (
             len(result["Users"]) > 0
             and result["Users"][0]["Username"] != event["userName"]
