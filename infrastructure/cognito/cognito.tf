@@ -13,10 +13,16 @@ resource "aws_cognito_user_pool" "pool" {
   auto_verified_attributes = ["email"]
   
   lambda_config {
-  post_confirmation = var.lambda_trigger_arns.add_user_to_customer_group_lambda_function
-  pre_sign_up = var.lambda_trigger_arns.verify_users_with_same_email_lambda_function
+    post_confirmation = var.lambda_trigger_arns.add_user_to_customer_group_lambda_function
+    pre_sign_up = var.lambda_trigger_arns.verify_users_with_same_email_lambda_function
   }
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -46,7 +52,7 @@ resource "aws_cognito_user_pool_client" "amplify" {
   refresh_token_validity = 10
   allowed_oauth_flows_user_pool_client = true
   allowed_oauth_flows = ["implicit"]
-  allowed_oauth_scopes = ["email", "openid", "phone", "profile"]
+  allowed_oauth_scopes = ["email", "openid", "profile"]
   callback_urls = var.callback_urls
   explicit_auth_flows = ["ALLOW_CUSTOM_AUTH", "ALLOW_REFRESH_TOKEN_AUTH", "ALLOW_USER_SRP_AUTH"]
   logout_urls = var.logout_urls
