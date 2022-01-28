@@ -117,3 +117,8 @@ resource "aws_cloudwatch_log_group" "authorize_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.authorize_lambda_function}"
   retention_in_days = var.retention_days
 }
+
+resource "aws_cloudwatch_log_group" "verify_users_with_same_email_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.verify_users_with_same_email_lambda_function}"
+  retention_in_days = var.retention_days
+}

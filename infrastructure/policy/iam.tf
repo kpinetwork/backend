@@ -925,3 +925,57 @@ resource "aws_iam_role_policy" "authorize_lambda_invoke_policy" {
 }
 EOF
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM COGNITO TRIGGER PRE SIGN UP
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "verify_users_with_same_email_lambda_exec_role" {
+  name               = "${var.environment}_verify_users_with_same_email_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "verify_users_with_same_email_lambda_list_users_policy" {
+  name        = "${var.environment}_verify_users_with_same_email_lambda_list_users_policy"
+  role        = aws_iam_role.verify_users_with_same_email_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "cognito-idp:ListUsers",
+      "Effect": "Allow",
+      "Resource": "${var.cognito_user_pool_arn}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "verify_users_with_same_email_lambda_logs" {
+  role       = aws_iam_role.verify_users_with_same_email_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_lambda_permission" "allow_pre_signup_from_user_pool" {
+  statement_id = "AllowPreSignUpFromUserPool"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.verify_users_with_same_email_lambda_function}"
+  principal = "cognito-idp.amazonaws.com"
+  source_arn = "${var.cognito_user_pool_arn}"
+}

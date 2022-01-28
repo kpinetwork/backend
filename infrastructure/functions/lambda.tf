@@ -611,3 +611,25 @@ resource "aws_lambda_function" "authorize_lambda_function" {
     }
   }
 }
+
+resource "aws_lambda_function" "verify_users_with_same_email_lambda_function" {
+  role = var.lambdas_exec_roles_arn.verify_users_with_same_email_exec_role_arn
+  handler = "verify_users_with_same_email_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.verify_users_with_same_email_function_bucket.bucket
+  s3_key = var.object_bucket_references.verify_users_with_same_email_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.verify_users_with_same_email_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.verify_users_with_same_email_function_bucket.etag)
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY = var.aws_access_key_id
+      SECRET_KEY = var.aws_secret_access_key
+    }
+  }
+}
