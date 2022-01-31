@@ -126,3 +126,8 @@ resource "aws_cloudwatch_log_group" "get_users_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_users_lambda_function}"
   retention_in_days = var.retention_days
 }
+
+resource "aws_cloudwatch_log_group" "get_roles_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_roles_lambda_function}"
+  retention_in_days = var.retention_days
+}

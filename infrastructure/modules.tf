@@ -43,6 +43,7 @@ module "policy" {
   environment                = local.environment
   glue_trigger_arn           = module.functions.lambdas_arns.glue_trigger_lambda_function
   bucket_files               = var.bucket_files
+  user_pool_id               = module.cognito.id
 }
 
 module "logs" {

@@ -32,3 +32,27 @@ class UsersService:
 
         mapped_users = process_users(users, userPoolId)
         return mapped_users
+    def get_roles_params(self, userPoolId) -> dict:
+        return {
+            "UserPoolId": userPoolId,
+            "Limit": 4,
+        }
+
+    def get_roles(self, userPoolId) -> list:
+        def process_result(groups) -> list:
+            roles = [
+                {
+                    "name": group.get("GroupName"),
+                    "description": group.get("Description"),
+                }
+                for group in groups
+                if group.get("GroupName", "").find("Google") == -1
+            ]
+            return roles
+
+        params = self.get_roles_params(userPoolId)
+        result = self.client.list_groups(**params)
+        _groups = result.get("Groups")
+        groups = _groups if _groups else []
+        roles = process_result(groups)
+        return roles
