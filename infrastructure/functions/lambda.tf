@@ -668,12 +668,14 @@ resource "aws_lambda_function" "get_roles_lambda_function" {
   source_code_hash = base64sha256(var.object_bucket_references.get_roles_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
+  
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
   ]
 
   environment {
     variables = {
+      REGION = var.region
       ACCESS_KEY = var.aws_access_key_id
       SECRET_KEY = var.aws_secret_access_key
       USER_POOL_ID = var.user_pool_id

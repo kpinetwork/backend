@@ -32,6 +32,7 @@ class UsersService:
 
         mapped_users = process_users(users, userPoolId)
         return mapped_users
+
     def get_roles_params(self, userPoolId) -> dict:
         return {
             "UserPoolId": userPoolId,
