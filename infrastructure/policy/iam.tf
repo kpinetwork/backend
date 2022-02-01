@@ -853,6 +853,51 @@ resource "aws_iam_role_policy_attachment" "add_user_to_customer_group_lambda_log
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM ROLE USERS AND ROLES
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "get_roles_lambda_exec_role" {
+  name               = "${var.environment}_get_roles_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "get_roles_lambda_logs" {
+  role       = aws_iam_role.get_roles_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy" "get_roles_cognito_policy" {
+  name        = "${var.environment}_get_roles_cognito_policy"
+  role        = aws_iam_role.get_roles_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "cognito-idp:ListGroups",
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
 # AWS API GATEWAY AUTHORIZATION
 # ----------------------------------------------------------------------------------------------------------------------
 

@@ -132,5 +132,11 @@ output "object_references" {
       key : aws_s3_bucket_object.get_users_function_object.key,
       bucket : aws_s3_bucket_object.get_users_function_object.bucket
     }
+    
+    "get_roles_function_bucket" : {
+      etag : aws_s3_bucket_object.get_roles_function_object.etag,
+      key : aws_s3_bucket_object.get_roles_function_object.key,
+      bucket : aws_s3_bucket_object.get_roles_function_object.bucket
+    }
   }
 }

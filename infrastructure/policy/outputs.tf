@@ -24,6 +24,7 @@ output "lambdas_exec_roles_arn" {
       "authorize_exec_role_arn": aws_iam_role.authorize_lambda_exec_role.arn
       "verify_users_with_same_email_exec_role_arn": aws_iam_role.verify_users_with_same_email_lambda_exec_role.arn
       "get_users_exec_role_arn": aws_iam_role.get_users_lambda_exec_role.arn
+      "get_roles_exec_role_arn": aws_iam_role.get_roles_lambda_exec_role.arn
   }
 }
 
@@ -34,16 +35,3 @@ output "apigw_invokes_role_arn" {
   }
 }
 
-output "aws_iam_roles_policy_attachment_logs" {
-  value = {
-      "companies_lambda_logs": aws_iam_role_policy_attachment.companies_lambda_logs
-      "company_lambda_logs": aws_iam_role_policy_attachment.company_lambda_logs
-  }
-}
-
-output "aws_iam_roles_policy_attachment_network" {
-  value = {
-      "companies_lambda_vpc": aws_iam_role_policy_attachment.companies_lambda_vpc
-      "company_lambda_vpc": aws_iam_role_policy_attachment.company_lambda_vpc
-  }
-}
