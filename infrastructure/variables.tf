@@ -52,6 +52,8 @@ variable "lambdas_names" {
     "get_comparison_vs_peers_lambda_function": "get_comparison_vs_peers_lambda_function"
     "add_user_to_customer_group_lambda_function": "add_user_to_customer_group_lambda_function"
     "authorize_lambda_function": "authorize_lambda_function"
+    "verify_users_with_same_email_lambda_function" : "verify_users_with_same_email_lambda_function"
+    "get_users_lambda_function": "get_users_lambda_function"
   }
 }
 
@@ -126,6 +128,28 @@ locals {
     local.domains.demo
   ]
   cert_sans = local.is_production ? local.prod_certs : local.demo_certs
+
+  prod_callback_urls = [
+    "https://app.${var.root_domain_name}"
+    ]
+  
+  demo_callback_urls = [
+    "http://localhost:3000/",
+    "https://app.demo.${var.root_domain_name}"
+  ]
+
+  prod_logout_urls = [
+    "https://app.${var.root_domain_name}"
+    ]
+  
+  demo_logout_urls = [
+    "http://localhost:3000/",
+    "https://app.demo.${var.root_domain_name}"
+  ]
+
+  callback_urls = local.is_production ? local.prod_callback_urls : local.demo_callback_urls
+  
+  logout_urls = local.is_production ? local.prod_logout_urls : local.demo_logout_urls
 
   remote_state_config = {
       bucket      = "kpinetwork-infrastructure"

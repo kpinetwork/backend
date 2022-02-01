@@ -167,3 +167,17 @@ resource "aws_s3_bucket_object" "authorize_function_object" {
   source = "${path.module}/../../dist/authorize_handler.zip"
   etag = filemd5("${path.module}/../../dist/authorize_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "verify_users_with_same_email_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/verify_users_with_same_email_handler.zip"
+  source = "${path.module}/../../dist/verify_users_with_same_email_handler.zip"
+  etag = filemd5("${path.module}/../../dist/verify_users_with_same_email_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_users_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_users_handler.zip"
+  source = "${path.module}/../../dist/get_users_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_users_handler.zip")
+}
