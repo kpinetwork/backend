@@ -675,7 +675,6 @@ resource "aws_lambda_function" "get_roles_lambda_function" {
 
   environment {
     variables = {
-      REGION = var.region
       ACCESS_KEY = var.aws_access_key_id
       SECRET_KEY = var.aws_secret_access_key
       USER_POOL_ID = var.user_pool_id

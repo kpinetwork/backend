@@ -897,6 +897,14 @@ resource "aws_iam_role_policy" "get_roles_cognito_policy" {
 EOF
 }
 
+resource "aws_lambda_permission" "apigw_get_roles_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetRoles"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_roles_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_roles_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_roles_lambda_function.http_method}${var.api_gateway_references.apigw_get_roles_lambda_function.resource_path}"
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # AWS API GATEWAY AUTHORIZATION
 # ----------------------------------------------------------------------------------------------------------------------
