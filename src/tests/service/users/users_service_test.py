@@ -54,10 +54,6 @@ class TestUsersService(TestCase):
         attrs = {"list_users.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
-    def mock_list_users_pagination(self, response):
-        attrs = {"list_users.return_value": response}
-        self.mock_client.configure_mock(**attrs)
-
     def mock_admin_list_groups_for_user(self, response):
         attrs = {"admin_list_groups_for_user.return_value": response}
         self.mock_client.configure_mock(**attrs)
