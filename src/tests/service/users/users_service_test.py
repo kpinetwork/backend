@@ -47,6 +47,15 @@ class TestUsersService(TestCase):
             ],
             "NextToken": "Token",
         }
+        self.groups = {
+            "Groups": [
+                {
+                    "GroupName": "default_Google",
+                    "Description": "Group for google users",
+                },
+                {"GroupName": "Customer", "Description": "Test group"},
+            ]
+        }
         self.mock_client = Mock()
         self.users_service_instance = UsersService(logger, self.mock_client)
 
@@ -56,6 +65,10 @@ class TestUsersService(TestCase):
 
     def mock_admin_list_groups_for_user(self, response):
         attrs = {"admin_list_groups_for_user.return_value": response}
+        self.mock_client.configure_mock(**attrs)
+
+    def mock_list_groups(self, response):
+        attrs = {"list_groups.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
     def test_get_users_success(self):
@@ -74,5 +87,20 @@ class TestUsersService(TestCase):
         self.mock_admin_list_groups_for_user({"Groups": []})
 
         get_roles_out = self.users_service_instance.get_users("userPoolId")
+
+        self.assertEqual(get_roles_out, [])
+
+    def test_get_roles_success(self):
+        self.mock_list_groups(self.groups)
+        expected_result = [{"name": "Customer", "description": "Test group"}]
+
+        get_roles_out = self.users_service_instance.get_roles("userPoolId")
+
+        self.assertEqual(get_roles_out, expected_result)
+
+    def test_get_roles_without_groups_should_return_empty_list(self):
+        self.mock_list_groups({"Groups": []})
+
+        get_roles_out = self.users_service_instance.get_roles("userPoolId")
 
         self.assertEqual(get_roles_out, [])

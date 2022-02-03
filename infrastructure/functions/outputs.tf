@@ -22,6 +22,7 @@ output "lambdas_invoke_arns" {
     "authorize_lambda_function": aws_lambda_function.authorize_lambda_function.invoke_arn
     "verify_users_with_same_email_lambda_function": aws_lambda_function.verify_users_with_same_email_lambda_function.invoke_arn
     "get_users_lambda_function": aws_lambda_function.get_users_lambda_function.invoke_arn
+    "get_roles_lambda_function": aws_lambda_function.get_roles_lambda_function.invoke_arn
   }
 }
 
