@@ -207,6 +207,12 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
 
+  get_roles_handler:
+    requirements: ./src/handlers/users/requirements.txt
+    include:
+    - ./src/handlers/users/get_roles_handler.py
+    - ./src/service/users/users_service.py
+
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
