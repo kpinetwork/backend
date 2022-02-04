@@ -7,8 +7,8 @@ class UsersService:
     def get_users_params(self, user_pool_id) -> dict:
         return {"UserPoolId": user_pool_id, "AttributesToGet": ["email"]}
 
-    def get_users(self, userPoolId) -> list:
-        def process_users(users, userPoolId) -> list:
+    def get_users(self, user_pool_id) -> list:
+        def process_users(users, user_pool_id) -> list:
             mapped_users = [
                 {"username": user["Username"], "email": user["Attributes"][0]["Value"]}
                 for user in users
@@ -16,18 +16,18 @@ class UsersService:
 
             for user in mapped_users:
                 groups = self.client.admin_list_groups_for_user(
-                    Username=user["username"], UserPoolId=userPoolId
+                    Username=user["username"], UserPoolId=user_pool_id
                 )
                 filter_groups = self.response_user.process_user_roles(groups)
                 user.update({"roles": filter_groups})
             return mapped_users
 
         users = []
-        params = self.get_users_params(userPoolId)
+        params = self.get_users_params(user_pool_id)
         response = self.client.list_users(**params)
         users.extend(response["Users"])
 
-        mapped_users = process_users(users, userPoolId)
+        mapped_users = process_users(users, user_pool_id)
         return mapped_users
 
     def get_roles_params(self, user_pool_id) -> dict:

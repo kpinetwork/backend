@@ -5,7 +5,6 @@ class FinancialScenarioService:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
-        pass
 
     def get_scenarios(self, offset=0, max_count=40) -> list:
         columns = [

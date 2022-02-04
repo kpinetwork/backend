@@ -21,8 +21,8 @@ users_service = UsersService(logger, cognito, response_user)
 def handler(event, context):
     try:
 
-        poolId = os.environ.get("USER_POOL_ID")
-        users = users_service.get_users(poolId)
+        pool_id = os.environ.get("USER_POOL_ID")
+        users = users_service.get_users(pool_id)
 
         return {
             "statusCode": 200,

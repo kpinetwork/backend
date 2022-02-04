@@ -5,7 +5,6 @@ class CohortService:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
-        pass
 
     def get_cohort_scenarios(
         self, cohort_id: str, scenario_type: str, year: str, offset=0, max_count=20
@@ -13,7 +12,8 @@ class CohortService:
         try:
             if cohort_id and cohort_id.strip():
                 columns = [
-                    "financial_scenario.id" "financial_scenario.name",
+                    "financial_scenario.id",
+                    "financial_scenario.name",
                     "financial_scenario.currency",
                     "financial_scenario.type",
                     "company.id as company_id",

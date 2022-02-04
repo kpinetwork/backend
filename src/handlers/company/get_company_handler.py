@@ -16,8 +16,8 @@ company_service = CompanyService(session, query_builder, logger, response_sql)
 
 def handler(event, context):
     try:
-        id = event.get("pathParameters").get("id")
-        company = company_service.get_company(id)
+        company_id = event.get("pathParameters").get("id")
+        company = company_service.get_company(company_id)
 
         return {
             "statusCode": 200,
