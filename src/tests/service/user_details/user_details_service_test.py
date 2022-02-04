@@ -32,6 +32,10 @@ class TestUsersService(TestCase):
         attrs = {"admin_list_groups_for_user.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
+    def mock_list_users(self, response):
+        attrs = {"list_users.return_value": response}
+        self.mock_client.configure_mock(**attrs)
+
     def mock_process_user_roles(self, response):
         attrs = {"process_user_roles.return_value": response}
         self.mock_response_user.configure_mock(**attrs)
@@ -71,6 +75,7 @@ class TestUsersService(TestCase):
             "status": "Active",
             "created_at": self.user.get("UserCreateDate"),
         }
+        self.mock_list_users({"Users": [self.user]})
         self.mock_process_user_roles(roles)
         self.mock_admin_list_groups_for_user({"Groups": [{"GroupName": "customer"}]})
         self.mock_process_user_info(user_info)
@@ -103,6 +108,7 @@ class TestUsersService(TestCase):
             "roles": roles,
         }
         expected_user = {"user": user_info, "permissions": []}
+        self.mock_list_users({"Users": [self.user]})
         self.mock_process_user_roles(roles)
         self.mock_admin_list_groups_for_user({"Groups": [{"GroupName": "customer"}]})
         self.mock_process_user_info(user_info)

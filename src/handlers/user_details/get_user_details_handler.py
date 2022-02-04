@@ -20,9 +20,9 @@ user_service = UserDetailsService(logger, cognito, response_user)
 
 def handler(event, context):
     try:
-        username = event.get("pathParameters").get("username")
+        email = event.get("pathParameters").get("username")
         pool_id = os.environ.get("USER_POOL_ID")
-        user = user_service.get_user_details(pool_id, username)
+        user = user_service.get_user_details(pool_id, email)
 
         return {
             "statusCode": 200,

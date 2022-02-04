@@ -8,13 +8,13 @@ class ResponseUser:
         role = group.split("_")
         return role[1] if role and len(role) == 3 else group
 
-    def process_user_info(self, user, username) -> dict:
+    def process_user_info(self, user, email) -> dict:
         if not user:
             return dict()
         status = "Active" if user.get("Enabled", True) else "Inactive"
         user_info = {
             "id": user.get("Username"),
-            "email": username,
+            "email": email,
             "status": status,
             "created_at": user.get("UserCreateDate"),
         }
