@@ -212,6 +212,7 @@ functions:
     include:
     - ./src/handlers/users/get_roles_handler.py
     - ./src/service/users/users_service.py
+    - ./src/utils/response_user.py
 
 layers:
   layer_libraries:
