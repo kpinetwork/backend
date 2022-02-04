@@ -681,3 +681,28 @@ resource "aws_lambda_function" "get_roles_lambda_function" {
     }
   }
 }
+
+resource "aws_lambda_function" "get_user_details_lambda_function" {
+  role = var.lambdas_exec_roles_arn.get_user_details_exec_role_arn
+  handler = "get_user_details_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.get_user_details_function_bucket.bucket
+  s3_key = var.object_bucket_references.get_user_details_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.get_user_details_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_user_details_function_bucket.etag)
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY = var.aws_access_key_id
+      SECRET_KEY = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+    }
+  }
+}
+

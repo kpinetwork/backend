@@ -191,12 +191,21 @@ functions:
     include:
     - ./src/handlers/users/get_users_handler.py
     - ./src/service/users/users_service.py
+    - ./src/utils/response_user.py
 
   get_roles_handler:
     requirements: ./src/handlers/users/requirements.txt
     include:
     - ./src/handlers/users/get_roles_handler.py
     - ./src/service/users/users_service.py
+    - ./src/utils/response_user.py
+
+  get_user_details_handler:
+    requirements: ./src/handlers/user_details/requirements.txt
+    include:
+    - ./src/handlers/user_details/get_user_details_handler.py
+    - ./src/service/user_details/user_details_service.py
+    - ./src/utils/response_user.py
 
 layers:
   layer_libraries:

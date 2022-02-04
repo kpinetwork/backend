@@ -55,6 +55,7 @@ variable "lambdas_names" {
     "verify_users_with_same_email_lambda_function" : "verify_users_with_same_email_lambda_function"
     "get_users_lambda_function": "get_users_lambda_function"
     "get_roles_lambda_function" : "get_roles_lambda_function"
+    "get_user_details_lambda_function" : "get_user_details_lambda_function"
   }
 }
 

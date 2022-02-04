@@ -36,7 +36,7 @@ class TestUsersService(TestCase):
                     "CreationDate": "",
                 },
                 {
-                    "GroupName": "customer",
+                    "GroupName": "env_customer_group",
                     "UserPoolId": "UserPoolId",
                     "Description": "Test group",
                     "RoleArn": "Arn",
@@ -53,11 +53,14 @@ class TestUsersService(TestCase):
                     "GroupName": "default_Google",
                     "Description": "Group for google users",
                 },
-                {"GroupName": "Customer", "Description": "Test group"},
+                {"GroupName": "env_customer_group", "Description": "Test group"},
             ]
         }
         self.mock_client = Mock()
-        self.users_service_instance = UsersService(logger, self.mock_client)
+        self.mock_response_user = Mock()
+        self.users_service_instance = UsersService(
+            logger, self.mock_client, self.mock_response_user
+        )
 
     def mock_list_users(self, response):
         attrs = {"list_users.return_value": response}
@@ -71,9 +74,18 @@ class TestUsersService(TestCase):
         attrs = {"list_groups.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
+    def mock_process_role_results(self, response):
+        attrs = {"process_role_results.return_value": response}
+        self.mock_response_user.configure_mock(**attrs)
+
+    def mock_process_user_roles(self, response):
+        attrs = {"process_user_roles.return_value": response}
+        self.mock_response_user.configure_mock(**attrs)
+
     def test_get_users_success(self):
         self.mock_list_users(self.users)
         self.mock_admin_list_groups_for_user(self.admin_groups)
+        self.mock_process_user_roles(["customer"])
         expected_result = [
             {"username": "01", "email": "user@email.com", "roles": ["customer"]}
         ]
@@ -92,7 +104,8 @@ class TestUsersService(TestCase):
 
     def test_get_roles_success(self):
         self.mock_list_groups(self.groups)
-        expected_result = [{"name": "Customer", "description": "Test group"}]
+        expected_result = [{"name": "customer", "description": "Test group"}]
+        self.mock_process_role_results(expected_result)
 
         get_roles_out = self.users_service_instance.get_roles("userPoolId")
 
@@ -100,6 +113,7 @@ class TestUsersService(TestCase):
 
     def test_get_roles_without_groups_should_return_empty_list(self):
         self.mock_list_groups({"Groups": []})
+        self.mock_process_role_results([])
 
         get_roles_out = self.users_service_instance.get_roles("userPoolId")
 
