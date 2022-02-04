@@ -25,6 +25,7 @@ output "lambdas_exec_roles_arn" {
       "verify_users_with_same_email_exec_role_arn": aws_iam_role.verify_users_with_same_email_lambda_exec_role.arn
       "get_users_exec_role_arn": aws_iam_role.get_users_lambda_exec_role.arn
       "get_roles_exec_role_arn": aws_iam_role.get_roles_lambda_exec_role.arn
+      "get_user_details_exec_role_arn": aws_iam_role.get_user_details_lambda_exec_role.arn
   }
 }
 

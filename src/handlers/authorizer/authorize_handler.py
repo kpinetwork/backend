@@ -53,7 +53,7 @@ def verify_token_application(app_client_id: str, claims: dict):
         raise Exception("Token was not issued for this audience")
 
 
-def get_policy(permission: str, user: str) -> str:
+def get_policy(permission: str, user: str) -> dict:
     account_id = os.environ.get("AWS_ACCOUNT_ID")
     api_gateway = os.environ.get("API_GATEWAY")
     return {

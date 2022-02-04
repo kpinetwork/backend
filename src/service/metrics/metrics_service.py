@@ -5,7 +5,6 @@ class MetricsService:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
-        pass
 
     def get_metric_by_company_id(
         self, company_id: str, name: str, scenario_type: str
@@ -97,7 +96,7 @@ class MetricsService:
             self.logger.info(error)
             raise error
 
-    def get_average_metrics(self, name: str, company_id: str) -> int:
+    def get_average_metrics(self, name: str, company_id: str) -> dict:
         try:
             if name and name.strip() and company_id and company_id.strip():
                 query = (

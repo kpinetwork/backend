@@ -12,11 +12,11 @@ def handler(event, context):
 
         client = boto3.client("cognito-idp")
         username = event["userName"]
-        poolId = event["userPoolId"]
+        pool_id = event["userPoolId"]
         group = f"{os.environ.get('ENVIRONMENT')}_customer_group"
 
         client.admin_add_user_to_group(
-            UserPoolId=poolId, Username=username, GroupName=group
+            UserPoolId=pool_id, Username=username, GroupName=group
         )
 
         return event

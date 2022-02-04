@@ -3,6 +3,7 @@ import json
 import boto3
 import logging
 from users_service import UsersService
+from response_user import ResponseUser
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -11,13 +12,14 @@ boto3.Session(
     aws_secret_access_key=os.environ.get("SECRET_KEY"),
 )
 cognito = boto3.client("cognito-idp")
-users_service = UsersService(logger, cognito)
+response_user = ResponseUser()
+users_service = UsersService(logger, cognito, response_user)
 
 
 def handler(event, context):
     try:
-        userPoolId = os.environ.get("USER_POOL_ID")
-        groups = users_service.get_roles(userPoolId)
+        user_pool_id = os.environ.get("USER_POOL_ID")
+        groups = users_service.get_roles(user_pool_id)
 
         return {
             "statusCode": 200,

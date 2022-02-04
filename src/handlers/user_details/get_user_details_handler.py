@@ -2,7 +2,7 @@ import os
 import json
 import boto3
 import logging
-from users_service import UsersService
+from user_details_service import UserDetailsService
 from response_user import ResponseUser
 
 logger = logging.getLogger()
@@ -15,18 +15,18 @@ boto3.Session(
 
 cognito = boto3.client("cognito-idp")
 response_user = ResponseUser()
-users_service = UsersService(logger, cognito, response_user)
+user_service = UserDetailsService(logger, cognito, response_user)
 
 
 def handler(event, context):
     try:
-
+        username = event.get("pathParameters").get("username")
         pool_id = os.environ.get("USER_POOL_ID")
-        users = users_service.get_users(pool_id)
+        user = user_service.get_user_details(pool_id, username)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(users, default=str),
+            "body": json.dumps(user, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
