@@ -188,3 +188,10 @@ resource "aws_s3_bucket_object" "get_roles_function_object" {
   source = "${path.module}/../../dist/get_roles_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_roles_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "get_user_details_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_user_details_handler.zip"
+  source = "${path.module}/../../dist/get_user_details_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_user_details_handler.zip")
+}

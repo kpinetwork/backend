@@ -1093,3 +1093,61 @@ resource "aws_lambda_permission" "apigw_get_users_lambda" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_users_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_users_lambda_function.http_method}${var.api_gateway_references.apigw_get_users_lambda_function.resource_path}"
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM ROLE USER DETAILS
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "get_user_details_lambda_exec_role" {
+  name               = "${var.environment}_get_user_details_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "get_user_details_lambda_logs" {
+  role       = aws_iam_role.get_user_details_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy" "get_user_details_cognito_policy" {
+  name        = "${var.environment}_get_user_details_cognito_policy"
+  role        = aws_iam_role.get_user_details_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:ListUsers"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_lambda_permission" "apigw_get_user_details_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetUserDetails"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_user_details_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_user_details_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_user_details_lambda_function.http_method}${var.api_gateway_references.apigw_get_user_details_lambda_function.resource_path}"
+}

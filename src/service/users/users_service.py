@@ -1,10 +1,11 @@
 class UsersService:
-    def __init__(self, logger, client) -> None:
+    def __init__(self, logger, client, response_user) -> None:
         self.logger = logger
         self.client = client
+        self.response_user = response_user
 
-    def get_users_params(self, userPoolId) -> dict:
-        return {"UserPoolId": userPoolId, "AttributesToGet": ["email"]}
+    def get_users_params(self, user_pool_id) -> dict:
+        return {"UserPoolId": user_pool_id, "AttributesToGet": ["email"]}
 
     def get_users(self, userPoolId) -> list:
         def process_users(users, userPoolId) -> list:
@@ -17,11 +18,7 @@ class UsersService:
                 groups = self.client.admin_list_groups_for_user(
                     Username=user["username"], UserPoolId=userPoolId
                 )
-                filter_groups = [
-                    group["GroupName"]
-                    for group in groups["Groups"]
-                    if "Google" not in group["GroupName"]
-                ]
+                filter_groups = self.response_user.process_user_roles(groups)
                 user.update({"roles": filter_groups})
             return mapped_users
 
@@ -33,27 +30,16 @@ class UsersService:
         mapped_users = process_users(users, userPoolId)
         return mapped_users
 
-    def get_roles_params(self, userPoolId) -> dict:
+    def get_roles_params(self, user_pool_id) -> dict:
         return {
-            "UserPoolId": userPoolId,
+            "UserPoolId": user_pool_id,
             "Limit": 4,
         }
 
-    def get_roles(self, userPoolId) -> list:
-        def process_result(groups) -> list:
-            roles = [
-                {
-                    "name": group.get("GroupName"),
-                    "description": group.get("Description"),
-                }
-                for group in groups
-                if group.get("GroupName", "").find("Google") == -1
-            ]
-            return roles
-
-        params = self.get_roles_params(userPoolId)
+    def get_roles(self, user_pool_id) -> list:
+        params = self.get_roles_params(user_pool_id)
         result = self.client.list_groups(**params)
         _groups = result.get("Groups")
         groups = _groups if _groups else []
-        roles = process_result(groups)
+        roles = self.response_user.process_role_results(groups)
         return roles

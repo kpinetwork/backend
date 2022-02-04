@@ -165,6 +165,12 @@ resource "aws_api_gateway_resource" "users" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "user" {
+  path_part   = "{username}"
+  parent_id   = aws_api_gateway_resource.users.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "roles" {
   path_part   = "roles"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -414,6 +420,14 @@ resource "aws_api_gateway_method" "get_users_method" {
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
+resource "aws_api_gateway_method" "get_user_details_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.user.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
 resource "aws_api_gateway_method" "get_roles_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.roles.id
@@ -602,6 +616,15 @@ resource "aws_api_gateway_integration" "users_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_users_lambda_function
+}
+
+resource "aws_api_gateway_integration" "user_details_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.user.id
+  http_method             = aws_api_gateway_method.get_user_details_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_user_details_lambda_function
 }
 
 resource "aws_api_gateway_integration" "get_roles_integration" {
