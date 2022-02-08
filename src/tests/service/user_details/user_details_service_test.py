@@ -32,6 +32,10 @@ class TestUsersService(TestCase):
         attrs = {"admin_list_groups_for_user.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
+    def mock_list_users(self, response):
+        attrs = {"list_users.return_value": response}
+        self.mock_client.configure_mock(**attrs)
+
     def mock_process_user_roles(self, response):
         attrs = {"process_user_roles.return_value": response}
         self.mock_response_user.configure_mock(**attrs)
@@ -39,6 +43,27 @@ class TestUsersService(TestCase):
     def mock_process_user_info(self, response):
         attrs = {"process_user_info.return_value": response}
         self.mock_response_user.configure_mock(**attrs)
+
+    def test_get_username_by_email_with_valid_args_should_return_username(self):
+        self.mock_list_users({"Users": [self.user]})
+
+        username_out = self.users_service_instance.get_username_by_email(
+            "test@email.com", "pool_id"
+        )
+
+        self.assertEqual(username_out, self.user["Username"])
+
+    def test_get_username_by_email_with_invalid_args_should_return_exception(self):
+        self.mock_client.list_users.side_effect = Exception(
+            "Parameter validation failed"
+        )
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.users_service_instance.get_username_by_email("", None)
+            )
+
+            self.assertTrue("Parameter validation failed" in context.exception)
+            self.assertEqual(exception, Exception)
 
     def test_get_user_roles_with_valid_args_should_return_complete_info(self):
         expected_out = ["customer"]
@@ -71,6 +96,7 @@ class TestUsersService(TestCase):
             "status": "Active",
             "created_at": self.user.get("UserCreateDate"),
         }
+        self.mock_list_users({"Users": [self.user]})
         self.mock_process_user_roles(roles)
         self.mock_admin_list_groups_for_user({"Groups": [{"GroupName": "customer"}]})
         self.mock_process_user_info(user_info)
@@ -103,6 +129,7 @@ class TestUsersService(TestCase):
             "roles": roles,
         }
         expected_user = {"user": user_info, "permissions": []}
+        self.mock_list_users({"Users": [self.user]})
         self.mock_process_user_roles(roles)
         self.mock_admin_list_groups_for_user({"Groups": [{"GroupName": "customer"}]})
         self.mock_process_user_info(user_info)
