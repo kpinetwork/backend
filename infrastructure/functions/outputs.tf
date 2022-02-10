@@ -24,6 +24,7 @@ output "lambdas_invoke_arns" {
     "get_users_lambda_function": aws_lambda_function.get_users_lambda_function.invoke_arn
     "get_roles_lambda_function": aws_lambda_function.get_roles_lambda_function.invoke_arn
     "get_user_details_lambda_function": aws_lambda_function.get_user_details_lambda_function.invoke_arn
+    "make_data_public_lambda_function": aws_lambda_function.make_data_public_lambda_function.invoke_arn
   }
 }
 

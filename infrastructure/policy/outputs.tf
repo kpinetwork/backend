@@ -26,6 +26,7 @@ output "lambdas_exec_roles_arn" {
       "get_users_exec_role_arn": aws_iam_role.get_users_lambda_exec_role.arn
       "get_roles_exec_role_arn": aws_iam_role.get_roles_lambda_exec_role.arn
       "get_user_details_exec_role_arn": aws_iam_role.get_user_details_lambda_exec_role.arn
+      "make_data_public_exec_role_arn": aws_iam_role.make_data_public_lambda_exec_role.arn
   }
 }
 
