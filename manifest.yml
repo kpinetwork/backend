@@ -227,6 +227,7 @@ functions:
     - ./src/service/users/users_service.py
     - ./src/utils/response_user.py
 
+
 layers:
   layer_libraries:
     requirements: ./requirements/lambda_layer/requirements.txt
