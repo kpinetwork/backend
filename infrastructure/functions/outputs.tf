@@ -27,6 +27,7 @@ output "lambdas_invoke_arns" {
     "assign_company_permissions_lambda_function": aws_lambda_function.assign_company_permissions_lambda_function.invoke_arn
     "make_data_public_lambda_function": aws_lambda_function.make_data_public_lambda_function.invoke_arn
     "assign_company_permissions_lambda_function": aws_lambda_function.assign_company_permissions_lambda_function.invoke_arn
+    "make_data_public_lambda_function": aws_lambda_function.make_data_public_lambda_function.invoke_arn
   }
 }
 
