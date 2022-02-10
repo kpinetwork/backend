@@ -1,12 +1,8 @@
 import logging
-import os
 import casbin
 import casbin_sqlalchemy_adapter
 from strenum import StrEnum
-from db.utils.connection import get_db_uri
-
-ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
-model_path = os.path.join(ROOT_DIR, "casbin_configuration", "model.conf")
+from connection import get_db_uri
 
 
 class PolicyManager:
@@ -17,7 +13,7 @@ class PolicyManager:
         self.adapter = casbin_sqlalchemy_adapter.Adapter(self.db_uri)
 
         casbin_sqlalchemy_adapter.CasbinRule
-        self.e = casbin.Enforcer(model_path, self.adapter)
+        self.e = casbin.Enforcer("model.conf", self.adapter)
 
     class ObjectType(StrEnum):
         COMPANY = "Company"
