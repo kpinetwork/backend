@@ -13,27 +13,32 @@ class PolicyManager:
         self.adapter = casbin_sqlalchemy_adapter.Adapter(self.db_uri)
 
         casbin_sqlalchemy_adapter.CasbinRule
-        self.e = casbin.Enforcer("model.conf", self.adapter)
+        self.e = casbin.Enforcer("./model.conf", self.adapter)
 
     class ObjectType(StrEnum):
         COMPANY = "Company"
         METRIC = "Metric"
         SCENARIO = "Scenario"
 
+    class ActionType(StrEnum):
+        READ = "read"
+        WRITE = "write"
+        DELETE = "delete"
+
     def verify_access(
-        self, user_id: str, object_id: str, action: str, type: ObjectType
+        self, user_id: str, object_id: str, action: ActionType, type: ObjectType
     ) -> bool:
         return True if self.e.enforce(user_id, object_id, action, type) else False
 
     def add_policy(
-        self, user_id: str, object_id: str, action: str, type: ObjectType
+        self, user_id: str, object_id: str, action: ActionType, type: ObjectType
     ) -> bool:
         return self.e.add_policy(user_id, object_id, action, type)
 
-    def add_policies(self, rules: list) -> bool:
+    def add_policies(self, rules: list[list]) -> bool:
         return self.e.add_policies(rules)
 
     def remove_policy(
-        self, user_id: str, object_id: str, action: str, type: ObjectType
+        self, user_id: str, object_id: str, action: ActionType, type: ObjectType
     ) -> bool:
         return self.e.remove_policy(user_id, object_id, action, type)
