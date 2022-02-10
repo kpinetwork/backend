@@ -1190,7 +1190,6 @@ resource "aws_lambda_permission" "apigw_assign_company_permissions_lambda" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.api_id}/*/${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.http_method}${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.resource_path}"
 }
-
 # ----------------------------------------------------------------------------------------------------------------------
 # AWS IAM MAKE COMPANY PUBLIC
 # ----------------------------------------------------------------------------------------------------------------------

@@ -208,3 +208,9 @@ resource "aws_s3_bucket_object" "assign_company_permissions_function_object" {
   source = "${path.module}/../../dist/assign_company_permissions_handler.zip"
   etag = filemd5("${path.module}/../../dist/assign_company_permissions_handler.zip")
 }
+resource "aws_s3_bucket_object" "make_data_public_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/make_data_public_handler.zip"
+  source = "${path.module}/../../dist/make_data_public_handler.zip"
+  etag = filemd5("${path.module}/../../dist/make_data_public_handler.zip")
+}
