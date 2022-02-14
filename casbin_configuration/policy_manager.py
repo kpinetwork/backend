@@ -42,3 +42,6 @@ class PolicyManager:
         self, user_id: str, object_id: str, action: ActionType, type: ObjectType
     ) -> bool:
         return self.e.remove_policy(user_id, object_id, action, type)
+
+    def remove_policies(self, rules: list[list]) -> bool:
+        return self.e.remove_policies(rules)

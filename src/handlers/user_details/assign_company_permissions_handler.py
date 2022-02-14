@@ -4,7 +4,7 @@ import boto3
 import logging
 from user_details_service import UserDetailsService
 from response_user import ResponseUser
-from policy_manager import PolicyManager
+from casbin_configuration.policy_manager import PolicyManager
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,13 +22,18 @@ user_service = UserDetailsService(logger, cognito, response_user, policy_manager
 
 def handler(event, context):
     try:
-        email = event.get("pathParameters").get("username")
-        pool_id = os.environ.get("USER_POOL_ID")
-        user = user_service.get_user_details(pool_id, email)
+        if event.get("body"):
+            raise ("No company data provided")
+
+        data = event.get("body")
+        username = data.get("username")
+        companies = data.get("companies")
+
+        response = user_service.assign_company_permissions(username, companies)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(user, default=str),
+            "body": json.dumps({"modified": response}, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",

@@ -1118,9 +1118,40 @@ resource "aws_iam_role" "get_user_details_lambda_exec_role" {
 EOF
 }
 
+resource "aws_iam_role" "assign_company_permissions_lambda_exec_role" {
+  name               = "${var.environment}_assign_company_permissions_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+
 resource "aws_iam_role_policy_attachment" "get_user_details_lambda_logs" {
   role       = aws_iam_role.get_user_details_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "assign_company_permissions_lambda_logs" {
+  role       = aws_iam_role.assign_company_permissions_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "assign_company_permissions_lambda_vpc" {
+  role       = aws_iam_role.assign_company_permissions_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
 }
 
 resource "aws_iam_role_policy" "get_user_details_cognito_policy" {
