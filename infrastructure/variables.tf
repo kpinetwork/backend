@@ -56,6 +56,7 @@ variable "lambdas_names" {
     "get_users_lambda_function": "get_users_lambda_function"
     "get_roles_lambda_function" : "get_roles_lambda_function"
     "get_user_details_lambda_function" : "get_user_details_lambda_function"
+    "make_data_public_lambda_function" : "make_data_public_lambda_function"
   }
 }
 

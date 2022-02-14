@@ -108,3 +108,26 @@ class CompanyService:
         except Exception as error:
             self.logger.info(error)
             raise error
+
+    def make_data_public(self, companies_data) -> bool:
+        try:
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_set_conditions({"is_public": "c.public_value"})
+                .add_from_values_statement(
+                    companies_data, "c(company_id, public_value)"
+                )
+                .add_sql_where_equal_condition(
+                    {"c.company_id": f"{self.table_name}.id"}
+                )
+                .build_update()
+                .get_query()
+            )
+            self.session.execute(query)
+            self.session.commit()
+
+            return True
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
