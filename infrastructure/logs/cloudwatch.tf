@@ -136,10 +136,6 @@ resource "aws_cloudwatch_log_group" "get_user_details_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_user_details_lambda_function}"
   retention_in_days = var.retention_days
 }
-resource "aws_cloudwatch_log_group" "make_data_public_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.make_data_public_lambda_function}"
-  retention_in_days = var.retention_days
-}
 
 resource "aws_cloudwatch_log_group" "assign_company_permissions_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.assign_company_permissions_lambda_function}"
