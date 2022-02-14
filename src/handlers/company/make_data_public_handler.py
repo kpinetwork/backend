@@ -16,11 +16,13 @@ company_service = CompanyService(session, query_builder, logger, response_sql)
 
 def handler(event, context):
     try:
-        companies_data = {}
-        if event.get("body"):
-            companies_data = json.loads(event.get("body")["companies"])
+        if not event.get("body"):
+            raise Exception("No company data provided")
 
-        response = company_service.make_data_public(companies_data)
+        data = json.loads(event.get("body"))
+        companies = data.get("companies")
+
+        response = company_service.make_data_public(companies)
 
         return {
             "statusCode": 200,
@@ -32,5 +34,10 @@ def handler(event, context):
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+            },
         }
