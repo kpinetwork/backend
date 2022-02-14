@@ -739,7 +739,6 @@ resource "aws_lambda_function" "assign_company_permissions_lambda_function" {
   }
 }
 
-
 resource "aws_lambda_function" "make_data_public_lambda_function" {
   role = var.lambdas_exec_roles_arn.make_data_public_exec_role_arn
   handler = "make_data_public_handler.handler"
