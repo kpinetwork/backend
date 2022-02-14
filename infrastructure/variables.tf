@@ -59,6 +59,7 @@ variable "lambdas_names" {
     "assign_company_permissions_lambda_function" : "assign_company_permissions_lambda_function"
     "make_data_public_lambda_function" : "make_data_public_lambda_function"
     "assign_company_permissions_lambda_function" : "assign_company_permissions_lambda_function"
+    "make_data_public_lambda_function" : "make_data_public_lambda_function"
   }
 }
 
