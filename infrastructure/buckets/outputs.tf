@@ -150,7 +150,7 @@ output "object_references" {
       key : aws_s3_bucket_object.assign_company_permissions_function_object.key,
       bucket : aws_s3_bucket_object.assign_company_permissions_function_object.bucket
     }
-     "make_data_pulic_function_bucket": {
+     "make_data_public_function_bucket": {
       etag : aws_s3_bucket_object.make_data_public_function_object.etag,
       key : aws_s3_bucket_object.make_data_public_function_object.key,
       bucket : aws_s3_bucket_object.make_data_public_function_object.bucket

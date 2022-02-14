@@ -7,7 +7,10 @@ class QuerySQLBuilder:
     def __init__(self) -> None:
         self.query = ""
         self.table_name = ""
+        self.values_alias = ""
         self.select_conditions = []
+        self.set_conditions = []
+        self.values = []
         self.join_clauses = []
         self.where_conditions_conj = []
         self.where_conditions_disj = []
@@ -62,6 +65,22 @@ class QuerySQLBuilder:
     def add_select_conditions(self, columns: list = None):
         columns = columns if columns else ["*"]
         self.select_conditions.extend(columns)
+        return self
+
+    def add_from_values_statement(self, values: dict = None, alias: str = ""):
+        self.values_alias = alias
+        if values:
+            for k, v in values.items():
+                value = f"('{k}',{v})"
+                self.values.append(value)
+        return self
+
+    def add_set_conditions(self, conditions: dict = None):
+        if conditions:
+            for k, v in conditions.items():
+                if self.__is_valid_name(k):
+                    condition = f"{k} = {v}"
+                    self.set_conditions.append(condition)
         return self
 
     def add_join_clause(
@@ -134,6 +153,26 @@ class QuerySQLBuilder:
             self.select_conditions.append("*")
         return ",".join(self.select_conditions)
 
+    def __build_set(self):
+        set_query = ""
+        if len(self.set_conditions) > 0:
+            set_query += "SET " + ", ".join(self.set_conditions)
+        return set_query
+
+    def __build_from_values_statement(self):
+        if len(self.values) > 0 and self.values_alias != "":
+            return (
+                "FROM "
+                + "(values "
+                + ",".join(self.values)
+                + ") "
+                + f"as {self.values_alias}"
+            )
+        elif len(self.values) > 0 and self.values_alias == "":
+            return "FROM " + "(values " + ",".join(self.values) + ") "
+        else:
+            return ""
+
     def __build_join(self):
         return """ """.join(self.join_clauses)
 
@@ -196,10 +235,26 @@ class QuerySQLBuilder:
         )
         return self
 
+    def build_update(self):
+        self.query = """
+            UPDATE {table_name}
+            {set_clause}
+            {from_statement}
+            {where_conditions}
+        """.format(
+            table_name=self.table_name,
+            set_clause=self.__build_set(),
+            from_statement=self.__build_from_values_statement(),
+            where_conditions=self.__build_where(),
+        )
+        return self
+
     def __clear(self):
         self.query = ""
         self.table_name = ""
         self.select_conditions = []
+        self.set_conditions = []
+        self.values = []
         self.where_conditions_conj = []
         self.where_conditions_disj = []
         self.order_by = None

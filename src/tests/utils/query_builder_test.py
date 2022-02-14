@@ -209,6 +209,51 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(result, expected_condition)
 
+    def test__build_set_with_condition(self):
+        conditions = {"test": "test"}
+        query_builder = QuerySQLBuilder().add_set_conditions(conditions)
+        expected_result = "SET test = test"
+
+        result = query_builder._QuerySQLBuilder__build_set()
+
+        self.assertEqual(result, expected_result)
+
+    def test__build_set_without_condition(self):
+        conditions = {}
+        query_builder = QuerySQLBuilder().add_set_conditions(conditions)
+        expected_result = ""
+
+        result = query_builder._QuerySQLBuilder__build_set()
+
+        self.assertEqual(result, expected_result)
+
+    def test__build_from_values_statement_with_conditions(self):
+        values = {"test": "test"}
+        query_builder = QuerySQLBuilder().add_from_values_statement(values, "alias")
+        expected_result = "FROM (values ('test',test)) as alias"
+
+        result = query_builder._QuerySQLBuilder__build_from_values_statement()
+
+        self.assertEqual(result, expected_result)
+
+    def test__build_from_values_statement_without_alias(self):
+        values = {"test": "test"}
+        query_builder = QuerySQLBuilder().add_from_values_statement(values)
+        expected_result = "FROM (values ('test',test)) "
+
+        result = query_builder._QuerySQLBuilder__build_from_values_statement()
+
+        self.assertEqual(result, expected_result)
+
+    def test__build_from_values_statement_without_conditions(self):
+        values = {}
+        query_builder = QuerySQLBuilder().add_from_values_statement(values)
+        expected_result = ""
+
+        result = query_builder._QuerySQLBuilder__build_from_values_statement()
+
+        self.assertEqual(result, expected_result)
+
     def test__build_where_with_condition(self):
         conditions = {"name": "test"}
         query_builder = QuerySQLBuilder().add_sql_where_equal_condition(conditions)
@@ -358,6 +403,60 @@ class TestQueryBuilder(TestCase):
             GROUP BY {table_name}.name
             OFFSET 2
             LIMIT 10
+        """.format(
+            table_name=self.table_name
+        )
+
+        query = query_builder.get_query()
+        self.assertEqual(
+            remove_white_spaces(query), remove_white_spaces(expected_query)
+        )
+
+    def test__clear_with_updated_build(self):
+        query_builder = (
+            QuerySQLBuilder()
+            .add_table_name(self.table_name)
+            .add_set_conditions({"test": "test"})
+            .add_from_values_statement({"id1": True, "id2": False}, "values")
+            .add_sql_where_equal_condition({"id": "test.id"})
+            .build_update()
+        )
+
+        query_builder._QuerySQLBuilder__clear()
+
+        self.assertEqual(query_builder.table_name, "")
+        self.assertEqual(query_builder.set_conditions, [])
+        self.assertEqual(query_builder.where_conditions_conj, [])
+        self.assertEqual(query_builder.values, [])
+
+    def test_build_update_with_all_conditions(self):
+        query_builder = (
+            QuerySQLBuilder()
+            .add_table_name(self.table_name)
+            .add_set_conditions({"test": "test"})
+            .add_from_values_statement({"id1": True, "id2": False}, "values")
+            .add_sql_where_equal_condition({"c.company_id": f"{self.table_name}.id"})
+            .build_update()
+        )
+
+        self.assertTrue(len(query_builder.set_conditions) > 0)
+        self.assertTrue(len(query_builder.values) > 0)
+        self.assertTrue(len(query_builder.where_conditions_conj) > 0)
+
+    def test_get_update_table_query(self):
+        query_builder = (
+            QuerySQLBuilder()
+            .add_table_name(self.table_name)
+            .add_set_conditions({"test": "test"})
+            .add_from_values_statement({"id1": True, "id2": False}, "values")
+            .add_sql_where_equal_condition({"id": "test.id"})
+            .build_update()
+        )
+        expected_query = """
+            UPDATE {table_name}
+            SET test = test
+            FROM (values ('id1',True),('id2',False)) as values
+            WHERE id = test.id
         """.format(
             table_name=self.table_name
         )
