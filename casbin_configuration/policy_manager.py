@@ -35,7 +35,7 @@ class PolicyManager:
     ) -> bool:
         return self.e.add_policy(user_id, object_id, action, type)
 
-    def add_policies(self, rules: list[list]) -> bool:
+    def add_policies(self, rules: list) -> bool:
         return self.e.add_policies(rules)
 
     def remove_policy(
@@ -43,5 +43,5 @@ class PolicyManager:
     ) -> bool:
         return self.e.remove_policy(user_id, object_id, action, type)
 
-    def remove_policies(self, rules: list[list]) -> bool:
+    def remove_policies(self, rules: list) -> bool:
         return self.e.remove_policies(rules)

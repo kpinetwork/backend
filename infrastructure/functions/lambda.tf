@@ -721,6 +721,11 @@ resource "aws_lambda_function" "assign_company_permissions_lambda_function" {
     aws_lambda_layer_version.db_lambda_layer
   ]
 
+  vpc_config {
+    subnet_ids         = [var.public_subnet_a_id]
+    security_group_ids = [var.security_group_id]
+  }
+
   environment {
     variables = {
       ACCESS_KEY = var.aws_access_key_id

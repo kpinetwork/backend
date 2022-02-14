@@ -22,10 +22,10 @@ user_service = UserDetailsService(logger, cognito, response_user, policy_manager
 
 def handler(event, context):
     try:
-        if event.get("body"):
+        if not event.get("body"):
             raise Exception("No company data provided")
 
-        data = event.get("body")
+        data = json.loads(event.get("body"))
         username = data.get("username")
         companies = data.get("companies")
 
