@@ -4,7 +4,7 @@ import boto3
 import logging
 from user_details_service import UserDetailsService
 from response_user import ResponseUser
-from casbin_configuration.policy_manager import PolicyManager
+from policy_manager import PolicyManager
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -23,7 +23,7 @@ user_service = UserDetailsService(logger, cognito, response_user, policy_manager
 def handler(event, context):
     try:
         if event.get("body"):
-            raise ("No company data provided")
+            raise Exception("No company data provided")
 
         data = event.get("body")
         username = data.get("username")
