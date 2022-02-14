@@ -20,11 +20,11 @@ def handler(event, context):
         if event.get("body"):
             companies_data = json.loads(event.get("body")["companies"])
 
-        make_data_public = company_service.make_data_public(companies_data)
+        response = company_service.make_data_public(companies_data)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(make_data_public, default=str),
+            "body": json.dumps({"modified": response}, default=str),
             "headers": {"Content-Type": "application/json"},
         }
 
