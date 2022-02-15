@@ -125,27 +125,31 @@ class TestCompanyService(TestCase):
             self.assertEqual(exception, Exception)
             self.company_service_instance.session.execute.assert_called_once()
 
-    def test_make_data_public_success(self):
+    def test_change_company_publicly_success(self):
 
-        response_make_data_public = self.company_service_instance.make_data_public(
-            self.companies_data
+        response_change_company_publicly = (
+            self.company_service_instance.change_company_publicly(self.companies_data)
         )
 
-        self.assertTrue(response_make_data_public)
+        self.assertTrue(response_change_company_publicly)
         self.company_service_instance.session.execute.assert_called_once()
 
-    def test_make_data_public_with_empty_parameter(self):
-        response_make_data_public = self.company_service_instance.make_data_public({})
+    def test_change_company_publicly_with_empty_parameter(self):
+        response_change_company_publicly = (
+            self.company_service_instance.change_company_publicly({})
+        )
 
-        self.assertTrue(response_make_data_public)
+        self.assertTrue(response_change_company_publicly)
         self.company_service_instance.session.execute.assert_called_once()
 
-    def test_make_data_public_failed(self):
+    def test_change_company_publicly_failed(self):
         self.company_service_instance.session.execute.side_effect = Exception("error")
 
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.company_service_instance.make_data_public(self.companies_data)
+                self.company_service_instance.change_company_publicly(
+                    self.companies_data
+                )
             )
 
             self.assertTrue("error" in context.exception)

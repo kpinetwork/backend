@@ -22,7 +22,7 @@ def handler(event, context):
         data = json.loads(event.get("body"))
         companies = data.get("companies")
 
-        response = company_service.make_data_public(companies)
+        response = company_service.change_company_publicly(companies)
 
         return {
             "statusCode": 200,

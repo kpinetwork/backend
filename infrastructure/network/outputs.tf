@@ -131,9 +131,9 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.assign_company_permissions_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
-     "apigw_make_data_public_lambda_function": {
-      resource_path: aws_api_gateway_resource.make_data_public.path,
-      http_method: aws_api_gateway_method.make_data_public_method.http_method,
+     "apigw_change_company_publicly_lambda_function": {
+      resource_path: aws_api_gateway_resource.change_company_publicly.path,
+      http_method: aws_api_gateway_method.change_company_publicly_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

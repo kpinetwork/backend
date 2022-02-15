@@ -109,7 +109,7 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def make_data_public(self, companies_data) -> bool:
+    def change_company_publicly(self, companies_data) -> bool:
         try:
             query = (
                 self.query_builder.add_table_name(self.table_name)
