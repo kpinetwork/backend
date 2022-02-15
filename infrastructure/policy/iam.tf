@@ -1190,3 +1190,43 @@ resource "aws_lambda_permission" "apigw_assign_company_permissions_lambda" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.api_id}/*/${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.http_method}${var.api_gateway_references.apigw_assign_company_permissions_lambda_function.resource_path}"
 }
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM CHANGE COMPANY PUBLICLY
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "change_company_publicly_lambda_exec_role" {
+  name = "${var.environment}_change_company_publicly_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "change_company_publicly_lambda_logs" {
+  role = aws_iam_role.change_company_publicly_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "change_company_publicly_lambda_vpc" {
+  role = aws_iam_role.change_company_publicly_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_change_company_publicly_lambda" {
+  statement_id = "AllowExecutionFromAPIGatewayChangeCompanyPublicly"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.change_company_publicly_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_change_company_publicly_lambda_function.api_id}/*/${var.api_gateway_references.apigw_change_company_publicly_lambda_function.http_method}${var.api_gateway_references.apigw_change_company_publicly_lambda_function.resource_path}"
+}

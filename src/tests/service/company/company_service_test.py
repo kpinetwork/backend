@@ -25,6 +25,7 @@ class TestCompanyService(TestCase):
         }
         self.metric_size_cohort = {"size_cohort": "1", "growth": "123"}
         self.metric_avg = {"revenue": "100"}
+        self.companies_data = {"compani_id_01": True, "companie_id_02": False}
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
@@ -118,6 +119,37 @@ class TestCompanyService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_revenue_sum_by_company()
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_change_company_publicly_success(self):
+
+        response_change_company_publicly = (
+            self.company_service_instance.change_company_publicly(self.companies_data)
+        )
+
+        self.assertTrue(response_change_company_publicly)
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_change_company_publicly_with_empty_parameter(self):
+        response_change_company_publicly = (
+            self.company_service_instance.change_company_publicly({})
+        )
+
+        self.assertTrue(response_change_company_publicly)
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_change_company_publicly_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.change_company_publicly(
+                    self.companies_data
+                )
             )
 
             self.assertTrue("error" in context.exception)
