@@ -27,17 +27,17 @@ def handler(event, context):
         return {
             "statusCode": 200,
             "body": json.dumps({"modified": response}, default=str),
-            "headers": {"Content-Type": "application/json"},
-        }
-
-    except Exception as error:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": str(error)}),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
             },
+        }
+
+    except Exception as error:
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": str(error)}),
+            "headers": {"Content-Type": "application/json"},
         }
