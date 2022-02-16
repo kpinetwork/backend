@@ -31,7 +31,15 @@ class UserDetailsService:
 
     def get_user_details(self, user_pool_id, username) -> dict:
         user_info = self.get_user(user_pool_id, username)
-        return {"user": user_info, "permissions": []}
+        company_permissions = self.get_user_company_permissions(username)
+        return {"user": user_info, "permissions": company_permissions}
+
+    def get_user_company_permissions(self, username) -> list:
+        if username and username.strip():
+            return self.policy_manager.get_permissions_by_type(
+                username, self.policy_manager.ObjectType.COMPANY
+            )
+        raise Exception("No valid username provided")
 
     def add_company_permissions(self, username: str, companies: list) -> dict:
         rules = {

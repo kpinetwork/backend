@@ -30,6 +30,18 @@ class PolicyManager:
     ) -> bool:
         return True if self.e.enforce(user_id, object_id, action, type) else False
 
+    def get_permissions(self, user_id: str) -> list:
+        return self.e.get_permissions_for_user(user_id)
+
+    def get_permissions_by_type(self, user_id: str, type: ObjectType) -> list:
+        permissions = self.get_permissions(user_id)
+        type_permissions = [
+            {"id": permission[1], "permission": permission[2]}
+            for permission in permissions
+            if len(permission) == 4 and permission[3] == type
+        ]
+        return type_permissions
+
     def add_policy(
         self, user_id: str, object_id: str, action: ActionType, type: ObjectType
     ) -> bool:
