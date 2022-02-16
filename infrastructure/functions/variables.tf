@@ -28,6 +28,7 @@ variable "bucket_files" {}
 
 variable "public_subnet_a_id" {}
 variable "security_group_id" {}
+variable "private_subnet_ids" {}
 
 variable "db_host" {}
 variable "db_name" {}

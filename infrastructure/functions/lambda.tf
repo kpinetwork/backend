@@ -697,7 +697,7 @@ resource "aws_lambda_function" "get_user_details_lambda_function" {
   ]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
