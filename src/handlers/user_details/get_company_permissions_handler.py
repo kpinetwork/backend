@@ -30,7 +30,7 @@ def handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps({"modified": response}, default=str),
+            "body": json.dumps(response, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
