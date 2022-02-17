@@ -6,15 +6,17 @@ from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
+from company_anonymization import CompanyAnonymization
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
+company_anonymization = CompanyAnonymization()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 company_report_service = CompanyReportvsPeersService(
-    session, query_builder, logger, response_sql
+    session, query_builder, logger, response_sql, company_anonymization
 )
 
 
@@ -38,7 +40,7 @@ def handler(event, context):
             year = params.get("year", year)
 
         company_report = company_report_service.get_company_report_vs_peers(
-            company_id, sectors, verticals, investor_profile, growth_profile, size, year
+            company_id, sectors, verticals, investor_profile, growth_profile, size, year, False
         )
 
         return {

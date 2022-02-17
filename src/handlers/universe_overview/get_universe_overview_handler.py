@@ -6,14 +6,16 @@ from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
+from company_anonymization import CompanyAnonymization
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
+company_anonymization = CompanyAnonymization()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-overview_service = UniverseOverviewService(session, query_builder, logger, response_sql)
+overview_service = UniverseOverviewService(session, query_builder, logger, response_sql, company_anonymization)
 
 
 def handler(event, context):
@@ -35,7 +37,7 @@ def handler(event, context):
             year = params.get("year", year)
 
         overview = overview_service.get_universe_overview(
-            sectors, verticals, investor_profile, growth_profile, size, year
+            sectors, verticals, investor_profile, growth_profile, size, year, False
         )
 
         return {

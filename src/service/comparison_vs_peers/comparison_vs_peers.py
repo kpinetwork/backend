@@ -1,9 +1,10 @@
 class ComparisonvsPeersService:
-    def __init__(self, session, query_builder, logger, response_sql) -> None:
+    def __init__(self, session, query_builder, logger, response_sql, company_anonymization) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.company_anonymization = company_anonymization
         self.metric_table = "metric"
         self.company_table = "company"
         self.scenario_table = "financial_scenario"
@@ -72,7 +73,7 @@ class ComparisonvsPeersService:
             self.logger.info(error)
             raise error
 
-    def get_peers_comparison_metric(self, metric_data: dict, filters: dict) -> list:
+    def get_peers_comparison_metric(self, metric_data: dict, filters: dict, access: bool) -> list:
         try:
             columns = [
                 f"DISTINCT ON ({self.company_table}.id) {self.company_table}.id",
@@ -155,7 +156,13 @@ class ComparisonvsPeersService:
 
             result = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(result)
+            if access:
+                return self.response_sql.process_query_list_results(result)
+            else:
+                peers_list = self.response_sql.process_query_list_results(result)
+                anonymized_peers_list = self.company_anonymization.anonymize_companies_list(peers_list,"id")
+                return anonymized_peers_list
+
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -169,6 +176,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool
     ) -> dict:
         try:
             if company_id and company_id.strip():
@@ -183,7 +191,7 @@ class ComparisonvsPeersService:
                 )
 
                 for metric in metrics:
-                    values = self.get_peers_comparison_metric(metric, filters)
+                    values = self.get_peers_comparison_metric(metric, filters, access)
                     data.extend(values)
 
                 return self.response_sql.proccess_comparison_results(data)
@@ -220,6 +228,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool
     ) -> dict:
         try:
             company = self.get_company(company_id)
@@ -233,6 +242,7 @@ class ComparisonvsPeersService:
                     growth_profile,
                     size,
                     year,
+                    access
                 )
 
                 company = data.pop(company_id, dict())
