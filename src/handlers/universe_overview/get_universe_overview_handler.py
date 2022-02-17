@@ -18,6 +18,7 @@ overview_service = UniverseOverviewService(session, query_builder, logger, respo
 
 def handler(event, context):
     try:
+        # user_id = event.get("requestContext").get("authorizer").get("principalId")
         sectors = []
         verticals = []
         investor_profile = []
