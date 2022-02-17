@@ -1,31 +1,7 @@
-import os
 import json
-import boto3
-import logging
-from user_details_service import UserDetailsService
-from response_user import ResponseUser
-from policy_manager import PolicyManager
-from connection import create_db_engine, create_db_session
-from query_builder import QuerySQLBuilder
-from response_sql import ResponseSQL
+from get_user_details_service import get_user_details_service
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-boto3.Session(
-    aws_access_key_id=os.environ.get("ACCESS_KEY"),
-    aws_secret_access_key=os.environ.get("SECRET_KEY"),
-)
-cognito = boto3.client("cognito-idp")
-engine = create_db_engine()
-session = create_db_session(engine)
-query_builder = QuerySQLBuilder()
-response_sql = ResponseSQL()
-response_user = ResponseUser()
-policy_manager = PolicyManager()
-user_service = UserDetailsService(
-    logger, cognito, response_user, policy_manager, session, query_builder, response_sql
-)
+user_service = get_user_details_service()
 
 
 def handler(event, context):
@@ -46,7 +22,7 @@ def handler(event, context):
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,PUT,GET",
             },
         }
 
