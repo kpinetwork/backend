@@ -69,6 +69,37 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
+    def get_all_public_companies(self, offset=0, max_count=20) -> list:
+        try:
+            where_condition = {f"{self.table_name}.is_public": True}
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(
+                    [f"{self.table_name}.*", "company_location.city"]
+                )
+                .add_join_clause(
+                    {
+                        "company_location": {
+                            "from": f"{self.table_name}.id",
+                            "to": "company_location.company_id",
+                        }
+                    },
+                    self.query_builder.JoinType.LEFT,
+                )
+                .add_sql_where_equal_condition(where_condition)
+                .add_sql_offset_condition(offset)
+                .add_sql_limit_condition(max_count)
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_list_results(results)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
     def get_revenue_sum_by_company(self) -> list:
         columns = [
             f"{self.table_name}.id",

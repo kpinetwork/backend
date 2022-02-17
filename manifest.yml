@@ -18,6 +18,15 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  get_all_public_companies_handler:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/company/get_all_public_companies_handler.py
+    - ./src/service/company/company_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
   get_scenarios_handler:
     requirements: ./src/handlers/financial_scenario/requirements.txt
     include:
