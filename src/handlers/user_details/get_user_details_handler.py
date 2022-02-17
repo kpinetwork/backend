@@ -1,23 +1,8 @@
 import os
 import json
-import boto3
-import logging
-from user_details_service import UserDetailsService
-from response_user import ResponseUser
-from policy_manager import PolicyManager
+from get_user_details_service import get_user_details_service
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-boto3.Session(
-    aws_access_key_id=os.environ.get("ACCESS_KEY"),
-    aws_secret_access_key=os.environ.get("SECRET_KEY"),
-)
-
-cognito = boto3.client("cognito-idp")
-response_user = ResponseUser()
-policy_manager = PolicyManager()
-user_service = UserDetailsService(logger, cognito, response_user, policy_manager)
+user_service = get_user_details_service()
 
 
 def handler(event, context):

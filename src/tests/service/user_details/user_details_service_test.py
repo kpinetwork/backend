@@ -14,8 +14,17 @@ class TestUsersService(TestCase):
         self.mock_client = Mock()
         self.mock_response_user = Mock()
         self.mock_policy_manager = Mock()
+        self.mock_session = Mock()
+        self.mock_query_builder = Mock()
+        self.mock_response_sql = Mock()
         self.users_service_instance = UserDetailsService(
-            logger, self.mock_client, self.mock_response_user, self.mock_policy_manager
+            logger,
+            self.mock_client,
+            self.mock_response_user,
+            self.mock_policy_manager,
+            self.mock_session,
+            self.mock_query_builder,
+            self.mock_response_sql,
         )
         self.user = {
             "Username": "000_test@email.com",
@@ -45,6 +54,10 @@ class TestUsersService(TestCase):
         attrs = {"process_user_info.return_value": response}
         self.mock_response_user.configure_mock(**attrs)
 
+    def mock_get_permissions_by_type(self, response):
+        attrs = {"get_permissions_by_type.return_value": response}
+        self.mock_policy_manager.configure_mock(**attrs)
+
     def mock_add_permission(self, response):
         attrs = {"add_policy.return_value": response}
         self.mock_policy_manager.configure_mock(**attrs)
@@ -52,6 +65,10 @@ class TestUsersService(TestCase):
     def mock_remove_permission(self, response):
         attrs = {"remove_policy.return_value": response}
         self.mock_policy_manager.configure_mock(**attrs)
+
+    def mock_response_list_query_sql(self, response):
+        attrs = {"process_query_list_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
 
     def test_get_username_by_email_with_valid_args_should_return_username(self):
         self.mock_list_users({"Users": [self.user]})
@@ -138,6 +155,7 @@ class TestUsersService(TestCase):
             "roles": roles,
         }
         expected_user = {"user": user_info, "permissions": []}
+        self.mock_response_list_query_sql([])
         self.mock_list_users({"Users": [self.user]})
         self.mock_process_user_roles(roles)
         self.mock_admin_list_groups_for_user({"Groups": [{"GroupName": "customer"}]})
@@ -149,6 +167,28 @@ class TestUsersService(TestCase):
         )
 
         self.assertEqual(user_out, expected_user)
+
+    def test_get_company_permissions_with_valid_username_should_return_valid_response(
+        self,
+    ):
+        expected_out = [
+            {"id": "company_id", "name": "TestCompany", "permission": "read"}
+        ]
+        self.mock_response_list_query_sql(expected_out)
+
+        company_permissions_out = (
+            self.users_service_instance.get_user_company_permissions("test@email.com")
+        )
+
+        self.assertEqual(company_permissions_out, expected_out)
+
+    def test_get_company_permissions_with_invalid_username_should_raise_exception(self):
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.users_service_instance.get_user_company_permissions("")
+            )
+            self.assertTrue("No valid username provided" in context.exception)
+            self.assertEqual(exception, Exception)
 
     def test_add_company_permissions_with_no_permissions_in_company_should_return_true_values(
         self,

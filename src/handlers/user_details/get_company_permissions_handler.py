@@ -6,23 +6,20 @@ user_service = get_user_details_service()
 
 def handler(event, context):
     try:
-        if not event.get("body"):
-            raise Exception("No company data provided")
-
-        data = json.loads(event.get("body"))
         username = event.get("pathParameters").get("username")
-        companies = data.get("companies")
+        if not (username and username.strip()):
+            raise Exception("No username provided")
 
-        response = user_service.assign_company_permissions(username, companies)
+        response = user_service.get_user_company_permissions(username)
 
         return {
             "statusCode": 200,
-            "body": json.dumps({"modified": response}, default=str),
+            "body": json.dumps(response, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,PUT,GET",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
             },
         }
 

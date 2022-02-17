@@ -204,21 +204,40 @@ functions:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/get_user_details_handler.py
+    - ./src/handlers/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
 
   assign_company_permissions_handler:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/assign_company_permissions_handler.py
+    - ./src/handlers/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+
+  get_company_permissions_handler:
+    requirements: ./src/handlers/user_details/requirements.txt
+    include:
+    - ./src/handlers/user_details/get_company_permissions_handler.py
+    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./src/utils/response_user.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
 
   get_roles_handler:
     requirements: ./src/handlers/users/requirements.txt
