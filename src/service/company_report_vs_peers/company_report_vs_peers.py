@@ -34,7 +34,10 @@ class CompanyReportvsPeersService:
                         ]
                     )
                     .add_sql_where_equal_condition(
-                        {f"{self.company_table}.id": f"'{company_id}'"}
+                        {
+                            f"{self.company_table}.id": f"'{company_id}'",
+                            f"{self.company_table}.is_public": True,
+                        }
                     )
                     .build()
                     .get_query()
@@ -61,6 +64,7 @@ class CompanyReportvsPeersService:
                 f"{self.company_table}.id": f"'{company_id}'",
                 f"{self.scenario_table}.name": f"'{scenario_name}'",
                 f"{self.metric_table}.name": f"'{metric}'",
+                f"{self.company_table}.is_public": True,
             }
 
             query = (
@@ -210,6 +214,7 @@ class CompanyReportvsPeersService:
                 margin_group=growth_profile,
                 size_cohort=size,
             )
+            where_conditions.update({f"{self.company_table}.is_public": True})
 
             query = (
                 self.query_builder.add_table_name(self.company_table)
@@ -267,6 +272,8 @@ class CompanyReportvsPeersService:
     ) -> dict:
         try:
             company_description = self.get_description(company_id)
+            if not company_description:
+                return dict()
             company_financial_profile = self.get_company_financial_profile(
                 company_id, year
             )

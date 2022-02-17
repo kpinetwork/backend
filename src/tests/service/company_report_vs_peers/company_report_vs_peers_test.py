@@ -231,7 +231,7 @@ class TestCompanyReportvsPeers(TestCase):
         self.overview_service_instance.session.execute.assert_called()
         self.assertEqual(self.overview_service_instance.session.execute.call_count, 8)
 
-    def test_get_get_company_report_vs_peers_with_empty_response(self):
+    def test_get_company_report_vs_peers_with_empty_response(self):
         self.mock_response_list_query_sql([])
         self.mock_response_query_sql(dict())
         self.mock_response_rule_of_40_chart_query_sql([])
@@ -248,15 +248,11 @@ class TestCompanyReportvsPeers(TestCase):
             )
         )
 
-        expected_out = {
-            "description": dict(),
-            "financial_profile": dict(),
-            "rule_of_40": [],
-        }
+        expected_out = dict()
 
         self.assertEqual(get_company_report_vs_peers_out, expected_out)
         self.overview_service_instance.session.execute.assert_called()
-        self.assertEqual(self.overview_service_instance.session.execute.call_count, 8)
+        self.assertEqual(self.overview_service_instance.session.execute.call_count, 1)
 
     def test_get_get_company_report_vs_peers_failed(self):
         self.overview_service_instance.session.execute.side_effect = Exception("error")

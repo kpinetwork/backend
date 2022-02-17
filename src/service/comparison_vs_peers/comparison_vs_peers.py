@@ -57,7 +57,10 @@ class ComparisonvsPeersService:
                 self.query_builder.add_table_name(self.company_table)
                 .add_select_conditions(["sector"])
                 .add_sql_where_equal_condition(
-                    {f"{self.company_table}.id": f"'{company_id}'"}
+                    {
+                        f"{self.company_table}.id": f"'{company_id}'",
+                        f"{self.company_table}.is_public": True,
+                    }
                 )
                 .build()
                 .get_query()
@@ -90,6 +93,7 @@ class ComparisonvsPeersService:
                 f"{self.metric_table}.name": "'{metric}'".format(
                     metric=metric_data.get("metric")
                 ),
+                f"{self.company_table}.is_public": True,
             }
 
             where_conditions.update(filters)
