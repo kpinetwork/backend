@@ -1,4 +1,3 @@
-import os
 import json
 from get_user_details_service import get_user_details_service
 
@@ -7,13 +6,15 @@ user_service = get_user_details_service()
 
 def handler(event, context):
     try:
-        email = event.get("pathParameters").get("username")
-        pool_id = os.environ.get("USER_POOL_ID")
-        user = user_service.get_user_details(pool_id, email)
+        username = event.get("pathParameters").get("username")
+        if not (username and username.strip()):
+            raise Exception("No username provided")
+
+        response = user_service.get_user_company_permissions(username)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(user, default=str),
+            "body": json.dumps(response, default=str),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",

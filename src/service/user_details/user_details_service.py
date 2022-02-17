@@ -1,8 +1,21 @@
 class UserDetailsService:
-    def __init__(self, logger, client, response_user) -> None:
+    def __init__(
+        self,
+        logger,
+        client,
+        response_user,
+        policy_manager,
+        session,
+        query_builder,
+        response_sql,
+    ) -> None:
         self.logger = logger
         self.client = client
         self.response_user = response_user
+        self.policy_manager = policy_manager
+        self.session = session
+        self.query_builder = query_builder
+        self.response_sql = response_sql
 
     def get_username_by_email(self, email, user_pool_id) -> str:
         users = self.client.list_users(
@@ -30,4 +43,77 @@ class UserDetailsService:
 
     def get_user_details(self, user_pool_id, username) -> dict:
         user_info = self.get_user(user_pool_id, username)
-        return {"user": user_info, "permissions": []}
+        company_permissions = self.get_user_company_permissions(username)
+        return {"user": user_info, "permissions": company_permissions}
+
+    def get_user_company_permissions(self, username) -> list:
+        if username and username.strip():
+            company_table = "company"
+            casbin_table = "casbin_rule"
+            columns = ["v1 as id", "v2 as permission", "name"]
+            where_conditions = {
+                "v3": f"'{self.policy_manager.ObjectType.COMPANY}'",
+                "v0": f"'{username}'",
+            }
+
+            query = (
+                self.query_builder.add_table_name(casbin_table)
+                .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        f"{company_table}": {
+                            "from": f"{company_table}.id",
+                            "to": f"{casbin_table}.v1",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(where_conditions)
+                .build()
+                .get_query()
+            )
+
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+
+            return self.response_sql.process_query_list_results(result)
+        raise Exception("No valid username provided")
+
+    def add_company_permissions(self, username: str, companies: list) -> dict:
+        rules = {
+            company: self.policy_manager.add_policy(
+                username,
+                company,
+                self.policy_manager.ActionType.READ,
+                self.policy_manager.ObjectType.COMPANY,
+            )
+            for company in companies
+        }
+        return rules
+
+    def remove_company_permissions(self, username: str, companies: list) -> dict:
+        rules = {
+            company: self.policy_manager.remove_policy(
+                username,
+                company,
+                self.policy_manager.ActionType.READ,
+                self.policy_manager.ObjectType.COMPANY,
+            )
+            for company in companies
+        }
+        return rules
+
+    def assign_company_permissions(self, username: str, companies: dict) -> dict:
+        if username and username.strip() and companies:
+            add_permissions = list(filter(lambda id: companies[id], companies))
+            add_permissions_result = self.add_company_permissions(
+                username, add_permissions
+            )
+
+            remove_permissions = list(filter(lambda id: not companies[id], companies))
+            remove_result = self.remove_company_permissions(
+                username, remove_permissions
+            )
+            add_permissions_result.update(remove_result)
+            return add_permissions_result
+
+        raise Exception("No valid username or companies data")

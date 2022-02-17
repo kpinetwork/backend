@@ -195,3 +195,24 @@ resource "aws_s3_bucket_object" "get_user_details_function_object" {
   source = "${path.module}/../../dist/get_user_details_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_user_details_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "assign_company_permissions_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/assign_company_permissions_handler.zip"
+  source = "${path.module}/../../dist/assign_company_permissions_handler.zip"
+  etag = filemd5("${path.module}/../../dist/assign_company_permissions_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_company_permissions_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_company_permissions_handler.zip"
+  source = "${path.module}/../../dist/get_company_permissions_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_company_permissions_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "change_company_publicly_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/change_company_publicly_handler.zip"
+  source = "${path.module}/../../dist/change_company_publicly_handler.zip"
+  etag = filemd5("${path.module}/../../dist/change_company_publicly_handler.zip")
+}

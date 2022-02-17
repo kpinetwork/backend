@@ -16,6 +16,7 @@ module "functions" {
   lambdas_names            = var.lambdas_names
   security_group_id        = module.shared.resources.security_group_lambda.id
   public_subnet_a_id       = module.shared.resources.public_subnet_id
+  private_subnet_ids               = module.shared.resources.private_subnet_ids
   environment              = local.environment
   db_host                  = module.sql.kpinetwork_db_host
   db_name                  = module.sql.kpinetwork_db_name
