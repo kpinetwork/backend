@@ -17,6 +17,7 @@ class TestCompanyService(TestCase):
             "sector": "Science",
             "vertical": "Technology",
             "inves_profile_name": "Small",
+            "is_public": False,
         }
         self.revenue_sum = {
             "id": "company_id",
@@ -97,6 +98,25 @@ class TestCompanyService(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.company_service_instance.get_all_companies()
+            )
+
+            self.assertTrue("error" in context.exception)
+            self.assertEqual(exception, Exception)
+            self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_all_public_companies_should_return_empty_result(self):
+        self.mock_response_list_query_sql([])
+
+        get_all_companies_out = self.company_service_instance.get_all_public_companies()
+
+        self.assertEqual(get_all_companies_out, [])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_all_public_companies_failed(self):
+        self.company_service_instance.session.execute.side_effect = Exception("error")
+        with self.assertRaises(Exception) as context:
+            exception = self.assertRaises(
+                self.company_service_instance.get_all_public_companies()
             )
 
             self.assertTrue("error" in context.exception)

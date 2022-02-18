@@ -117,7 +117,7 @@ class QuerySQLBuilder:
                         condition = f"{k} IN {joined_values}"
                         self.where_conditions_disj.append(condition)
                 else:
-                    if self.__is_valid_name(v):
+                    if isinstance(v, bool) or self.__is_valid_name(v):
                         condition = f"{k} = {v}"
                         self.where_conditions_conj.append(condition)
         return self

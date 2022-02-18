@@ -32,6 +32,7 @@ class UniverseOverviewService:
             where_condition = {
                 f"{self.scenario_table}.name": f"'{scenario_type}-{year}'",
                 f"{self.metric_table}.name": f"'{metric}'",
+                f"{self.company_table}.is_public": True,
             }
             filters = self.add_company_filters(
                 sector=sectors,
@@ -131,7 +132,6 @@ class UniverseOverviewService:
         size: list,
     ) -> list:
         try:
-
             where_conditions = self.add_company_filters(
                 sector=sectors,
                 vertical=verticals,
@@ -139,6 +139,7 @@ class UniverseOverviewService:
                 margin_group=growth_profile,
                 size_cohort=size,
             )
+            where_conditions.update({f"{self.company_table}.is_public": True})
 
             query = (
                 self.query_builder.add_table_name(self.company_table)
@@ -189,6 +190,7 @@ class UniverseOverviewService:
                 where_conditions = {
                     f"{self.scenario_table}.name": f"'{scenario_name}'",
                     f"{self.metric_table}.name": f"'{metric}'",
+                    f"{self.company_table}.is_public": True,
                 }
 
                 filters = self.add_company_filters(
@@ -391,6 +393,7 @@ class UniverseOverviewService:
                 margin_group=growth_profile,
                 size_cohort=size,
             )
+            where_conditions.update({f"{self.company_table}.is_public": True})
 
             query = (
                 self.query_builder.add_table_name(self.company_table)
