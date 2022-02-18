@@ -1,5 +1,7 @@
 class ComparisonvsPeersService:
-    def __init__(self, session, query_builder, logger, response_sql, company_anonymization) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
@@ -52,7 +54,7 @@ class ComparisonvsPeersService:
         for company in peers:
             company["revenue"] = company.pop("size_cohort", "")
 
-    def get_company(self, company_id) -> dict:
+    def get_company(self, company_id: str) -> dict:
         try:
             query = (
                 self.query_builder.add_table_name(self.company_table)
@@ -73,7 +75,9 @@ class ComparisonvsPeersService:
             self.logger.info(error)
             raise error
 
-    def get_peers_comparison_metric(self, metric_data: dict, filters: dict, access: bool) -> list:
+    def get_peers_comparison_metric(
+        self, metric_data: dict, filters: dict, access: bool
+    ) -> list:
         try:
             columns = [
                 f"DISTINCT ON ({self.company_table}.id) {self.company_table}.id",
@@ -156,12 +160,11 @@ class ComparisonvsPeersService:
 
             result = self.session.execute(query).fetchall()
             self.session.commit()
+            peers = self.response_sql.process_query_list_results(result)
             if access:
-                return self.response_sql.process_query_list_results(result)
+                return peers
             else:
-                peers_list = self.response_sql.process_query_list_results(result)
-                anonymized_peers_list = self.company_anonymization.anonymize_companies_list(peers_list,"id")
-                return anonymized_peers_list
+                return self.company_anonymization.anonymize_companies_list(peers, "id")
 
         except Exception as error:
             self.logger.info(error)
@@ -176,7 +179,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> dict:
         try:
             if company_id and company_id.strip():
@@ -228,7 +231,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> dict:
         try:
             company = self.get_company(company_id)
@@ -242,7 +245,7 @@ class ComparisonvsPeersService:
                     growth_profile,
                     size,
                     year,
-                    access
+                    access,
                 )
 
                 company = data.pop(company_id, dict())

@@ -1,5 +1,7 @@
 class CompanyReportvsPeersService:
-    def __init__(self, session, query_builder, logger, response_sql, company_anonymization) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
@@ -46,13 +48,13 @@ class CompanyReportvsPeersService:
 
                 result = self.session.execute(query).fetchall()
                 self.session.commit()
-
-                if access: 
-                    return self.response_sql.process_query_result(result)
-                else: 
-                    company_description = self.response_sql.process_query_result(result)
-                    anonymized_company_description = self.company_anonymization.anonymize_company_description(company_description, "id")
-                    return anonymized_company_description
+                company_description = self.response_sql.process_query_result(result)
+                if access:
+                    return company_description
+                else:
+                    return self.company_anonymization.anonymize_company_description(
+                        company_description, "id"
+                    )
 
         except Exception as error:
             self.logger.info(error)
@@ -186,7 +188,7 @@ class CompanyReportvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> list:
         def get_case_statement(scenario: str, metric: str, alias: str) -> str:
             return """
@@ -262,13 +264,14 @@ class CompanyReportvsPeersService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
+            rule_of_40 = self.response_sql.process_rule_of_40_chart_results(results)
             if access:
-                return self.response_sql.process_rule_of_40_chart_results(results)
+                return rule_of_40
             else:
-                rule_of_40_list = self.response_sql.process_rule_of_40_chart_results(results)
-                anonymized_results = self.company_anonymization.anonymize_companies_list(rule_of_40_list, "company_id")
-                return anonymized_results
-            
+                return self.company_anonymization.anonymize_companies_list(
+                    rule_of_40, "company_id"
+                )
+
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -282,7 +285,7 @@ class CompanyReportvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> dict:
         try:
             company_description = self.get_description(company_id, access)

@@ -1,5 +1,7 @@
 class UniverseOverviewService:
-    def __init__(self, session, query_builder, logger, response_sql, company_anonymization) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
@@ -360,7 +362,7 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> list:
         def get_case_statement(scenario: str, metric: str, alias: str) -> str:
             return """
@@ -436,12 +438,13 @@ class UniverseOverviewService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
+            rule_of_40 = self.response_sql.process_query_list_results(results)
             if access:
-                return self.response_sql.process_query_list_results(results)
+                return rule_of_40
             else:
-                rule_of_40_list = self.response_sql.process_query_list_results(results)
-                anonymized_results = self.company_anonymization.anonymize_companies_list(rule_of_40_list, "company_id")
-                return anonymized_results
+                return self.company_anonymization.anonymize_companies_list(
+                    rule_of_40, "company_id"
+                )
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -454,7 +457,7 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool
+        access: bool,
     ) -> dict:
         try:
             kpi_average = self.get_companies_kpi_average(
