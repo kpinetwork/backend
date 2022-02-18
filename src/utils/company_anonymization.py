@@ -1,7 +1,3 @@
-import os
-import boto3
-import logging
-
 class CompanyAnonymization:
     def __init__(self) -> None:
         pass

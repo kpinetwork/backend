@@ -8,6 +8,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/company_anonymization.py
 
   get_all_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -17,6 +18,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/company_anonymization.py
 
   get_all_public_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -26,6 +28,8 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
 
   get_scenarios_handler:
     requirements: ./src/handlers/financial_scenario/requirements.txt
@@ -159,6 +163,8 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -168,7 +174,9 @@ functions:
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-    - ./db/utils/connection.py  
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -179,6 +187,8 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
@@ -263,7 +273,9 @@ functions:
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-    - ./db/utils/connection.py  
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
 
 
 layers:

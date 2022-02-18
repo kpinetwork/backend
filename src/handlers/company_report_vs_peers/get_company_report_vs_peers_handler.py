@@ -7,6 +7,7 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
+from verify_user_permissions import verify_user_access, get_user_id_from_event
 
 engine = create_db_engine()
 session = create_db_session(engine)
@@ -22,6 +23,8 @@ company_report_service = CompanyReportvsPeersService(
 
 def handler(event, context):
     try:
+        user_id = get_user_id_from_event(event)
+        access = verify_user_access(user_id)
         company_id = event.get("pathParameters").get("company_id")
         sectors = []
         verticals = []
@@ -40,7 +43,14 @@ def handler(event, context):
             year = params.get("year", year)
 
         company_report = company_report_service.get_company_report_vs_peers(
-            company_id, sectors, verticals, investor_profile, growth_profile, size, year, False
+            company_id,
+            sectors,
+            verticals,
+            investor_profile,
+            growth_profile,
+            size,
+            year,
+            access,
         )
 
         return {

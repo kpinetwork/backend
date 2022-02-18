@@ -1,6 +1,6 @@
 import os
 import boto3
-from response_user import ResponseUser
+from src.utils.response_user import ResponseUser
 
 
 def get_user_id_from_event(event: dict):
@@ -31,11 +31,12 @@ def get_roles(user_id: str, user_pool_id: str, client) -> list:
 
 
 def verify_user_access(user_id: str) -> bool:
-    cognito = get_cognito_client()
-    user_pool_id = os.environ.get("USER_POOL_ID")
+    if user_id:
+        cognito = get_cognito_client()
+        user_pool_id = os.environ.get("USER_POOL_ID")
 
-    roles = get_roles(user_id, user_pool_id, cognito)
+        roles = get_roles(user_id, user_pool_id, cognito)
 
-    if isinstance(roles, list):
-        return "admin" in roles
+        if isinstance(roles, list):
+            return "admin" in roles
     raise Exception("Cannot verified permissions")
