@@ -30,6 +30,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
 
   get_scenarios_handler:
     requirements: ./src/handlers/financial_scenario/requirements.txt
@@ -165,6 +166,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -177,6 +179,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -189,6 +192,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
