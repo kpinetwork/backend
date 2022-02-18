@@ -1,10 +1,13 @@
 class CompanyService:
-    def __init__(self, session, query_builder, logger, response_sql) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.table_name = "company"
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.company_anonymization = company_anonymization
 
     def get_company(self, company_id: str) -> dict:
         try:
@@ -69,7 +72,7 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_all_public_companies(self, offset=0, max_count=20) -> list:
+    def get_all_public_companies(self, offset=0, max_count=20, access=False) -> list:
         try:
             where_condition = {f"{self.table_name}.is_public": True}
             query = (
@@ -94,7 +97,10 @@ class CompanyService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(results)
+            companies = self.response_sql.process_query_list_results(results)
+            if access:
+                return companies
+            return self.company_anonymization.anonymize_companies_list(companies, "id")
 
         except Exception as error:
             self.logger.info(error)

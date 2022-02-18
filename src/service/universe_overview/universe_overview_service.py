@@ -1,8 +1,11 @@
 class UniverseOverviewService:
-    def __init__(self, session, query_builder, logger, response_sql) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
+        self.company_anonymization = company_anonymization
         self.logger = logger
         self.metric_table = "metric"
         self.company_table = "company"
@@ -359,6 +362,7 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool,
     ) -> list:
         def get_case_statement(scenario: str, metric: str, alias: str) -> str:
             return """
@@ -434,7 +438,13 @@ class UniverseOverviewService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(results)
+            rule_of_40 = self.response_sql.process_query_list_results(results)
+            if access:
+                return rule_of_40
+            else:
+                return self.company_anonymization.anonymize_companies_list(
+                    rule_of_40, "company_id"
+                )
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -447,6 +457,7 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool,
     ) -> dict:
         try:
             kpi_average = self.get_companies_kpi_average(
@@ -465,7 +476,7 @@ class UniverseOverviewService:
                 sectors, verticals, investor_profile, growth_profile, size, year
             )
             rule_of_40 = self.get_rule_of_40(
-                sectors, verticals, investor_profile, growth_profile, size, year
+                sectors, verticals, investor_profile, growth_profile, size, year, access
             )
 
             return {

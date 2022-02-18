@@ -2,6 +2,7 @@ from unittest import TestCase
 import logging
 from unittest.mock import Mock
 from src.service.company.company_service import CompanyService
+from src.utils.company_anonymization import CompanyAnonymization
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,7 +32,11 @@ class TestCompanyService(TestCase):
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
         self.company_service_instance = CompanyService(
-            self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
+            self.mock_session,
+            self.mock_query_builder,
+            logger,
+            self.mock_response_sql,
+            CompanyAnonymization(object()),
         )
         return
 
@@ -104,10 +109,40 @@ class TestCompanyService(TestCase):
             self.assertEqual(exception, Exception)
             self.company_service_instance.session.execute.assert_called_once()
 
+    def test_get_all_public_companies_with_access_should_return_no_anonymized_data(
+        self,
+    ):
+        self.mock_response_list_query_sql([self.company])
+
+        get_all_companies_out = self.company_service_instance.get_all_public_companies(
+            access=True
+        )
+
+        self.assertEqual(get_all_companies_out, [self.company])
+        self.company_service_instance.session.execute.assert_called_once()
+
+    def test_get_all_public_companies_without_access_should_return_anonymized_data(
+        self,
+    ):
+        self.mock_response_list_query_sql([self.company])
+        company_anonymized = self.company.copy()
+        company_anonymized["name"] = "{id}-xxxx".format(
+            id=company_anonymized["id"][0:4]
+        )
+
+        get_all_companies_out = self.company_service_instance.get_all_public_companies(
+            access=False
+        )
+
+        self.assertEqual(get_all_companies_out, [company_anonymized])
+        self.company_service_instance.session.execute.assert_called_once()
+
     def test_get_all_public_companies_should_return_empty_result(self):
         self.mock_response_list_query_sql([])
 
-        get_all_companies_out = self.company_service_instance.get_all_public_companies()
+        get_all_companies_out = self.company_service_instance.get_all_public_companies(
+            access=True
+        )
 
         self.assertEqual(get_all_companies_out, [])
         self.company_service_instance.session.execute.assert_called_once()
