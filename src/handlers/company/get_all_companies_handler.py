@@ -12,7 +12,7 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-company_anonymization = CompanyAnonymization()
+company_anonymization = CompanyAnonymization(object())
 company_service = CompanyService(
     session, query_builder, logger, response_sql, company_anonymization
 )

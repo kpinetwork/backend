@@ -7,13 +7,19 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
-from verify_user_permissions import verify_user_access, get_user_id_from_event
+from verify_user_permissions import (
+    verify_user_access,
+    get_user_id_from_event,
+    get_username_from_user_id,
+)
+from get_user_details_service import get_user_details_service
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
-company_anonymization = CompanyAnonymization()
+user_service = get_user_details_service()
+company_anonymization = CompanyAnonymization(user_service)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 comparison_vs_peers_service = ComparisonvsPeersService(
@@ -42,6 +48,8 @@ def handler(event, context):
             size = get_list_param(params.get("size"))
             year = params.get("year", year)
 
+        username = get_username_from_user_id(user_id)
+        company_anonymization.set_company_permissions(username)
         comparison_peers = comparison_vs_peers_service.get_peers_comparison(
             company_id,
             sectors,

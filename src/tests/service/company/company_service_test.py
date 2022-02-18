@@ -36,7 +36,7 @@ class TestCompanyService(TestCase):
             self.mock_query_builder,
             logger,
             self.mock_response_sql,
-            CompanyAnonymization(),
+            CompanyAnonymization(object()),
         )
         return
 

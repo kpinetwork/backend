@@ -30,7 +30,7 @@ class TestCompanyReportvsPeers(TestCase):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.company_anonymization = CompanyAnonymization()
+        self.company_anonymization = CompanyAnonymization(object)
         self.overview_service_instance = CompanyReportvsPeersService(
             self.mock_session,
             self.mock_query_builder,
