@@ -22,7 +22,7 @@ resource "aws_lambda_function" "get_company_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -52,7 +52,7 @@ resource "aws_lambda_function" "get_all_companies_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -82,7 +82,7 @@ resource "aws_lambda_function" "get_all_public_companies_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -514,7 +514,7 @@ resource "aws_lambda_function" "get_universe_overview_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -544,7 +544,7 @@ resource "aws_lambda_function" "get_company_report_vs_peers_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -575,7 +575,7 @@ resource "aws_lambda_function" "get_comparison_vs_peers_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -822,7 +822,7 @@ resource "aws_lambda_function" "change_company_publicly_lambda_function" {
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
   vpc_config {
-    subnet_ids = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
