@@ -2,6 +2,7 @@ output "lambdas_invoke_arns" {
   value = {
     "get_company_lambda_function": aws_lambda_function.get_company_lambda_function.invoke_arn
     "get_all_companies_lambda_function": aws_lambda_function.get_all_companies_lambda_function.invoke_arn
+    "get_all_public_companies_lambda_function": aws_lambda_function.get_all_public_companies_lambda_function.invoke_arn
     "get_metrics_lambda_function": aws_lambda_function.get_metrics_function.invoke_arn
     "get_metric_by_company_id_lambda_function": aws_lambda_function.get_metric_by_company_id_function.invoke_arn
     "get_average_metrics_lambda_function": aws_lambda_function.get_average_metrics_function.invoke_arn

@@ -1,9 +1,12 @@
 class ComparisonvsPeersService:
-    def __init__(self, session, query_builder, logger, response_sql) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.company_anonymization = company_anonymization
         self.metric_table = "metric"
         self.company_table = "company"
         self.scenario_table = "financial_scenario"
@@ -51,13 +54,16 @@ class ComparisonvsPeersService:
         for company in peers:
             company["revenue"] = company.pop("size_cohort", "")
 
-    def get_company(self, company_id) -> dict:
+    def get_company(self, company_id: str) -> dict:
         try:
             query = (
                 self.query_builder.add_table_name(self.company_table)
                 .add_select_conditions(["sector"])
                 .add_sql_where_equal_condition(
-                    {f"{self.company_table}.id": f"'{company_id}'"}
+                    {
+                        f"{self.company_table}.id": f"'{company_id}'",
+                        f"{self.company_table}.is_public": True,
+                    }
                 )
                 .build()
                 .get_query()
@@ -69,7 +75,9 @@ class ComparisonvsPeersService:
             self.logger.info(error)
             raise error
 
-    def get_peers_comparison_metric(self, metric_data: dict, filters: dict) -> list:
+    def get_peers_comparison_metric(
+        self, metric_data: dict, filters: dict, access: bool
+    ) -> list:
         try:
             columns = [
                 f"DISTINCT ON ({self.company_table}.id) {self.company_table}.id",
@@ -90,6 +98,7 @@ class ComparisonvsPeersService:
                 f"{self.metric_table}.name": "'{metric}'".format(
                     metric=metric_data.get("metric")
                 ),
+                f"{self.company_table}.is_public": True,
             }
 
             where_conditions.update(filters)
@@ -151,7 +160,12 @@ class ComparisonvsPeersService:
 
             result = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(result)
+            peers = self.response_sql.process_query_list_results(result)
+            if access:
+                return peers
+            else:
+                return self.company_anonymization.anonymize_companies_list(peers, "id")
+
         except Exception as error:
             self.logger.info(error)
             raise error
@@ -165,6 +179,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool,
     ) -> dict:
         try:
             if company_id and company_id.strip():
@@ -179,7 +194,7 @@ class ComparisonvsPeersService:
                 )
 
                 for metric in metrics:
-                    values = self.get_peers_comparison_metric(metric, filters)
+                    values = self.get_peers_comparison_metric(metric, filters, access)
                     data.extend(values)
 
                 return self.response_sql.proccess_comparison_results(data)
@@ -216,6 +231,7 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
+        access: bool,
     ) -> dict:
         try:
             company = self.get_company(company_id)
@@ -229,6 +245,7 @@ class ComparisonvsPeersService:
                     growth_profile,
                     size,
                     year,
+                    access,
                 )
 
                 company = data.pop(company_id, dict())

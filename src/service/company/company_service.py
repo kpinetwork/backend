@@ -1,10 +1,13 @@
 class CompanyService:
-    def __init__(self, session, query_builder, logger, response_sql) -> None:
+    def __init__(
+        self, session, query_builder, logger, response_sql, company_anonymization
+    ) -> None:
         self.table_name = "company"
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.company_anonymization = company_anonymization
 
     def get_company(self, company_id: str) -> dict:
         try:
@@ -64,6 +67,40 @@ class CompanyService:
             results = self.session.execute(query).fetchall()
             self.session.commit()
             return self.response_sql.process_query_list_results(results)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_all_public_companies(self, offset=0, max_count=20, access=False) -> list:
+        try:
+            where_condition = {f"{self.table_name}.is_public": True}
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(
+                    [f"{self.table_name}.*", "company_location.city"]
+                )
+                .add_join_clause(
+                    {
+                        "company_location": {
+                            "from": f"{self.table_name}.id",
+                            "to": "company_location.company_id",
+                        }
+                    },
+                    self.query_builder.JoinType.LEFT,
+                )
+                .add_sql_where_equal_condition(where_condition)
+                .add_sql_offset_condition(offset)
+                .add_sql_limit_condition(max_count)
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+            companies = self.response_sql.process_query_list_results(results)
+            if access:
+                return companies
+            return self.company_anonymization.anonymize_companies_list(companies, "id")
 
         except Exception as error:
             self.logger.info(error)
