@@ -145,6 +145,12 @@ output "object_references" {
       bucket : aws_s3_bucket_object.get_user_details_function_object.bucket
     }
 
+    "change_user_role_function_bucket": {
+      etag : aws_s3_bucket_object.change_user_role_function_object.etag,
+      key : aws_s3_bucket_object.change_user_role_function_object.key,
+      bucket : aws_s3_bucket_object.change_user_role_function_object.bucket
+    }
+
     "assign_company_permissions_function_bucket": {
       etag : aws_s3_bucket_object.assign_company_permissions_function_object.etag,
       key : aws_s3_bucket_object.assign_company_permissions_function_object.key,

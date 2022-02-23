@@ -196,6 +196,13 @@ resource "aws_s3_bucket_object" "get_user_details_function_object" {
   etag = filemd5("${path.module}/../../dist/get_user_details_handler.zip")
 }
 
+resource "aws_s3_bucket_object" "change_user_role_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/change_user_role_handler.zip"
+  source = "${path.module}/../../dist/change_user_role_handler.zip"
+  etag = filemd5("${path.module}/../../dist/change_user_role_handler.zip")
+}
+
 resource "aws_s3_bucket_object" "assign_company_permissions_function_object" {
   bucket = var.bucket_name
   key = "${var.lambda_resource_name}/${var.environment}/assign_company_permissions_handler.zip"

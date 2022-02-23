@@ -147,3 +147,6 @@ operations/variable-scripts/variable.json
 
 #juniper
 .juni/
+
+#docker
+Dockerfile
