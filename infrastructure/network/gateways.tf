@@ -177,6 +177,12 @@ resource "aws_api_gateway_resource" "user" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "user_roles" {
+  path_part   = "roles"
+  parent_id   = aws_api_gateway_resource.user.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "company_permissions" {
   path_part   = "company_permissions"
   parent_id   = aws_api_gateway_resource.user.id
@@ -458,6 +464,14 @@ resource "aws_api_gateway_method" "get_user_details_method" {
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
+resource "aws_api_gateway_method" "change_user_role_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.user_roles.id
+  http_method   = "PUT"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
 resource "aws_api_gateway_method" "assign_company_permissions_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_permissions.id
@@ -687,6 +701,15 @@ resource "aws_api_gateway_integration" "user_details_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_user_details_lambda_function
+}
+
+resource "aws_api_gateway_integration" "change_user_role_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.user_roles.id
+  http_method             = aws_api_gateway_method.change_user_role_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.change_user_role_lambda_function
 }
 
 resource "aws_api_gateway_integration" "assign_company_permissions_integration" {

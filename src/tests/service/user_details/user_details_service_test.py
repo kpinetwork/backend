@@ -34,8 +34,18 @@ class TestUsersService(TestCase):
             "UserStatus": "CONFIRMED",
         }
 
+        self.roles = {"new_role": "admin", "current_role": "customer"}
+
     def mock_admin_get_user(self, response):
         attrs = {"admin_get_user.return_value": response}
+        self.mock_client.configure_mock(**attrs)
+
+    def mock_admin_remove_user_from_group(self, response):
+        attrs = {"admin_remove_user_from_group.return_value": response}
+        self.mock_client.configure_mock(**attrs)
+
+    def mock_admin_add_user_to_group(self, response):
+        attrs = {"admin_add_user_to_group.return_value": response}
         self.mock_client.configure_mock(**attrs)
 
     def mock_admin_list_groups_for_user(self, response):
@@ -167,6 +177,29 @@ class TestUsersService(TestCase):
         )
 
         self.assertEqual(user_out, expected_user)
+
+    def test_change_user_role_success_should_return_true_response(self):
+        self.mock_list_users({"Users": [self.user]})
+        self.mock_admin_add_user_to_group(dict())
+        self.mock_admin_remove_user_from_group(dict())
+
+        out = self.users_service_instance.change_user_role(
+            "pool_id", "demo", "test@email.com", self.roles
+        )
+
+        self.assertEqual(out, True)
+
+    def test_change_user_role_fail_should_return_false_response(self):
+        self.mock_list_users({"Users": [self.user]})
+        self.mock_client.admin_add_user_to_group.side_effect = Exception(
+            "Parameter validation failed"
+        )
+
+        out = self.users_service_instance.change_user_role(
+            "pool_id", "demo", "test@email.com", self.roles
+        )
+
+        self.assertEqual(out, False)
 
     def test_get_company_permissions_with_valid_username_should_return_valid_response(
         self,
