@@ -1,0 +1,8 @@
+SQLAlchemy==1.4.24
+aws-psycopg2
+casbin==1.9.2
+casbin_sqlalchemy_adapter==0.4.2
+numpy
+boto3==1.20.27
+requests
+StrEnum==0.4.7
