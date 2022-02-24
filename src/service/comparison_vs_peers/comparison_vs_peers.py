@@ -249,7 +249,13 @@ class ComparisonvsPeersService:
                 )
 
                 company = data.pop(company_id, dict())
-                peers = list(data.values())
+                peers = sorted(
+                    list(data.values()),
+                    key=lambda x: (
+                        self.company_anonymization.is_anonymized(x.get("name", "")),
+                        x.get("name", ""),
+                    ),
+                )
                 rank = self.get_rank(company, peers)
 
                 self.remove_revenue(peers)

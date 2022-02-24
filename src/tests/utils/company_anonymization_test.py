@@ -15,6 +15,7 @@ class TestCompanyAnonymization(TestCase):
             "name": "Test Company",
             "is_public": True,
         }
+        self.anonymized_name = "jg34-xxxx"
         self.mock_user_service = Mock()
         self.company_anonymization_instance = CompanyAnonymization(
             self.mock_user_service
@@ -98,3 +99,35 @@ class TestCompanyAnonymization(TestCase):
         )
 
         self.assertEqual(companies_anonymized, [self.company])
+
+    def test_hide_companies_should_return_only_allowed_companies(self):
+        self.mock_get_user_company_permissions(self.permissions)
+        companies = [
+            self.company,
+            {
+                "id": "3",
+                "name": "Test Company",
+                "is_public": True,
+            },
+        ]
+
+        self.company_anonymization_instance.set_company_permissions(self.username)
+        hiden_companies = self.company_anonymization_instance.hide_companies(
+            companies, "id"
+        )
+
+        self.assertEqual(hiden_companies, [self.company])
+
+    def test_is_anonymized_return_true(self):
+        is_anonymize = self.company_anonymization_instance.is_anonymized(
+            self.anonymized_name
+        )
+
+        self.assertTrue(is_anonymize)
+
+    def test_is_anonymized_return_false(self):
+        company_name = "koeu-xx"
+
+        is_anonymize = self.company_anonymization_instance.is_anonymized(company_name)
+
+        self.assertFalse(is_anonymize)
