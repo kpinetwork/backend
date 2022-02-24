@@ -46,6 +46,28 @@ class UserDetailsService:
         company_permissions = self.get_user_company_permissions(username)
         return {"user": user_info, "permissions": company_permissions}
 
+    def change_user_role(self, user_pool_id, env: str, email: str, roles: dict) -> bool:
+        try:
+
+            def get_group(group_name: str, env: str) -> str:
+                return f"{env}_{group_name}_group"
+
+            username = self.get_username_by_email(email, user_pool_id)
+            self.client.admin_add_user_to_group(
+                UserPoolId=user_pool_id,
+                Username=username,
+                GroupName=get_group(roles.get("new_role"), env),
+            )
+            self.client.admin_remove_user_from_group(
+                UserPoolId=user_pool_id,
+                Username=username,
+                GroupName=get_group(roles.get("current_role"), env),
+            )
+            return True
+        except Exception as error:
+            self.logger.info(error)
+            return False
+
     def get_user_company_permissions(self, username) -> list:
         if username and username.strip():
             company_table = "company"
