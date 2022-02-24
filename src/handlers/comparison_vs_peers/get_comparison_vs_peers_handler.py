@@ -38,6 +38,7 @@ def handler(event, context):
         growth_profile = []
         size = []
         year = datetime.datetime.today().year
+        from_main = False
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
@@ -47,6 +48,7 @@ def handler(event, context):
             growth_profile = get_list_param(params.get("growth_profile"))
             size = get_list_param(params.get("size"))
             year = params.get("year", year)
+            from_main = params.get("from_main", from_main)
 
         username = get_username_from_user_id(user_id)
         company_anonymization.set_company_permissions(username)
@@ -58,6 +60,7 @@ def handler(event, context):
             growth_profile,
             size,
             year,
+            from_main,
             access,
         )
 
