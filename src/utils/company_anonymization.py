@@ -1,3 +1,6 @@
+import re
+
+
 class CompanyAnonymization:
     def __init__(self, user_details_service) -> None:
         self.user_details_service = user_details_service
@@ -32,3 +35,11 @@ class CompanyAnonymization:
             **result,
             "name": self.anonymize_company_name(result.get(key)),
         }
+
+    def hide_companies(self, results: list, key: str) -> list:
+        hiden_companies = list(filter(lambda x: x.get(key) in self.companies, results))
+        return hiden_companies
+
+    def is_anonymized(self, companie_name: str):
+        matched = re.match(r"[\w][\w][\w][\w]-[x][x][x][x]", companie_name)
+        return bool(matched)

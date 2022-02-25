@@ -100,7 +100,7 @@ class CompanyService:
             companies = self.response_sql.process_query_list_results(results)
             if access:
                 return companies
-            return self.company_anonymization.anonymize_companies_list(companies, "id")
+            return self.company_anonymization.hide_companies(companies, "id")
 
         except Exception as error:
             self.logger.info(error)

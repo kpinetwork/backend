@@ -121,20 +121,16 @@ class TestCompanyService(TestCase):
         self.assertEqual(get_all_companies_out, [self.company])
         self.company_service_instance.session.execute.assert_called_once()
 
-    def test_get_all_public_companies_without_access_should_return_anonymized_data(
+    def test_get_all_public_companies_without_access_should_return_hiden_companies(
         self,
     ):
         self.mock_response_list_query_sql([self.company])
-        company_anonymized = self.company.copy()
-        company_anonymized["name"] = "{id}-xxxx".format(
-            id=company_anonymized["id"][0:4]
-        )
 
         get_all_companies_out = self.company_service_instance.get_all_public_companies(
             access=False
         )
 
-        self.assertEqual(get_all_companies_out, [company_anonymized])
+        self.assertEqual(get_all_companies_out, [])
         self.company_service_instance.session.execute.assert_called_once()
 
     def test_get_all_public_companies_should_return_empty_result(self):
