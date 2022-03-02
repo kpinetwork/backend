@@ -231,23 +231,27 @@ class ComparisonvsPeersService:
         growth_profile: list,
         size: list,
         year: str,
+        from_main: bool,
         access: bool,
     ) -> dict:
         try:
-            company = self.get_company(company_id)
-
-            if company:
-                data = self.get_peers_comparison_data(
-                    company_id,
-                    sectors,
-                    verticals,
-                    investor_profile,
-                    growth_profile,
-                    size,
-                    year,
-                    access,
-                )
-
+            data = self.get_peers_comparison_data(
+                company_id,
+                sectors,
+                verticals,
+                investor_profile,
+                growth_profile,
+                size,
+                year,
+                access,
+            )
+            peers = []
+            company = dict()
+            rank = dict()
+            if from_main:
+                peers = list(data.values())
+            elif not from_main and company_id and company_id.strip():
+                company = self.get_company(company_id)
                 company = data.pop(company_id, dict())
                 peers = sorted(
                     list(data.values()),
@@ -258,13 +262,12 @@ class ComparisonvsPeersService:
                 )
                 rank = self.get_rank(company, peers)
 
-                self.remove_revenue(peers)
-                return {
-                    "company_comparison_data": company,
-                    "rank": rank,
-                    "peers_comparison_data": peers,
-                }
-            return dict()
+            self.remove_revenue(peers)
+            return {
+                "company_comparison_data": company,
+                "rank": rank,
+                "peers_comparison_data": peers,
+            }
         except Exception as error:
             self.logger.info(error)
             raise error
