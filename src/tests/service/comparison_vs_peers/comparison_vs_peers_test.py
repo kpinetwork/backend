@@ -243,7 +243,7 @@ class TestComparisonvsPeers(TestCase):
         )
 
         self.assertEqual(get_peers_comparison_out, expected_out)
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 7)
+        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
 
     def test_get_peers_comparison_success_with_no_company_data(self):
         self.mock_response_list_query_sql([self.company, self.comparison])

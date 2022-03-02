@@ -251,7 +251,6 @@ class ComparisonvsPeersService:
             if from_main:
                 peers = list(data.values())
             elif not from_main and company_id and company_id.strip():
-                company = self.get_company(company_id)
                 company = data.pop(company_id, dict())
                 peers = sorted(
                     list(data.values()),
