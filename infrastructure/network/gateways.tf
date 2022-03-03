@@ -445,6 +445,7 @@ resource "aws_api_gateway_method" "get_comparison_vs_peers_method" {
     "method.request.querystring.growth_profile" = false
     "method.request.querystring.size" = false
     "method.request.querystring.year" = false
+    "method.request.querystring.from_main" = false
   }
 }
 

@@ -238,24 +238,31 @@ class TestComparisonvsPeers(TestCase):
         }
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], [], "2020", True
+                "1", [], [], [], [], [], "2020", False, True
             )
         )
 
         self.assertEqual(get_peers_comparison_out, expected_out)
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 7)
+        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
 
     def test_get_peers_comparison_success_with_no_company_data(self):
-        self.mock_response_query_sql(dict())
+        self.mock_response_list_query_sql([self.company, self.comparison])
+        self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
+        peers = self.comparison.copy()
+        peers["revenue"] = peers.pop("size_cohort")
+        expected_out = {
+            "company_comparison_data": dict(),
+            "rank": dict(),
+            "peers_comparison_data": [self.company, peers],
+        }
 
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], [], "2020", True
+                "1", [], [], [], [], [], "2020", True, True
             )
         )
 
-        self.assertEqual(get_peers_comparison_out, dict())
-        self.comparison_service_instance.session.execute.assert_called_once()
+        self.assertEqual(get_peers_comparison_out, expected_out)
 
     def test_get_peers_comparison_failed(self):
         self.comparison_service_instance.session.execute.side_effect = Exception(
@@ -265,7 +272,7 @@ class TestComparisonvsPeers(TestCase):
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
                 self.comparison_service_instance.get_peers_comparison(
-                    "1", [], [], [], [], [], "2020", True
+                    "1", [], [], [], [], [], "2020", True, True
                 )
             )
 
