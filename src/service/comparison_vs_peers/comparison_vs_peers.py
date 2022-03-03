@@ -266,7 +266,13 @@ class ComparisonvsPeersService:
             company = dict()
             rank = dict()
             if from_main:
-                peers = list(data.values())
+                peers = sorted(
+                    list(data.values()),
+                    key=lambda x: (
+                        self.company_anonymization.is_anonymized(x.get("name", "")),
+                        x.get("name", ""),
+                    ),
+                )
             elif not from_main and company_id and company_id.strip():
                 company = data.pop(company_id, dict())
                 peers = sorted(
