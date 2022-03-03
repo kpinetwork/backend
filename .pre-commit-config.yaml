@@ -27,4 +27,4 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [commit]
-        additional_dependencies: [pytest, pydash]
+        additional_dependencies: [pytest, pydash, parameterized]

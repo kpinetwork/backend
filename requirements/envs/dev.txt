@@ -8,6 +8,7 @@ commitizen==2.18.0
 
 # Unit test
 pytest==6.2.4
+parameterized
 
 # Coverage
 coverage==5.5
