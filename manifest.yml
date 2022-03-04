@@ -205,6 +205,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
+    - ./src/utils/revenue_range.py
     - ./src/handlers/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py

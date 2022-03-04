@@ -1,6 +1,12 @@
 class ComparisonvsPeersService:
     def __init__(
-        self, session, query_builder, logger, response_sql, company_anonymization
+        self,
+        session,
+        query_builder,
+        logger,
+        response_sql,
+        company_anonymization,
+        revenue_range,
     ) -> None:
         self.session = session
         self.query_builder = query_builder
@@ -12,6 +18,7 @@ class ComparisonvsPeersService:
         self.scenario_table = "financial_scenario"
         self.scenario_metric_table = "scenario_metric"
         self.time_period_table = "time_period"
+        self.revenue_range = revenue_range
 
     def add_company_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -52,7 +59,17 @@ class ComparisonvsPeersService:
 
     def remove_revenue(self, peers):
         for company in peers:
-            company["revenue"] = company.pop("size_cohort", "")
+            revenue = company.get("revenue")
+            revenue_ranges = list(
+                filter(
+                    lambda range: self.revenue_range.verify_range(range, revenue),
+                    self.revenue_range.ranges,
+                )
+            )
+            revenue_range = (
+                revenue_ranges[0] if len(revenue_ranges) == 1 else {"label": "NaN"}
+            )
+            company["revenue"] = revenue_range.get("label")
 
     def get_company(self, company_id: str) -> dict:
         try:
@@ -249,7 +266,13 @@ class ComparisonvsPeersService:
             company = dict()
             rank = dict()
             if from_main:
-                peers = list(data.values())
+                peers = sorted(
+                    list(data.values()),
+                    key=lambda x: (
+                        self.company_anonymization.is_anonymized(x.get("name", "")),
+                        x.get("name", ""),
+                    ),
+                )
             elif not from_main and company_id and company_id.strip():
                 company = data.pop(company_id, dict())
                 peers = sorted(

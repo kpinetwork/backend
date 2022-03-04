@@ -7,6 +7,7 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
+from revenue_range import RevenueRange
 from verify_user_permissions import (
     verify_user_access,
     get_user_id_from_event,
@@ -22,8 +23,9 @@ user_service = get_user_details_service()
 company_anonymization = CompanyAnonymization(user_service)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+revenue_range = RevenueRange(session, QuerySQLBuilder(), logger, response_sql)
 comparison_vs_peers_service = ComparisonvsPeersService(
-    session, query_builder, logger, response_sql, company_anonymization
+    session, query_builder, logger, response_sql, company_anonymization, revenue_range
 )
 
 
@@ -52,6 +54,7 @@ def handler(event, context):
 
         username = get_username_from_user_id(user_id)
         company_anonymization.set_company_permissions(username)
+        revenue_range.set_ranges()
         comparison_peers = comparison_vs_peers_service.get_peers_comparison(
             company_id,
             sectors,
