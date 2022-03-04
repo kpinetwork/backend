@@ -5,6 +5,7 @@ from src.service.comparison_vs_peers.comparison_vs_peers import (
     ComparisonvsPeersService,
 )
 from src.utils.company_anonymization import CompanyAnonymization
+from src.utils.revenue_range import RevenueRange
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -24,6 +25,7 @@ class TestComparisonvsPeers(TestCase):
             "vertical": "Maths",
             "size_cohort": "100+",
             "growth": 17,
+            "revenue": 120,
         }
         self.comparison = {
             "id": "2",
@@ -32,17 +34,25 @@ class TestComparisonvsPeers(TestCase):
             "vertical": "Maths",
             "size_cohort": "100+",
             "growth": 34,
+            "revenue": 110,
         }
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
         self.company_anonymization = CompanyAnonymization(object)
+        self.revenue_range = RevenueRange(
+            self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
+        )
+        self.revenue_range.ranges = [
+            {"label": "100+", "max_value": None, "min_value": 100}
+        ]
         self.comparison_service_instance = ComparisonvsPeersService(
             self.mock_session,
             self.mock_query_builder,
             logger,
             self.mock_response_sql,
             self.company_anonymization,
+            self.revenue_range,
         )
         return
 
@@ -68,8 +78,8 @@ class TestComparisonvsPeers(TestCase):
         self.assertEqual(filters_out, expected_out)
 
     def test_remove_revenue(self):
-        data = {"size_cohort": "100+", "revenue": 34}
-        expected_out = {"revenue": "100+"}
+        data = {"size_cohort": "100+", "revenue": 102}
+        expected_out = {"size_cohort": "100+", "revenue": "100+"}
 
         self.comparison_service_instance.remove_revenue([data])
 
@@ -209,7 +219,7 @@ class TestComparisonvsPeers(TestCase):
     def test_get_rank_success(self):
         company_data = self.company.copy()
         company_data.update(self.metric_value)
-        expected_out = {"growth": "2 of 2"}
+        expected_out = {"growth": "2 of 2", "revenue": "1 of 2"}
 
         get_rank_out = self.comparison_service_instance.get_rank(
             company_data, [self.comparison]
@@ -230,10 +240,10 @@ class TestComparisonvsPeers(TestCase):
         self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
 
         peers = self.comparison.copy()
-        peers["revenue"] = peers.pop("size_cohort")
+        peers["revenue"] = peers["size_cohort"]
         expected_out = {
             "company_comparison_data": self.company,
-            "rank": {"growth": "2 of 2"},
+            "rank": {"growth": "2 of 2", "revenue": "1 of 2"},
             "peers_comparison_data": [peers],
         }
         get_peers_comparison_out = (
@@ -249,7 +259,7 @@ class TestComparisonvsPeers(TestCase):
         self.mock_response_list_query_sql([self.company, self.comparison])
         self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
         peers = self.comparison.copy()
-        peers["revenue"] = peers.pop("size_cohort")
+        peers["revenue"] = peers["size_cohort"]
         expected_out = {
             "company_comparison_data": dict(),
             "rank": dict(),
