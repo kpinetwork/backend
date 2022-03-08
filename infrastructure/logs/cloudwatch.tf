@@ -18,11 +18,6 @@ resource "aws_cloudwatch_log_group" "get_all_public_companies_lambda_function" {
   retention_in_days = var.retention_days
 }
 
-resource "aws_cloudwatch_log_group" "get_revenue_sum_by_company_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_company_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
 resource "aws_cloudwatch_log_group" "codebuild_rds_migrations" {
   name = "${var.prefix_codebuild_cloudwatch_log_group}${var.environment}_${var.codebuild_project_name}"
   retention_in_days = var.retention_days
@@ -34,66 +29,6 @@ resource "aws_cloudwatch_log_group" "codebuild_rds_migrations" {
 
 resource "aws_cloudwatch_log_group" "glue_trigger_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.glue_trigger_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_metric_by_id_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metric_by_company_id_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_metrics_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metrics_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_average_metrics_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_average_metrics_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_average_metrics_by_cohort_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_average_metrics_by_cohort_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_metrics_by_cohort_id_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_metrics_by_cohort_id_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_scenarios_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_scenarios_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_company_scenarios_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_scenarios_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "list_scenarios_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.list_scenarios_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_cohort_by_id_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_cohort_by_id_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_cohort_scenarios_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_cohort_scenarios_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_cohorts_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_cohorts_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_revenue_sum_by_cohort_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_revenue_sum_by_cohort_lambda_function}"
   retention_in_days = var.retention_days
 }
 
