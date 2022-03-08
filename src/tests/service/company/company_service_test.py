@@ -154,28 +154,6 @@ class TestCompanyService(TestCase):
             self.assertEqual(exception, Exception)
             self.company_service_instance.session.execute.assert_called_once()
 
-    def test_get_revenue_sum_by_company_success(self):
-        self.mock_response_list_query_sql([self.revenue_sum])
-
-        get_all_companies_out = (
-            self.company_service_instance.get_revenue_sum_by_company()
-        )
-
-        self.assertEqual(get_all_companies_out, [self.revenue_sum])
-        self.assertEqual(len(get_all_companies_out), len([self.revenue_sum]))
-        self.company_service_instance.session.execute.assert_called_once()
-
-    def test_get_revenue_sum_by_company_failed(self):
-        self.company_service_instance.session.execute.side_effect = Exception("error")
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.company_service_instance.get_revenue_sum_by_company()
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.company_service_instance.session.execute.assert_called_once()
-
     def test_change_company_publicly_success(self):
 
         response_change_company_publicly = (
