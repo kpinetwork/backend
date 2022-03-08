@@ -1,14 +1,7 @@
 import json
-import sys
-import os
 from unittest import TestCase, mock
-
-root_path = os.path.abspath(".")
-sys.path.append(f"{root_path}/src/service/company/")
-sys.path.append(f"{root_path}/db/utils/")
-sys.path.append(f"{root_path}/src/utils/")
-
-from src.handlers.company.get_all_companies_handler import handler  # noqa
+import src.tests.config_imports  # noqa
+from src.handlers.company.get_all_companies_handler import handler
 
 
 class TestGetAllCompaniesHandler(TestCase):
