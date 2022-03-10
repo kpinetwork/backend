@@ -1,29 +1,24 @@
 import json
+from src.tests.data.data_reader import read
 from unittest import TestCase, mock
-import src.tests.config_imports  # noqa
 from src.handlers.company.get_all_companies_handler import handler
 
 
 class TestGetAllCompaniesHandler(TestCase):
     def setUp(self):
-        self.company = {
-            "name": "Test Company",
-            "sector": "Software",
-            "vertical": "",
-            "size_cohort": "100+ million",
-        }
-        self.event = {"queryStringParameters": {"limit": 1, "offset": 1}}
+        self.company = read("sample_company.json")
+        self.event = read("sample_event.json")
 
     @mock.patch("company_service.CompanyService.get_all_companies")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_handler_success_should_return_200_response(
-        self, mock_create_db_session, mock_create_db_engine, mock_company_service
+        self, mock_create_db_session, mock_create_db_engine, mock_get_companies
     ):
-        mock_company_service.return_value = [self.company]
+        mock_get_companies.return_value = [self.company]
         response = handler(self.event, {})
 
-        mock_company_service.assert_called()
+        mock_get_companies.assert_called()
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
         self.assertEqual(response.get("statusCode"), 200)
@@ -32,7 +27,7 @@ class TestGetAllCompaniesHandler(TestCase):
     @mock.patch("company_service.CompanyService.get_all_companies")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
-    def test_handler_failed_should_return_error_400_response(
+    def test_handler_fail_should_return_error_400_response(
         self, mock_create_db_session, mock_create_db_engine, mock_get_all_companies
     ):
         error_message = "Cannot get companies"

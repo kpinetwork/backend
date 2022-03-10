@@ -1,0 +1,37 @@
+{
+    "description": {
+        "id": "zec4b0212-m385-4828-814c-0e6b21d98f87",
+        "name": "A",
+        "from_date": "2010-01-01",
+        "fiscal_year": "2010-01-01",
+        "sector": "Application Software",
+        "vertical": "Energy",
+        "inves_profile_name": "Growth stage VC",
+        "margin_group": "Low",
+        "size_cohort": "$100 million+"
+    },
+    "financial_profile": {
+        "annual_revenue": "110",
+        "annual_ebitda": "-9",
+        "anual_rule_of_40": "7",
+        "current_revenue_growth": "113",
+        "current_ebitda_margin": "-7",
+        "current_rule_of_40": "6"
+    },
+    "rule_of_40": [
+        {
+            "company_id": "zec4b0212-m385-4828-814c-0e6b21d98f87",
+            "name": "A",
+            "revenue_growth_rate": "114",
+            "ebitda_margin": "-8",
+            "revenue": "110"
+        },
+        {
+            "company_id": "ayc4b0212-m385-4828-814c-0e6b21d98f87",
+            "name": "B",
+            "revenue_growth_rate": "100",
+            "ebitda_margin": "9",
+            "revenue": "36"
+        }
+    ]
+}

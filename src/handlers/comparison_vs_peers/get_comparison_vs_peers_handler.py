@@ -13,24 +13,29 @@ from verify_user_permissions import (
     get_user_id_from_event,
     get_username_from_user_id,
 )
-from get_user_details_service import get_user_details_service
+from get_user_details_service import get_user_details_service_instance
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
-user_service = get_user_details_service()
-company_anonymization = CompanyAnonymization(user_service)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 revenue_range = RevenueRange(session, QuerySQLBuilder(), logger, response_sql)
-comparison_vs_peers_service = ComparisonvsPeersService(
-    session, query_builder, logger, response_sql, company_anonymization, revenue_range
-)
 
 
 def handler(event, context):
     try:
+        user_service = get_user_details_service_instance()
+        company_anonymization = CompanyAnonymization(user_service)
+        comparison_vs_peers_service = ComparisonvsPeersService(
+            session,
+            query_builder,
+            logger,
+            response_sql,
+            company_anonymization,
+            revenue_range,
+        )
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
         company_id = event.get("pathParameters").get("company_id")
