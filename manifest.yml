@@ -63,7 +63,7 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/company_report_vs_peers/get_company_report_vs_peers_handler.py
-    - ./src/service/company_report_vs_peers/company_report_vs_peers.py
+    - ./src/service/company_report_vs_peers/company_report_vs_peers_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -80,7 +80,7 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers.py
+    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py

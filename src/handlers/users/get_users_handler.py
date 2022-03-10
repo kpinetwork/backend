@@ -8,19 +8,17 @@ from response_user import ResponseUser
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-boto3.Session(
-    aws_access_key_id=os.environ.get("ACCESS_KEY"),
-    aws_secret_access_key=os.environ.get("SECRET_KEY"),
-)
-
-cognito = boto3.client("cognito-idp")
-response_user = ResponseUser()
-users_service = UsersService(logger, cognito, response_user)
-
 
 def handler(event, context):
     try:
+        boto3.Session(
+            aws_access_key_id=os.environ.get("ACCESS_KEY"),
+            aws_secret_access_key=os.environ.get("SECRET_KEY"),
+        )
 
+        cognito = boto3.client("cognito-idp")
+        response_user = ResponseUser()
+        users_service = UsersService(logger, cognito, response_user)
         pool_id = os.environ.get("USER_POOL_ID")
         users = users_service.get_users(pool_id)
 

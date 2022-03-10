@@ -39,8 +39,8 @@ def get_cognito_client():
             aws_secret_access_key=os.environ.get("SECRET_KEY"),
             region_name="us-west-2",
         )
-        client = boto3.client("cognito-idp")
-    return client
+        cognito = boto3.client("cognito-idp")
+    return cognito
 
 
 def get_roles(user_id: str, user_pool_id: str, client) -> list:

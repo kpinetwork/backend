@@ -1,7 +1,7 @@
 import json
 import logging
 import datetime
-from comparison_vs_peers import ComparisonvsPeersService
+from comparison_vs_peers_service import ComparisonvsPeersService
 from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder

@@ -1,6 +1,7 @@
 import json
 from src.tests.data.data_reader import read
 from unittest import TestCase, mock
+import src.handlers.company_report_vs_peers.get_company_report_vs_peers_handler as report_handler
 from src.handlers.company_report_vs_peers.get_company_report_vs_peers_handler import (
     handler,
 )
@@ -13,16 +14,12 @@ class TestCompanyReportVsPeersHandler(TestCase):
         self.event = read("sample_event_company.json")
 
     @mock.patch(
-        "company_report_vs_peers.CompanyReportvsPeersService.get_company_report_vs_peers"
+        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report_vs_peers"
     )
-    @mock.patch(
-        "company_report_vs_peers.get_company_report_vs_peers_handler.get_username_from_user_id"
-    )
+    @mock.patch.object(report_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch("get_company_report_vs_peers_handler.get_user_details_service_instance")
-    @mock.patch(
-        "company_report_vs_peers.get_company_report_vs_peers_handler.verify_user_access"
-    )
+    @mock.patch.object(report_handler, "get_user_details_service_instance")
+    @mock.patch.object(report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_company_report_handler_success_should_return_200_response(
@@ -52,16 +49,12 @@ class TestCompanyReportVsPeersHandler(TestCase):
         )
 
     @mock.patch(
-        "company_report_vs_peers.CompanyReportvsPeersService.get_company_report_vs_peers"
+        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report_vs_peers"
     )
-    @mock.patch(
-        "company_report_vs_peers.get_company_report_vs_peers_handler.get_username_from_user_id"
-    )
+    @mock.patch.object(report_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch("get_company_report_vs_peers_handler.get_user_details_service_instance")
-    @mock.patch(
-        "company_report_vs_peers.get_company_report_vs_peers_handler.verify_user_access"
-    )
+    @mock.patch.object(report_handler, "get_user_details_service_instance")
+    @mock.patch.object(report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_company_report_handler_fail_should_return_error_400_response(

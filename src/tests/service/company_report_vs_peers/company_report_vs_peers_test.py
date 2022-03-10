@@ -1,7 +1,7 @@
 from unittest import TestCase
 import logging
 from unittest.mock import Mock
-from src.service.company_report_vs_peers.company_report_vs_peers import (
+from src.service.company_report_vs_peers.company_report_vs_peers_service import (
     CompanyReportvsPeersService,
 )
 from src.utils.company_anonymization import CompanyAnonymization

@@ -1,5 +1,6 @@
 import json
 from src.tests.data.data_reader import read
+import src.handlers.comparison_vs_peers.get_comparison_vs_peers_handler as get_peers_handler
 from unittest import TestCase, mock
 from src.handlers.comparison_vs_peers.get_comparison_vs_peers_handler import handler
 
@@ -10,17 +11,13 @@ class TestComparisonVsPeersHandler(TestCase):
         self.comparison_vs_peers = read("sample_company_report.json")
         self.event = read("sample_event_company.json")
 
-    @mock.patch("comparison_vs_peers.ComparisonvsPeersService.get_peers_comparison")
     @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.get_username_from_user_id"
+        "comparison_vs_peers_service.ComparisonvsPeersService.get_peers_comparison"
     )
+    @mock.patch.object(get_peers_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.get_user_details_service_instance"
-    )
-    @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.verify_user_access"
-    )
+    @mock.patch.object(get_peers_handler, "get_user_details_service_instance")
+    @mock.patch.object(get_peers_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_comparison_vs_peers_handler_success_should_return_200_response(
@@ -49,17 +46,13 @@ class TestComparisonVsPeersHandler(TestCase):
             response.get("body"), json.dumps(self.comparison_vs_peers, default=str)
         )
 
-    @mock.patch("comparison_vs_peers.ComparisonvsPeersService.get_peers_comparison")
     @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.get_username_from_user_id"
+        "comparison_vs_peers_service.ComparisonvsPeersService.get_peers_comparison"
     )
+    @mock.patch.object(get_peers_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.get_user_details_service_instance"
-    )
-    @mock.patch(
-        "comparison_vs_peers.get_comparison_vs_peers_handler.verify_user_access"
-    )
+    @mock.patch.object(get_peers_handler, "get_user_details_service_instance")
+    @mock.patch.object(get_peers_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_comparison_vs_peers_handler_fail_should_return_error_400_response(

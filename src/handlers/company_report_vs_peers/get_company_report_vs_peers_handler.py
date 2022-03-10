@@ -1,7 +1,7 @@
 import json
 import logging
 import datetime
-from company_report_vs_peers import CompanyReportvsPeersService
+from company_report_vs_peers_service import CompanyReportvsPeersService
 from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder

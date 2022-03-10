@@ -1,6 +1,7 @@
 import json
 from src.tests.data.data_reader import read
 from unittest import TestCase, mock
+import src.handlers.company.get_all_public_companies_handler as get_all_public_companies_handler
 from src.handlers.company.get_all_public_companies_handler import handler
 
 
@@ -15,12 +16,12 @@ class TestGetAllPublicCompaniesHandler(TestCase):
         self.event = read("sample_event.json")
 
     @mock.patch("company_service.CompanyService.get_all_public_companies")
-    @mock.patch("company.get_all_public_companies_handler.get_username_from_user_id")
+    @mock.patch.object(get_all_public_companies_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch(
-        "company.get_all_public_companies_handler.get_user_details_service_instance"
+    @mock.patch.object(
+        get_all_public_companies_handler, "get_user_details_service_instance"
     )
-    @mock.patch("company.get_all_public_companies_handler.verify_user_access")
+    @mock.patch.object(get_all_public_companies_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_all_public_companies_handler_success_should_return_200_response(
@@ -50,12 +51,12 @@ class TestGetAllPublicCompaniesHandler(TestCase):
         )
 
     @mock.patch("company_service.CompanyService.get_all_public_companies")
-    @mock.patch("company.get_all_public_companies_handler.get_username_from_user_id")
+    @mock.patch.object(get_all_public_companies_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
-    @mock.patch(
-        "company.get_all_public_companies_handler.get_user_details_service_instance"
+    @mock.patch.object(
+        get_all_public_companies_handler, "get_user_details_service_instance"
     )
-    @mock.patch("company.get_all_public_companies_handler.verify_user_access")
+    @mock.patch.object(get_all_public_companies_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_all_public_companies_handler_fail_should_return_error_400_response(

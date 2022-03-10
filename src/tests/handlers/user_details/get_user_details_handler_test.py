@@ -1,6 +1,7 @@
 import json
 from src.tests.data.data_reader import read
 from unittest import TestCase, mock
+import src.handlers.user_details.get_user_details_handler as get_user_handler
 from src.handlers.user_details.get_user_details_handler import handler
 from user_details_service import UserDetailsService
 
@@ -20,9 +21,7 @@ class TestGetUserDetailsHandler(TestCase):
         )
 
     @mock.patch("user_details_service.UserDetailsService.get_user_details")
-    @mock.patch(
-        "src.handlers.user_details.get_user_details_handler.get_user_details_service_instance"
-    )
+    @mock.patch.object(get_user_handler, "get_user_details_service_instance")
     def test_get_user_details_handler_success_should_return_200_response(
         self, mock_get_user_service_instance, mock_get_user_details
     ):
@@ -38,9 +37,7 @@ class TestGetUserDetailsHandler(TestCase):
         )
 
     @mock.patch("user_details_service.UserDetailsService.get_user_details")
-    @mock.patch(
-        "src.handlers.user_details.get_user_details_handler.get_user_details_service_instance"
-    )
+    @mock.patch.object(get_user_handler, "get_user_details_service_instance")
     def test_get_user_details_handler_fail_should_return_error_400_response(
         self, mock_get_user_service_instance, mock_get_user_details
     ):
