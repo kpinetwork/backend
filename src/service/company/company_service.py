@@ -59,6 +59,7 @@ class CompanyService:
                     },
                     self.query_builder.JoinType.LEFT,
                 )
+                .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
@@ -90,6 +91,7 @@ class CompanyService:
                     self.query_builder.JoinType.LEFT,
                 )
                 .add_sql_where_equal_condition(where_condition)
+                .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
@@ -100,8 +102,13 @@ class CompanyService:
             companies = self.response_sql.process_query_list_results(results)
             if access:
                 return companies
-            return self.company_anonymization.hide_companies(companies, "id")
-
+            anonymized_companies = self.company_anonymization.hide_companies(
+                companies, "id"
+            )
+            return sorted(
+                anonymized_companies,
+                key=lambda x: x.get("name", ""),
+            )
         except Exception as error:
             self.logger.info(error)
             raise error
