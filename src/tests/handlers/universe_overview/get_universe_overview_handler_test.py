@@ -73,9 +73,9 @@ class TestGetUniverseOverviewHandler(TestCase):
 
         response = handler(self.event, {})
 
-        # mock_get_universe_overview.assert_called()
-        # mock_create_db_engine.assert_not_called()
-        # mock_create_db_session.assert_not_called()
-        # mock_set_company_permissions.assert_called_with(self.username)
+        mock_get_universe_overview.assert_called()
+        mock_create_db_engine.assert_not_called()
+        mock_create_db_session.assert_not_called()
+        mock_set_company_permissions.assert_called_with(self.username)
         self.assertEqual(response.get("statusCode"), 400)
         self.assertEqual(response.get("body"), json.dumps({"error": error_message}))
