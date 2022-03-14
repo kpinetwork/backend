@@ -60,16 +60,19 @@ class ComparisonvsPeersService:
     def remove_revenue(self, peers):
         for company in peers:
             revenue = company.get("revenue")
-            revenue_ranges = list(
-                filter(
-                    lambda range: self.revenue_range.verify_range(range, revenue),
-                    self.revenue_range.ranges,
+            if not revenue:
+                company["revenue"] = "NaN"
+            else:
+                revenue_ranges = list(
+                    filter(
+                        lambda range: self.revenue_range.verify_range(range, revenue),
+                        self.revenue_range.ranges,
+                    )
                 )
-            )
-            revenue_range = (
-                revenue_ranges[0] if len(revenue_ranges) == 1 else {"label": "NaN"}
-            )
-            company["revenue"] = revenue_range.get("label")
+                revenue_range = (
+                    revenue_ranges[0] if len(revenue_ranges) == 1 else {"label": "NaN"}
+                )
+                company["revenue"] = revenue_range.get("label")
 
     def get_company(self, company_id: str) -> dict:
         try:
@@ -226,17 +229,18 @@ class ComparisonvsPeersService:
         data.extend(peer_data)
         rank = dict()
 
-        for key in company_data.keys():
-            if key not in company_details:
+        for company_key in company_data.keys():
+            if company_key not in company_details:
+                filtered = list(filter(lambda company, data_key=company_key: company.get(data_key), data))
                 metric_order = sorted(
-                    data, key=lambda company: company.get(key), reverse=True
+                    filtered, key=lambda company, data_key=company_key: company.get(data_key), reverse=True
                 )
                 index = (
                     metric_order.index(company_data) + 1
                     if company_data in metric_order
                     else -1
                 )
-                rank[key] = f"{index} of {len(metric_order)}"
+                rank[company_key] = f"{index} of {len(metric_order)}"
         return rank
 
     def get_peers_comparison(
