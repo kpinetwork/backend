@@ -85,6 +85,14 @@ class TestComparisonvsPeers(TestCase):
 
         self.assertEqual([data], [expected_out])
 
+    def test_remove_revenue_without_revenue_value(self):
+        data = {"size_cohort": "100+"}
+        expected_out = {"size_cohort": "100+", "revenue": "NaN"}
+
+        self.comparison_service_instance.remove_revenue([data])
+
+        self.assertEqual([data], [expected_out])
+
     def test_get_company_success(self):
         expected_out = {"sector": "Test"}
         self.mock_response_query_sql(expected_out)
