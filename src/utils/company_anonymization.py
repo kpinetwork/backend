@@ -7,9 +7,9 @@ class CompanyAnonymization:
         self.companies = []
 
     def set_company_permissions(self, username) -> list:
-        permisisons = self.user_details_service.get_user_company_permissions(username)
+        permissions = self.user_details_service.get_user_company_permissions(username)
         self.companies = [
-            permission.get("id") for permission in permisisons if permission.get("id")
+            permission.get("id") for permission in permissions if permission.get("id")
         ]
 
     def anonymize_company_name(self, company_id: str) -> str:
