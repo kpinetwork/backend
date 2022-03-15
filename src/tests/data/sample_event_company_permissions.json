@@ -1,0 +1,6 @@
+{
+    "pathParameters": {
+        "username": "customer@email.com"
+    },
+    "body": "{\"companies\": {\"zec4b0212-m385-4828-814c-0e6b21d98f87\": true } }"
+}

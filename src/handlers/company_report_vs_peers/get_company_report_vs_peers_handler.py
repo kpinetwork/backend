@@ -1,7 +1,7 @@
 import json
 import logging
 import datetime
-from company_report_vs_peers import CompanyReportvsPeersService
+from company_report_vs_peers_service import CompanyReportvsPeersService
 from commons_functions import get_list_param
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
@@ -12,23 +12,23 @@ from verify_user_permissions import (
     get_user_id_from_event,
     get_username_from_user_id,
 )
-from get_user_details_service import get_user_details_service
+from get_user_details_service import get_user_details_service_instance
 
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
-user_service = get_user_details_service()
-company_anonymization = CompanyAnonymization(user_service)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-company_report_service = CompanyReportvsPeersService(
-    session, query_builder, logger, response_sql, company_anonymization
-)
 
 
 def handler(event, context):
     try:
+        user_service = get_user_details_service_instance()
+        company_anonymization = CompanyAnonymization(user_service)
+        company_report_service = CompanyReportvsPeersService(
+            session, query_builder, logger, response_sql, company_anonymization
+        )
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
         company_id = event.get("pathParameters").get("company_id")

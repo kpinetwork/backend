@@ -1,8 +1,6 @@
 import os
 import json
-from get_user_details_service import get_user_details_service
-
-user_service = get_user_details_service()
+from get_user_details_service import get_user_details_service_instance
 
 
 def handler(event, context):
@@ -10,6 +8,7 @@ def handler(event, context):
         if not event.get("body"):
             raise Exception("No roles data provided")
 
+        user_service = get_user_details_service_instance()
         roles = json.loads(event.get("body"))
         email = event.get("pathParameters").get("username")
         user_pool_id = os.environ.get("USER_POOL_ID")

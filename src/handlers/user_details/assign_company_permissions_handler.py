@@ -1,7 +1,5 @@
 import json
-from get_user_details_service import get_user_details_service
-
-user_service = get_user_details_service()
+from get_user_details_service import get_user_details_service_instance
 
 
 def handler(event, context):
@@ -9,6 +7,7 @@ def handler(event, context):
         if not event.get("body"):
             raise Exception("No company data provided")
 
+        user_service = get_user_details_service_instance()
         data = json.loads(event.get("body"))
         username = event.get("pathParameters").get("username")
         companies = data.get("companies")

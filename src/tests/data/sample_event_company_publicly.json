@@ -1,0 +1,12 @@
+{
+    "queryStringParameters": {
+        "limit": 1,
+        "offset": 1
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "body": "{\"companies\": {\"aec4b028-c382-4828-814c-0e6b21d98f87\": false}}"
+}
