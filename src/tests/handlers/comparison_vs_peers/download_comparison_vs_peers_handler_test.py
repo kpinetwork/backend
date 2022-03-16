@@ -20,7 +20,9 @@ class TestDownloadComparisonVsPeersHandler(TestCase):
         self.event = read("sample_event_company.json")
 
     @mock.patch.object(download_peers, "get_comparison_vs_peers")
-    @mock.patch.object(download_peers, "file_path", return_value=get_path("data.csv"))
+    @mock.patch.object(
+        download_peers, "file_path", return_value=get_path("comparison_data.csv")
+    )
     def test_download_comparison_vs_peers_handler_success_should_return_200_response(
         self, mock_file_path, mock_get_comparison_vs_peers
     ):
@@ -35,7 +37,9 @@ class TestDownloadComparisonVsPeersHandler(TestCase):
         self.assertEqual(type(file_data), str)
 
     @mock.patch.object(download_peers, "get_comparison_vs_peers")
-    @mock.patch.object(download_peers, "file_path", return_value=get_path("data.csv"))
+    @mock.patch.object(
+        download_peers, "file_path", return_value=get_path("comparison_data.csv")
+    )
     def test_download_comparison_vs_peers_handler_fail_should_return_error_400_response(
         self, mock_file_path, mock_get_comparison_vs_peers
     ):
