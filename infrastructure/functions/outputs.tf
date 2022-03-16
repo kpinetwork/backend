@@ -6,6 +6,7 @@ output "lambdas_invoke_arns" {
     "get_universe_overview_lambda_function": aws_lambda_function.get_universe_overview_lambda_function.invoke_arn
     "get_company_report_vs_peers_lambda_function": aws_lambda_function.get_company_report_vs_peers_lambda_function.invoke_arn
     "get_comparison_vs_peers_lambda_function": aws_lambda_function.get_comparison_vs_peers_lambda_function.invoke_arn
+    "download_comparison_vs_peers_lambda_function": aws_lambda_function.download_comparison_vs_peers_lambda_function.invoke_arn
     "add_user_to_customer_group_lambda_function": aws_lambda_function.add_user_to_customer_group_lambda_function.invoke_arn
     "authorize_lambda_function": aws_lambda_function.authorize_lambda_function.invoke_arn
     "verify_users_with_same_email_lambda_function": aws_lambda_function.verify_users_with_same_email_lambda_function.invoke_arn

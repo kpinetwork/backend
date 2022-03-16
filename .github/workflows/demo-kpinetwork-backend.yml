@@ -18,6 +18,7 @@ jobs:
       TF_VAR_db_prod_password: ${{ secrets.DB_PROD_PASSWORD }}
       TF_VAR_db_demo_password: ${{ secrets.DB_DEMO_PASSWORD }}
       TF_VAR_git_token: ${{ secrets.CODEBUILD_TOKEN }}
+      TF_VAR_comparison_file_path: ${{ secrets.COMPARISON_FILE_PATH }}
     steps:
       - uses: actions/checkout@v2
       - name: Set up python
