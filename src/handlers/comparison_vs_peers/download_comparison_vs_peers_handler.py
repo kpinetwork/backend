@@ -37,9 +37,13 @@ def process_data(data: dict) -> list:
     company = data.get("company_comparison_data")
     rank = data.get("rank")
 
-    peers_data = list(map(remove_keys, peers))
+    peers_data = []
+    if company and rank:
+        peers_data = [company, rank]
+
+    peers = list(map(remove_keys, peers))
     remove_keys(company)
-    peers_data.extend([company, rank])
+    peers_data.extend(peers)
 
     return peers_data
 

@@ -404,6 +404,7 @@ resource "aws_lambda_function" "get_user_details_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.get_user_details_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_user_details_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
