@@ -130,7 +130,7 @@ class QuerySQLBuilder:
             raise Exception("No valid columns for group by")
 
     def add_sql_limit_condition(self, limit):
-        if self.__is_valid_number(limit):
+        if self.__is_valid_number(limit) or limit is None:
             self.limit = limit
             return self
         else:

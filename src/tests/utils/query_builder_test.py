@@ -157,8 +157,15 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(query_builder.limit, limit)
 
-    def test_add_sql_limit_condition_with_invalid_limit(self):
+    def test_add_sql_limit_condition_with_None_limit(self):
         limit = None
+
+        query_builder = QuerySQLBuilder().add_sql_limit_condition(limit)
+
+        self.assertEqual(query_builder.limit, limit)
+
+    def test_add_sql_limit_condition_with_invalid_limit(self):
+        limit = "number"
 
         with self.assertRaises(Exception):
             exception = self.assertRaises(
