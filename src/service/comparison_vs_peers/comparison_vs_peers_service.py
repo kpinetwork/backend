@@ -231,9 +231,16 @@ class ComparisonvsPeersService:
 
         for company_key in company_data.keys():
             if company_key not in company_details:
-                filtered = list(filter(lambda company, data_key=company_key: company.get(data_key), data))
+                filtered = list(
+                    filter(
+                        lambda company, data_key=company_key: company.get(data_key),
+                        data,
+                    )
+                )
                 metric_order = sorted(
-                    filtered, key=lambda company, data_key=company_key: company.get(data_key), reverse=True
+                    filtered,
+                    key=lambda company, data_key=company_key: company.get(data_key),
+                    reverse=True,
                 )
                 index = (
                     metric_order.index(company_data) + 1
@@ -255,6 +262,15 @@ class ComparisonvsPeersService:
         from_main: bool,
         access: bool,
     ) -> dict:
+        def get_peers_sorted(data: dict) -> list:
+            return sorted(
+                list(data.values()),
+                key=lambda x: (
+                    self.company_anonymization.is_anonymized(x.get("name", "")),
+                    x.get("name", "").lower(),
+                ),
+            )
+
         try:
             data = self.get_peers_comparison_data(
                 company_id,
@@ -270,22 +286,10 @@ class ComparisonvsPeersService:
             company = dict()
             rank = dict()
             if from_main:
-                peers = sorted(
-                    list(data.values()),
-                    key=lambda x: (
-                        self.company_anonymization.is_anonymized(x.get("name", "")),
-                        x.get("name", ""),
-                    ),
-                )
+                peers = get_peers_sorted(data)
             elif not from_main and company_id and company_id.strip():
                 company = data.pop(company_id, dict())
-                peers = sorted(
-                    list(data.values()),
-                    key=lambda x: (
-                        self.company_anonymization.is_anonymized(x.get("name", "")),
-                        x.get("name", ""),
-                    ),
-                )
+                peers = get_peers_sorted(data)
                 rank = self.get_rank(company, peers)
 
             self.remove_revenue(peers)
