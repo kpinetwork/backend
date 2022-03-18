@@ -288,9 +288,50 @@ resource "aws_iam_role" "get_comparison_vs_peers_lambda_exec_role" {
 EOF
 }
 
+resource "aws_iam_role" "download_comparison_vs_peers_lambda_exec_role" {
+  name               = "${var.environment}_download_comparison_vs_peers_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
 resource "aws_iam_role_policy" "get_comparison_vs_peers_cognito_policy" {
   name        = "${var.environment}_get_comparison_vs_peers_cognito_policy"
   role        = aws_iam_role.get_comparison_vs_peers_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser",
+        "cognito-idp:ListUsers"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "download_comparison_vs_peers_cognito_policy" {
+  name        = "${var.environment}_download_comparison_vs_peers_cognito_policy"
+  role        = aws_iam_role.download_comparison_vs_peers_lambda_exec_role.id
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -313,9 +354,17 @@ resource "aws_iam_role_policy_attachment" "get_comparison_vs_peers_lambda_logs" 
   role       = aws_iam_role.get_comparison_vs_peers_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
 }
+resource "aws_iam_role_policy_attachment" "download_comparison_vs_peers_lambda_logs" {
+  role       = aws_iam_role.download_comparison_vs_peers_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
 
 resource "aws_iam_role_policy_attachment" "get_comparison_vs_peers_lambda_vpc" {
   role       = aws_iam_role.get_comparison_vs_peers_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+resource "aws_iam_role_policy_attachment" "download_comparison_vs_peers_lambda_vpc" {
+  role       = aws_iam_role.download_comparison_vs_peers_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
 }
 
@@ -325,6 +374,13 @@ resource "aws_lambda_permission" "apigw_get_comparison_vs_peers_lambda" {
   function_name = "${var.environment}_${var.lambdas_names.get_comparison_vs_peers_lambda_function}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_comparison_vs_peers_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_comparison_vs_peers_lambda_function.http_method}${var.api_gateway_references.apigw_get_comparison_vs_peers_lambda_function.resource_path}"
+}
+resource "aws_lambda_permission" "apigw_download_comparison_vs_peers_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.download_comparison_vs_peers_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.api_id}/*/${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.http_method}${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.resource_path}"
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -36,6 +36,7 @@ variable "db_username" {}
 variable "db_password" {}
 variable "aws_access_key_id" {}
 variable "aws_secret_access_key" {}
+variable "comparison_file_path" {}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # AUTHORIZE

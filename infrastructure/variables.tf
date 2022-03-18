@@ -38,6 +38,7 @@ variable "lambdas_names" {
     "get_universe_overview_lambda_function": "get_universe_overview_lambda_function"
     "get_company_report_vs_peers_lambda_function": "get_company_report_vs_peers_lambda_function"
     "get_comparison_vs_peers_lambda_function": "get_comparison_vs_peers_lambda_function"
+    "download_comparison_vs_peers_lambda_function": "download_comparison_vs_peers_lambda_function"
     "add_user_to_customer_group_lambda_function": "add_user_to_customer_group_lambda_function"
     "authorize_lambda_function": "authorize_lambda_function"
     "verify_users_with_same_email_lambda_function" : "verify_users_with_same_email_lambda_function"
@@ -90,6 +91,10 @@ variable "git_token" {
 
 variable "backend" {
   default     = "s3"
+}
+
+variable "comparison_file_path" {
+  sensitive = true
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

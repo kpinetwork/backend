@@ -80,6 +80,26 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
+    - ./src/handlers/comparison_vs_peers/get_peers_data.py
+    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/utils/commons_functions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
+    - ./src/utils/revenue_range.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+
+  download_comparison_vs_peers_handler:
+    requirements: ./src/handlers/company/requirements.txt
+    include:
+    - ./src/handlers/comparison_vs_peers/download_comparison_vs_peers_handler.py
+    - ./src/handlers/comparison_vs_peers/get_peers_data.py
     - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
