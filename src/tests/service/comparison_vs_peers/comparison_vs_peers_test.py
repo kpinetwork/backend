@@ -246,14 +246,13 @@ class TestComparisonvsPeers(TestCase):
         self.mock_response_query_sql(self.company)
         self.mock_response_list_query_sql([self.company, self.comparison])
         self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
-
         peers = self.comparison.copy()
-        peers["revenue"] = peers["size_cohort"]
         expected_out = {
             "company_comparison_data": self.company,
-            "rank": {"growth": "2 of 2", "revenue": "1 of 2"},
+            "rank": {},
             "peers_comparison_data": [peers],
         }
+
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
                 "1", [], [], [], [], [], "2020", False, True
@@ -264,10 +263,10 @@ class TestComparisonvsPeers(TestCase):
         self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
 
     def test_get_peers_comparison_success_with_no_company_data(self):
+
         self.mock_response_list_query_sql([self.company, self.comparison])
         self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
         peers = self.comparison.copy()
-        peers["revenue"] = peers["size_cohort"]
         expected_out = {
             "company_comparison_data": dict(),
             "rank": dict(),
