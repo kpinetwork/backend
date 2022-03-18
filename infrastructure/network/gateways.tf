@@ -5,6 +5,7 @@
 
 resource "aws_api_gateway_rest_api" "api" {
   name =  var.is_production? var.api_name : "${var.environment}_${var.api_name}"
+  binary_media_types = ["application/octet-stream"]
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -60,6 +61,12 @@ resource "aws_api_gateway_resource" "comparison_vs_peers" {
 resource "aws_api_gateway_resource" "comparison_vs_peers_id" {
   path_part   = "{company_id}"
   parent_id   = aws_api_gateway_resource.comparison_vs_peers.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "download_comparison_vs_peers" {
+  path_part   = "download"
+  parent_id   = aws_api_gateway_resource.comparison_vs_peers_id.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -193,6 +200,24 @@ resource "aws_api_gateway_method" "get_comparison_vs_peers_method" {
   }
 }
 
+resource "aws_api_gateway_method" "download_comparison_vs_peers_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.download_comparison_vs_peers.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+
+  request_parameters = {
+    "method.request.querystring.vertical" = false
+    "method.request.querystring.sector" = false
+    "method.request.querystring.investor_profile" = false
+    "method.request.querystring.growth_profile" = false
+    "method.request.querystring.size" = false
+    "method.request.querystring.year" = false
+    "method.request.querystring.from_main" = false
+  }
+}
+
 resource "aws_api_gateway_method" "get_users_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.users.id
@@ -311,6 +336,15 @@ resource "aws_api_gateway_integration" "comparison_vs_peers_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_comparison_vs_peers_lambda_function
+}
+
+resource "aws_api_gateway_integration" "download_comparison_vs_peers_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.download_comparison_vs_peers.id
+  http_method             = aws_api_gateway_method.download_comparison_vs_peers_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.download_comparison_vs_peers_lambda_function
 }
 
 resource "aws_api_gateway_integration" "users_integration" {

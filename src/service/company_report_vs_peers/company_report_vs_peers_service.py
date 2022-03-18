@@ -132,6 +132,7 @@ class CompanyReportvsPeersService:
         year: str,
     ) -> dict:
         try:
+            next_year = int(year) + 1
             financial_profile = dict()
             metrics = [
                 {
@@ -150,17 +151,17 @@ class CompanyReportvsPeersService:
                     "alias": "anual_rule_of_40",
                 },
                 {
-                    "scenario": f"Budgeted growth-{year}",
+                    "scenario": f"Budgeted growth-{next_year}",
                     "metric": "Revenue",
                     "alias": "current_revenue_growth",
                 },
                 {
-                    "scenario": f"Budgeted margin-{year}",
+                    "scenario": f"Budgeted growth-{next_year}",
                     "metric": "Ebitda",
                     "alias": "current_ebitda_margin",
                 },
                 {
-                    "scenario": f"Budget-{year}",
+                    "scenario": f"Budget-{next_year}",
                     "metric": "Rule of 40",
                     "alias": "current_rule_of_40",
                 },

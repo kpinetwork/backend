@@ -30,6 +30,7 @@ module "functions" {
   user_pool_id             = module.cognito.id
   app_client_id            = module.cognito.amplify_client_id
   aws_account_id           = var.aws_account_id
+  comparison_file_path                = var.comparison_file_path
 }
 
 module "policy" {

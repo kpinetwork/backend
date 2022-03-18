@@ -107,7 +107,7 @@ class CompanyService:
             )
             return sorted(
                 anonymized_companies,
-                key=lambda x: x.get("name", ""),
+                key=lambda x: x.get("name", "").lower(),
             )
         except Exception as error:
             self.logger.info(error)
