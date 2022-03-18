@@ -77,9 +77,10 @@ class TestComparisonvsPeers(TestCase):
 
         self.assertEqual(filters_out, expected_out)
 
-    def test_remove_revenue(self):
-        data = {"size_cohort": "100+", "revenue": 102}
-        expected_out = {"size_cohort": "100+", "revenue": "100+"}
+    def test_remove_revenue_without_permissions(self):
+        self.company_anonymization.companies = ["2"]
+        data = {"id": "1", "size_cohort": "100+", "revenue": 102}
+        expected_out = {"id": "1", "size_cohort": "100+", "revenue": "100+"}
 
         self.comparison_service_instance.remove_revenue([data])
 
@@ -263,10 +264,10 @@ class TestComparisonvsPeers(TestCase):
         self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
 
     def test_get_peers_comparison_success_with_no_company_data(self):
-
         self.mock_response_list_query_sql([self.company, self.comparison])
         self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
         peers = self.comparison.copy()
+        peers["revenue"] = peers["size_cohort"]
         expected_out = {
             "company_comparison_data": dict(),
             "rank": dict(),
@@ -275,7 +276,7 @@ class TestComparisonvsPeers(TestCase):
 
         get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], [], "2020", True, True
+                "1", [], [], [], [], [], "2020", True, False
             )
         )
 
