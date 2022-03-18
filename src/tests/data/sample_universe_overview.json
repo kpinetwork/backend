@@ -1,0 +1,105 @@
+{
+    "kpi_average": [
+        {
+            "growth": "25"
+        },
+        {
+            "ebitda_margin": "-12.5"
+        },
+        {
+            "rule_of_40": "13.5"
+        }
+    ],
+    "count_by_size": [
+        {
+            "size_cohort": "$100 million+",
+            "count": 1
+        },
+        {
+            "size_cohort": "$30-<$50 million",
+            "count": 1
+        }
+    ],
+    "growth_and_margin": {
+        "$100 million+": [
+            {
+                "size_cohort": "$100 million+",
+                "growth": "14"
+            },
+            {
+                "size_cohort": "$100 million+",
+                "margin": "-8"
+            }
+        ],
+        "$30-<$50 million": [
+            {
+                "size_cohort": "$30-<$50 million",
+                "growth": "36"
+            },
+            {
+                "size_cohort": "$30-<$50 million",
+                "margin": "-17"
+            }
+        ]
+    },
+    "expected_growth_and_margin": {
+        "$100 million+": [
+            {
+                "size_cohort": "$100 million+",
+                "growth": "97"
+            },
+            {
+                "size_cohort": "$100 million+",
+                "margin": "128"
+            }
+        ],
+        "$30-<$50 million": [
+            {
+                "size_cohort": "$30-<$50 million",
+                "growth": "102"
+            },
+            {
+                "size_cohort": "$30-<$50 million",
+                "margin": "69"
+            }
+        ]
+    },
+    "revenue_and_ebitda": {
+        "$100 million+": [
+            {
+                "size_cohort": "$100 million+",
+                "revenue": "110"
+            },
+            {
+                "size_cohort": "$100 million+",
+                "ebitda": "-8"
+            }
+        ],
+        "$30-<$50 million": [
+            {
+                "size_cohort": "$30-<$50 million",
+                "revenue": "76"
+            },
+            {
+                "size_cohort": "$30-<$50 million",
+                "ebitda": "-17"
+            }
+        ]
+    },
+    "rule_of_40": [
+        {
+            "company_id": "fc4c54bf-49e1-47eb-b045-b80e2f20e36e",
+            "name": "SONIC FOUNDRY INC",
+            "revenue_growth_rate": "100",
+            "ebitda_margin": "9",
+            "revenue": "36"
+        },
+        {
+            "company_id": "cab73877-8f9b-4942-9b66-78090592ce0f",
+            "name": "ADESTO TECHNOLOGIES Corp",
+            "revenue_growth_rate": "114",
+            "ebitda_margin": "-8",
+            "revenue": "110"
+        }
+    ]
+}

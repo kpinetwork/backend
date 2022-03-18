@@ -1,0 +1,10 @@
+{
+    "pathParameters": {
+        "username": "user@email.com"
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}

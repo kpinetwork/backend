@@ -117,6 +117,22 @@ commit, you can use this command:
 cz check -m "fix: KPI-00 check commit message" 
 ```
 
+## Docker file
+Lambdas aws environment can be tested with docker image, use the following Dockerfile
+
+```
+FROM amazon/aws-lambda-python:3.6
+ENV VAR=<value>                                                                                                                      
+
+COPY dist/<handler>.zip ./
+RUN unzip <handler>.zip
+
+COPY requirements/docker/requirements.txt  ./
+RUN  pip3 install -r requirements.txt
+CMD [ "<handler>.handler" ]
+
+```
+
 ## Code Style
 
 The project use [PEP 8](https://www.python.org/dev/peps/pep-0008/) as the

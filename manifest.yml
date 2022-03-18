@@ -31,7 +31,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
@@ -54,7 +54,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
@@ -63,7 +63,7 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/company_report_vs_peers/get_company_report_vs_peers_handler.py
-    - ./src/service/company_report_vs_peers/company_report_vs_peers.py
+    - ./src/service/company_report_vs_peers/company_report_vs_peers_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -71,7 +71,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
@@ -80,7 +80,7 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers.py
+    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -89,7 +89,7 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/revenue_range.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
@@ -127,7 +127,7 @@ functions:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/get_user_details_handler.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py
@@ -140,7 +140,7 @@ functions:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/change_user_role_handler.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py
@@ -153,7 +153,7 @@ functions:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/assign_company_permissions_handler.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py
@@ -166,7 +166,7 @@ functions:
     requirements: ./src/handlers/user_details/requirements.txt
     include:
     - ./src/handlers/user_details/get_company_permissions_handler.py
-    - ./src/handlers/user_details/get_user_details_service.py
+    - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./src/utils/response_user.py
     - ./casbin_configuration/policy_manager.py

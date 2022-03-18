@@ -1,0 +1,6 @@
+{
+    "pathParameters": {
+        "username": "customer@email.com"
+    },
+    "body": "{\"new_role\": \"admin\", \"current_role\": \"customer\" }"
+}

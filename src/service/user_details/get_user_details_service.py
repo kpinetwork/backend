@@ -28,7 +28,7 @@ def get_session():
     return create_db_session(engine)
 
 
-def get_user_details_service():
+def get_user_details_service_instance():
     cognito = get_cognito_resource()
     logger = get_logger()
     session = get_session()

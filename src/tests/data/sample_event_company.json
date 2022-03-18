@@ -1,0 +1,15 @@
+{
+    "queryStringParameters": {
+        "limit": 1,
+        "offset": 1,
+        "year": 2020
+    },
+    "pathParameters": {
+        "id": "zec4b0212-m385-4828-814c-0e6b21d98f87"
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}

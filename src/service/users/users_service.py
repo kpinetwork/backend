@@ -28,7 +28,7 @@ class UsersService:
         users.extend(response["Users"])
 
         mapped_users = process_users(users, user_pool_id)
-        return mapped_users
+        return sorted(mapped_users, key=lambda user: user.get("email"))
 
     def get_roles_params(self, user_pool_id) -> dict:
         return {
