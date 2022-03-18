@@ -35,14 +35,13 @@ def write_file(file: TextIOWrapper, data: dict):
 def process_data(data: dict) -> list:
     peers = data.get("peers_comparison_data")
     company = data.get("company_comparison_data")
-    rank = data.get("rank")
 
     peers_data = []
-    if company and rank:
-        peers_data = [company, rank]
+    remove_keys(company)
+    if company:
+        peers_data = [company]
 
     peers = list(map(remove_keys, peers))
-    remove_keys(company)
     peers_data.extend(peers)
 
     return peers_data
