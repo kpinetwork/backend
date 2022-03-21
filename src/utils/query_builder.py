@@ -130,7 +130,7 @@ class QuerySQLBuilder:
             raise Exception("No valid columns for group by")
 
     def add_sql_limit_condition(self, limit):
-        if self.__is_valid_number(limit) or limit is None:
+        if limit is None or self.__is_valid_number(limit):
             self.limit = limit
             return self
         else:
@@ -195,7 +195,7 @@ class QuerySQLBuilder:
             return ""
 
     def __build_offset(self):
-        if self.offset is not None:
+        if (self.limit and self.offset) is not None:
             return "OFFSET {offset}".format(offset=self.offset)
         else:
             return ""

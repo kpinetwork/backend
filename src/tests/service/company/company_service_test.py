@@ -125,7 +125,7 @@ class TestCompanyService(TestCase):
         self.mock_response_query_sql(self.total_companies)
 
         get_total_number_of_companies = (
-            self.company_service_instance.get_total_number_of_companies()
+            self.company_service_instance.get_total_number_of_companies(public=False)
         )
 
         self.assertEqual(get_total_number_of_companies, self.total_companies)
@@ -135,7 +135,9 @@ class TestCompanyService(TestCase):
         self.company_service_instance.session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.company_service_instance.get_total_number_of_companies()
+                self.company_service_instance.get_total_number_of_companies(
+                    public=False
+                )
             )
 
             self.assertTrue("error" in context.exception)
@@ -145,6 +147,7 @@ class TestCompanyService(TestCase):
     def test_get_all_public_companies_with_access_should_return_no_anonymized_data(
         self,
     ):
+        self.mock_response_query_sql(self.total_companies)
         self.mock_response_list_query_sql([self.company])
 
         get_all_companies_out = self.company_service_instance.get_all_public_companies(
@@ -152,21 +155,23 @@ class TestCompanyService(TestCase):
         )
 
         self.assertEqual(get_all_companies_out, self.all_public_companies)
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
 
     def test_get_all_public_companies_without_access_should_return_hiden_companies(
         self,
     ):
+        self.mock_response_query_sql(self.total_companies)
         self.mock_response_list_query_sql([self.company])
 
         get_all_companies_out = self.company_service_instance.get_all_public_companies(
             access=False
         )
 
-        self.assertEqual(get_all_companies_out, {"total": 0, "companies": []})
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(get_all_companies_out, {"total": 1, "companies": []})
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
 
     def test_get_all_public_companies_should_return_empty_result(self):
+        self.mock_response_query_sql({"count": 0})
         self.mock_response_list_query_sql([])
 
         get_all_companies_out = self.company_service_instance.get_all_public_companies(
@@ -174,7 +179,7 @@ class TestCompanyService(TestCase):
         )
 
         self.assertEqual(get_all_companies_out, {"total": 0, "companies": []})
-        self.company_service_instance.session.execute.assert_called_once()
+        self.assertEqual(self.company_service_instance.session.execute.call_count, 2)
 
     def test_get_all_public_companies_failed(self):
         self.company_service_instance.session.execute.side_effect = Exception("error")

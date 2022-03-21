@@ -43,11 +43,15 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_total_number_of_companies(self) -> dict:
+    def get_total_number_of_companies(self, public: bool) -> dict:
         try:
+            where_condition = dict()
+            if public:
+                where_condition = {f"{self.table_name}.is_public": True}
             query = (
                 self.query_builder.add_table_name(self.table_name)
                 .add_select_conditions(["COUNT(*)"])
+                .add_sql_where_equal_condition(where_condition)
                 .build()
                 .get_query()
             )
@@ -84,7 +88,9 @@ class CompanyService:
             results = self.session.execute(query).fetchall()
             self.session.commit()
             companies = self.response_sql.process_query_list_results(results)
-            total_companies = self.get_total_number_of_companies().get("count")
+            total_companies = self.get_total_number_of_companies(public=False).get(
+                "count"
+            )
 
             return {"total": total_companies, "companies": companies}
 
@@ -121,11 +127,12 @@ class CompanyService:
             self.session.commit()
             companies = self.response_sql.process_query_list_results(results)
             companies_to_return = []
-            total_companies = 0
+            total_companies = self.get_total_number_of_companies(public=True).get(
+                "count"
+            )
 
             if access:
                 companies_to_return = companies
-                total_companies = len(companies_to_return)
             else:
                 anonymized_companies = self.company_anonymization.hide_companies(
                     companies, "id"
@@ -134,7 +141,6 @@ class CompanyService:
                     anonymized_companies,
                     key=lambda x: x.get("name", "").lower(),
                 )
-                total_companies = len(companies_to_return)
 
             return {"total": total_companies, "companies": companies_to_return}
 

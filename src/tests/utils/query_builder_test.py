@@ -304,11 +304,25 @@ class TestQueryBuilder(TestCase):
 
         self.assertEqual(result, expected_group_by_condition)
 
-    def test__build_offset_with_value(self):
+    def test__build_offset_with_value_and_limit_condition(self):
+        offset = 10
+        limit = 10
+        query_builder = (
+            QuerySQLBuilder()
+            .add_sql_limit_condition(limit)
+            .add_sql_offset_condition(offset)
+        )
+
+        expected_offset_condition = f"OFFSET {offset}"
+        result = query_builder._QuerySQLBuilder__build_offset()
+
+        self.assertEqual(result, expected_offset_condition)
+
+    def test__build_offset_with_value_and_withou_limit_condition(self):
         offset = 10
         query_builder = QuerySQLBuilder().add_sql_offset_condition(offset)
 
-        expected_offset_condition = f"OFFSET {offset}"
+        expected_offset_condition = ""
         result = query_builder._QuerySQLBuilder__build_offset()
 
         self.assertEqual(result, expected_offset_condition)
