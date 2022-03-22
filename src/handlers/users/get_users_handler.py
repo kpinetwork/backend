@@ -20,7 +20,15 @@ def handler(event, context):
         response_user = ResponseUser()
         users_service = UsersService(logger, cognito, response_user)
         pool_id = os.environ.get("USER_POOL_ID")
-        users = users_service.get_users(pool_id)
+
+        limit = 10
+        token = ""
+        if event.get("queryStringParameters"):
+            params = event.get("queryStringParameters")
+            limit = int(params.get("limit", limit))
+            token = params.get("token", token)
+
+        users = users_service.get_users(pool_id, limit, token)
 
         return {
             "statusCode": 200,

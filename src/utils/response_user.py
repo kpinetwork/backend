@@ -41,3 +41,15 @@ class ResponseUser:
             for group in groups.get("Groups")
             if "google" not in group.get("GroupName", "").lower()
         ]
+
+    def proccess_user(self, user: dict) -> dict:
+        email_object = user["Attributes"][0]
+        return {
+            "username": user.get("Username"),
+            "email": email_object.get("Value"),
+            "roles": [],
+        }
+
+    def proccess_users(self, users: list) -> list:
+        users = [self.proccess_user(user) for user in users]
+        return users

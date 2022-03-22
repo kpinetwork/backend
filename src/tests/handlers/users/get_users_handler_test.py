@@ -6,7 +6,7 @@ from src.handlers.users.get_users_handler import handler
 
 class TestGetUsersHandler(TestCase):
     def setUp(self):
-        self.event = read("sample_event_user_role.json")
+        self.event = read("sample_event_users.json")
 
     @mock.patch("users_service.UsersService.get_users")
     @mock.patch("src.handlers.users.get_users_handler.boto3")
