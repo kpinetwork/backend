@@ -6,6 +6,7 @@ from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
 from verify_user_permissions import verify_user_access, get_user_id_from_event
+from base_exception import AppError
 
 engine = create_db_engine()
 session = create_db_session(engine)
@@ -25,10 +26,10 @@ def handler(event, context):
         access = verify_user_access(user_id)
 
         if not access:
-            raise Exception("No permissions to change company publicly")
+            raise AppError("No permissions to change company publicly")
 
         if not event.get("body"):
-            raise Exception("No company data provided")
+            raise AppError("No company data provided")
 
         data = json.loads(event.get("body"))
         companies = data.get("companies")

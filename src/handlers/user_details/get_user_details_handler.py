@@ -2,6 +2,7 @@ import os
 import json
 from get_user_details_service import get_user_details_service_instance
 from verify_user_permissions import verify_user_access, get_user_id_from_event
+from base_exception import AppError
 
 
 def handler(event, context):
@@ -10,7 +11,7 @@ def handler(event, context):
         access = verify_user_access(user_id)
 
         if not access:
-            raise Exception("No permissions to get user details")
+            raise AppError("No permissions to get user details")
 
         user_service = get_user_details_service_instance()
         email = event.get("pathParameters").get("username")
