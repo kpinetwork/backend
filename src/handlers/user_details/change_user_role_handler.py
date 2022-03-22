@@ -1,6 +1,7 @@
 import os
 import json
 from get_user_details_service import get_user_details_service_instance
+from verify_user_permissions import verify_user_access, get_user_id_from_event
 
 
 def handler(event, context):
@@ -13,6 +14,11 @@ def handler(event, context):
         email = event.get("pathParameters").get("username")
         user_pool_id = os.environ.get("USER_POOL_ID")
         env = os.environ.get("ENVIRONMENT")
+        user_id = get_user_id_from_event(event)
+        access = verify_user_access(user_id)
+
+        if not access:
+            raise Exception("No permissions to change user role")
 
         response = user_service.change_user_role(user_pool_id, env, email, roles)
 

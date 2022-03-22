@@ -1,5 +1,10 @@
 {
     "queryStringParameters": {
         "limit": 10
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
     }
 }
