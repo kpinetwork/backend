@@ -5,7 +5,7 @@ from src.service.comparison_vs_peers.comparison_vs_peers_service import (
     ComparisonvsPeersService,
 )
 from src.utils.company_anonymization import CompanyAnonymization
-from src.utils.revenue_range import RevenueRange
+from src.utils.profile_range import ProfileRange
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -40,10 +40,10 @@ class TestComparisonvsPeers(TestCase):
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
         self.company_anonymization = CompanyAnonymization(object)
-        self.revenue_range = RevenueRange(
+        self.profile_range = ProfileRange(
             self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )
-        self.revenue_range.ranges = [
+        self.profile_range.ranges = [
             {"label": "100+", "max_value": None, "min_value": 100}
         ]
         self.comparison_service_instance = ComparisonvsPeersService(
@@ -52,7 +52,7 @@ class TestComparisonvsPeers(TestCase):
             logger,
             self.mock_response_sql,
             self.company_anonymization,
-            self.revenue_range,
+            self.profile_range,
         )
         return
 

@@ -1,4 +1,12 @@
-class RevenueRange:
+from strenum import StrEnum
+
+
+class ProfileType(StrEnum):
+    SIZE = "size profile"
+    GROWTH = "growth profile"
+
+
+class ProfileRange:
     def __init__(self, session, query_builder, logger, response_sql) -> None:
         self.session = session
         self.query_builder = query_builder
@@ -7,11 +15,12 @@ class RevenueRange:
         self.table = "value_range"
         self.ranges = []
 
-    def set_ranges(self) -> None:
+    def set_ranges(self, type: ProfileType) -> None:
         try:
             query = (
                 self.query_builder.add_table_name(self.table)
                 .add_select_conditions(["label, min_value, max_value"])
+                .add_sql_where_equal_condition({f"{self.table}.type": f"'{type}'"})
                 .build()
                 .get_query()
             )
