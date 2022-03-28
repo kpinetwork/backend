@@ -249,3 +249,37 @@ class TestCompanyReportvsPeers(TestCase):
         self.assertEqual(str(context.exception), "error")
         mock_get_metric_by_scenario.assert_called()
         mock_set_company_permissions.assert_called()
+
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_company_description"
+    )
+    def test_get_company_report_with_empty_metric_data(
+        self,
+        mock_get_company_description,
+        mock_get_most_recents_revenue,
+        mock_get_metric_by_scenario,
+        mock_set_company_permissions,
+    ):
+        self.mock_base_metric_results(dict())
+        self.company_anonymization.companies = ["0123456"]
+        revenues = [{"value": 40}, {"value": 37.5}]
+        mock_get_company_description.return_value = self.company
+        mock_get_most_recents_revenue.return_value = revenues
+        self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
+
+        report = self.report_service_instance.get_company_report(
+            "0123456", "user@email.com", 2020, False
+        )
+
+        self.assertEqual(report.get("description"), self.company)
+        mock_get_metric_by_scenario.assert_called()
+        mock_set_company_permissions.assert_called()

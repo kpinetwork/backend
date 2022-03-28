@@ -116,6 +116,8 @@ class CompanyReportvsPeersService:
             )
 
             company = data.get(company_id, dict())
+            if not company:
+                company = self.repository.get_company_description(company_id)
 
             return {
                 "description": self.get_description(company),
