@@ -62,6 +62,27 @@ class TestCalculatorRepository(TestCase):
 
         self.assertEqual(company, dict())
 
+    def test_get_most_recents_revenue_success(self):
+        expected_revenues = [{"value": 40}, {"value": 37.5}]
+        self.mock_response_list_query_sql(expected_revenues)
+
+        revenues = self.repository.get_most_recents_revenue("012345")
+
+        self.assertEqual(revenues, expected_revenues)
+
+    def test_get_most_recents_revenue_with_no_valid_id(self):
+
+        revenues = self.repository.get_most_recents_revenue("")
+
+        self.assertEqual(revenues, [])
+
+    def test_get_most_recents_revenue_fail(self):
+        self.repository.session.execute.side_effect = Exception("error")
+
+        revenues = self.repository.get_most_recents_revenue("0123456")
+
+        self.assertEqual(revenues, [])
+
     def test_get_company_description_fail(self):
         self.repository.session.execute.side_effect = Exception("error")
 

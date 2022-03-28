@@ -11,7 +11,7 @@ class ComparisonvsPeersService:
     def remove_revenue(self, company: dict) -> None:
         revenue = company.get("revenue")
         ranges = self.profile_range.get_profile_ranges("size profile")
-        if revenue is None:
+        if not self.calculator.is_valid_number(revenue):
             company["revenue"] = "NA"
         else:
             revenue_ranges = list(

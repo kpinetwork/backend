@@ -9,7 +9,7 @@ class CompanyReportvsPeersService:
         self.company_anonymization = company_anonymization
 
     def get_metric_range(self, metric: float, profile_type: str) -> str:
-        if metric is None:
+        if not self.calculator.is_valid_number(metric):
             return "NA"
         try:
             ranges = self.profile_range.get_profile_ranges(profile_type)
@@ -25,15 +25,22 @@ class CompanyReportvsPeersService:
             return "NA"
 
     def get_profiles(self, company: dict) -> dict:
-        actuals_revenue = company.get("actuals_revenue")
-        prior_actuals_revenue = company.get("prior_actuals_revenue")
-        growth = self.calculator.calculate_growth_rate(
-            actuals_revenue, prior_actuals_revenue
+        actuals_revenue, prior_revenue = tuple(
+            self.get_most_recent_revenues_value(company)
         )
+
+        growth = self.calculator.calculate_growth_rate(actuals_revenue, prior_revenue)
         revenue = self.calculator.calculate_base_metric(actuals_revenue)
         size_range = self.get_metric_range(revenue, "size profile")
         growth_range = self.get_metric_range(growth, "growth profile")
         return {"size_cohort": size_range, "margin_group": growth_range}
+
+    def get_most_recent_revenues_value(self, company: dict):
+        company_id = company.get("id")
+        result = self.repository.get_most_recents_revenue(company_id)
+        result.extend([{}, {}])
+        revenues = result[:2]
+        return [revenue.get("value", "NA") for revenue in revenues]
 
     def get_description(self, company: dict) -> dict:
         params = ["id", "name", "sector", "vertical", "inves_profile_name"]

@@ -74,6 +74,10 @@ class TestCompanyReportvsPeers(TestCase):
         attrs = {"proccess_base_metrics_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
+    def mock_process_query_list_results(self, response):
+        attrs = {"process_query_list_results.return_value": response}
+        self.mock_response_sql.configure_mock(**attrs)
+
     @parameterized.expand(
         [
             [
@@ -103,20 +107,30 @@ class TestCompanyReportvsPeers(TestCase):
 
         self.assertEqual(range, "NA")
 
-    def test_get_profiles(self):
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
+    )
+    def test_get_profiles(self, mock_get_most_recents_revenue):
         expected_profile = {
             "size_cohort": self.company["size_cohort"],
             "margin_group": self.company["margin_group"],
         }
+        revenues = [{"value": 40}, {"value": 37.5}]
+        mock_get_most_recents_revenue.return_value = revenues
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
 
         profile = self.report_service_instance.get_profiles(self.scenarios)
 
         self.assertEqual(profile, expected_profile)
 
-    def test_get_description(self):
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
+    )
+    def test_get_description(self, mock_get_most_recents_revenue):
         company = self.company.copy()
         company.update(self.scenarios)
+        revenues = [{"value": 40}, {"value": 37.5}]
+        mock_get_most_recents_revenue.return_value = revenues
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
 
         description = self.report_service_instance.get_description(company)
@@ -168,11 +182,19 @@ class TestCompanyReportvsPeers(TestCase):
     @mock.patch(
         "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
     )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
+    )
     def test_get_company_report(
-        self, mock_get_metric_by_scenario, mock_set_company_permissions
+        self,
+        mock_get_most_recents_revenue,
+        mock_get_metric_by_scenario,
+        mock_set_company_permissions,
     ):
         company = self.company.copy()
         company.update(self.scenarios)
+        revenues = [{"value": 40}, {"value": 37.5}]
+        mock_get_most_recents_revenue.return_value = revenues
         self.mock_base_metric_results({company["id"]: company})
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
 

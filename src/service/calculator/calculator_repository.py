@@ -107,6 +107,59 @@ class CalculatorRepository:
             self.logger.info(error)
             raise error
 
+    def get_most_recents_revenue(self, company_id: str) -> list:
+        if not (company_id and company_id.strip()):
+            return []
+        try:
+            where_condition = {
+                f"{self.scenario_table}.type": "'Actuals'",
+                f"{self.metric_table}.name": "'Revenue'",
+                f"{self.scenario_table}.company_id": f"'{company_id}'",
+                f"{self.company_table}.is_public": True,
+            }
+            columns = [f"{self.scenario_table}.name", f"{self.metric_table}.value"]
+
+            query = (
+                self.query_builder.add_table_name(self.company_table)
+                .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        f"{self.scenario_table}": {
+                            "from": f"{self.scenario_table}.company_id",
+                            "to": f"{self.company_table}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{self.scenario_metric_table}": {
+                            "from": f"{self.scenario_metric_table}.scenario_id",
+                            "to": f"{self.scenario_table}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{self.metric_table}": {
+                            "from": f"{self.scenario_metric_table}.metric_id",
+                            "to": f"{self.metric_table}.id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(where_condition)
+                .add_sql_order_by_condition(["name"], self.query_builder.Order.DESC)
+                .add_sql_limit_condition(2)
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_list_results(result)
+
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
     def get_metric_by_scenario(
         self,
         scenario_name: str,
