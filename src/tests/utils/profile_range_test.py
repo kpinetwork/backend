@@ -33,19 +33,19 @@ class TestProfileRange(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_set_ranges_success(self):
+    def test_get_ranges_success(self):
         self.mock_response_list_query_sql(self.ranges)
 
-        self.profile_range_instance.set_ranges(ProfileType.SIZE)
+        ranges = self.profile_range_instance.get_profile_ranges(ProfileType.SIZE)
 
-        self.assertEqual(self.profile_range_instance.ranges, self.ranges)
+        self.assertEqual(ranges, self.ranges)
 
-    def test_set_ranges_failed(self):
+    def test_get_ranges_failed(self):
         self.profile_range_instance.session.execute.side_effect = Exception("error")
 
-        self.profile_range_instance.set_ranges(ProfileType.SIZE)
+        ranges = self.profile_range_instance.get_profile_ranges(ProfileType.SIZE)
 
-        self.assertEqual(self.profile_range_instance.ranges, [])
+        self.assertEqual(ranges, [])
 
     @parameterized.expand(
         [

@@ -14,7 +14,6 @@ class TestGetPeersData(TestCase):
         "comparison_vs_peers_service.ComparisonvsPeersService.get_peers_comparison"
     )
     @mock.patch.object(get_peers, "get_username_from_user_id")
-    @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(get_peers, "get_user_details_service_instance")
     @mock.patch.object(get_peers, "verify_user_access")
     @mock.patch("connection.create_db_engine")
@@ -25,7 +24,6 @@ class TestGetPeersData(TestCase):
         mock_create_db_engine,
         mock_verify_user_access,
         mock_get_user_service_instance,
-        mock_set_company_permissions,
         mock_get_username_from_user_id,
         mock_get_peers_comparison,
     ):
@@ -39,14 +37,12 @@ class TestGetPeersData(TestCase):
         mock_get_peers_comparison.assert_called()
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
-        mock_set_company_permissions.assert_called_with(self.username)
         self.assertEqual(response, self.comparison_vs_peers)
 
     @mock.patch(
         "comparison_vs_peers_service.ComparisonvsPeersService.get_peers_comparison"
     )
     @mock.patch.object(get_peers, "get_username_from_user_id")
-    @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(get_peers, "get_user_details_service_instance")
     @mock.patch.object(get_peers, "verify_user_access")
     @mock.patch("connection.create_db_engine")
@@ -57,7 +53,6 @@ class TestGetPeersData(TestCase):
         mock_create_db_engine,
         mock_verify_user_access,
         mock_get_user_service_instance,
-        mock_set_company_permissions,
         mock_get_username_from_user_id,
         mock_get_peers_comparison,
     ):
@@ -73,5 +68,4 @@ class TestGetPeersData(TestCase):
         mock_get_peers_comparison.assert_called()
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
-        mock_set_company_permissions.assert_called_with(self.username)
         self.assertEqual(str(context.exception), error_message)

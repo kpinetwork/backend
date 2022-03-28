@@ -33,5 +33,21 @@
             "ebitda_vs_budget": "69",
             "rule_of_40": "20"
         }
+    ],
+    "rule_of_40": [
+        {
+            "company_id": "zec4b0212-m385-4828-814c-0e6b21d98f87",
+            "name": "A",
+            "revenue_growth_rate": "114",
+            "ebitda_margin": "-8",
+            "revenue": "110"
+        },
+        {
+            "company_id": "ayc4b0212-m385-4828-814c-0e6b21d98f87",
+            "name": "B",
+            "revenue_growth_rate": "100",
+            "ebitda_margin": "9",
+            "revenue": "36"
+        }
     ]
 }

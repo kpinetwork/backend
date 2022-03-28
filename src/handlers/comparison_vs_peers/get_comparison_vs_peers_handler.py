@@ -8,7 +8,7 @@ def handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps(comparison_peers, default=str),
+            "body": json.dumps(comparison_peers),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Headers": "Content-Type",

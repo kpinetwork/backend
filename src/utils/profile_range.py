@@ -13,9 +13,8 @@ class ProfileRange:
         self.response_sql = response_sql
         self.logger = logger
         self.table = "value_range"
-        self.ranges = []
 
-    def set_ranges(self, type: ProfileType) -> None:
+    def get_profile_ranges(self, type: str) -> list:
         try:
             query = (
                 self.query_builder.add_table_name(self.table)
@@ -26,9 +25,10 @@ class ProfileRange:
             )
             result = self.session.execute(query).fetchall()
             self.session.commit()
-            self.ranges = self.response_sql.process_query_list_results(result)
+            return self.response_sql.process_query_list_results(result)
         except Exception as error:
             self.logger.info(error)
+            return []
 
     def verify_range(self, range, revenue):
         max_value = range.get("max_value")

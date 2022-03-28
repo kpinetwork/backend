@@ -71,6 +71,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -89,7 +92,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/utils/revenue_range.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -108,7 +113,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/utils/revenue_range.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
