@@ -26,6 +26,11 @@ class CompanyReportvsPeersService:
     def is_valid_number(self, number: float):
         return number is not None and not isinstance(number, str)
 
+    def convert_to_int_if_valid(self, value: Union[float, str]) -> Union[float, str]:
+        if isinstance(value, (int, float)):
+            return int(value)
+        return value
+
     def calculate_growth_rate(
         self, metric_value_recent_year: float, metric_value_prior_year: float
     ) -> Union[float, str]:
@@ -239,30 +244,40 @@ class CompanyReportvsPeersService:
         try:
             financial_profile = dict()
             base_metrics = self.get_base_metrics(company_id, year)
-            annual_rule_of_40 = self.calculate_rule_of_40(
-                base_metrics.get("actuals_revenue_current_year", ""),
-                base_metrics.get("actuals_revenue_prior_year"),
-                base_metrics.get("actuals_ebitda_current_year", ""),
+            annual_rule_of_40 = self.convert_to_int_if_valid(
+                self.calculate_rule_of_40(
+                    base_metrics.get("actuals_revenue_current_year", ""),
+                    base_metrics.get("actuals_revenue_prior_year"),
+                    base_metrics.get("actuals_ebitda_current_year", ""),
+                )
             )
-            forward_budgeted_revenue_growth = self.calculate_growth_rate(
-                base_metrics.get("budget_revenue_next_year", ""),
-                base_metrics.get("budget_revenue_current_year", ""),
+            forward_budgeted_revenue_growth = self.convert_to_int_if_valid(
+                self.calculate_growth_rate(
+                    base_metrics.get("budget_revenue_next_year", ""),
+                    base_metrics.get("budget_revenue_current_year", ""),
+                )
             )
-            forward_budgeted_ebitda_growth = self.calculate_growth_rate(
-                base_metrics.get("budget_ebitda_next_year", ""),
-                base_metrics.get("budget_ebitda_current_year", ""),
+            forward_budgeted_ebitda_growth = self.convert_to_int_if_valid(
+                self.calculate_growth_rate(
+                    base_metrics.get("budget_ebitda_next_year", ""),
+                    base_metrics.get("budget_ebitda_current_year", ""),
+                )
             )
-            forward_budgeted_rule_of_40 = self.calculate_rule_of_40(
-                base_metrics.get("budget_revenue_next_year", ""),
-                base_metrics.get("budget_revenue_current_year"),
-                base_metrics.get("budget_ebitda_next_year", ""),
+            forward_budgeted_rule_of_40 = self.convert_to_int_if_valid(
+                self.calculate_rule_of_40(
+                    base_metrics.get("budget_revenue_next_year", ""),
+                    base_metrics.get("budget_revenue_current_year"),
+                    base_metrics.get("budget_ebitda_next_year", ""),
+                )
             )
 
             financial_profile = {
-                "annual_revenue": base_metrics.get(
-                    "actuals_revenue_current_year", "NA"
+                "annual_revenue": self.convert_to_int_if_valid(
+                    base_metrics.get("actuals_revenue_current_year", "NA")
                 ),
-                "annual_ebitda": base_metrics.get("actuals_ebitda_current_year", "NA"),
+                "annual_ebitda": self.convert_to_int_if_valid(
+                    base_metrics.get("actuals_ebitda_current_year", "NA")
+                ),
                 "anual_rule_of_40": annual_rule_of_40,
                 "current_revenue_growth": forward_budgeted_revenue_growth,
                 "current_ebitda_margin": forward_budgeted_ebitda_growth,
