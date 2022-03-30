@@ -2,7 +2,6 @@ import json
 import logging
 import datetime
 from company_report_vs_peers_service import CompanyReportvsPeersService
-from commons_functions import get_condition_params
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -42,16 +41,14 @@ def handler(event, context):
         access = verify_user_access(user_id)
         company_id = event.get("pathParameters").get("company_id")
         year = datetime.datetime.today().year
-        conditions = dict()
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            conditions = get_condition_params(params)
             year = int(params.get("year", year))
 
         username = get_username_from_user_id(user_id)
         company_report = company_report_service.get_company_report(
-            company_id, username, year, access, **conditions
+            company_id, username, year, access
         )
 
         return {

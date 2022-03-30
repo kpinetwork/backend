@@ -35,7 +35,7 @@ class CompanyReportvsPeersService:
         growth_range = self.get_metric_range(growth, "growth profile")
         return {"size_cohort": size_range, "margin_group": growth_range}
 
-    def get_most_recent_revenues_value(self, company: dict):
+    def get_most_recent_revenues_value(self, company: dict) -> list:
         company_id = company.get("id")
         result = self.repository.get_most_recents_revenue(company_id)
         result.extend([{}, {}])
@@ -97,7 +97,7 @@ class CompanyReportvsPeersService:
         return company_id in allowed_companies
 
     def get_company_report(
-        self, company_id: str, username: str, year: int, access: bool, **conditions
+        self, company_id: str, username: str, year: int, access: bool
     ) -> dict:
         try:
             self.company_anonymization.set_company_permissions(username)

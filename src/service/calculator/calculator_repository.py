@@ -54,7 +54,7 @@ class CalculatorRepository:
         year: int,
         need_prior_year: bool,
         need_next_year: bool,
-    ) -> dict:
+    ) -> list:
         metrics = [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
