@@ -218,6 +218,9 @@ functions:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/company/change_company_publicly_handler.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./src/utils/response_user.py
     - ./src/service/company/company_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py

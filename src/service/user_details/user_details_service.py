@@ -97,7 +97,10 @@ class UserDetailsService:
             result = self.session.execute(query).fetchall()
             self.session.commit()
 
-            return self.response_sql.process_query_list_results(result)
+            permissions = self.response_sql.process_query_list_results(result)
+            return sorted(
+                permissions, key=lambda permission: permission.get("name", "").lower()
+            )
         raise Exception("No valid username provided")
 
     def add_company_permissions(self, username: str, companies: list) -> dict:

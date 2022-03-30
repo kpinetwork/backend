@@ -487,7 +487,7 @@ resource "aws_lambda_function" "assign_company_permissions_lambda_function" {
   ]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -521,7 +521,7 @@ resource "aws_lambda_function" "get_company_permissions_lambda_function" {
   ]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -561,6 +561,9 @@ resource "aws_lambda_function" "change_company_publicly_lambda_function" {
 
   environment {
     variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
       DB_HOST = var.db_host
       DB_NAME = var.db_name
       DB_USERNAME = var.db_username
