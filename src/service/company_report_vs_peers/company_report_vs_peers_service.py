@@ -1,3 +1,6 @@
+from typing import Union
+
+
 class CompanyReportvsPeersService:
     def __init__(
         self, session, query_builder, logger, response_sql, company_anonymization
@@ -19,6 +22,113 @@ class CompanyReportvsPeersService:
             values = [f"'{element}'" for element in v if element and element.strip()]
             filters[f"{self.company_table}.{k}"] = values
         return filters
+
+    def is_valid_number(self, number: float):
+        return number is not None and not isinstance(number, str)
+
+    def convert_to_int_if_valid(self, value: Union[float, str]) -> Union[float, str]:
+        if isinstance(value, (int, float)):
+            return int(value)
+        return value
+
+    def calculate_growth_rate(
+        self, metric_value_recent_year: float, metric_value_prior_year: float
+    ) -> Union[float, str]:
+        try:
+            if self.is_valid_number(metric_value_recent_year) and self.is_valid_number(
+                metric_value_prior_year
+            ):
+                return round(
+                    ((metric_value_recent_year / metric_value_prior_year) - 1) * 100, 2
+                )
+            return "NA"
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_ebitda_margin(
+        self, ebitda: float, revenue: float
+    ) -> Union[float, str]:
+        try:
+            if self.is_valid_number(ebitda) and revenue:
+                return (ebitda / revenue) * 100
+            return "NA"
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_rule_of_40(
+        self,
+        revenue_recent_year: float,
+        revenue_prior_year: float,
+        ebitda_recent_year: float,
+    ) -> Union[float, str]:
+        revenue_growth = self.calculate_growth_rate(
+            revenue_recent_year, revenue_prior_year
+        )
+        ebitda_margin = self.calculate_ebitda_margin(
+            ebitda_recent_year, revenue_recent_year
+        )
+        if self.is_valid_number(revenue_growth) and self.is_valid_number(ebitda_margin):
+            return round(revenue_growth + ebitda_margin, 2)
+        return "NA"
+
+    def get_base_metrics(self, company_id: str, year: str) -> dict():
+        try:
+            prior_year = int(year) - 1
+            next_year = int(year) + 1
+            base_metrics = dict()
+            metrics = [
+                {
+                    "scenario": f"Actuals-{year}",
+                    "metric": "Revenue",
+                    "alias": "actuals_revenue_current_year",
+                },
+                {
+                    "scenario": f"Actuals-{year}",
+                    "metric": "Ebitda",
+                    "alias": "actuals_ebitda_current_year",
+                },
+                {
+                    "scenario": f"Actuals-{prior_year}",
+                    "metric": "Revenue",
+                    "alias": "actuals_revenue_prior_year",
+                },
+                {
+                    "scenario": f"Budget-{year}",
+                    "metric": "Revenue",
+                    "alias": "budget_revenue_current_year",
+                },
+                {
+                    "scenario": f"Budget-{year}",
+                    "metric": "Ebitda",
+                    "alias": "budget_ebitda_current_year",
+                },
+                {
+                    "scenario": f"Budget-{next_year}",
+                    "metric": "Revenue",
+                    "alias": "budget_revenue_next_year",
+                },
+                {
+                    "scenario": f"Budget-{next_year}",
+                    "metric": "Ebitda",
+                    "alias": "budget_ebitda_next_year",
+                },
+            ]
+            for metric in metrics:
+                base_metric = self.get_metric_by_scenario(
+                    company_id,
+                    metric.get("scenario"),
+                    metric.get("metric"),
+                    metric.get("alias"),
+                )
+                if base_metric:
+                    base_metrics.update(base_metric)
+            return base_metrics
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
 
     def get_description(self, company_id: str, access) -> dict:
         try:
@@ -132,51 +242,49 @@ class CompanyReportvsPeersService:
         year: str,
     ) -> dict:
         try:
-            next_year = int(year) + 1
             financial_profile = dict()
-            metrics = [
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Revenue",
-                    "alias": "annual_revenue",
-                },
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Ebitda",
-                    "alias": "annual_ebitda",
-                },
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Rule of 40",
-                    "alias": "anual_rule_of_40",
-                },
-                {
-                    "scenario": f"Budgeted growth-{next_year}",
-                    "metric": "Revenue",
-                    "alias": "current_revenue_growth",
-                },
-                {
-                    "scenario": f"Budgeted growth-{next_year}",
-                    "metric": "Ebitda",
-                    "alias": "current_ebitda_margin",
-                },
-                {
-                    "scenario": f"Budget-{next_year}",
-                    "metric": "Rule of 40",
-                    "alias": "current_rule_of_40",
-                },
-            ]
-            for metric in metrics:
-                metric_average = self.get_metric_by_scenario(
-                    company_id,
-                    metric.get("scenario"),
-                    metric.get("metric"),
-                    metric.get("alias"),
+            base_metrics = self.get_base_metrics(company_id, year)
+            annual_rule_of_40 = self.convert_to_int_if_valid(
+                self.calculate_rule_of_40(
+                    base_metrics.get("actuals_revenue_current_year", ""),
+                    base_metrics.get("actuals_revenue_prior_year"),
+                    base_metrics.get("actuals_ebitda_current_year", ""),
                 )
+            )
+            forward_budgeted_revenue_growth = self.convert_to_int_if_valid(
+                self.calculate_growth_rate(
+                    base_metrics.get("budget_revenue_next_year", ""),
+                    base_metrics.get("budget_revenue_current_year", ""),
+                )
+            )
+            forward_budgeted_ebitda_growth = self.convert_to_int_if_valid(
+                self.calculate_growth_rate(
+                    base_metrics.get("budget_ebitda_next_year", ""),
+                    base_metrics.get("budget_ebitda_current_year", ""),
+                )
+            )
+            forward_budgeted_rule_of_40 = self.convert_to_int_if_valid(
+                self.calculate_rule_of_40(
+                    base_metrics.get("budget_revenue_next_year", ""),
+                    base_metrics.get("budget_revenue_current_year"),
+                    base_metrics.get("budget_ebitda_next_year", ""),
+                )
+            )
 
-                if metric_average:
-                    financial_profile.update(metric_average)
-            return self.response_sql.process_query_result([financial_profile])
+            financial_profile = {
+                "annual_revenue": self.convert_to_int_if_valid(
+                    base_metrics.get("actuals_revenue_current_year", "NA")
+                ),
+                "annual_ebitda": self.convert_to_int_if_valid(
+                    base_metrics.get("actuals_ebitda_current_year", "NA")
+                ),
+                "anual_rule_of_40": annual_rule_of_40,
+                "current_revenue_growth": forward_budgeted_revenue_growth,
+                "current_ebitda_margin": forward_budgeted_ebitda_growth,
+                "current_rule_of_40": forward_budgeted_rule_of_40,
+            }
+            return financial_profile
+
         except Exception as error:
             self.logger.info(error)
             raise error
