@@ -21,10 +21,15 @@ class TestChangeUserRoleHandler(TestCase):
 
     @mock.patch("user_details_service.UserDetailsService.change_user_role")
     @mock.patch.object(change_role_handler, "get_user_details_service_instance")
+    @mock.patch.object(change_role_handler, "verify_user_access")
     def test_change_user_role_handler_success_should_return_200_response(
-        self, mock_get_user_service_instance, mock_change_user_role
+        self,
+        mock_verify_user_access,
+        mock_get_user_service_instance,
+        mock_change_user_role,
     ):
         mock_get_user_service_instance.return_value = self.users_service_instance
+        mock_verify_user_access.return_value = True
         mock_change_user_role.return_value = True
 
         response = handler(self.event, {})
@@ -44,6 +49,25 @@ class TestChangeUserRoleHandler(TestCase):
         mock_get_user_service_instance.return_value = self.users_service_instance
 
         response = handler({}, {})
+
+        mock_change_user_role.assert_not_called()
+        self.assertEqual(response.get("statusCode"), 400)
+        self.assertEqual(response.get("body"), json.dumps({"error": error_message}))
+
+    @mock.patch("user_details_service.UserDetailsService.change_user_role")
+    @mock.patch.object(change_role_handler, "get_user_details_service_instance")
+    @mock.patch.object(change_role_handler, "verify_user_access")
+    def test_change_user_role_handler_without_access_return_error_400_response(
+        self,
+        mock_verify_user_access,
+        mock_get_user_service_instance,
+        mock_change_user_role,
+    ):
+        error_message = "No permissions to change user role"
+        mock_verify_user_access.return_value = False
+        mock_get_user_service_instance.return_value = self.users_service_instance
+
+        response = handler(self.event, {})
 
         mock_change_user_role.assert_not_called()
         self.assertEqual(response.get("statusCode"), 400)
