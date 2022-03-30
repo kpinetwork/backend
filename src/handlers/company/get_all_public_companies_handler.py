@@ -28,7 +28,7 @@ def handler(event, context):
             session, query_builder, logger, response_sql, company_anonymization
         )
         offset = 0
-        max_count = 20
+        max_count = None
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
         if event.get("queryStringParameters"):

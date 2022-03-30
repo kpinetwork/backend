@@ -43,7 +43,27 @@ class CompanyService:
             self.logger.info(error)
             raise error
 
-    def get_all_companies(self, offset=0, max_count=20) -> list:
+    def get_total_number_of_companies(self, public: bool) -> dict:
+        try:
+            where_condition = dict()
+            if public:
+                where_condition = {f"{self.table_name}.is_public": True}
+            query = (
+                self.query_builder.add_table_name(self.table_name)
+                .add_select_conditions(["COUNT(*)"])
+                .add_sql_where_equal_condition(where_condition)
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_result(result)
+
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_all_companies(self, offset=0, max_count=20) -> dict:
         try:
             query = (
                 self.query_builder.add_table_name(self.table_name)
@@ -67,13 +87,19 @@ class CompanyService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            return self.response_sql.process_query_list_results(results)
+            companies = self.response_sql.process_query_list_results(results)
+            total_companies = self.get_total_number_of_companies(public=False).get(
+                "count"
+            )
+
+            return {"total": total_companies, "companies": companies}
 
         except Exception as error:
             self.logger.info(error)
             raise error
 
-    def get_all_public_companies(self, offset=0, max_count=20, access=False) -> list:
+    def get_all_public_companies(self, offset=0, max_count=None, access=False) -> dict:
+
         try:
             where_condition = {f"{self.table_name}.is_public": True}
             query = (
@@ -100,15 +126,24 @@ class CompanyService:
             results = self.session.execute(query).fetchall()
             self.session.commit()
             companies = self.response_sql.process_query_list_results(results)
+            companies_to_return = []
+            total_companies = self.get_total_number_of_companies(public=True).get(
+                "count"
+            )
+
             if access:
-                return companies
-            anonymized_companies = self.company_anonymization.hide_companies(
-                companies, "id"
-            )
-            return sorted(
-                anonymized_companies,
-                key=lambda x: x.get("name", "").lower(),
-            )
+                companies_to_return = companies
+            else:
+                anonymized_companies = self.company_anonymization.hide_companies(
+                    companies, "id"
+                )
+                companies_to_return = sorted(
+                    anonymized_companies,
+                    key=lambda x: x.get("name", "").lower(),
+                )
+
+            return {"total": total_companies, "companies": companies_to_return}
+
         except Exception as error:
             self.logger.info(error)
             raise error
