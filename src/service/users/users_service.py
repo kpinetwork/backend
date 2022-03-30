@@ -28,7 +28,7 @@ class UsersService:
             filter_groups = self.response_user.process_user_roles(groups)
             user.update({"roles": filter_groups})
 
-    def get_users(self, user_pool_id: str, limit: int = 10, token: str = None) -> list:
+    def get_users(self, user_pool_id: str, limit: int = 10, token: str = None) -> dict:
         params = self.get_users_params(user_pool_id, limit, token)
         response = self.client.list_users(**params)
         users = self.response_user.proccess_users(response.get("Users", []))
@@ -37,7 +37,7 @@ class UsersService:
         sort = sorted(users, key=lambda user: user.get("email"))
         return {"users": sort, "token": response.get("PaginationToken")}
 
-    def get_groups(self, user_pool_id):
+    def get_groups(self, user_pool_id) -> list:
         params = self.get_roles_params(user_pool_id)
         result = self.client.list_groups(**params)
         _groups = result.get("Groups")
