@@ -102,7 +102,6 @@ class TestResponseBuilder(TestCase):
         company = self.company.copy()
         expected_company = self.company.copy()
         revenue = {"id": company["id"], "revenue": 23}
-        # ebitda = {"id": company["id"], "ebitda": 23}
         expected_company.update(revenue)
 
         result = self.response_sql_instance.proccess_base_metrics_results(

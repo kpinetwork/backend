@@ -54,7 +54,7 @@ class CalculatorRepository:
         year: int,
         need_prior_year: bool,
         need_next_year: bool,
-    ):
+    ) -> dict:
         metrics = [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
@@ -231,7 +231,7 @@ class CalculatorRepository:
         need_prior_year: bool = False,
         need_next_year: bool = False,
         **conditions,
-    ):
+    ) -> dict:
         filters = self.add_company_filters(**conditions)
         metric_options = self.get_base_metrics_options(
             year, need_prior_year, need_next_year
