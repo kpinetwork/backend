@@ -4,6 +4,8 @@ import boto3
 import logging
 from users_service import UsersService
 from response_user import ResponseUser
+from verify_user_permissions import verify_user_access, get_user_id_from_event
+from base_exception import AppError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,6 +21,12 @@ def handler(event, context):
         response_user = ResponseUser()
         users_service = UsersService(logger, cognito, response_user)
         user_pool_id = os.environ.get("USER_POOL_ID")
+        user_id = get_user_id_from_event(event)
+        access = verify_user_access(user_id)
+
+        if not access:
+            raise AppError("No permissions to get roles")
+
         groups = users_service.get_roles(user_pool_id)
 
         return {

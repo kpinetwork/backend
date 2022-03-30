@@ -45,7 +45,7 @@ class TestUsersService(TestCase):
                     "CreationDate": "",
                 },
             ],
-            "NextToken": "Token",
+            "NextToken": None,
         }
         self.groups = {
             "Groups": [
@@ -82,25 +82,38 @@ class TestUsersService(TestCase):
         attrs = {"process_user_roles.return_value": response}
         self.mock_response_user.configure_mock(**attrs)
 
+    def test_set_users_groups(self):
+        user = {"username": "01", "email": "user@email.com", "roles": []}
+        roles = ["customer"]
+        self.mock_admin_list_groups_for_user(self.admin_groups)
+        self.mock_process_user_roles(roles)
+
+        self.users_service_instance.set_users_groups([user], "userPoolId")
+
+        self.assertEqual(user.get("roles"), roles)
+
     def test_get_users_success(self):
+        user_result = [
+            {"username": "01", "email": "user@email.com", "roles": ["customer"]}
+        ]
         self.mock_list_users(self.users)
         self.mock_admin_list_groups_for_user(self.admin_groups)
         self.mock_process_user_roles(["customer"])
-        expected_result = [
-            {"username": "01", "email": "user@email.com", "roles": ["customer"]}
-        ]
+        self.mock_response_user.proccess_users.return_value = user_result
+        expected_result = {"users": user_result, "token": None}
 
-        get_users_out = self.users_service_instance.get_users("userPoolId")
+        get_users_out = self.users_service_instance.get_users("userPoolId", token="end")
 
         self.assertEqual(get_users_out, expected_result)
 
     def test_get_users_without_groups_should_return_empty_list(self):
         self.mock_list_users({"Users": []})
         self.mock_admin_list_groups_for_user({"Groups": []})
+        self.mock_response_user.proccess_users.return_value = []
 
         get_roles_out = self.users_service_instance.get_users("userPoolId")
 
-        self.assertEqual(get_roles_out, [])
+        self.assertEqual(get_roles_out, {"users": [], "token": None})
 
     def test_get_roles_success(self):
         self.mock_list_groups(self.groups)

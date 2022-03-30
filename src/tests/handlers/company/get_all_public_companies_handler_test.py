@@ -10,9 +10,16 @@ class TestGetAllPublicCompaniesHandler(TestCase):
         self.username = "user@email.com"
         self.company = read("sample_company.json")
         self.companies = read("sample_companies.json")
-        self.public_companies = list(
-            filter(lambda company: company.get("is_public"), self.companies)
-        )
+        self.total_companies = len(list(self.companies))
+        self.public_companies = {
+            "total": self.total_companies,
+            "companies": list(
+                filter(
+                    lambda company: company.get("is_public"),
+                    self.companies.get("companies"),
+                )
+            ),
+        }
         self.event = read("sample_event.json")
 
     @mock.patch("company_service.CompanyService.get_all_public_companies")
