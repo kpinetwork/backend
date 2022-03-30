@@ -22,6 +22,7 @@ file_path = os.environ.get("FILE_PATH")
 def remove_keys(company: dict):
     company.pop("id", None)
     company.pop("size_cohort", None)
+    company.pop("inves_profile_name", None)
     return company
 
 

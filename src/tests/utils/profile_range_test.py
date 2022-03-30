@@ -1,14 +1,14 @@
 from unittest import TestCase
 import logging
 from unittest.mock import Mock
-from src.utils.revenue_range import RevenueRange
+from src.utils.profile_range import ProfileRange, ProfileType
 from parameterized import parameterized
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-class TestRevenueRange(TestCase):
+class TestProfileRange(TestCase):
     def setUp(self):
         self.ranges = [
             {
@@ -25,7 +25,7 @@ class TestRevenueRange(TestCase):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.revenue_range_instance = RevenueRange(
+        self.profile_range_instance = ProfileRange(
             self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )
 
@@ -33,19 +33,19 @@ class TestRevenueRange(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_set_ranges_success(self):
+    def test_get_ranges_success(self):
         self.mock_response_list_query_sql(self.ranges)
 
-        self.revenue_range_instance.set_ranges()
+        ranges = self.profile_range_instance.get_profile_ranges(ProfileType.SIZE)
 
-        self.assertEqual(self.revenue_range_instance.ranges, self.ranges)
+        self.assertEqual(ranges, self.ranges)
 
-    def test_set_ranges_failed(self):
-        self.revenue_range_instance.session.execute.side_effect = Exception("error")
+    def test_get_ranges_failed(self):
+        self.profile_range_instance.session.execute.side_effect = Exception("error")
 
-        self.revenue_range_instance.set_ranges()
+        ranges = self.profile_range_instance.get_profile_ranges(ProfileType.SIZE)
 
-        self.assertEqual(self.revenue_range_instance.ranges, [])
+        self.assertEqual(ranges, [])
 
     @parameterized.expand(
         [
@@ -56,6 +56,6 @@ class TestRevenueRange(TestCase):
     )
     def test_verify_range(self, range, revenue, expected_out):
 
-        response = self.revenue_range_instance.verify_range(range, revenue)
+        response = self.profile_range_instance.verify_range(range, revenue)
 
         self.assertEqual(response, expected_out)

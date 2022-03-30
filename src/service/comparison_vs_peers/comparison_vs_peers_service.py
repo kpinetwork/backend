@@ -1,304 +1,140 @@
 class ComparisonvsPeersService:
     def __init__(
-        self,
-        session,
-        query_builder,
-        logger,
-        response_sql,
-        company_anonymization,
-        revenue_range,
+        self, logger, calculator, repository, profile_range, company_anonymization
     ) -> None:
-        self.session = session
-        self.query_builder = query_builder
-        self.response_sql = response_sql
         self.logger = logger
+        self.calculator = calculator
+        self.repository = repository
+        self.profile_range = profile_range
         self.company_anonymization = company_anonymization
-        self.metric_table = "metric"
-        self.company_table = "company"
-        self.scenario_table = "financial_scenario"
-        self.scenario_metric_table = "scenario_metric"
-        self.time_period_table = "time_period"
-        self.revenue_range = revenue_range
 
-    def add_company_filters(self, **kwargs) -> dict:
-        filters = dict()
-        for k, v in kwargs.items():
-            values = [f"'{element}'" for element in v if element and element.strip()]
-            filters[f"{self.company_table}.{k}"] = values
-        return filters
+    def remove_revenue(self, company: dict) -> None:
+        revenue = company.get("revenue")
+        ranges = self.profile_range.get_profile_ranges("size profile")
+        if not self.calculator.is_valid_number(revenue):
+            company["revenue"] = "NA"
+        else:
+            revenue_ranges = list(
+                filter(
+                    lambda range: self.profile_range.verify_range(range, revenue),
+                    ranges,
+                )
+            )
+            profile_range = (
+                revenue_ranges[0]
+                if (len(revenue_ranges) == 1 and revenue_ranges[0])
+                else {"label": "NA"}
+            )
+            company["revenue"] = profile_range.get("label")
 
-    def get_metrics(self, year: str) -> list:
-        return [
-            {"scenario": f"Actuals-{year}", "metric": "Revenue", "alias": "revenue"},
-            {
-                "scenario": f"Actual growth-{year}",
-                "metric": "Revenue",
-                "alias": "growth",
-            },
-            {
-                "scenario": f"Actual margin-{year}",
-                "metric": "Ebitda",
-                "alias": "ebitda_margin",
-            },
-            {
-                "scenario": f"Actual vs budget-{year}",
-                "metric": "Revenue",
-                "alias": "revenue_vs_budget",
-            },
-            {
-                "scenario": f"Actual vs budget-{year}",
-                "metric": "Ebitda",
-                "alias": "ebitda_vs_budget",
-            },
-            {
-                "scenario": f"Actuals-{year}",
-                "metric": "Rule of 40",
-                "alias": "rule_of_40",
-            },
+    def remove_base_metrics(self, company: dict) -> None:
+        base_metrics = [
+            "actuals_revenue",
+            "actuals_ebitda",
+            "prior_actuals_revenue",
+            "budget_revenue",
+            "budget_ebitda",
         ]
 
-    def remove_revenue(self, peers: list) -> None:
-        permissions = self.company_anonymization.companies
-        for company in peers:
-            revenue = company.get("revenue")
-            company_id = company.get("id")
+        for metric in base_metrics:
+            company.pop(metric, None)
 
-            if not revenue:
-                company["revenue"] = "NaN"
-            elif revenue and company_id not in permissions:
-                revenue_ranges = list(
-                    filter(
-                        lambda range: self.revenue_range.verify_range(range, revenue),
-                        self.revenue_range.ranges,
-                    )
-                )
-                revenue_range = (
-                    revenue_ranges[0] if len(revenue_ranges) == 1 else {"label": "NaN"}
-                )
-                company["revenue"] = revenue_range.get("label")
+    def calculate_metrics(self, company: dict) -> None:
+        actuals_revenue = company.get("actuals_revenue")
+        actuals_ebitda = company.get("actuals_ebitda")
+        prior_actuals_revenue = company.get("prior_actuals_revenue")
 
-    def get_company(self, company_id: str) -> dict:
-        try:
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(["sector"])
-                .add_sql_where_equal_condition(
-                    {
-                        f"{self.company_table}.id": f"'{company_id}'",
-                        f"{self.company_table}.is_public": True,
-                    }
-                )
-                .build()
-                .get_query()
+        company["revenue"] = self.calculator.calculate_base_metric(actuals_revenue)
+        company["growth"] = self.calculator.calculate_growth_rate(
+            actuals_revenue, prior_actuals_revenue
+        )
+        company["ebitda_margin"] = self.calculator.calculate_ebitda_margin(
+            actuals_ebitda, actuals_revenue
+        )
+        company["revenue_vs_budget"] = self.calculator.calculate_actual_vs_budget(
+            actuals_revenue, company.get("budget_revenue")
+        )
+        company["ebitda_vs_budget"] = self.calculator.calculate_actual_vs_budget(
+            actuals_ebitda, company.get("budget_ebitda")
+        )
+        company["rule_of_40"] = self.calculator.calculate_rule_of_40(
+            actuals_revenue, prior_actuals_revenue, actuals_ebitda
+        )
+
+    def anonymized_company(self, company: dict, allowed_companies: list) -> None:
+        if company.get("id") not in allowed_companies:
+            self.remove_revenue(company)
+            anonymized_name = self.company_anonymization.anonymize_company_name(
+                company.get("id")
             )
-            result = self.session.execute(query).fetchall()
-            self.session.commit()
-            return self.response_sql.process_query_result(result)
-        except Exception as error:
-            self.logger.info(error)
-            raise error
+            company["name"] = anonymized_name
 
-    def get_peers_comparison_metric(
-        self, metric_data: dict, filters: dict, access: bool
-    ) -> list:
-        try:
-            columns = [
-                f"DISTINCT ON ({self.company_table}.id) {self.company_table}.id",
-                f"{self.company_table}.name",
-                f"{self.company_table}.sector",
-                f"{self.company_table}.vertical",
-                f"{self.company_table}.size_cohort",
-                "{metric_table}.value as {alias}".format(
-                    metric_table=self.metric_table,
-                    alias=metric_data.get("alias", "value"),
-                ),
-            ]
+    def get_peers_sorted(self, data: dict) -> list:
+        return sorted(
+            list(data.values()),
+            key=lambda x: (
+                self.company_anonymization.is_anonymized(x.get("name", "")),
+                x.get("name", "").lower(),
+            ),
+        )
 
-            where_conditions = {
-                f"{self.scenario_table}.name": "'{name}'".format(
-                    name=metric_data.get("scenario")
-                ),
-                f"{self.metric_table}.name": "'{metric}'".format(
-                    metric=metric_data.get("metric")
-                ),
-                f"{self.company_table}.is_public": True,
-            }
+    def get_rule_of_40(self, company: dict) -> dict:
+        no_data = "NA"
+        return {
+            "id": company["id"],
+            "name": company["name"],
+            "revenue_growth_rate": company.get("growth", no_data),
+            "ebitda_margin": company.get("ebitda_margin", no_data),
+            "revenue": company.get("revenue", no_data),
+        }
 
-            where_conditions.update(filters)
+    def get_comparison_vs_data(self, data: dict, access: bool) -> list:
+        allowed_companies = self.company_anonymization.companies
+        rule_of_40 = []
 
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(columns)
-                .add_join_clause(
-                    {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.time_period_table}": {
-                            "from": f"{self.time_period_table}.id",
-                            "to": f"{self.metric_table}.period_id",
-                        }
-                    }
-                )
-                .add_sql_where_equal_condition(where_conditions)
-                .add_sql_group_by_condition(
-                    [
-                        f"{self.company_table}.id",
-                        f"{self.company_table}.name",
-                        f"{self.time_period_table}.start_at",
-                        f"{self.company_table}.sector",
-                        f"{self.company_table}.vertical",
-                        f"{self.company_table}.size_cohort",
-                        f"{self.metric_table}.value",
-                    ]
-                )
-                .add_sql_order_by_condition(
-                    [f"{self.company_table}.id", f"{self.time_period_table}.start_at"],
-                    self.query_builder.Order.DESC,
-                )
-                .build()
-                .get_query()
-            )
+        for id in data:
+            company_data = data[id]
+            self.calculate_metrics(company_data)
+            rule_of_40.append(self.get_rule_of_40(company_data))
+            self.remove_base_metrics(company_data)
+            if not access and id not in allowed_companies:
+                self.anonymized_company(company_data, allowed_companies)
 
-            result = self.session.execute(query).fetchall()
-            self.session.commit()
-            peers = self.response_sql.process_query_list_results(result)
-            if access:
-                return peers
-            else:
-                return self.company_anonymization.anonymize_companies_list(peers, "id")
-
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_peers_comparison_data(
-        self,
-        company_id: str,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        access: bool,
-    ) -> dict:
-        try:
-            if company_id and company_id.strip():
-                metrics = self.get_metrics(year)
-                data = []
-                filters = self.add_company_filters(
-                    sector=sectors,
-                    vertical=verticals,
-                    inves_profile_name=investor_profile,
-                    margin_group=growth_profile,
-                    size_cohort=size,
-                )
-
-                for metric in metrics:
-                    values = self.get_peers_comparison_metric(metric, filters, access)
-                    data.extend(values)
-
-                return self.response_sql.proccess_comparison_results(data)
-            return dict()
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_rank(self, company_data: dict, peer_data: list):
-        company_details = ["id", "name", "sector", "vertical", "size_cohort"]
-        data = [company_data.copy()]
-        data.extend(peer_data)
-        rank = dict()
-
-        for company_key in company_data.keys():
-            if company_key not in company_details:
-                filtered = list(
-                    filter(
-                        lambda company, data_key=company_key: company.get(data_key),
-                        data,
-                    )
-                )
-                metric_order = sorted(
-                    filtered,
-                    key=lambda company, data_key=company_key: company.get(data_key),
-                    reverse=True,
-                )
-                index = (
-                    metric_order.index(company_data) + 1
-                    if company_data in metric_order
-                    else -1
-                )
-                rank[company_key] = f"{index} of {len(metric_order)}"
-        return rank
+        return rule_of_40
 
     def get_peers_comparison(
         self,
         company_id: str,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
+        username: str,
         year: str,
         from_main: bool,
         access: bool,
+        **conditions
     ) -> dict:
-        def get_peers_sorted(data: dict) -> list:
-            return sorted(
-                list(data.values()),
-                key=lambda x: (
-                    self.company_anonymization.is_anonymized(x.get("name", "")),
-                    x.get("name", "").lower(),
-                ),
+        try:
+            company = dict()
+            is_valid_company = company_id and company_id.strip()
+            self.company_anonymization.set_company_permissions(username)
+            data = self.repository.get_base_metrics(
+                year=year,
+                need_all=True,
+                company_id=company_id,
+                need_prior_year=True,
+                need_next_year=False,
+                **conditions
             )
 
-        try:
-            data = self.get_peers_comparison_data(
-                company_id,
-                sectors,
-                verticals,
-                investor_profile,
-                growth_profile,
-                size,
-                year,
-                access,
-            )
-            peers = []
-            company = dict()
-            rank = dict()
-            if from_main:
-                peers = get_peers_sorted(data)
-            elif not from_main and company_id and company_id.strip():
+            rule_of_40 = self.get_comparison_vs_data(data, access)
+
+            if not from_main and is_valid_company:
                 company = data.pop(company_id, dict())
-                peers = get_peers_sorted(data)
-            if not access:
-                self.remove_revenue(peers)
+
+            peers = self.get_peers_sorted(data)
+
             return {
                 "company_comparison_data": company,
-                "rank": rank,
                 "peers_comparison_data": peers,
+                "rule_of_40": rule_of_40,
             }
         except Exception as error:
             self.logger.info(error)
