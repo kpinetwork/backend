@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+
 class ComparisonvsPeersService:
     def __init__(
         self, logger, calculator, repository, profile_range, company_anonymization
@@ -78,14 +81,14 @@ class ComparisonvsPeersService:
             ),
         )
 
-    def get_rule_of_40(self, company: dict) -> dict:
+    def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
         no_data = "NA"
         return {
             "id": company["id"],
             "name": company["name"],
             "revenue_growth_rate": company.get("growth", no_data),
             "ebitda_margin": company.get("ebitda_margin", no_data),
-            "revenue": company.get("revenue", no_data),
+            "revenue": company_revenue,
         }
 
     def get_comparison_vs_data(self, data: dict, access: bool) -> list:
@@ -94,11 +97,17 @@ class ComparisonvsPeersService:
 
         for id in data:
             company_data = data[id]
+            company_revenue = company_data.get("actuals_revenue")
+            rule_of_40_revenue = (
+                int(company_revenue)
+                if isinstance(company_revenue, (int, float, Decimal))
+                else company_revenue
+            )
             self.calculate_metrics(company_data)
-            rule_of_40.append(self.get_rule_of_40(company_data))
-            self.remove_base_metrics(company_data)
             if not access and id not in allowed_companies:
                 self.anonymized_company(company_data, allowed_companies)
+            rule_of_40.append(self.get_rule_of_40(company_data, rule_of_40_revenue))
+            self.remove_base_metrics(company_data)
 
         return rule_of_40
 

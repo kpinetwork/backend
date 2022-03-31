@@ -123,7 +123,9 @@ class TestComparisonvsPeers(TestCase):
         company = self.company.copy()
         company.update(self.metrics)
 
-        rule_of_40 = self.comparison_service_instance.get_rule_of_40(company)
+        rule_of_40 = self.comparison_service_instance.get_rule_of_40(
+            company, self.metrics["revenue"]
+        )
 
         self.assertEqual(rule_of_40, self.rule_of_40)
 
@@ -148,13 +150,15 @@ class TestComparisonvsPeers(TestCase):
         expected_company.update(self.metrics)
         expected_company["revenue"] = self.range["label"]
         expected_company["name"] = "0123-xxxx"
+        expected_rule_of_40 = self.rule_of_40.copy()
+        expected_rule_of_40["name"] = "0123-xxxx"
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
         rule_of_40 = self.comparison_service_instance.get_comparison_vs_data(
             data, False
         )
 
-        self.assertEqual(rule_of_40, [self.rule_of_40])
+        self.assertEqual(rule_of_40, [expected_rule_of_40])
         self.assertEqual(data[company["id"]], expected_company)
 
     @mock.patch(

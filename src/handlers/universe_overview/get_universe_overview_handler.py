@@ -8,7 +8,6 @@ from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
 from verify_user_permissions import (
-    verify_user_access,
     get_user_id_from_event,
     get_username_from_user_id,
 )
@@ -30,7 +29,6 @@ def handler(event, context):
             session, query_builder, logger, response_sql, company_anonymization
         )
         user_id = get_user_id_from_event(event)
-        access = verify_user_access(user_id)
         sectors = []
         verticals = []
         investor_profile = []
@@ -49,7 +47,7 @@ def handler(event, context):
         username = get_username_from_user_id(user_id)
         company_anonymization.set_company_permissions(username)
         overview = overview_service.get_universe_overview(
-            sectors, verticals, investor_profile, growth_profile, size, year, access
+            sectors, verticals, investor_profile, growth_profile, size, year
         )
 
         return {
