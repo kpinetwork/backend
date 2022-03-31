@@ -5,7 +5,6 @@ class UniverseOverviewService:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
-        self.company_anonymization = company_anonymization
         self.logger = logger
         self.metric_table = "metric"
         self.company_table = "company"
@@ -354,101 +353,6 @@ class UniverseOverviewService:
             self.logger.info(error)
             raise error
 
-    def get_rule_of_40(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        access: bool,
-    ) -> list:
-        def get_case_statement(scenario: str, metric: str, alias: str) -> str:
-            return """
-                SUM(
-                    CASE WHEN {scenario_table}.name = '{scenario}'
-                    AND {metric_table}.name = '{metric}'
-                    THEN {metric_table}.value ELSE 0 END
-                ) AS {alias}
-            """.format(
-                scenario=scenario,
-                metric=metric,
-                alias=alias,
-                scenario_table=self.scenario_table,
-                metric_table=self.metric_table,
-            )
-
-        try:
-            columns = [
-                f"{self.scenario_table}.{self.company_table}_id",
-                f"{self.company_table}.name",
-                get_case_statement(
-                    f"Actual growth-{year}", "Revenue", "revenue_growth_rate"
-                ),
-                get_case_statement(f"Actual margin-{year}", "Ebitda", "ebitda_margin"),
-                get_case_statement(f"Actuals-{year}", "Revenue", "revenue"),
-            ]
-
-            where_conditions = self.add_company_filters(
-                sector=sectors,
-                vertical=verticals,
-                inves_profile_name=investor_profile,
-                margin_group=growth_profile,
-                size_cohort=size,
-            )
-            where_conditions.update({f"{self.company_table}.is_public": True})
-
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(columns)
-                .add_join_clause(
-                    {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
-                        }
-                    }
-                )
-                .add_sql_where_equal_condition(where_conditions)
-                .add_sql_group_by_condition(
-                    [
-                        f"{self.scenario_table}.{self.company_table}_id",
-                        f"{self.company_table}.name",
-                    ]
-                )
-                .build()
-                .get_query()
-            )
-            results = self.session.execute(query).fetchall()
-            self.session.commit()
-            rule_of_40 = self.response_sql.process_query_list_results(results)
-            if access:
-                return rule_of_40
-            else:
-                return self.company_anonymization.anonymize_companies_list(
-                    rule_of_40, "company_id"
-                )
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
     def get_universe_overview(
         self,
         sectors: list,
@@ -457,7 +361,6 @@ class UniverseOverviewService:
         growth_profile: list,
         size: list,
         year: str,
-        access: bool,
     ) -> dict:
         try:
             kpi_average = self.get_companies_kpi_average(
@@ -475,9 +378,6 @@ class UniverseOverviewService:
             revenue_and_ebitda = self.get_revenue_and_ebitda_by_size_cohort(
                 sectors, verticals, investor_profile, growth_profile, size, year
             )
-            rule_of_40 = self.get_rule_of_40(
-                sectors, verticals, investor_profile, growth_profile, size, year, access
-            )
 
             return {
                 "kpi_average": kpi_average,
@@ -485,7 +385,6 @@ class UniverseOverviewService:
                 "growth_and_margin": growth_and_margin,
                 "expected_growth_and_margin": expected_growth_and_margin,
                 "revenue_and_ebitda": revenue_and_ebitda,
-                "rule_of_40": rule_of_40,
             }
         except Exception as error:
             self.logger.info(error)

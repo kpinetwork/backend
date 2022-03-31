@@ -17,21 +17,18 @@ class TestGetUniverseOverviewHandler(TestCase):
     @mock.patch.object(get_overview_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(get_overview_handler, "get_user_details_service_instance")
-    @mock.patch.object(get_overview_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_comparison_vs_peers_handler_success_should_return_200_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,
-        mock_verify_user_access,
         mock_get_user_service_instance,
         mock_set_company_permissions,
         mock_get_username_from_user_id,
         mock_get_universe_overview,
     ):
         mock_get_user_service_instance.return_value = object()
-        mock_verify_user_access.return_value = True
         mock_get_username_from_user_id.return_value = self.username
         mock_get_universe_overview.return_value = self.universe_overview
 
@@ -52,14 +49,12 @@ class TestGetUniverseOverviewHandler(TestCase):
     @mock.patch.object(get_overview_handler, "get_username_from_user_id")
     @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(get_overview_handler, "get_user_details_service_instance")
-    @mock.patch.object(get_overview_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_get_comparison_vs_peers_handler_fail_should_return_error_400_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,
-        mock_verify_user_access,
         mock_get_user_service_instance,
         mock_set_company_permissions,
         mock_get_username_from_user_id,
@@ -68,7 +63,6 @@ class TestGetUniverseOverviewHandler(TestCase):
         error_message = "Cannot get universe overview"
         mock_get_universe_overview.side_effect = Exception(error_message)
         mock_get_user_service_instance.return_value = object()
-        mock_verify_user_access.return_value = True
         mock_get_username_from_user_id.return_value = self.username
 
         response = handler(self.event, {})

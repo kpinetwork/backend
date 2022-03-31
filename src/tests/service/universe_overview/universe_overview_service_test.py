@@ -475,93 +475,6 @@ class TestUniverseOverview(TestCase):
             self.assertEqual(exception, Exception)
             self.overview_service_instance.session.execute.assert_called_once()
 
-    def test_get_rule_of_40_with_access_success(self):
-        expected_out = [
-            {
-                "company_id": "da610d0a-e1ff-4653-a07f-27f7c99b6a3f",
-                "name": "SEVCON, INC.",
-                "revenue_growth_rate": "129",
-                "ebitda_margin": "-15",
-                "revenue": "60",
-            }
-        ]
-        expected_out = []
-        self.mock_response_list_query_sql(expected_out)
-
-        get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            ["Semiconductors"],
-            ["Transportation"],
-            ["Investor"],
-            ["Growth"],
-            ["Size", "Size2"],
-            "2020",
-            True,
-        )
-
-        self.assertEqual(get_rule_of_40_out, expected_out)
-        self.overview_service_instance.session.execute.assert_called_once()
-
-    def test_get_rule_of_40_without_access_success(self):
-        expected_out = [
-            {
-                "company_id": "da610d0a-e1ff-4653-a07f-27f7c99b6a3f",
-                "name": "SEVCON, INC.",
-                "revenue_growth_rate": "129",
-                "ebitda_margin": "-15",
-                "revenue": "60",
-            }
-        ]
-        expected_out = []
-        self.mock_response_list_query_sql(expected_out)
-
-        get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            ["Semiconductors"],
-            ["Transportation"],
-            ["Investor"],
-            ["Growth"],
-            ["Size", "Size2"],
-            "2020",
-            False,
-        )
-
-        self.assertEqual(get_rule_of_40_out, expected_out)
-        self.overview_service_instance.session.execute.assert_called_once()
-
-    def test_get_rule_of_40_success_with_empty_response(self):
-        self.mock_response_list_query_sql([])
-
-        get_rule_of_40_out = self.overview_service_instance.get_rule_of_40(
-            ["Semiconductors"],
-            ["Transportation"],
-            ["Investor"],
-            ["Growth"],
-            ["Size", "Size2"],
-            "2020",
-            True,
-        )
-
-        self.assertEqual(get_rule_of_40_out, [])
-        self.overview_service_instance.session.execute.assert_called_once()
-
-    def test_get_rule_of_40_failed(self):
-        self.overview_service_instance.session.execute.side_effect = Exception("error")
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.overview_service_instance.get_rule_of_40(
-                    ["Semiconductors"],
-                    ["Transportation"],
-                    ["Investor"],
-                    ["Growth"],
-                    ["Size", "Size2"],
-                    "2020",
-                    True,
-                )
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.overview_service_instance.session.execute.assert_called_once()
-
     def test_get_universe_overview_with_access_success(self):
         record = self.size_cohort.copy()
         record["margin"] = record.pop("count")
@@ -579,7 +492,6 @@ class TestUniverseOverview(TestCase):
                 ["Growth"],
                 ["Size", "Size2"],
                 "2020",
-                True,
             )
         )
 
@@ -589,12 +501,11 @@ class TestUniverseOverview(TestCase):
             "growth_and_margin": size_cohort_expected_out,
             "expected_growth_and_margin": size_cohort_expected_out,
             "revenue_and_ebitda": size_cohort_expected_out,
-            "rule_of_40": [self.size_cohort, record],
         }
 
         self.assertEqual(get_universe_overview_out, expected_out)
         self.overview_service_instance.session.execute.assert_called()
-        self.assertEqual(self.overview_service_instance.session.execute.call_count, 11)
+        self.assertEqual(self.overview_service_instance.session.execute.call_count, 10)
 
     def test_get_universe_overview_success_with_empty_response(self):
         self.mock_response_list_query_sql([])
@@ -608,7 +519,6 @@ class TestUniverseOverview(TestCase):
                 ["Growth"],
                 ["Size", "Size2"],
                 "2020",
-                True,
             )
         )
 
@@ -618,12 +528,11 @@ class TestUniverseOverview(TestCase):
             "growth_and_margin": dict(),
             "expected_growth_and_margin": dict(),
             "revenue_and_ebitda": dict(),
-            "rule_of_40": [],
         }
 
         self.assertEqual(get_universe_overview_out, expected_out)
         self.overview_service_instance.session.execute.assert_called()
-        self.assertEqual(self.overview_service_instance.session.execute.call_count, 11)
+        self.assertEqual(self.overview_service_instance.session.execute.call_count, 10)
 
     def test_get_universe_overview_failed(self):
         self.overview_service_instance.session.execute.side_effect = Exception("error")
@@ -636,7 +545,6 @@ class TestUniverseOverview(TestCase):
                     ["Growth"],
                     ["Size", "Size2"],
                     "2020",
-                    True,
                 )
             )
 
