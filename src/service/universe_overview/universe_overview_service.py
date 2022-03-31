@@ -1,383 +1,194 @@
+from statistics import mean
+
+
 class UniverseOverviewService:
-    def __init__(
-        self, session, query_builder, logger, response_sql, company_anonymization
-    ) -> None:
-        self.session = session
-        self.query_builder = query_builder
-        self.response_sql = response_sql
+    def __init__(self, logger, calculator, repository, profile_range) -> None:
         self.logger = logger
-        self.metric_table = "metric"
-        self.company_table = "company"
-        self.scenario_table = "financial_scenario"
-        self.scenario_metric_table = "scenario_metric"
+        self.calculator = calculator
+        self.repository = repository
+        self.profile_range = profile_range
 
-    def add_company_filters(self, **kwargs) -> dict:
-        filters = dict()
-        for k, v in kwargs.items():
-            values = [f"'{element}'" for element in v if element and element.strip()]
-            filters[f"{self.company_table}.{k}"] = values
-        return filters
+    def get_metrics_by_year(self, year: str, **conditions) -> dict:
+        return self.repository.get_base_metrics(
+            year, False, None, True, True, True, **conditions
+        )
 
-    def get_metric_avg_by_scenario(
+    def add_actuals_metrics(
         self,
-        scenario_type: str,
-        metric: str,
-        year: str,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        avg_alias: str,
-    ) -> dict:
+        actuals_ebitda: float,
+        actuals_revenue: float,
+        prior_revenue: float,
+        company: dict,
+    ) -> None:
+        company["growth"] = self.calculator.calculate_growth_rate(
+            actuals_revenue, prior_revenue, False
+        )
+        company["ebitda_margin"] = self.calculator.calculate_ebitda_margin(
+            actuals_ebitda, actuals_revenue, False
+        )
+        company["rule_of_40"] = self.calculator.calculate_rule_of_40(
+            actuals_revenue, prior_revenue, actuals_ebitda, False
+        )
+        company["size_cohort"] = self.get_revenue_range(actuals_revenue)
+
+    def add_budget_metrics(
+        self,
+        budget_ebitda: float,
+        budget_revenue: float,
+        budget_prior_revenue: float,
+        company: dict,
+    ) -> None:
+        company["budget_growth"] = self.calculator.calculate_growth_rate(
+            budget_revenue, budget_prior_revenue, False
+        )
+        company["budget_ebitda_margin"] = self.calculator.calculate_ebitda_margin(
+            budget_ebitda, budget_revenue, False
+        )
+
+    def add_actuals_vs_budget_metrics(
+        self,
+        actuals_revenue: float,
+        actuals_ebitda: float,
+        budget_revenue: float,
+        budget_ebitda: float,
+        company: dict,
+    ) -> None:
+        company["revenue_vs_budget"] = self.calculator.calculate_actual_vs_budget(
+            actuals_revenue, budget_revenue, False
+        )
+        company["ebitda_vs_budget"] = self.calculator.calculate_ebitda_margin(
+            actuals_ebitda, budget_ebitda, False
+        )
+
+    def get_revenue_range(self, metric: float) -> str:
+        if not self.calculator.is_valid_number(metric):
+            return "NA"
         try:
-            where_condition = {
-                f"{self.scenario_table}.name": f"'{scenario_type}-{year}'",
-                f"{self.metric_table}.name": f"'{metric}'",
-                f"{self.company_table}.is_public": True,
+            ranges = self.profile_range.get_profile_ranges("size profile")
+            metric_ranges = list(
+                filter(
+                    lambda range: self.profile_range.verify_range(range, metric),
+                    ranges,
+                )
+            )
+            return metric_ranges[0].get("label")
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def add_calculated_metrics_to_companies(self, data: list) -> None:
+        for company in data:
+            actuals_ebitda = company.get("actuals_ebitda")
+            actuals_revenue = company.get("actuals_revenue")
+            prior_revenue = company.get("prior_actuals_revenue")
+            budget_ebitda = company.get("budget_ebitda")
+            budget_revenue = company.get("budget_revenue")
+            budget_prior_revenue = company.get("prior_budget_revenue")
+
+            self.add_actuals_metrics(
+                actuals_ebitda, actuals_revenue, prior_revenue, company
+            )
+            self.add_budget_metrics(
+                budget_ebitda, budget_revenue, budget_prior_revenue, company
+            )
+            self.add_actuals_vs_budget_metrics(
+                actuals_revenue, actuals_ebitda, budget_revenue, budget_ebitda, company
+            )
+
+    def get_kpi_average(self, metric: str, data: list) -> float:
+        try:
+            average = mean(
+                company.get(metric)
+                for company in data
+                if self.calculator.is_valid_number(company.get(metric))
+            )
+            return round(average, 2)
+        except Exception as error:
+            self.logger.info(error)
+            return 0
+
+    def get_kpi_averages(self, data: list) -> list:
+        growth = self.get_kpi_average("growth", data)
+        margin = self.get_kpi_average("ebitda_margin", data)
+        rule_of_40 = self.get_kpi_average("rule_of_40", data)
+
+        return [
+            {"growth": growth},
+            {"ebitda_margin": margin},
+            {"rule_of_40": rule_of_40},
+        ]
+
+    def get_companies_by_size_cohort(self, data: list) -> dict:
+        companies_by_size = dict()
+        for company in data:
+            size = company.get("size_cohort")
+            valid_size = size and size != "NA"
+            if valid_size and size not in companies_by_size:
+                companies_by_size[size] = [company]
+            elif valid_size and size in companies_by_size:
+                companies_by_size[size].append(company)
+        return companies_by_size
+
+    def get_count_by_size(self, data: dict) -> list:
+        return [
+            {"size_cohort": size_cohort, "count": len(companies)}
+            for size_cohort, companies in data.items()
+        ]
+
+    def get_metric_by_size(self, data: dict, metric: str, alias: str) -> dict:
+        return {
+            size_cohort: {
+                "size_cohort": size_cohort,
+                alias: self.get_kpi_average(metric, companies),
             }
-            filters = self.add_company_filters(
-                sector=sectors,
-                vertical=verticals,
-                inves_profile_name=investor_profile,
-                margin_group=growth_profile,
-                size_cohort=size,
-            )
-            where_condition = dict(where_condition, **filters)
+            for size_cohort, companies in data.items()
+        }
 
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(
-                    [f"AVG({self.metric_table}.value) as {avg_alias}"]
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
-                        }
-                    }
-                )
-                .add_sql_where_equal_condition(where_condition)
-                .build()
-                .get_query()
-            )
-            result = self.session.execute(query).fetchall()
-            self.session.commit()
-            return self.response_sql.process_query_result(result)
+    def merge_metric_dicts(self, metric: dict, pair_metric: dict) -> None:
+        for size, metrics in metric.items():
+            metrics.update(pair_metric.get(size, dict()))
 
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_companies_kpi_average(
-        self,
-        sector: list,
-        vertical: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-    ) -> list:
-        try:
-            kpi_averages = []
-            metrics = [
-                {"scenario": "Actual growth", "metric": "Revenue", "alias": "growth"},
-                {
-                    "scenario": "Actual margin",
-                    "metric": "Ebitda",
-                    "alias": "ebitda_margin",
-                },
-                {"scenario": "Actuals", "metric": "Rule of 40", "alias": "rule_of_40"},
-            ]
-            for metric in metrics:
-                metric_average = self.get_metric_avg_by_scenario(
-                    metric.get("scenario"),
-                    metric.get("metric"),
-                    year,
-                    sector,
-                    vertical,
-                    investor_profile,
-                    growth_profile,
-                    size,
-                    metric.get("alias"),
-                )
-                kpi_averages.append(metric_average)
-
-            return self.response_sql.process_query_list_results(kpi_averages)
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_companies_count_by_size(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-    ) -> list:
-        try:
-            where_conditions = self.add_company_filters(
-                sector=sectors,
-                vertical=verticals,
-                inves_profile_name=investor_profile,
-                margin_group=growth_profile,
-                size_cohort=size,
-            )
-            where_conditions.update({f"{self.company_table}.is_public": True})
-
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(
-                    [
-                        f"{self.company_table}.size_cohort",
-                        f"COUNT({self.company_table}.id)",
-                    ]
-                )
-                .add_sql_where_equal_condition(where_conditions)
-                .add_sql_group_by_condition([f"{self.company_table}.size_cohort"])
-                .build()
-                .get_query()
-            )
-            results = self.session.execute(query).fetchall()
-            self.session.commit()
-            return self.response_sql.process_query_list_results(results)
-
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_metric_avg_by_size_cohort(
-        self,
-        scenario: str,
-        metric: str,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        avg_alias: str,
-    ) -> list:
-        try:
-            if scenario and scenario.strip() and metric and metric.strip():
-                scenario_name = f"{scenario}-{year}"
-                avg_select = f"AVG({self.metric_table}.value)"
-
-                if avg_alias and avg_alias.strip():
-                    avg_select = f"{avg_select} as {avg_alias}"
-
-                columns = [
-                    f"{self.company_table}.size_cohort",
-                    avg_select,
-                ]
-
-                where_conditions = {
-                    f"{self.scenario_table}.name": f"'{scenario_name}'",
-                    f"{self.metric_table}.name": f"'{metric}'",
-                    f"{self.company_table}.is_public": True,
-                }
-
-                filters = self.add_company_filters(
-                    sector=sectors,
-                    vertical=verticals,
-                    inves_profile_name=investor_profile,
-                    margin_group=growth_profile,
-                    size_cohort=size,
-                )
-                where_conditions = dict(where_conditions, **filters)
-
-                query = (
-                    self.query_builder.add_table_name(self.company_table)
-                    .add_select_conditions(columns)
-                    .add_join_clause(
-                        {
-                            f"{self.scenario_table}": {
-                                "from": f"{self.scenario_table}.company_id",
-                                "to": f"{self.company_table}.id",
-                            }
-                        }
-                    )
-                    .add_join_clause(
-                        {
-                            f"{self.scenario_metric_table}": {
-                                "from": f"{self.scenario_metric_table}.scenario_id",
-                                "to": f"{self.scenario_table}.id",
-                            }
-                        }
-                    )
-                    .add_join_clause(
-                        {
-                            f"{self.metric_table}": {
-                                "from": f"{self.scenario_metric_table}.metric_id",
-                                "to": f"{self.metric_table}.id",
-                            }
-                        }
-                    )
-                    .add_sql_where_equal_condition(where_conditions)
-                    .add_sql_group_by_condition([f"{self.company_table}.size_cohort"])
-                    .build()
-                    .get_query()
-                )
-                results = self.session.execute(query).fetchall()
-                self.session.commit()
-
-                return self.response_sql.process_query_list_results(results)
-            return []
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_scenarios_pair_by_size_cohort(
-        self,
-        scenarios: list,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-    ) -> list:
-        try:
-            scenarios_result = []
-
-            for scenario in scenarios:
-                scenario_result = self.get_metric_avg_by_size_cohort(
-                    scenario.get("scenario"),
-                    scenario.get("metric"),
-                    sectors,
-                    verticals,
-                    investor_profile,
-                    growth_profile,
-                    size,
-                    year,
-                    scenario.get("avg_alias"),
-                )
-                scenarios_result.extend(scenario_result)
-
-            return self.response_sql.process_metrics_group_by_size_cohort_results(
-                scenarios_result
-            )
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_growth_and_margin_by_size_cohort(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        is_actual: bool = True,
+    def get_growth_and_margin_by_size(
+        self, data: dict, projected: bool = False
     ) -> dict:
-        try:
-            scenario_type = "Actual" if is_actual else "Budgeted"
-            scenarios = [
-                {
-                    "scenario": f"{scenario_type} growth",
-                    "metric": "Revenue",
-                    "avg_alias": "growth",
-                },
-                {
-                    "scenario": f"{scenario_type} margin",
-                    "metric": "Ebitda",
-                    "avg_alias": "margin",
-                },
-            ]
+        scenario = "budget_" if projected else ""
+        growth_by_size = self.get_metric_by_size(data, f"{scenario}growth", "growth")
+        margin_by_size = self.get_metric_by_size(
+            data, f"{scenario}ebitda_margin", "margin"
+        )
 
-            return self.get_scenarios_pair_by_size_cohort(
-                scenarios,
-                sectors,
-                verticals,
-                investor_profile,
-                growth_profile,
-                size,
-                year,
-            )
-        except Exception as error:
-            self.logger.info(error)
-            raise error
+        self.merge_metric_dicts(growth_by_size, margin_by_size)
 
-    def get_revenue_and_ebitda_by_size_cohort(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-    ) -> dict:
-        try:
-            scenario_type = "Actual vs budget"
-            scenarios = [
-                {
-                    "scenario": f"{scenario_type}",
-                    "metric": "Revenue",
-                    "avg_alias": "revenue",
-                },
-                {
-                    "scenario": f"{scenario_type}",
-                    "metric": "Ebitda",
-                    "avg_alias": "ebitda",
-                },
-            ]
-            return self.get_scenarios_pair_by_size_cohort(
-                scenarios,
-                sectors,
-                verticals,
-                investor_profile,
-                growth_profile,
-                size,
-                year,
-            )
-        except Exception as error:
-            self.logger.info(error)
-            raise error
+        return growth_by_size
 
-    def get_universe_overview(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-    ) -> dict:
+    def get_revenue_and_ebitda_by_size(self, data: dict) -> dict:
+        revenue_vs_budget = self.get_metric_by_size(
+            data, "revenue_vs_budget", "revenue"
+        )
+        ebitda_vs_budget = self.get_metric_by_size(data, "ebitda_vs_budget", "ebitda")
+
+        self.merge_metric_dicts(revenue_vs_budget, ebitda_vs_budget)
+
+        return revenue_vs_budget
+
+    def get_universe_overview(self, year: int, **conditions):
         try:
-            kpi_average = self.get_companies_kpi_average(
-                sectors, verticals, investor_profile, growth_profile, size, year
+            data = self.get_metrics_by_year(year, **conditions).values()
+
+            self.add_calculated_metrics_to_companies(data)
+
+            kpi_average = self.get_kpi_averages(data)
+
+            companies_by_size = self.get_companies_by_size_cohort(data)
+
+            count_by_size = self.get_count_by_size(companies_by_size)
+            growth_and_margin = self.get_growth_and_margin_by_size(
+                companies_by_size, False
             )
-            count_by_size = self.get_companies_count_by_size(
-                sectors, verticals, investor_profile, growth_profile, size
+            expected_growth_and_margin = self.get_growth_and_margin_by_size(
+                companies_by_size, True
             )
-            growth_and_margin = self.get_growth_and_margin_by_size_cohort(
-                sectors, verticals, investor_profile, growth_profile, size, year, True
-            )
-            expected_growth_and_margin = self.get_growth_and_margin_by_size_cohort(
-                sectors, verticals, investor_profile, growth_profile, size, year, False
-            )
-            revenue_and_ebitda = self.get_revenue_and_ebitda_by_size_cohort(
-                sectors, verticals, investor_profile, growth_profile, size, year
-            )
+            revenue_and_ebitda = self.get_revenue_and_ebitda_by_size(companies_by_size)
 
             return {
                 "kpi_average": kpi_average,
