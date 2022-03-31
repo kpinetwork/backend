@@ -46,6 +46,7 @@ class CalculatorService:
         revenue_recent_year: float,
         revenue_prior_year: float,
         ebitda_recent_year: float,
+        rounded: bool = True,
     ) -> Union[float, str]:
         revenue_growth = self.calculate_growth_rate(
             revenue_recent_year, revenue_prior_year, False
@@ -54,14 +55,16 @@ class CalculatorService:
             ebitda_recent_year, revenue_recent_year, False
         )
         if self.is_valid_number(revenue_growth) and self.is_valid_number(ebitda_margin):
-            return round(revenue_growth + ebitda_margin)
+            rule_of_40 = revenue_growth + ebitda_margin
+            return round(rule_of_40) if rounded else rule_of_40
         return "NA"
 
     def calculate_actual_vs_budget(
-        self, actual_value: float, budget_value: float
+        self, actual_value: float, budget_value: float, rounded: bool = True
     ) -> Union[float, str]:
         try:
-            return round((actual_value / budget_value) * 100)
+            actual_vs_budget = (actual_value / budget_value) * 100
+            return round(actual_vs_budget) if rounded else actual_vs_budget
         except Exception as error:
             self.logger.info(error)
             return "NA"

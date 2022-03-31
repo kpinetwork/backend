@@ -49,29 +49,32 @@ class CalculatorRepository:
             "alias": f"{alias}",
         }
 
-    def get_base_metrics_options(
-        self,
-        year: int,
-        need_prior_year: bool,
-        need_next_year: bool,
-    ) -> list:
-        metrics = [
+    def get_actuals_budget_options(self, year: int) -> list:
+        return [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
             self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
             self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
         ]
 
-        if need_prior_year:
-            metrics.append(
-                self.get_metric_option(
-                    "Actuals", "Revenue", "prior_actuals_revenue", year - 1
-                )
+    def get_budget_options(self, year: int, need_prior: bool, need_next: bool) -> list:
+        budget_options = []
+        if need_prior:
+            prior_year = year - 1
+            budget_options.extend(
+                [
+                    self.get_metric_option(
+                        "Budget", "Revenue", "prior_budget_revenue", prior_year
+                    ),
+                    self.get_metric_option(
+                        "Budget", "Ebitda", "prior_budget_ebitda", prior_year
+                    ),
+                ]
             )
 
-        if need_next_year:
+        if need_next:
             next_year = year + 1
-            metrics.extend(
+            budget_options.extend(
                 [
                     self.get_metric_option(
                         "Budget", "Revenue", "next_budget_revenue", next_year
@@ -81,6 +84,29 @@ class CalculatorRepository:
                     ),
                 ]
             )
+
+        return budget_options
+
+    def get_base_metrics_options(
+        self,
+        year: int,
+        need_actuals_prior_year: bool,
+        need_next_year: bool,
+        need_budget_prior_year: bool,
+    ) -> list:
+        metrics = self.get_actuals_budget_options(year)
+
+        if need_actuals_prior_year:
+            metrics.append(
+                self.get_metric_option(
+                    "Actuals", "Revenue", "prior_actuals_revenue", year - 1
+                )
+            )
+
+        budget_options = self.get_budget_options(
+            year, need_budget_prior_year, need_next_year
+        )
+        metrics.extend(budget_options)
 
         return metrics
 
@@ -228,13 +254,14 @@ class CalculatorRepository:
         year: int,
         need_all: bool = False,
         company_id: str = None,
-        need_prior_year: bool = False,
+        need_actuals_prior_year: bool = False,
         need_next_year: bool = False,
+        need_budget_prior_year: bool = False,
         **conditions,
     ) -> dict:
         filters = self.add_company_filters(**conditions)
         metric_options = self.get_base_metrics_options(
-            year, need_prior_year, need_next_year
+            year, need_actuals_prior_year, need_next_year, need_budget_prior_year
         )
         data = []
         for metric in metric_options:
