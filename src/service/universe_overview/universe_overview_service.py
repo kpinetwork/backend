@@ -108,7 +108,7 @@ class UniverseOverviewService:
             self.logger.info(error)
             return 0
 
-    def get_kpi_averages(self, data: list) -> dict:
+    def get_kpi_averages(self, data: list) -> list:
         growth = self.get_kpi_average("growth", data)
         margin = self.get_kpi_average("ebitda_margin", data)
         rule_of_40 = self.get_kpi_average("rule_of_40", data)
