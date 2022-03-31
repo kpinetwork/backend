@@ -71,6 +71,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -89,7 +92,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/utils/revenue_range.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -108,7 +113,9 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
-    - ./src/utils/revenue_range.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -135,6 +142,8 @@ functions:
     - ./src/handlers/users/get_users_handler.py
     - ./src/service/users/users_service.py
     - ./src/utils/response_user.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   get_roles_handler:
     requirements: ./src/handlers/users/requirements.txt
@@ -142,6 +151,8 @@ functions:
     - ./src/handlers/users/get_roles_handler.py
     - ./src/service/users/users_service.py
     - ./src/utils/response_user.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   get_user_details_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -155,6 +166,8 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   change_user_role_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -168,6 +181,8 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   assign_company_permissions_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -181,6 +196,8 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   get_company_permissions_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -194,18 +211,16 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-
-  get_roles_handler:
-    requirements: ./src/handlers/users/requirements.txt
-    include:
-    - ./src/handlers/users/get_roles_handler.py
-    - ./src/service/users/users_service.py
-    - ./src/utils/response_user.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
 
   change_company_publicly_handler:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/company/change_company_publicly_handler.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./src/utils/response_user.py
     - ./src/service/company/company_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
@@ -213,6 +228,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
+    - ./src/exceptions/base_exception.py
 
 
 layers:

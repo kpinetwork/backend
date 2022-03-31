@@ -4,6 +4,8 @@ import boto3
 import logging
 from users_service import UsersService
 from response_user import ResponseUser
+from verify_user_permissions import verify_user_access, get_user_id_from_event
+from base_exception import AppError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -20,7 +22,20 @@ def handler(event, context):
         response_user = ResponseUser()
         users_service = UsersService(logger, cognito, response_user)
         pool_id = os.environ.get("USER_POOL_ID")
-        users = users_service.get_users(pool_id)
+        user_id = get_user_id_from_event(event)
+        access = verify_user_access(user_id)
+
+        if not access:
+            raise AppError("No permissions to get users")
+
+        limit = 10
+        token = ""
+        if event.get("queryStringParameters"):
+            params = event.get("queryStringParameters")
+            limit = int(params.get("limit", limit))
+            token = params.get("token", token)
+
+        users = users_service.get_users(pool_id, limit, token)
 
         return {
             "statusCode": 200,

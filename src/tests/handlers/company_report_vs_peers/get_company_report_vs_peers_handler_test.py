@@ -14,10 +14,9 @@ class TestCompanyReportVsPeersHandler(TestCase):
         self.event = read("sample_event_company.json")
 
     @mock.patch(
-        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report_vs_peers"
+        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report"
     )
     @mock.patch.object(report_handler, "get_username_from_user_id")
-    @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(report_handler, "get_user_details_service_instance")
     @mock.patch.object(report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
@@ -28,7 +27,6 @@ class TestCompanyReportVsPeersHandler(TestCase):
         mock_create_db_engine,
         mock_verify_user_access,
         mock_get_user_service_instance,
-        mock_set_company_permissions,
         mock_get_username_from_user_id,
         mock_get_company_report,
     ):
@@ -42,17 +40,15 @@ class TestCompanyReportVsPeersHandler(TestCase):
         mock_get_company_report.assert_called()
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
-        mock_set_company_permissions.assert_called_with(self.username)
         self.assertEqual(response.get("statusCode"), 200)
         self.assertEqual(
             response.get("body"), json.dumps(self.company_report, default=str)
         )
 
     @mock.patch(
-        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report_vs_peers"
+        "company_report_vs_peers_service.CompanyReportvsPeersService.get_company_report"
     )
     @mock.patch.object(report_handler, "get_username_from_user_id")
-    @mock.patch("company_anonymization.CompanyAnonymization.set_company_permissions")
     @mock.patch.object(report_handler, "get_user_details_service_instance")
     @mock.patch.object(report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
@@ -63,7 +59,6 @@ class TestCompanyReportVsPeersHandler(TestCase):
         mock_create_db_engine,
         mock_verify_user_access,
         mock_get_user_service_instance,
-        mock_set_company_permissions,
         mock_get_username_from_user_id,
         mock_get_company_report,
     ):
@@ -78,6 +73,5 @@ class TestCompanyReportVsPeersHandler(TestCase):
         mock_get_company_report.assert_called()
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
-        mock_set_company_permissions.assert_called_with(self.username)
         self.assertEqual(response.get("statusCode"), 400)
         self.assertEqual(response.get("body"), json.dumps({"error": error_message}))

@@ -1,11 +1,13 @@
-from unittest import TestCase
+from unittest import TestCase, mock
 import logging
 from unittest.mock import Mock
+from parameterized import parameterized
 from src.service.comparison_vs_peers.comparison_vs_peers_service import (
     ComparisonvsPeersService,
 )
+from src.service.calculator.calculator_repository import CalculatorRepository
+from src.service.calculator.calculator_service import CalculatorService
 from src.utils.company_anonymization import CompanyAnonymization
-from src.utils.revenue_range import RevenueRange
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -13,287 +15,223 @@ logger.setLevel(logging.INFO)
 
 class TestComparisonvsPeers(TestCase):
     def setUp(self):
-        self.scenarios = [
-            {"scenario": "Test 1", "metric": "Revenue", "alias": "growth"},
-            {"scenario": "Test 2", "metric": "Revenue", "alias": "margin"},
-        ]
-        self.metric_value = {"growth": 15}
-        self.company = {
-            "id": "1",
-            "name": "Company",
-            "sector": "Science",
-            "vertical": "Maths",
-            "size_cohort": "100+",
-            "growth": 17,
-            "revenue": 120,
-        }
-        self.comparison = {
-            "id": "2",
-            "name": "Test",
-            "sector": "Science",
-            "vertical": "Maths",
-            "size_cohort": "100+",
-            "growth": 34,
-            "revenue": 110,
-        }
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
         self.company_anonymization = CompanyAnonymization(object)
-        self.revenue_range = RevenueRange(
-            self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
+        self.mock_profile_range = Mock()
+        self.calculator = CalculatorService(logger)
+        self.repository = CalculatorRepository(
+            self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
         )
-        self.revenue_range.ranges = [
-            {"label": "100+", "max_value": None, "min_value": 100}
-        ]
         self.comparison_service_instance = ComparisonvsPeersService(
-            self.mock_session,
-            self.mock_query_builder,
             logger,
-            self.mock_response_sql,
+            self.calculator,
+            self.repository,
+            self.mock_profile_range,
             self.company_anonymization,
-            self.revenue_range,
         )
-        return
+        self.company = {
+            "id": "0123456",
+            "name": "Company Test",
+            "sector": "Computer Hardware",
+            "vertical": "Life Sciences",
+        }
 
-    def mock_response_query_sql(self, response):
-        attrs = {"process_query_result.return_value": response}
+        self.metrics = {
+            "revenue": 40,
+            "growth": 7,
+            "ebitda_margin": -38,
+            "revenue_vs_budget": 114,
+            "ebitda_vs_budget": 125,
+            "rule_of_40": -31,
+        }
+
+        self.scenarios = {
+            "actuals_revenue": 40,
+            "actuals_ebitda": -15,
+            "prior_actuals_revenue": 37.5,
+            "budget_revenue": 35,
+            "budget_ebitda": -12,
+        }
+
+        self.rule_of_40 = {
+            "id": self.company["id"],
+            "name": self.company["name"],
+            "revenue_growth_rate": self.metrics["growth"],
+            "ebitda_margin": self.metrics["ebitda_margin"],
+            "revenue": self.metrics["revenue"],
+        }
+
+        self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
+
+    def mock_base_metric_results(self, response):
+        attrs = {"proccess_base_metrics_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def mock_response_list_query_sql(self, response):
-        attrs = {"process_query_list_results.return_value": response}
-        self.mock_response_sql.configure_mock(**attrs)
+    @parameterized.expand(
+        [
+            [
+                31,
+                {"label": "$30-<50 million", "max_value": 50, "min_value": 30},
+                "$30-<50 million",
+            ],
+            [None, {"label": "100+", "max_value": None, "min_value": 100}, "NA"],
+            [50, {}, "NA"],
+        ]
+    )
+    def test_remove_revenue(self, revenue, ranges, label):
+        company = self.company.copy()
+        company["revenue"] = revenue
+        self.mock_profile_range.get_profile_ranges.return_value = [ranges]
 
-    def mock_proccess_comparison_results(self, response):
-        attrs = {"proccess_comparison_results.return_value": response}
-        self.mock_response_sql.configure_mock(**attrs)
+        self.comparison_service_instance.remove_revenue(company)
 
-    def test_add_company_filters_with_data(self):
-        expected_out = {"company.sector": ["'Application'"]}
+        self.assertEqual(company.get("revenue"), label)
+        self.mock_profile_range.get_profile_ranges.assert_called()
 
-        filters_out = self.comparison_service_instance.add_company_filters(
-            sector=["Application"]
+    def test_remove_base_metrics(self):
+        company = self.company.copy()
+        company["actuals_revenue"] = 30
+
+        self.comparison_service_instance.remove_base_metrics(company)
+
+        self.assertEqual(company, self.company)
+
+    def test_calculate_metrics(self):
+        company = self.scenarios.copy()
+        expected_company = self.scenarios.copy()
+        for key in self.metrics:
+            expected_company[key] = self.metrics[key]
+
+        self.comparison_service_instance.calculate_metrics(company)
+
+        self.assertEqual(company, expected_company)
+
+    @parameterized.expand(
+        [[[], "0123-xxxx", "$30-<50 million"], [["0123456"], "Company Test", 40]]
+    )
+    def test_anonymized_company(self, allowed_companies, name, revenue):
+        company = self.company.copy()
+        self.mock_profile_range.get_profile_ranges.return_value = [self.range]
+
+        self.comparison_service_instance.anonymized_company(company, allowed_companies)
+
+        self.assertEqual(company.get("name"), name)
+
+    def test_get_rule_of_40(self):
+        company = self.company.copy()
+        company.update(self.metrics)
+
+        rule_of_40 = self.comparison_service_instance.get_rule_of_40(company)
+
+        self.assertEqual(rule_of_40, self.rule_of_40)
+
+    def test_get_comparison_vs_data_with_access(self):
+        data = dict()
+        company = self.company.copy()
+        expected_company = self.company.copy()
+        company.update(self.scenarios)
+        expected_company.update(self.metrics)
+        data[company["id"]] = company
+
+        rule_of_40 = self.comparison_service_instance.get_comparison_vs_data(data, True)
+
+        self.assertEqual(rule_of_40, [self.rule_of_40])
+        self.assertEqual(data[company["id"]], expected_company)
+
+    def test_get_comparison_vs_data_without_access(self):
+        company = self.company.copy()
+        company.update(self.scenarios)
+        data = {company["id"]: company}
+        expected_company = self.company.copy()
+        expected_company.update(self.metrics)
+        expected_company["revenue"] = self.range["label"]
+        expected_company["name"] = "0123-xxxx"
+        self.mock_profile_range.get_profile_ranges.return_value = [self.range]
+
+        rule_of_40 = self.comparison_service_instance.get_comparison_vs_data(
+            data, False
         )
 
-        self.assertEqual(filters_out, expected_out)
+        self.assertEqual(rule_of_40, [self.rule_of_40])
+        self.assertEqual(data[company["id"]], expected_company)
 
-    def test_remove_revenue_without_permissions(self):
-        self.company_anonymization.companies = ["2"]
-        data = {"id": "1", "size_cohort": "100+", "revenue": 102}
-        expected_out = {"id": "1", "size_cohort": "100+", "revenue": "100+"}
-
-        self.comparison_service_instance.remove_revenue([data])
-
-        self.assertEqual([data], [expected_out])
-
-    def test_remove_revenue_without_revenue_value(self):
-        data = {"size_cohort": "100+"}
-        expected_out = {"size_cohort": "100+", "revenue": "NaN"}
-
-        self.comparison_service_instance.remove_revenue([data])
-
-        self.assertEqual([data], [expected_out])
-
-    def test_get_company_success(self):
-        expected_out = {"sector": "Test"}
-        self.mock_response_query_sql(expected_out)
-
-        get_company_out = self.comparison_service_instance.get_company("id")
-
-        self.assertEqual(get_company_out, expected_out)
-        self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_company_failed(self):
-        self.comparison_service_instance.session.execute.side_effect = Exception(
-            "error"
-        )
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.comparison_service_instance.get_company("1")
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_comparison_metric_with_acces_success(self):
-        self.mock_response_list_query_sql([self.company])
-
-        get_peers_comparison_metric_out = (
-            self.comparison_service_instance.get_peers_comparison_metric(
-                {"metric": "growth", "scenario": "Actuals", "alias": "growth"}, {}, True
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_metric_out, [self.company])
-        self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_comparison_metric_without_acces_success_should_return_anonymized_data(
-        self,
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
+    )
+    def test_get_peers_comparison_from_main(
+        self, mock_get_metric_by_scenario, mock_set_company_permissions
     ):
-        self.mock_response_list_query_sql([self.company])
-        company_anonymized = self.company.copy()
-        company_anonymized["name"] = "{id}-xxxx".format(
-            id=company_anonymized["id"][0:4]
+        company = self.company.copy()
+        expected_company = self.company.copy()
+        expected_company.update(self.metrics)
+        company.update(self.scenarios)
+        self.mock_base_metric_results({company["id"]: company})
+
+        comparison = self.comparison_service_instance.get_peers_comparison(
+            None, "user@email.com", 2020, True, True
         )
 
-        get_peers_comparison_metric_out = (
-            self.comparison_service_instance.get_peers_comparison_metric(
-                {"metric": "growth", "scenario": "Actuals", "alias": "growth"},
-                {},
-                False,
-            )
+        self.assertEqual(
+            comparison,
+            {
+                "company_comparison_data": {},
+                "peers_comparison_data": [expected_company],
+                "rule_of_40": [self.rule_of_40],
+            },
+        )
+        mock_get_metric_by_scenario.assert_called()
+        mock_set_company_permissions.assert_called()
+
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
+    )
+    def test_get_peers_comparison(
+        self, mock_get_metric_by_scenario, mock_set_company_permissions
+    ):
+        company = self.company.copy()
+        expected_company = self.company.copy()
+        expected_company.update(self.metrics)
+        company.update(self.scenarios)
+        self.mock_base_metric_results({company["id"]: company})
+
+        comparison = self.comparison_service_instance.get_peers_comparison(
+            company["id"], "user@email.com", 2020, False, True
         )
 
-        self.assertEqual(get_peers_comparison_metric_out, [company_anonymized])
-        self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_comparison_metric_failed(self):
-        self.comparison_service_instance.session.execute.side_effect = Exception(
-            "error"
+        self.assertEqual(
+            comparison,
+            {
+                "company_comparison_data": expected_company,
+                "peers_comparison_data": [],
+                "rule_of_40": [self.rule_of_40],
+            },
         )
+        mock_get_metric_by_scenario.assert_called()
+        mock_set_company_permissions.assert_called()
 
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    @mock.patch(
+        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
+    )
+    def test_get_peers_comparison_fail(
+        self, mock_get_metric_by_scenario, mock_set_company_permissions
+    ):
+        mock_get_metric_by_scenario.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.comparison_service_instance.get_peers_comparison_metric(
-                    {"metric": "growth", "scenario": "Actuals", "alias": "growth"},
-                    {},
-                    True,
-                )
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_peers_comparison_data_success(self):
-        self.mock_response_list_query_sql([self.company])
-        self.mock_proccess_comparison_results({"1": self.company})
-
-        get_peers_comparison_data_out = (
-            self.comparison_service_instance.get_peers_comparison_data(
-                "1", [], [], [], [], [], "2020", True
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_data_out, {"1": self.company})
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
-
-    def test_get_peers_comparison_data_wihout_access_success(self):
-        self.mock_response_list_query_sql([self.company])
-        company_anonymized = self.company.copy()
-        company_anonymized["name"] = "{id}-xxxx".format(
-            id=company_anonymized["id"][0:4]
-        )
-        self.mock_proccess_comparison_results({"1": company_anonymized})
-
-        get_peers_comparison_data_out = (
-            self.comparison_service_instance.get_peers_comparison_data(
-                "1", [], [], [], [], [], "2020", False
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_data_out, {"1": company_anonymized})
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
-
-    def test_get_peers_comparison_data_with_empty_company_id(self):
-        self.mock_response_list_query_sql([])
-        self.mock_proccess_comparison_results(dict())
-
-        get_peers_comparison_data_out = (
-            self.comparison_service_instance.get_peers_comparison_data(
-                " ", [], [], [], [], [], "2020", True
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_data_out, dict())
-        self.comparison_service_instance.session.execute.assert_not_called()
-
-    def test_get_peers_comparison_data_failed(self):
-        self.comparison_service_instance.session.execute.side_effect = Exception(
-            "error"
-        )
-
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.comparison_service_instance.get_peers_comparison_data(
-                    "1", [], [], [], [], [], "2020", True
-                )
-            )
-
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.comparison_service_instance.session.execute.assert_called_once()
-
-    def test_get_rank_success(self):
-        company_data = self.company.copy()
-        company_data.update(self.metric_value)
-        expected_out = {"growth": "2 of 2", "revenue": "1 of 2"}
-
-        get_rank_out = self.comparison_service_instance.get_rank(
-            company_data, [self.comparison]
-        )
-
-        self.assertEqual(get_rank_out, expected_out)
-
-    def test_get_rank_success_with_empty_company_data(self):
-        get_rank_out = self.comparison_service_instance.get_rank(
-            dict(), [self.comparison]
-        )
-
-        self.assertEqual(get_rank_out, dict())
-
-    def test_get_peers_comparison_success(self):
-        self.mock_response_query_sql(self.company)
-        self.mock_response_list_query_sql([self.company, self.comparison])
-        self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
-        peers = self.comparison.copy()
-        expected_out = {
-            "company_comparison_data": self.company,
-            "rank": {},
-            "peers_comparison_data": [peers],
-        }
-
-        get_peers_comparison_out = (
             self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], [], "2020", False, True
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_out, expected_out)
-        self.assertEqual(self.comparison_service_instance.session.execute.call_count, 6)
-
-    def test_get_peers_comparison_success_with_no_company_data(self):
-        self.mock_response_list_query_sql([self.company, self.comparison])
-        self.mock_proccess_comparison_results({"1": self.company, "2": self.comparison})
-        peers = self.comparison.copy()
-        peers["revenue"] = peers["size_cohort"]
-        expected_out = {
-            "company_comparison_data": dict(),
-            "rank": dict(),
-            "peers_comparison_data": [self.company, peers],
-        }
-
-        get_peers_comparison_out = (
-            self.comparison_service_instance.get_peers_comparison(
-                "1", [], [], [], [], [], "2020", True, False
-            )
-        )
-
-        self.assertEqual(get_peers_comparison_out, expected_out)
-
-    def test_get_peers_comparison_failed(self):
-        self.comparison_service_instance.session.execute.side_effect = Exception(
-            "error"
-        )
-
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(
-                self.comparison_service_instance.get_peers_comparison(
-                    "1", [], [], [], [], [], "2020", True, True
-                )
+                "123", "user@email.com", 2020, True, True
             )
 
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.comparison_service_instance.session.execute.assert_called_once()
+        self.assertEqual(str(context.exception), "error")
+        mock_get_metric_by_scenario.assert_called()
+        mock_set_company_permissions.assert_called()

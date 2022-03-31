@@ -1,309 +1,127 @@
 class CompanyReportvsPeersService:
     def __init__(
-        self, session, query_builder, logger, response_sql, company_anonymization
+        self, logger, calculator, repository, profile_range, company_anonymization
     ) -> None:
-        self.session = session
-        self.query_builder = query_builder
-        self.response_sql = response_sql
-        self.company_anonymization = company_anonymization
         self.logger = logger
-        self.metric_table = "metric"
-        self.company_table = "company"
-        self.scenario_table = "financial_scenario"
-        self.scenario_metric_table = "scenario_metric"
-        self.time_period_table = "time_period"
+        self.calculator = calculator
+        self.repository = repository
+        self.profile_range = profile_range
+        self.company_anonymization = company_anonymization
 
-    def add_company_filters(self, **kwargs) -> dict:
-        filters = dict()
-        for k, v in kwargs.items():
-            values = [f"'{element}'" for element in v if element and element.strip()]
-            filters[f"{self.company_table}.{k}"] = values
-        return filters
-
-    def get_description(self, company_id: str, access) -> dict:
+    def get_metric_range(self, metric: float, profile_type: str) -> str:
+        if not self.calculator.is_valid_number(metric):
+            return "NA"
         try:
-            if company_id and company_id.strip():
-                query = (
-                    self.query_builder.add_table_name(self.company_table)
-                    .add_select_conditions(
-                        [
-                            f"{self.company_table}.id",
-                            f"{self.company_table}.name",
-                            f"{self.company_table}.sector",
-                            f"{self.company_table}.vertical",
-                            f"{self.company_table}.inves_profile_name",
-                            f"{self.company_table}.size_cohort",
-                            f"{self.company_table}.margin_group",
-                        ]
-                    )
-                    .add_sql_where_equal_condition(
-                        {
-                            f"{self.company_table}.id": f"'{company_id}'",
-                            f"{self.company_table}.is_public": True,
-                        }
-                    )
-                    .build()
-                    .get_query()
+            ranges = self.profile_range.get_profile_ranges(profile_type)
+            metric_ranges = list(
+                filter(
+                    lambda range: self.profile_range.verify_range(range, metric),
+                    ranges,
                 )
-
-                result = self.session.execute(query).fetchall()
-                self.session.commit()
-                company_description = self.response_sql.process_query_result(result)
-                if access:
-                    return company_description
-                else:
-                    return self.company_anonymization.anonymize_company_description(
-                        company_description, "id"
-                    )
-
+            )
+            return metric_ranges[0].get("label")
         except Exception as error:
             self.logger.info(error)
-            raise error
+            return "NA"
 
-    def get_metric_by_scenario(
-        self,
-        company_id: str,
-        scenario_name: str,
-        metric: str,
-        value_alias: str,
+    def get_profiles(self, company: dict) -> dict:
+        actuals_revenue, prior_revenue = tuple(
+            self.get_most_recent_revenues_value(company)
+        )
+
+        growth = self.calculator.calculate_growth_rate(actuals_revenue, prior_revenue)
+        revenue = self.calculator.calculate_base_metric(actuals_revenue)
+        size_range = self.get_metric_range(revenue, "size profile")
+        growth_range = self.get_metric_range(growth, "growth profile")
+        return {"size_cohort": size_range, "margin_group": growth_range}
+
+    def get_most_recent_revenues_value(self, company: dict) -> list:
+        company_id = company.get("id")
+        result = self.repository.get_most_recents_revenue(company_id)
+        result.extend([{}, {}])
+        revenues = result[:2]
+        return [revenue.get("value", "NA") for revenue in revenues]
+
+    def get_description(self, company: dict) -> dict:
+        params = ["id", "name", "sector", "vertical", "inves_profile_name"]
+        description = dict()
+
+        if not company:
+            return description
+
+        for param in params:
+            description[param] = company.get(param)
+
+        profiles = self.get_profiles(company)
+        description.update(profiles)
+        return description
+
+    def get_financial_profile(self, company: dict) -> dict:
+        financial_profile = dict()
+        if not company:
+            return financial_profile
+
+        actuals_revenue = company.get("actuals_revenue")
+        actuals_ebitda = company.get("actuals_ebitda")
+        prior_revenue = company.get("prior_actuals_revenue")
+
+        annual_rule_of_40 = self.calculator.calculate_rule_of_40(
+            actuals_revenue, prior_revenue, actuals_ebitda
+        )
+        forward_budgeted_revenue_growth = self.calculator.calculate_growth_rate(
+            company.get("next_budget_revenue"),
+            company.get("budget_revenue"),
+        )
+        forward_budgeted_ebitda_growth = self.calculator.calculate_growth_rate(
+            company.get("next_budget_ebitda"),
+            company.get("budget_ebitda"),
+        )
+        forward_budgeted_rule_of_40 = self.calculator.calculate_rule_of_40(
+            company.get("next_budget_revenue"),
+            company.get("budget_revenue"),
+            company.get("next_budget_ebitda"),
+        )
+
+        financial_profile = {
+            "annual_revenue": self.calculator.calculate_base_metric(actuals_revenue),
+            "annual_ebitda": self.calculator.calculate_base_metric(actuals_ebitda),
+            "annual_rule_of_40": annual_rule_of_40,
+            "forward_revenue_growth": forward_budgeted_revenue_growth,
+            "forward_ebitda_growth": forward_budgeted_ebitda_growth,
+            "forward_rule_of_40": forward_budgeted_rule_of_40,
+        }
+        return financial_profile
+
+    def has_permissions(self, company_id: str) -> bool:
+        allowed_companies = self.company_anonymization.companies
+        return company_id in allowed_companies
+
+    def get_company_report(
+        self, company_id: str, username: str, year: int, access: bool
     ) -> dict:
         try:
-            where_condition = {
-                f"{self.company_table}.id": f"'{company_id}'",
-                f"{self.scenario_table}.name": f"'{scenario_name}'",
-                f"{self.metric_table}.name": f"'{metric}'",
-                f"{self.company_table}.is_public": True,
-            }
-
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions([f"{self.metric_table}.value as {value_alias}"])
-                .add_join_clause(
-                    {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.time_period_table}": {
-                            "from": f"{self.time_period_table}.id",
-                            "to": f"{self.metric_table}.period_id",
-                        }
-                    }
-                )
-                .add_sql_where_equal_condition(where_condition)
-                .add_sql_order_by_condition(
-                    ["time_period.start_at"], self.query_builder.Order.DESC
-                )
-                .add_sql_limit_condition(1)
-                .build()
-                .get_query()
+            self.company_anonymization.set_company_permissions(username)
+            user_has_permissions = (
+                self.has_permissions(company_id) if not access else access
             )
-            result = self.session.execute(query).fetchall()
-            self.session.commit()
-            return self.response_sql.process_query_result(result)
-
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_company_financial_profile(
-        self,
-        company_id: str,
-        year: str,
-    ) -> dict:
-        try:
-            next_year = int(year) + 1
-            financial_profile = dict()
-            metrics = [
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Revenue",
-                    "alias": "annual_revenue",
-                },
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Ebitda",
-                    "alias": "annual_ebitda",
-                },
-                {
-                    "scenario": f"Actuals-{year}",
-                    "metric": "Rule of 40",
-                    "alias": "anual_rule_of_40",
-                },
-                {
-                    "scenario": f"Budgeted growth-{next_year}",
-                    "metric": "Revenue",
-                    "alias": "current_revenue_growth",
-                },
-                {
-                    "scenario": f"Budgeted growth-{next_year}",
-                    "metric": "Ebitda",
-                    "alias": "current_ebitda_margin",
-                },
-                {
-                    "scenario": f"Budget-{next_year}",
-                    "metric": "Rule of 40",
-                    "alias": "current_rule_of_40",
-                },
-            ]
-            for metric in metrics:
-                metric_average = self.get_metric_by_scenario(
-                    company_id,
-                    metric.get("scenario"),
-                    metric.get("metric"),
-                    metric.get("alias"),
-                )
-
-                if metric_average:
-                    financial_profile.update(metric_average)
-            return self.response_sql.process_query_result([financial_profile])
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_rule_of_40(
-        self,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        access: bool,
-    ) -> list:
-        def get_case_statement(scenario: str, metric: str, alias: str) -> str:
-            return """
-                SUM(
-                    CASE WHEN {scenario_table}.name = '{scenario}'
-                    AND {metric_table}.name = '{metric}'
-                    THEN {metric_table}.value ELSE NULL END
-                ) AS {alias}
-            """.format(
-                scenario=scenario,
-                metric=metric,
-                alias=alias,
-                scenario_table=self.scenario_table,
-                metric_table=self.metric_table,
-            )
-
-        try:
-            columns = [
-                f"{self.scenario_table}.{self.company_table}_id",
-                f"{self.company_table}.name",
-                get_case_statement(
-                    f"Actual growth-{year}", "Revenue", "revenue_growth_rate"
-                ),
-                get_case_statement(f"Actual margin-{year}", "Ebitda", "ebitda_margin"),
-                get_case_statement(f"Actuals-{year}", "Revenue", "revenue"),
-            ]
-
-            where_conditions = self.add_company_filters(
-                sector=sectors,
-                vertical=verticals,
-                inves_profile_name=investor_profile,
-                margin_group=growth_profile,
-                size_cohort=size,
-            )
-            where_conditions.update({f"{self.company_table}.is_public": True})
-
-            query = (
-                self.query_builder.add_table_name(self.company_table)
-                .add_select_conditions(columns)
-                .add_join_clause(
-                    {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
-                        }
-                    }
-                )
-                .add_join_clause(
-                    {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
-                        }
-                    }
-                )
-                .add_sql_where_equal_condition(where_conditions)
-                .add_sql_group_by_condition(
-                    [
-                        f"{self.scenario_table}.{self.company_table}_id",
-                        f"{self.company_table}.name",
-                    ]
-                )
-                .build()
-                .get_query()
-            )
-            results = self.session.execute(query).fetchall()
-            self.session.commit()
-            rule_of_40 = self.response_sql.process_rule_of_40_chart_results(results)
-            if access:
-                return rule_of_40
-            else:
-                return self.company_anonymization.anonymize_companies_list(
-                    rule_of_40, "company_id"
-                )
-
-        except Exception as error:
-            self.logger.info(error)
-            raise error
-
-    def get_company_report_vs_peers(
-        self,
-        company_id: str,
-        sectors: list,
-        verticals: list,
-        investor_profile: list,
-        growth_profile: list,
-        size: list,
-        year: str,
-        access: bool,
-    ) -> dict:
-        try:
-            company_description = self.get_description(company_id, access)
-            if not company_description:
+            if not user_has_permissions:
                 return dict()
 
-            company_financial_profile = self.get_company_financial_profile(
-                company_id, year
-            )
-            rule_of_40 = self.get_rule_of_40(
-                sectors, verticals, investor_profile, growth_profile, size, year, access
+            data = self.repository.get_base_metrics(
+                year=year,
+                need_all=True,
+                company_id=company_id,
+                need_prior_year=True,
+                need_next_year=True,
             )
 
+            company = data.get(company_id, dict())
+            if not company:
+                company = self.repository.get_company_description(company_id)
+
             return {
-                "description": company_description,
-                "financial_profile": company_financial_profile,
-                "rule_of_40": rule_of_40,
+                "description": self.get_description(company),
+                "financial_profile": self.get_financial_profile(company),
             }
         except Exception as error:
             self.logger.info(error)

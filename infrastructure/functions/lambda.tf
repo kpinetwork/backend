@@ -48,6 +48,7 @@ resource "aws_lambda_function" "get_all_companies_lambda_function" {
   s3_key           = var.object_bucket_references.get_all_companies_function_bucket.key
   function_name    = "${var.environment}_${var.lambdas_names.get_all_companies_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_all_companies_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -78,6 +79,7 @@ resource "aws_lambda_function" "get_all_public_companies_lambda_function" {
   s3_key           = var.object_bucket_references.get_all_public_companies_function_bucket.key
   function_name    = "${var.environment}_${var.lambdas_names.get_all_public_companies_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_all_public_companies_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -149,6 +151,7 @@ resource "aws_lambda_function" "get_universe_overview_lambda_function" {
   s3_key = var.object_bucket_references.get_universe_overview_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_universe_overview_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_universe_overview_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -182,6 +185,7 @@ resource "aws_lambda_function" "get_company_report_vs_peers_lambda_function" {
   s3_key = var.object_bucket_references.get_company_report_vs_peers_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_company_report_vs_peers_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_company_report_vs_peers_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -285,6 +289,7 @@ resource "aws_lambda_function" "add_user_to_customer_group_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.add_user_to_customer_group_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.add_user_to_customer_group_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
@@ -334,6 +339,7 @@ resource "aws_lambda_function" "verify_users_with_same_email_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.verify_users_with_same_email_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.verify_users_with_same_email_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
@@ -356,6 +362,7 @@ resource "aws_lambda_function" "get_users_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.get_users_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_users_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
@@ -380,6 +387,7 @@ resource "aws_lambda_function" "get_roles_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.get_roles_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_roles_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   
   depends_on = [
@@ -437,6 +445,7 @@ resource "aws_lambda_function" "change_user_role_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.change_user_role_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.change_user_role_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   depends_on = [
     aws_lambda_layer_version.db_lambda_layer
@@ -470,6 +479,7 @@ resource "aws_lambda_function" "assign_company_permissions_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.assign_company_permissions_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.assign_company_permissions_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   
   depends_on = [
@@ -477,7 +487,7 @@ resource "aws_lambda_function" "assign_company_permissions_lambda_function" {
   ]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -503,6 +513,7 @@ resource "aws_lambda_function" "get_company_permissions_lambda_function" {
   function_name = "${var.environment}_${var.lambdas_names.get_company_permissions_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_company_permissions_function_bucket.etag)
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+  timeout = 100
 
   
   depends_on = [
@@ -510,7 +521,7 @@ resource "aws_lambda_function" "get_company_permissions_lambda_function" {
   ]
 
   vpc_config {
-    subnet_ids         = [var.public_subnet_a_id]
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
     security_group_ids = [var.security_group_id]
   }
 
@@ -535,6 +546,7 @@ resource "aws_lambda_function" "change_company_publicly_lambda_function" {
   s3_key = var.object_bucket_references.change_company_publicly_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.change_company_publicly_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.change_company_publicly_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -549,6 +561,9 @@ resource "aws_lambda_function" "change_company_publicly_lambda_function" {
 
   environment {
     variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
       DB_HOST = var.db_host
       DB_NAME = var.db_name
       DB_USERNAME = var.db_username

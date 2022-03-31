@@ -224,6 +224,11 @@ resource "aws_api_gateway_method" "get_users_method" {
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+
+    request_parameters = {
+    "method.request.querystring.token" = false
+    "method.request.querystring.limit" = false
+  }
 }
 
 resource "aws_api_gateway_method" "get_user_details_method" {
