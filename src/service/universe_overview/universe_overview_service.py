@@ -1,4 +1,3 @@
-from itertools import groupby
 from statistics import mean
 
 
@@ -121,9 +120,13 @@ class UniverseOverviewService:
 
     def get_companies_by_size_cohort(self, data: list) -> dict:
         companies_by_size = dict()
-        for key, group in groupby(data, key=lambda x: x.get("size_cohort")):
-            if key != "NA":
-                companies_by_size[key] = list(group)
+        for company in data:
+            size = company.get("size_cohort")
+            valid_size = size and size != "NA"
+            if valid_size and size not in companies_by_size:
+                companies_by_size[size] = [company]
+            elif valid_size and size in companies_by_size:
+                companies_by_size[size].append(company)
         return companies_by_size
 
     def get_count_by_size(self, data: dict) -> list:

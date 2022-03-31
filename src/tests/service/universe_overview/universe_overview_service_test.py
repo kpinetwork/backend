@@ -119,11 +119,14 @@ class TestUniverseOverview(TestCase):
     def test_get_companies_by_size_cohort(self):
         company = self.scenarios.copy()
         company.update(self.metrics)
+        secondary_company = company.copy()
 
-        expected_company_by_size = {company["size_cohort"]: [company.copy()]}
+        expected_company_by_size = {
+            company["size_cohort"]: [company.copy(), secondary_company]
+        }
 
         companies_by_size = self.overview_instance.get_companies_by_size_cohort(
-            [company]
+            [company, secondary_company]
         )
 
         self.assertEqual(companies_by_size, expected_company_by_size)
