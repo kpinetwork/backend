@@ -78,14 +78,14 @@ class ComparisonvsPeersService:
             ),
         )
 
-    def get_rule_of_40(self, company: dict) -> dict:
+    def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
         no_data = "NA"
         return {
             "id": company["id"],
             "name": company["name"],
             "revenue_growth_rate": company.get("growth", no_data),
             "ebitda_margin": company.get("ebitda_margin", no_data),
-            "revenue": company.get("revenue", no_data),
+            "revenue": self.calculator.calculate_base_metric(company_revenue),
         }
 
     def get_comparison_vs_data(self, data: dict, access: bool) -> list:
@@ -94,11 +94,14 @@ class ComparisonvsPeersService:
 
         for id in data:
             company_data = data[id]
+            company_revenue = company_data.get("actuals_revenue")
             self.calculate_metrics(company_data)
-            rule_of_40.append(self.get_rule_of_40(company_data))
-            self.remove_base_metrics(company_data)
             if not access and id not in allowed_companies:
                 self.anonymized_company(company_data, allowed_companies)
+            company_rule_of_40 = self.get_rule_of_40(company_data, company_revenue)
+            if "NA" not in company_rule_of_40.values():
+                rule_of_40.append(company_rule_of_40)
+            self.remove_base_metrics(company_data)
 
         return rule_of_40
 
@@ -119,7 +122,7 @@ class ComparisonvsPeersService:
                 year=year,
                 need_all=True,
                 company_id=company_id,
-                need_prior_year=True,
+                need_actuals_prior_year=True,
                 need_next_year=False,
                 **conditions
             )

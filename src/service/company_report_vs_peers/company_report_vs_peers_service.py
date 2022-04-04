@@ -111,7 +111,7 @@ class CompanyReportvsPeersService:
                 year=year,
                 need_all=True,
                 company_id=company_id,
-                need_prior_year=True,
+                need_actuals_prior_year=True,
                 need_next_year=True,
             )
 

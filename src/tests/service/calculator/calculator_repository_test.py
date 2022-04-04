@@ -134,7 +134,7 @@ class TestCalculatorRepository(TestCase):
         self.mock_base_metric_results(data)
 
         response = self.repository.get_base_metrics(
-            2020, True, "0123456", True, True, inves_profile_name=[]
+            2020, True, "0123456", True, True, True, inves_profile_name=[]
         )
 
         self.assertEqual(response, data)
