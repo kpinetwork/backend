@@ -17,6 +17,7 @@ output "lambdas_invoke_arns" {
     "assign_company_permissions_lambda_function": aws_lambda_function.assign_company_permissions_lambda_function.invoke_arn
     "get_company_permissions_lambda_function": aws_lambda_function.get_company_permissions_lambda_function.invoke_arn
     "change_company_publicly_lambda_function": aws_lambda_function.change_company_publicly_lambda_function.invoke_arn
+    "upload_data_s3_trigger_lambda_function": aws_lambda_function.upload_data_s3_trigger_lambda_function.invoke_arn
   }
 }
 

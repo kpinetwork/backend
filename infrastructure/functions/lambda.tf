@@ -572,3 +572,28 @@ resource "aws_lambda_function" "change_company_publicly_lambda_function" {
   }
 }
 
+resource "aws_lambda_function" "upload_data_s3_trigger_lambda_function" {
+  role = var.lambdas_exec_roles_arn.upload_data_s3_trigger_exec_role_arn
+  handler = "upload_data_s3_trigger_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.upload_data_s3_trigger_function_bucket.bucket
+  s3_key = var.object_bucket_references.upload_data_s3_trigger_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.upload_data_s3_trigger_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.upload_data_s3_trigger_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      BUCKET_FILES = var.bucket_files
+      ENV          = var.environment
+    }
+  }
+}

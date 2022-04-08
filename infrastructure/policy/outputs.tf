@@ -19,6 +19,7 @@ output "lambdas_exec_roles_arn" {
       "assign_company_permissions_exec_role_arn": aws_iam_role.assign_company_permissions_lambda_exec_role.arn
       "get_company_permissions_exec_role_arn": aws_iam_role.get_company_permissions_lambda_exec_role.arn
       "change_company_publicly_exec_role_arn": aws_iam_role.change_company_publicly_lambda_exec_role.arn
+      "upload_data_s3_trigger_exec_role_arn": aws_iam_role.upload_data_s3_trigger_lambda_exec_role.arn
   }
 }
 

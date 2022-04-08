@@ -101,3 +101,8 @@ resource "aws_cloudwatch_log_group" "change_company_publicly_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.change_company_publicly_lambda_function}"
   retention_in_days = var.retention_days
 }
+
+resource "aws_cloudwatch_log_group" "upload_data_s3_trigger_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.upload_data_s3_trigger_lambda_function}"
+  retention_in_days = var.retention_days
+}
