@@ -147,9 +147,9 @@ resource "aws_s3_bucket_object" "get_all_public_companies_function_object" {
   etag = filemd5("${path.module}/../../dist/get_all_public_companies_handler.zip")
 }
 
-resource "aws_s3_bucket_object" "upload_data_s3_trigger_function_object" {
+resource "aws_s3_bucket_object" "upload_file_s3_function_object" {
   bucket = var.bucket_name
-  key = "${var.lambda_resource_name}/${var.environment}/upload_data_s3_trigger_handler.zip"
-  source = "${path.module}/../../dist/upload_data_s3_trigger_handler.zip"
-  etag = filemd5("${path.module}/../../dist/upload_data_s3_trigger_handler.zip")
+  key = "${var.lambda_resource_name}/${var.environment}/upload_file_s3_handler.zip"
+  source = "${path.module}/../../dist/upload_file_s3_handler.zip"
+  etag = filemd5("${path.module}/../../dist/upload_file_s3_handler.zip")
 }

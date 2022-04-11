@@ -226,10 +226,10 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/exceptions/base_exception.py
 
-  upload_data_s3_trigger_handler:
-    requirements: ./src/handlers/upload_data/requirements.txt
+  upload_file_s3_handler:
+    requirements: ./src/handlers/upload_file/requirements.txt
     include:
-    - ./src/handlers/upload_data/upload_data_s3_trigger_handler.py
+    - ./src/handlers/upload_file/upload_file_s3_handler.py
     - ./src/exceptions/base_exception.py
 
 layers:

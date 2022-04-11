@@ -83,9 +83,9 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_upload_data_s3_trigger_lambda_function": {
-      resource_path: aws_api_gateway_resource.upload_data_s3_trigger.path,
-      http_method: aws_api_gateway_method.upload_data_s3_trigger_method.http_method,
+    "apigw_upload_file_s3_lambda_function": {
+      resource_path: aws_api_gateway_resource.upload_file_s3.path,
+      http_method: aws_api_gateway_method.upload_file_s3_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

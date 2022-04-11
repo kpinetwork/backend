@@ -110,10 +110,10 @@ output "object_references" {
       bucket : aws_s3_bucket_object.get_all_public_companies_function_object.bucket
     }
 
-    "upload_data_s3_trigger_function_bucket" : {
-      etag : aws_s3_bucket_object.upload_data_s3_trigger_function_object.etag,
-      key : aws_s3_bucket_object.upload_data_s3_trigger_function_object.key,
-      bucket : aws_s3_bucket_object.upload_data_s3_trigger_function_object.bucket
+    "upload_file_s3_function_bucket" : {
+      etag : aws_s3_bucket_object.upload_file_s3_function_object.etag,
+      key : aws_s3_bucket_object.upload_file_s3_function_object.key,
+      bucket : aws_s3_bucket_object.upload_file_s3_function_object.bucket
     }
   }
 }
