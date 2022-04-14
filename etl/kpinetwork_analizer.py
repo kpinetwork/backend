@@ -1,50 +1,96 @@
 import sys
 import uuid
+import logging
 import datetime
-import re
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from pyspark.sql import SparkSession
 from awsglue.dynamicframe import DynamicFrame
-from pyspark.sql.types import DateType
+from pyspark.sql.types import (
+    DateType,
+    StructType,
+    StructField,
+    StringType,
+    BooleanType,
+    DoubleType,
+)
 
+logging.basicConfig()
+logger = logging.getLogger("logger")
+logger.setLevel(logging.WARNING)
 glueContext = GlueContext(SparkContext.getOrCreate())
 spark = SparkSession.builder.getOrCreate()
-df_schema_company = [
-    "id",
-    "name",
-    "sector",
-    "vertical",
-    "inves_profile_name",
-    "margin_group",
-    "from_date",
-    "fiscal_year",
-]
-df_schema_time_period = ["id", "start_at", "end_at"]
-df_schema_scenario = ["id", "name", "currency", "period_id", "type", "company_id"]
-df_schema_metric = [
-    "id",
-    "name",
-    "value",
-    "period_id",
-    "type",
-    "company_id",
-    "data_type",
-]
-df_schema_currency = ["id", "metric_id", "currency_iso_code"]
-df_schema_metric_scenario = ["id", "metric_id", "scenario_id"]
-df_schema_company_location = ["id", "company_id", "country", "city", "address", "geo"]
-growth_types = "Medium|Hyper|Negative|Low|High"
+
+time_period_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("start_at", StringType(), False),
+        StructField("end_at", StringType(), False),
+    ]
+)
+
+scenario_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("name", StringType(), False),
+        StructField("currency", StringType(), False),
+        StructField("type", StringType(), False),
+        StructField("period_id", StringType(), False),
+        StructField("company_id", StringType(), False),
+    ]
+)
+
+metric_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("name", StringType(), False),
+        StructField("value", DoubleType(), False),
+        StructField("type", StringType(), False),
+        StructField("data_type", StringType(), False),
+        StructField("period_id", StringType(), False),
+        StructField("company_id", StringType(), False),
+    ]
+)
+
+currency_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("currency_iso_code", StringType(), False),
+        StructField("metric_id", StringType(), False),
+    ]
+)
+
+scenario_metric_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("metric_id", StringType(), False),
+        StructField("scenario_id", StringType(), False),
+    ]
+)
+
+company_schema = StructType(
+    [
+        StructField("id", StringType(), False),
+        StructField("name", StringType(), False),
+        StructField("sector", StringType(), False),
+        StructField("vertical", StringType(), True),
+        StructField("from_date", StringType(), False),
+        StructField("fiscal_year", StringType(), False),
+        StructField("inves_profile_name", StringType(), True),
+        StructField("is_public", BooleanType(), False),
+    ]
+)
 
 
-def save_database(env, db_table, dataframe):
+def save_to_database(env, db_table, dataframe):
     database = "kpinetworkdb"
     if env == "demo":
         database = "demokpinetworkdb"
 
-    print("==========Save in Database===============================")
-    print("env: {} database: {} db_table: {}".format(env, database, db_table))
+    logger.warning("==========Save in Database===============================")
+    logger.warning("env: {} database: {} db_table: {}".format(env, database, db_table))
+
     dynamic_frame = DynamicFrame.fromDF(dataframe, glueContext, db_table)
     glueContext.write_dynamic_frame.from_jdbc_conf(
         dynamic_frame,
@@ -53,301 +99,215 @@ def save_database(env, db_table, dataframe):
     )
 
 
-def get_scenarios_limits(df_main_headers):
-    scenarios = []
-    for index in range(11, len(df_main_headers), 1):
-        header = df_main_headers[index]
-        next_header = ""
-        if index < len(df_main_headers) - 1:
-            next_header = df_main_headers[index + 1]
-        if ":" in header:
-            start = header.find(":") + 1
-            scenario_name = header[start:]
-            start_position = index
-        if ":" in next_header or index == len(df_main_headers) - 1:
-            end_position = index
-            header_info = (scenario_name, start_position, end_position)
-            scenarios.append(header_info)
-            start_position = 0
-            scenario_name = ""
-    df_scenario = spark.createDataFrame(scenarios, ["name", "start", "end"])
-    df_scenario.show()
-    return df_scenario
+def get_data_from_dataframe(dataframe):
+    headers = dataframe.columns
+    data = dataframe.collect()
+    return (headers, data)
 
 
-def get_metrics_limits(data_collect_scenario, data_collect):
-    metrics = []
-    for row in data_collect_scenario:
-        start_position_metric = 0
-        metric_name = ""
-        for index in range(row["start"], row["end"] + 1, 1):
-            header = ""
-            if data_collect[0][index] is not None:
-                header = data_collect[0][index]
-            next_header = ""
-            if index < row["end"]:
-                if data_collect[0][index + 1] is not None:
-                    next_header = data_collect[0][index + 1]
-            if ":" in header:
-                start = header.find(":") + 1
-                metric_name = header[start:]
-                start_position_metric = index
-            if ":" in next_header or index == row["end"]:
-                end_position = index
-                header_info = (
-                    row["name"],
-                    metric_name,
-                    start_position_metric,
-                    end_position,
-                )
-                metrics.append(header_info)
-                metric_name = ""
-    df_metrics = spark.createDataFrame(
-        metrics, ["scene", "name", "start", "end"]  # add your column names here
-    )
-    df_metrics.show()
-    return df_metrics
+def get_index_limits(row):
+    return [i for i in range(0, len(row)) if row[i] and row[i].startswith(":")]
 
 
-def get_company_information(data_collect, index):
-    company = data_collect[index][0]
-    sector = data_collect[index][6]
-    vertical = data_collect[index][7]
-    investor = data_collect[index][8]
-    margin_group_target = data_collect[index][9]
-    margin_group = re.findall(growth_types, margin_group_target, flags=re.IGNORECASE)
+def get_row_value(row, column):
+    if column in row:
+        return row[column]
+    return None
+
+
+def is_valid_value(value):
+    return value is not None and value.strip()
+
+
+def get_metric_value(value):
+    try:
+        return float(value)
+    except Exception as error:
+        logger.warning(error)
+        return None
+
+
+def get_name(row, index):
+    cell = row[index]
+    return cell.split(":")[1]
+
+
+def get_limits(limits, count):
+    index_limits = []
+    for index in range(len(limits)):
+        max_index = len(limits) - 1
+        next_index = count if max_index == index else limits[index + 1]
+        index_limits.append((limits[index], next_index))
+
+    return index_limits
+
+
+def get_company_description(row):
+    company_id = str(uuid.uuid4())
+    name = get_row_value(row, "Name")
+    sector = get_row_value(row, "Sector")
+    vertical = get_row_value(row, "Vertical")
+    inves_profile = get_row_value(row, "Investor proflie")
     now = datetime.datetime.utcnow()
     from_date = now.strftime("%Y-%m-%d")
     fiscal_year = now.strftime("%Y-%m-%d")
-    company_id = str(uuid.uuid4())
 
-    return (
+    return [
         company_id,
-        company,
+        name,
         sector,
         vertical,
-        investor,
-        margin_group[0],
         from_date,
         fiscal_year,
+        inves_profile,
+        True,
+    ]
+
+
+def get_time_period(row, start, end):
+    return [str(uuid.uuid4()), start, end]
+
+
+def get_scenario(row, name, scenario_type, period, company):
+    return [str(uuid.uuid4()), name, "USD", scenario_type, period, company]
+
+
+def get_metric(row, name, value, period, company):
+    return [str(uuid.uuid4()), name, value, "standard", "currency", period, company]
+
+
+def get_time_period_str(year):
+    start = "{}-01-01".format(year)
+    end = "{}-12-31".format(year)
+    return (start, end)
+
+
+def get_scenario_data(row, year, scenario_type, company, scenarios, periods):
+
+    scenario_name = "{}-{}".format(scenario_type, year)
+    start_time, end_time = get_time_period_str(year)
+    time_period = []
+    scenario = []
+
+    scenario_created = list(
+        filter(lambda scenario: scenario[1] == scenario_name, scenarios)
     )
 
-
-# TO DO implement this function when location information is available in csv file
-def get_company_geo_information(data_collect, index, company_id):
-    country = str(data_collect[index][2] or "")
-    city = str(data_collect[index][3] or "")
-    address = str(data_collect[index][4] or "")
-    geo = str(data_collect[index][5] or "")
-    location_id = str(uuid.uuid4())
-
-    return location_id, company_id, country, city, address, geo
-
-
-def check_time_periods_scenarios(scenarios_time_periods, scenario_name):
-    time_period_id = ""
-    scenario_id = ""
-    create_scenario = True
-    create_period = True
-    if scenario_name in scenarios_time_periods:
-        time_period_id = scenarios_time_periods[scenario_name]["idTimePeriod"]
-        scenario_id = scenarios_time_periods[scenario_name]["idScene"]
-        create_scenario = False
-        create_period = False
+    if len(scenario_created) > 0:
+        scenario = scenario_created[0]
+        time_period.append(scenario[4])
 
     else:
-        scenarios_time_periods.update(
-            {
-                scenario_name: {
-                    "idTimePeriod": str(uuid.uuid4()),
-                    "idScene": str(uuid.uuid4()),
-                }
-            }
+        time_period = get_time_period(row, start_time, end_time)
+        periods.append(time_period)
+
+        scenario = get_scenario(
+            row, scenario_name, scenario_type, time_period[0], company[0]
         )
-        time_period_id = scenarios_time_periods[scenario_name]["idTimePeriod"]
-        scenario_id = scenarios_time_periods[scenario_name]["idScene"]
-    return (
-        time_period_id,
-        scenario_id,
-        create_scenario,
-        create_period,
-        scenarios_time_periods,
-    )
+        scenarios.append(scenario)
+
+    return (time_period, scenario)
 
 
-def get_metric_value_parsed(metric_value, data_type, data_type_checked):
-    if "." in metric_value:
-        metric_value = float(metric_value)
-        if not data_type_checked:
-            data_type = "decimal"
-    else:
-        metric_value = int(metric_value)
-        if not data_type_checked:
-            data_type = "integer"
-    return data_type, metric_value
+def get_metric_data(row, metric_name, period_id, scenario_id, company_id, value):
+    metric = get_metric(row, metric_name, value, period_id, company_id)
+
+    currency_metric = [str(uuid.uuid4()), "USD", metric[0]]
+
+    scenario_metric = [str(uuid.uuid4()), metric[0], scenario_id]
+
+    return (metric, currency_metric, scenario_metric)
 
 
-def get_data_type_metric(metric_value, metric_id, currency, currency_data):
-    data_type = "integer"
-    data_type_checked = False
-    # Check metric type
-    if "$" in metric_value:
-        data_type = "currency"
-        currency_id = str(uuid.uuid4())
-        currency_data.append((currency_id, metric_id, currency))
-        data_type_checked = True
-    if "%" in metric_value:
-        data_type = "percentage"
-        data_type_checked = True
-
-    # Replace special characters to parse string to integer or double
-    metric_value = metric_value.replace("$", "").replace("%", "")
-
-    data_type, metric_value = get_metric_value_parsed(
-        metric_value, data_type, data_type_checked
-    )
-    return data_type, metric_value, currency_data
-
-
-def build_metric_data(
-    metric_limit, data_collect, metric_index, index, metric_id, currency, currency_data
+def get_financial_data(
+    row, metric_limits, scenarios_index, header, years_row, metric_row, company
 ):
-    metric_name = metric_limit["name"]
-    # TO DO Add logic to difference between standard and custom
-    metric_type = "standard"
-    metric_value = data_collect[index][metric_index]
-    # Check metric type
-    data_type, metric_value, currency_data = get_data_type_metric(
-        metric_value, metric_id, currency, currency_data
-    )
 
-    return metric_name, metric_type, metric_value, data_type, currency_data
+    periods, scenarios, metrics, scenario_metrics, currencies = [], [], [], [], []
+    scenario_type = ""
 
+    for limits in metric_limits:
+        start, end = limits
+        metric_name = get_name(metric_row, start)
+        if start in scenarios_index:
+            scenario_type = get_name(header, start)
 
-def set_time_period_data(
-    create_period, start_time, end_time, time_period_id, time_periods_data
-):
-    # Set time period data
-    if create_period:
-        time_periods_data.append((time_period_id, start_time, end_time))
+        for index in range(start, end):
+            metric_value = row[index]
+            year = years_row[index]
+            value = get_metric_value(metric_value)
+            if is_valid_value(metric_value) and value is not None:
 
-    return time_periods_data
-
-
-def set_scenarios_data(
-    create_scenario,
-    metric_limit,
-    scenarios_data,
-    scenario_id,
-    scenario_name,
-    currency,
-    time_period_id,
-    company_id,
-):
-    if create_scenario:
-        scenario_type = metric_limit["scene"]
-        scenarios_data.append(
-            (
-                scenario_id,
-                scenario_name,
-                currency,
-                time_period_id,
-                scenario_type,
-                company_id,
-            )
-        )
-
-    return scenarios_data
-
-
-def get_scenario_metric_data(
-    data_collect_metrics_limits,
-    data_collect,
-    previous_scenario,
-    scenarios_time_periods,
-    currency,
-    company_id,
-    index,
-):
-    scenarios_data = []
-    metrics_data = []
-    time_periods_data = []
-    currency_data = []
-    metric_scenario_data = []
-    for metric_limit in data_collect_metrics_limits:
-        if previous_scenario != metric_limit["scene"]:
-            scenarios_time_periods = {}
-            previous_scenario = metric_limit["scene"]
-
-        for metric_index in range(metric_limit["start"], metric_limit["end"] + 1, 1):
-            metric_scenario_id = str(uuid.uuid4())
-            metric_id = str(uuid.uuid4())
-            scenario_name = "{}-{}".format(
-                previous_scenario, data_collect[1][metric_index]
-            )
-            start_time = "{}-01-01".format(data_collect[1][metric_index])
-            end_time = "{}-12-31".format(data_collect[1][metric_index])
-            (
-                time_period_id,
-                scenario_id,
-                create_scenario,
-                create_period,
-                scenarios_time_periods,
-            ) = check_time_periods_scenarios(scenarios_time_periods, scenario_name)
-
-            # Set time period data
-            time_periods_data = set_time_period_data(
-                create_period, start_time, end_time, time_period_id, time_periods_data
-            )
-
-            # Set scenario data
-            scenarios_data = set_scenarios_data(
-                create_scenario,
-                metric_limit,
-                scenarios_data,
-                scenario_id,
-                scenario_name,
-                currency,
-                time_period_id,
-                company_id,
-            )
-            # Set metric data
-            (
-                metric_name,
-                metric_type,
-                metric_value,
-                data_type,
-                currency_data,
-            ) = build_metric_data(
-                metric_limit,
-                data_collect,
-                metric_index,
-                index,
-                metric_id,
-                currency,
-                currency_data,
-            )
-
-            metric_scenario_data.append((metric_scenario_id, metric_id, scenario_id))
-
-            metrics_data.append(
-                (
-                    metric_id,
-                    metric_name,
-                    metric_value,
-                    time_period_id,
-                    metric_type,
-                    company_id,
-                    data_type,
+                time_period, scenario = get_scenario_data(
+                    row, year, scenario_type, company, scenarios, periods
                 )
-            )
+
+                metric, currency, scenario_metric = get_metric_data(
+                    row, metric_name, time_period[0], scenario[0], company[0], value
+                )
+                metrics.append(metric)
+                currencies.append(currency)
+                scenario_metrics.append(scenario_metric)
+
+    return (periods, scenarios, metrics, scenario_metrics, currencies)
+
+
+def get_company_financial_data(
+    row, metric_limits, scenarios_index, header, years_row, metric_row
+):
+
+    companies = []
+
+    if is_valid_value(row[0]):
+        return ([] for i in range(6))
+
+    company = get_company_description(row)
+    companies.append(company)
+
+    periods, scenarios, metrics, scenario_metrics, currencies = get_financial_data(
+        row, metric_limits, scenarios_index, header, years_row, metric_row, company
+    )
+
+    return (companies, periods, scenarios, metrics, scenario_metrics, currencies)
+
+
+def get_schemas_data_from_dataframe(headers, data):
+    data_periods = []
+    data_metrics = []
+    data_companies = []
+    data_scenarios = []
+    data_currencies = []
+    data_scenario_metrics = []
+
+    metric_row = data[0]
+    metric_limits = get_limits(get_index_limits(metric_row), len(headers))
+    scenarios_index = get_index_limits(headers)
+
+    for index in range(2, len(data)):
+        (
+            _companies,
+            _periods,
+            _scenarios,
+            _metrics,
+            _scenario_metrics,
+            _currencies,
+        ) = get_company_financial_data(
+            data[index], metric_limits, scenarios_index, headers, data[1], metric_row
+        )
+        data_periods.extend(_periods)
+        data_companies.extend(_companies)
+        data_scenarios.extend(_scenarios)
+        data_metrics.extend(_metrics)
+        data_scenario_metrics.extend(_scenario_metrics)
+        data_currencies.extend(_currencies)
 
     return (
-        scenarios_data,
-        metrics_data,
-        time_periods_data,
-        currency_data,
-        metric_scenario_data,
+        data_companies,
+        data_periods,
+        data_scenarios,
+        data_metrics,
+        data_scenario_metrics,
+        data_currencies,
     )
 
 
@@ -358,113 +318,89 @@ def dataframe_cast_date_type(data_frame, columns):
     return data_frame
 
 
-def save_dataframes(
-    df_company_information,
-    df_time_period_information,
-    df_scenario_information,
-    df_metric_information,
-    df_currency_information,
-    df_metric_scenario_information,
-    env,
-):
-    print("==========Company===============================")
-    df_company = spark.createDataFrame(df_company_information, df_schema_company)
-    df_company = dataframe_cast_date_type(df_company, ["from_date", "fiscal_year"])
-    df_company.show()
-    save_database(env, "company", df_company)
-    print("==========Time Period===============================")
-    df_time_period = spark.createDataFrame(
-        df_time_period_information, df_schema_time_period
+def get_dataframes_from_lists(data):
+    (companies, periods, scenarios, metrics, scenario_metrics, currencies) = data
+
+    df_companies = spark.createDataFrame(companies, schema=company_schema)
+    df_companies = dataframe_cast_date_type(df_companies, ["from_date", "fiscal_year"])
+    df_time_periods = spark.createDataFrame(periods, schema=time_period_schema)
+    df_time_periods = dataframe_cast_date_type(df_time_periods, ["start_at", "end_at"])
+    df_scenarios = spark.createDataFrame(scenarios, schema=scenario_schema)
+    df_metrics = spark.createDataFrame(metrics, schema=metric_schema)
+    df_currencies = spark.createDataFrame(currencies, schema=currency_schema)
+    df_scenario_metrics = spark.createDataFrame(
+        scenario_metrics, schema=scenario_metric_schema
     )
-    df_time_period = dataframe_cast_date_type(df_time_period, ["start_at", "end_at"])
-    df_time_period.show()
-    save_database(env, "time_period", df_time_period)
 
-    print("==========Scenarios===============================")
-    df_scenario = spark.createDataFrame(df_scenario_information, df_schema_scenario)
-    df_scenario.show()
-    save_database(env, "financial_scenario", df_scenario)
+    return (
+        df_companies,
+        df_time_periods,
+        df_scenarios,
+        df_metrics,
+        df_scenario_metrics,
+        df_currencies,
+    )
 
-    print("==========Metrics===============================")
-    df_metrics = spark.createDataFrame(df_metric_information, df_schema_metric)
 
+def save_data_to_database(data, env):
+
+    (
+        df_companies,
+        df_time_periods,
+        df_scenarios,
+        df_metrics,
+        df_scenario_metrics,
+        df_currencies,
+    ) = get_dataframes_from_lists(data)
+
+    logger.warning("==========Company===============================")
+    df_companies.show()
+    save_to_database(env, "company", df_companies)
+
+    logger.warning("==========Time period===========================")
+    df_time_periods.show()
+    save_to_database(env, "time_period", df_time_periods)
+
+    logger.warning("==========Financial scenario====================")
+    df_scenarios.show()
+    save_to_database(env, "financial_scenario", df_scenarios)
+
+    logger.warning("==========Metric================================")
     df_metrics.show()
-    save_database(env, "metric", df_metrics)
+    save_to_database(env, "metric", df_metrics)
 
-    if len(df_currency_information) > 0:
-        print("==========Currency Metrics===============================")
-        df_currency = spark.createDataFrame(df_currency_information, df_schema_currency)
-        df_currency.show()
-        save_database(env, "currency_metric", df_currency)
+    logger.warning("==========Currency metric=======================")
+    df_currencies.show()
+    save_to_database(env, "currency_metric", df_currencies)
 
-    print("==========Metrics-Scenarios===============================")
-    df_metric_scenario = spark.createDataFrame(
-        df_metric_scenario_information, df_schema_metric_scenario
+    logger.warning("==========Scenario metric=======================")
+    df_scenario_metrics.show()
+    save_to_database(env, "scenario_metric", df_scenario_metrics)
+
+
+def get_dataframe_from_file(file_path):
+
+    logger.warning("file path: {}".format(file_path))
+
+    file_dataframe = (
+        spark.read.format("csv")
+        .option("header", "true")
+        .option("delimiter", ",")
+        .load(file_path)
     )
-
-    df_metric_scenario.show()
-    save_database(env, "scenario_metric", df_metric_scenario)
+    return file_dataframe
 
 
-def process_dataframes(data_collect, data_collect_metrics_limits, file_dataframe, env):
-    df_company_information = []
-    df_time_period_information = []
-    df_scenario_information = []
-    df_metric_information = []
-    df_currency_information = []
-    df_metric_scenario_information = []
-    print("=========process_dataframes========")
-    for index in range(2, file_dataframe.count(), 1):
-        currency = data_collect[index][1]
-        company_information = get_company_information(data_collect, index)
-        df_company_information.append(company_information)
-        previous_scenario = ""
-        scenarios_time_periods = {}
-        (
-            scenarios_data,
-            metrics_data,
-            time_periods_data,
-            currency_data,
-            metric_scenario_data,
-        ) = get_scenario_metric_data(
-            data_collect_metrics_limits,
-            data_collect,
-            previous_scenario,
-            scenarios_time_periods,
-            currency,
-            company_information[0],
-            index,
-        )
+def proccess_file(file_path, env):
+    dataframe = get_dataframe_from_file(file_path)
+    headers, data = get_data_from_dataframe(dataframe)
 
-        df_time_period_information = df_time_period_information + time_periods_data
-        df_scenario_information = df_scenario_information + scenarios_data
-        df_metric_information = df_metric_information + metrics_data
-        df_currency_information = df_currency_information + currency_data
-        df_metric_scenario_information = (
-            df_metric_scenario_information + metric_scenario_data
-        )
+    logger.warning("==========File Headers===============================")
+    logger.warning(headers)
 
-    save_dataframes(
-        df_company_information,
-        df_time_period_information,
-        df_scenario_information,
-        df_metric_information,
-        df_currency_information,
-        df_metric_scenario_information,
-        env,
-    )
+    schemas_data = get_schemas_data_from_dataframe(headers, data)
 
-
-def process_file(file_dataframe, env):
-    df_main_headers = file_dataframe.columns
-    data_collect = file_dataframe.collect()
-    print("==========File Headers===============================")
-    print(df_main_headers)
-    df_scenarios_limits = get_scenarios_limits(df_main_headers)
-    data_collect_scenarios_limits = df_scenarios_limits.collect()
-    df_metrics_limits = get_metrics_limits(data_collect_scenarios_limits, data_collect)
-    data_collect_metrics_limits = df_metrics_limits.collect()
-    process_dataframes(data_collect, data_collect_metrics_limits, file_dataframe, env)
+    save_data_to_database(schemas_data, env)
 
 
 def main():
@@ -472,19 +408,12 @@ def main():
     file_name = args["FILENAME"]
     bucket_name = args["BUCKET"]
     env = args["ENV"]
-    print("Bucket Name", bucket_name)
-    print("File Name", file_name)
-    print("env", env)
-    input_file_path = "s3://{}/{}".format(bucket_name, file_name)
-    print("Input File Path : ", input_file_path)
+    file_path = "s3://{}/{}".format(bucket_name, file_name)
 
-    file_dataframe = (
-        spark.read.format("csv")
-        .option("header", "true")
-        .option("delimiter", ",")
-        .load(input_file_path)
-    )
-    process_file(file_dataframe, env)
+    logger.warning(file_path)
+    logger.warning("env: {}".format(env))
+
+    proccess_file(file_path, env)
 
 
 main()
