@@ -147,7 +147,7 @@ def get_company_description(row):
     name = get_row_value(row, "Name")
     sector = get_row_value(row, "Sector")
     vertical = get_row_value(row, "Vertical")
-    inves_profile = get_row_value(row, "Investor proflie")
+    inves_profile = get_row_value(row, "Investor profile")
     now = datetime.datetime.utcnow()
     from_date = now.strftime("%Y-%m-%d")
     fiscal_year = now.strftime("%Y-%m-%d")
@@ -164,15 +164,15 @@ def get_company_description(row):
     ]
 
 
-def get_time_period(row, start, end):
+def get_time_period(start, end):
     return [str(uuid.uuid4()), start, end]
 
 
-def get_scenario(row, name, scenario_type, period, company):
+def get_scenario(name, scenario_type, period, company):
     return [str(uuid.uuid4()), name, "USD", scenario_type, period, company]
 
 
-def get_metric(row, name, value, period, company):
+def get_metric(name, value, period, company):
     return [str(uuid.uuid4()), name, value, "standard", "currency", period, company]
 
 
@@ -198,11 +198,11 @@ def get_scenario_data(row, year, scenario_type, company, scenarios, periods):
         time_period.append(scenario[4])
 
     else:
-        time_period = get_time_period(row, start_time, end_time)
+        time_period = get_time_period(start_time, end_time)
         periods.append(time_period)
 
         scenario = get_scenario(
-            row, scenario_name, scenario_type, time_period[0], company[0]
+            scenario_name, scenario_type, time_period[0], company[0]
         )
         scenarios.append(scenario)
 
@@ -210,7 +210,7 @@ def get_scenario_data(row, year, scenario_type, company, scenarios, periods):
 
 
 def get_metric_data(row, metric_name, period_id, scenario_id, company_id, value):
-    metric = get_metric(row, metric_name, value, period_id, company_id)
+    metric = get_metric(metric_name, value, period_id, company_id)
 
     currency_metric = [str(uuid.uuid4()), "USD", metric[0]]
 
@@ -258,9 +258,6 @@ def get_company_financial_data(
 
     companies = []
 
-    if is_valid_value(row[0]):
-        return ([] for i in range(6))
-
     company = get_company_description(row)
     companies.append(company)
 
@@ -284,22 +281,28 @@ def get_schemas_data_from_dataframe(headers, data):
     scenarios_index = get_index_limits(headers)
 
     for index in range(2, len(data)):
-        (
-            _companies,
-            _periods,
-            _scenarios,
-            _metrics,
-            _scenario_metrics,
-            _currencies,
-        ) = get_company_financial_data(
-            data[index], metric_limits, scenarios_index, headers, data[1], metric_row
-        )
-        data_periods.extend(_periods)
-        data_companies.extend(_companies)
-        data_scenarios.extend(_scenarios)
-        data_metrics.extend(_metrics)
-        data_scenario_metrics.extend(_scenario_metrics)
-        data_currencies.extend(_currencies)
+        if not is_valid_value(data[index][0]):
+            (
+                _companies,
+                _periods,
+                _scenarios,
+                _metrics,
+                _scenario_metrics,
+                _currencies,
+            ) = get_company_financial_data(
+                data[index],
+                metric_limits,
+                scenarios_index,
+                headers,
+                data[1],
+                metric_row,
+            )
+            data_periods.extend(_periods)
+            data_companies.extend(_companies)
+            data_scenarios.extend(_scenarios)
+            data_metrics.extend(_metrics)
+            data_scenario_metrics.extend(_scenario_metrics)
+            data_currencies.extend(_currencies)
 
     return (
         data_companies,
