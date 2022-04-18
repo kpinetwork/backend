@@ -9,8 +9,7 @@ def handler(event, context):
         if not event.get("body"):
             raise AppError("No data provided")
 
-        bucket_files = "kpinetwork-test"
-        # bucket_files = os.environ.get("BUCKET_FILES")
+        bucket_files = os.environ.get("BUCKET_FILES")
         body = json.loads(event.get("body"))
         upload_file(bucket_files, body)
 
