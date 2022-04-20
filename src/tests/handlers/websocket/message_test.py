@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 from src.handlers.websocket.message import handler, get_api_url
 
 
-class TestUploadDataS3TriggerHandler(TestCase):
+class TestWebsocketMessageRoute(TestCase):
     def setUp(self):
         self.event = read("sample_event_websocket.json")
 
