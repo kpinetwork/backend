@@ -50,6 +50,9 @@ variable "lambdas_names" {
     "get_company_permissions_lambda_function" : "get_company_permissions_lambda_function"
     "change_company_publicly_lambda_function" : "change_company_publicly_lambda_function"
     "upload_file_s3_lambda_function" : "upload_file_s3_lambda_function"
+    "connect_lambda_function" : "connect_lambda_function"
+    "disconnect_lambda_function" : "disconnect_lambda_function"
+    "message_lambda_function" : "message_lambda_function"
   }
 }
 

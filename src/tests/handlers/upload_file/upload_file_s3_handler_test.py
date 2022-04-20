@@ -26,7 +26,6 @@ class TestUploadDataS3TriggerHandler(TestCase):
     def test_handler_fail_no_body_400_response(self, mock_upload_file, mock_boto3):
         error_message = "No data provided"
         response = handler({}, {})
-        print(response)
 
         mock_upload_file.assert_not_called()
         mock_boto3.assert_not_called()
@@ -36,7 +35,7 @@ class TestUploadDataS3TriggerHandler(TestCase):
     @mock.patch("src.handlers.upload_file.upload_file_s3_handler.boto3")
     def test_upload_data_sucess(self, mock_boto3):
         response = upload_file("Bucket_name", {"file": "test", "fileName": "test.csv"})
-        print(response)
+
         mock_boto3.assert_not_called()
         self.assertEqual(response, None)
 

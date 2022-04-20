@@ -115,5 +115,23 @@ output "object_references" {
       key : aws_s3_bucket_object.upload_file_s3_function_object.key,
       bucket : aws_s3_bucket_object.upload_file_s3_function_object.bucket
     }
+
+    "connect_function_bucket" : {
+      etag : aws_s3_bucket_object.connect_function_object.etag,
+      key : aws_s3_bucket_object.connect_function_object.key,
+      bucket : aws_s3_bucket_object.connect_function_object.bucket
+    }
+
+    "disconnect_function_bucket" : {
+      etag : aws_s3_bucket_object.disconnect_function_object.etag,
+      key : aws_s3_bucket_object.disconnect_function_object.key,
+      bucket : aws_s3_bucket_object.disconnect_function_object.bucket
+    }
+
+    "message_function_bucket" : {
+      etag : aws_s3_bucket_object.message_function_object.etag,
+      key : aws_s3_bucket_object.message_function_object.key,
+      bucket : aws_s3_bucket_object.message_function_object.bucket
+    }
   }
 }

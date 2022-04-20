@@ -91,6 +91,15 @@ output "api_gateway_references" {
   }
 }
 
+output "websocket_api_references" {
+  value = {
+    "api": {
+      arn: aws_apigatewayv2_api.websocket_api.execution_arn
+      invoke_url: aws_apigatewayv2_stage.stage.invoke_url
+    }
+  }
+}
+
 output "api_gateway_domain" {
   value = aws_api_gateway_domain_name.domain
 }

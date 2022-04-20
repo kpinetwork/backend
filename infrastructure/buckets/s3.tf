@@ -153,3 +153,24 @@ resource "aws_s3_bucket_object" "upload_file_s3_function_object" {
   source = "${path.module}/../../dist/upload_file_s3_handler.zip"
   etag = filemd5("${path.module}/../../dist/upload_file_s3_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "connect_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/connect.zip"
+  source = "${path.module}/../../dist/connect.zip"
+  etag = filemd5("${path.module}/../../dist/connect.zip")
+}
+
+resource "aws_s3_bucket_object" "disconnect_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/disconnect.zip"
+  source = "${path.module}/../../dist/disconnect.zip"
+  etag = filemd5("${path.module}/../../dist/disconnect.zip")
+}
+
+resource "aws_s3_bucket_object" "message_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/message.zip"
+  source = "${path.module}/../../dist/message.zip"
+  etag = filemd5("${path.module}/../../dist/message.zip")
+}

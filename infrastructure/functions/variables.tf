@@ -19,6 +19,7 @@ variable "region" {}
 # ----------------------------------------------------------------------------------------------------------------------
 variable "lambdas_exec_roles_arn" {}
 variable "object_bucket_references" {}
+variable "websocket_api_invoke_url" {}
 variable "lambdas_names" {}
 variable "bucket_files" {}
 

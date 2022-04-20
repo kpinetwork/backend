@@ -18,6 +18,9 @@ output "lambdas_invoke_arns" {
     "get_company_permissions_lambda_function": aws_lambda_function.get_company_permissions_lambda_function.invoke_arn
     "change_company_publicly_lambda_function": aws_lambda_function.change_company_publicly_lambda_function.invoke_arn
     "upload_file_s3_lambda_function": aws_lambda_function.upload_file_s3_lambda_function.invoke_arn
+    "connect_lambda_function": aws_lambda_function.connect_lambda_function.invoke_arn
+    "disconnect_lambda_function": aws_lambda_function.disconnect_lambda_function.invoke_arn
+    "message_lambda_function": aws_lambda_function.message_lambda_function.invoke_arn
   }
 }
 
