@@ -597,3 +597,45 @@ resource "aws_lambda_function" "upload_file_s3_lambda_function" {
     }
   }
 }
+
+resource "aws_lambda_function" "connect_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.connect_exec_role_arn
+  handler          = "connect.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.connect_function_bucket.bucket
+  s3_key           = var.object_bucket_references.connect_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.connect_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.connect_function_bucket.etag)
+}
+
+resource "aws_lambda_function" "disconnect_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.disconnect_exec_role_arn
+  handler          = "disconnect.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.disconnect_function_bucket.bucket
+  s3_key           = var.object_bucket_references.disconnect_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.disconnect_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.disconnect_function_bucket.etag)
+}
+
+resource "aws_lambda_function" "message_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.message_exec_role_arn
+  handler          = "message.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.message_function_bucket.bucket
+  s3_key           = var.object_bucket_references.message_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.message_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.message_function_bucket.etag)
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      WEBSOCKET_API = var.websocket_api_invoke_url
+    }
+  }
+}

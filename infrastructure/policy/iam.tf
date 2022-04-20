@@ -1111,3 +1111,124 @@ resource "aws_lambda_permission" "apigw_upload_file_s3_lambda" {
   principal = "apigateway.amazonaws.com"
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_upload_file_s3_lambda_function.api_id}/*/${var.api_gateway_references.apigw_upload_file_s3_lambda_function.http_method}${var.api_gateway_references.apigw_upload_file_s3_lambda_function.resource_path}"
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS WEBSOCKET
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "connect_lambda_exec_role" {
+  name = "${var.environment}_connect_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "connect_lambda_logs" {
+  role = aws_iam_role.connect_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_lambda_permission" "websocket_connect" {
+  statement_id = "AllowExecutionFromApiGateway"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.connect_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${var.websocket_api_references.api.arn}/*/$connect"
+}
+
+resource "aws_iam_role" "disconnect_lambda_exec_role" {
+  name = "${var.environment}_disconnect_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "disconnect_lambda_logs" {
+  role = aws_iam_role.disconnect_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_lambda_permission" "websocket_disconnect" {
+  statement_id = "AllowExecutionFromApiGateway"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.disconnect_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${var.websocket_api_references.api.arn}/*/$disconnect"
+}
+
+resource "aws_iam_role" "message_lambda_exec_role" {
+  name = "${var.environment}_message_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "message_lambda_logs" {
+  role = aws_iam_role.message_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_lambda_permission" "websocket_message" {
+  statement_id = "AllowExecutionFromApiGateway"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.message_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${var.websocket_api_references.api.arn}/*/message"
+}
+
+resource "aws_iam_role_policy" "allow_execute_api_message_connection" {
+  name        = "${var.environment}_allow_execute_api_message_connection_policy"
+  role        = aws_iam_role.message_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "execute-api:ManageConnections"
+      ],
+      "Effect": "Allow",
+      "Resource": "${var.websocket_api_references.api.arn}/*"
+    }
+  ]
+}
+EOF
+}

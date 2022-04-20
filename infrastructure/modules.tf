@@ -12,6 +12,7 @@ module "shared" {
 module "functions" {
   source                   = "./functions/"
   object_bucket_references = module.buckets.object_references
+  websocket_api_invoke_url = module.network.websocket_api_references.api.invoke_url
   lambdas_exec_roles_arn   = module.policy.lambdas_exec_roles_arn
   lambdas_names            = var.lambdas_names
   security_group_id        = module.shared.resources.security_group_lambda.id
@@ -30,7 +31,7 @@ module "functions" {
   user_pool_id             = module.cognito.id
   app_client_id            = module.cognito.amplify_client_id
   aws_account_id           = var.aws_account_id
-  comparison_file_path                = var.comparison_file_path
+  comparison_file_path     = var.comparison_file_path
 }
 
 module "policy" {
@@ -39,6 +40,7 @@ module "policy" {
   account_id                 = var.aws_account_id
   lambdas_names              = var.lambdas_names
   api_gateway_references     = module.network.api_gateway_references
+  websocket_api_references   = module.network.websocket_api_references
   aws_iam_policy_logs_arn    = module.shared.resources.aws_iam_policy_logs_arn
   aws_iam_policy_network_arn = module.shared.resources.aws_iam_policy_network_arn
   cognito_user_pool_arn      = module.cognito.cognito_arn
