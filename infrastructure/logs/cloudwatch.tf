@@ -101,3 +101,23 @@ resource "aws_cloudwatch_log_group" "change_company_publicly_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.change_company_publicly_lambda_function}"
   retention_in_days = var.retention_days
 }
+
+resource "aws_cloudwatch_log_group" "upload_file_s3_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.upload_file_s3_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "connect_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.connect_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "disconnect_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.disconnect_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "message_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.message_lambda_function}"
+  retention_in_days = var.retention_days
+}

@@ -226,6 +226,27 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/exceptions/base_exception.py
 
+  upload_file_s3_handler:
+    requirements: ./src/handlers/upload_file/requirements.txt
+    include:
+    - ./src/handlers/upload_file/upload_file_s3_handler.py
+    - ./src/exceptions/base_exception.py
+  
+  connect:
+    requirements: ./src/handlers/websocket/requirements.txt
+    include:
+    - ./src/handlers/websocket/connect.py
+
+  disconnect:
+    requirements: ./src/handlers/websocket/requirements.txt
+    include:
+    - ./src/handlers/websocket/disconnect.py
+
+  message:
+    requirements: ./src/handlers/websocket/requirements.txt
+    include:
+    - ./src/handlers/websocket/message.py
+    - ./src/exceptions/base_exception.py
 
 layers:
   layer_libraries:

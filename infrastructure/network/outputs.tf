@@ -82,6 +82,21 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.change_company_publicly_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_upload_file_s3_lambda_function": {
+      resource_path: aws_api_gateway_resource.upload_file_s3.path,
+      http_method: aws_api_gateway_method.upload_file_s3_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+  }
+}
+
+output "websocket_api_references" {
+  value = {
+    "api": {
+      arn: aws_apigatewayv2_api.websocket_api.execution_arn
+      invoke_url: aws_apigatewayv2_stage.stage.invoke_url
+    }
   }
 }
 

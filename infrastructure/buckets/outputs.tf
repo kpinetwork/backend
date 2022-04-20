@@ -104,10 +104,34 @@ output "object_references" {
       bucket : aws_s3_bucket_object.change_company_publicly_function_object.bucket
      }
 
-     "get_all_public_companies_function_bucket" : {
+    "get_all_public_companies_function_bucket" : {
       etag : aws_s3_bucket_object.get_all_public_companies_function_object.etag,
       key : aws_s3_bucket_object.get_all_public_companies_function_object.key,
       bucket : aws_s3_bucket_object.get_all_public_companies_function_object.bucket
+    }
+
+    "upload_file_s3_function_bucket" : {
+      etag : aws_s3_bucket_object.upload_file_s3_function_object.etag,
+      key : aws_s3_bucket_object.upload_file_s3_function_object.key,
+      bucket : aws_s3_bucket_object.upload_file_s3_function_object.bucket
+    }
+
+    "connect_function_bucket" : {
+      etag : aws_s3_bucket_object.connect_function_object.etag,
+      key : aws_s3_bucket_object.connect_function_object.key,
+      bucket : aws_s3_bucket_object.connect_function_object.bucket
+    }
+
+    "disconnect_function_bucket" : {
+      etag : aws_s3_bucket_object.disconnect_function_object.etag,
+      key : aws_s3_bucket_object.disconnect_function_object.key,
+      bucket : aws_s3_bucket_object.disconnect_function_object.bucket
+    }
+
+    "message_function_bucket" : {
+      etag : aws_s3_bucket_object.message_function_object.etag,
+      key : aws_s3_bucket_object.message_function_object.key,
+      bucket : aws_s3_bucket_object.message_function_object.bucket
     }
   }
 }

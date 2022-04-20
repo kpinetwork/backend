@@ -133,6 +133,33 @@ CMD [ "<handler>.handler" ]
 
 ```
 
+## Local file compression
+
+In case of applying lambda code changes from terraform locally, it is recommended to use the zip file generator in the project. This generator allows you to compress a list of necessary files from a lambda and save them in the dist directory without deleting the rest of the files already compressed in the directory, avoiding sending files to S3 buckets that do not need to be changed, which allows a cost reduction in the call of S3 buckets.
+
+To use the generator you must follow the following steps
+
+1. Modify the ```dirs``` and ```folder_name``` variables in the ```local_file_compression.py``` file, located at the root of the project. In the ```dirs``` variable, a list with the paths of the files that the lambda needs must be detailed, and in ```folder_name```, the name of the zip file to be compressed must be indicated.
+
+```python
+dirs = [
+    "./src/handlers/company/get_company_handler.py",
+    "./src/service/company/company_service.py",
+    "./src/utils/query_builder.py",
+    "./src/utils/response_sql.py",
+    "./db/utils/connection.py",
+    "./src/utils/company_anonymization.py",
+]
+
+folder_name = "dist/get_company_handler"
+```
+
+2. Run in root:
+
+```
+python local_file_compression.py
+```
+
 ## Code Style
 
 The project use [PEP 8](https://www.python.org/dev/peps/pep-0008/) as the
