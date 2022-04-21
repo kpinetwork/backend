@@ -20,16 +20,18 @@ class UniverseOverviewService:
         prior_revenue: float,
         company: dict,
     ) -> None:
-        company["growth"] = self.calculator.calculate_growth_rate(
+        growth = self.calculator.calculate_growth_rate(
             actuals_revenue, prior_revenue, False
         )
+        company["growth"] = growth
         company["ebitda_margin"] = self.calculator.calculate_ebitda_margin(
             actuals_ebitda, actuals_revenue, False
         )
         company["rule_of_40"] = self.calculator.calculate_rule_of_40(
             actuals_revenue, prior_revenue, actuals_ebitda, False
         )
-        company["size_cohort"] = self.get_revenue_range(actuals_revenue)
+        company["size_cohort"] = self.get_profile_range(actuals_revenue, "size profile")
+        company["margin_group"] = self.get_profile_range(growth, "growth profile")
 
     def add_budget_metrics(
         self,
@@ -60,11 +62,11 @@ class UniverseOverviewService:
             actuals_ebitda, budget_ebitda, False
         )
 
-    def get_revenue_range(self, metric: float) -> str:
+    def get_profile_range(self, metric: float, profile: str) -> str:
         if not self.calculator.is_valid_number(metric):
             return "NA"
         try:
-            ranges = self.profile_range.get_profile_ranges("size profile")
+            ranges = self.profile_range.get_profile_ranges(profile)
             metric_ranges = list(
                 filter(
                     lambda range: self.profile_range.verify_range(range, metric),
@@ -171,11 +173,50 @@ class UniverseOverviewService:
 
         return revenue_vs_budget
 
+    def filter_by_conditions(self, data: list, **conditions) -> list:
+        companies_filtered = list()
+        if (
+            conditions.__contains__("size_cohort") is True
+            and conditions.__contains__("margin_group") is True
+        ):
+            companies_filtered = filter(
+                lambda company: (
+                    company["size_cohort"] in conditions.get("size_cohort", [])
+                    and company["margin_group"] in conditions.get("margin_group", [])
+                ),
+                data,
+            )
+        elif (
+            conditions.__contains__("size_cohort") is True
+            and conditions.__contains__("margin_group") is False
+        ):
+            companies_filtered = filter(
+                lambda company: (
+                    company["size_cohort"] in conditions.get("size_cohort", [])
+                ),
+                data,
+            )
+        elif (
+            conditions.__contains__("margin_group") is True
+            and conditions.__contains__("size_cohort") is False
+        ):
+            companies_filtered = filter(
+                lambda company: (
+                    company["margin_group"] in conditions.get("margin_group", [])
+                ),
+                data,
+            )
+        else:
+            companies_filtered = data
+        return list(companies_filtered)
+
     def get_universe_overview(self, year: int, **conditions):
         try:
             data = self.get_metrics_by_year(year, **conditions).values()
 
             self.add_calculated_metrics_to_companies(data)
+
+            data = self.filter_by_conditions(data, **conditions)
 
             kpi_average = self.get_kpi_averages(data)
 

@@ -11,6 +11,7 @@ from src.utils.company_anonymization import CompanyAnonymization
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 
 
 class TestComparisonvsPeers(TestCase):
@@ -98,9 +99,39 @@ class TestComparisonvsPeers(TestCase):
 
         self.assertEqual(company, self.company)
 
+    @parameterized.expand(
+        [
+            [
+                31,
+                "size profile",
+                {"label": "$30-<50 million", "max_value": 50, "min_value": 30},
+            ],
+            [None, "size profile", {}],
+            [
+                5,
+                "growth profile",
+                {"label": "Low growth", "max_value": 0, "min_value": 10},
+            ],
+        ]
+    )
+    def test_get_metric_range(self, value, type, ranges):
+        self.mock_profile_range.get_profile_ranges.return_value = [ranges]
+
+        range = self.comparison_service_instance.get_metric_range(value, type)
+
+        self.assertEqual(range, ranges.get("label", "NA"))
+
+    def test_get_metric_range_fail(self):
+        self.mock_profile_range.get_profile_ranges.side_effect = Exception("error")
+
+        range = self.comparison_service_instance.get_metric_range(34, "size profile")
+
+        self.assertEqual(range, "NA")
+
     def test_calculate_metrics(self):
         company = self.scenarios.copy()
         expected_company = self.scenarios.copy()
+        expected_company.update({"size_cohort": "NA", "margin_group": "NA"})
         for key in self.metrics:
             expected_company[key] = self.metrics[key]
 
@@ -134,7 +165,9 @@ class TestComparisonvsPeers(TestCase):
         company = self.company.copy()
         expected_company = self.company.copy()
         company.update(self.scenarios)
-        expected_company.update(self.metrics)
+        metrics = self.metrics.copy()
+        metrics.update({"size_cohort": "NA", "margin_group": "NA"})
+        expected_company.update(metrics)
         data[company["id"]] = company
 
         rule_of_40 = self.comparison_service_instance.get_comparison_vs_data(data, True)
@@ -147,7 +180,11 @@ class TestComparisonvsPeers(TestCase):
         company.update(self.scenarios)
         data = {company["id"]: company}
         expected_company = self.company.copy()
-        expected_company.update(self.metrics)
+        metrics = self.metrics.copy()
+        metrics.update(
+            {"size_cohort": "$30-<50 million", "margin_group": "$30-<50 million"}
+        )
+        expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
         expected_company["name"] = "0123-xxxx"
         expected_rule_of_40 = self.rule_of_40.copy()
@@ -161,6 +198,48 @@ class TestComparisonvsPeers(TestCase):
         self.assertEqual(rule_of_40, [expected_rule_of_40])
         self.assertEqual(data[company["id"]], expected_company)
 
+    @parameterized.expand(
+        [
+            [
+                {
+                    "size_cohort": "$30-<$50 million",
+                    "margin_group": "Negative growth (<0%)",
+                },
+                {
+                    "0123456": {
+                        "size_cohort": "$30-<$50 million",
+                        "margin_group": "Negative growth (<0%)",
+                    }
+                },
+            ],
+            [
+                {"size_cohort": "$50-$100 million"},
+                {
+                    "0123456": {
+                        "size_cohort": "$50-$100 million",
+                        "margin_group": "Low growth (0-<10%)",
+                    }
+                },
+            ],
+            [
+                {"margin_group": "Medium growth (10%-<30%)"},
+                {
+                    "0123456": {
+                        "size_cohort": "100 million+",
+                        "margin_group": "Medium growth (10%-<30%)",
+                    }
+                },
+            ],
+        ]
+    )
+    def test_filter_by_conditions(self, conditions, data):
+
+        filters_by_conditions = self.comparison_service_instance.filter_by_conditions(
+            data, **conditions
+        )
+
+        self.assertEqual(filters_by_conditions, data)
+
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
@@ -172,7 +251,9 @@ class TestComparisonvsPeers(TestCase):
     ):
         company = self.company.copy()
         expected_company = self.company.copy()
-        expected_company.update(self.metrics)
+        metrics = self.metrics.copy()
+        metrics.update({"size_cohort": "NA", "margin_group": "NA"})
+        expected_company.update(metrics)
         company.update(self.scenarios)
         self.mock_base_metric_results({company["id"]: company})
 
@@ -202,7 +283,9 @@ class TestComparisonvsPeers(TestCase):
     ):
         company = self.company.copy()
         expected_company = self.company.copy()
-        expected_company.update(self.metrics)
+        metrics = self.metrics.copy()
+        metrics.update({"size_cohort": "NA", "margin_group": "NA"})
+        expected_company.update(metrics)
         company.update(self.scenarios)
         self.mock_base_metric_results({company["id"]: company})
 

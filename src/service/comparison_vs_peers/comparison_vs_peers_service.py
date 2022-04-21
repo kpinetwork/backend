@@ -39,6 +39,22 @@ class ComparisonvsPeersService:
         for metric in base_metrics:
             company.pop(metric, None)
 
+    def get_metric_range(self, metric: float, profile_type: str) -> str:
+        if not self.calculator.is_valid_number(metric):
+            return "NA"
+        try:
+            ranges = self.profile_range.get_profile_ranges(profile_type)
+            metric_ranges = list(
+                filter(
+                    lambda range: self.profile_range.verify_range(range, metric),
+                    ranges,
+                )
+            )
+            return metric_ranges[0].get("label")
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
     def calculate_metrics(self, company: dict) -> None:
         actuals_revenue = company.get("actuals_revenue")
         actuals_ebitda = company.get("actuals_ebitda")
@@ -60,6 +76,15 @@ class ComparisonvsPeersService:
         company["rule_of_40"] = self.calculator.calculate_rule_of_40(
             actuals_revenue, prior_actuals_revenue, actuals_ebitda
         )
+        revenue = self.calculator.calculate_base_metric(actuals_revenue)
+        size_range = self.get_metric_range(revenue, "size profile")
+        company["size_cohort"] = size_range
+
+        growth = self.calculator.calculate_growth_rate(
+            actuals_revenue, prior_actuals_revenue
+        )
+        growth_range = self.get_metric_range(growth, "growth profile")
+        company["margin_group"] = growth_range
 
     def anonymized_company(self, company: dict, allowed_companies: list) -> None:
         if company.get("id") not in allowed_companies:
@@ -105,6 +130,37 @@ class ComparisonvsPeersService:
 
         return rule_of_40
 
+    def filter_by_conditions(self, data: dict, **conditions) -> dict:
+        companies_filtered = dict()
+        if (
+            conditions.__contains__("size_cohort") is True
+            and conditions.__contains__("margin_group") is True
+        ):
+            for company in data:
+                if data[company]["size_cohort"] in conditions.get(
+                    "size_cohort", []
+                ) and data[company]["margin_group"] in conditions.get(
+                    "margin_group", []
+                ):
+                    companies_filtered[company] = data[company]
+        elif (
+            conditions.__contains__("size_cohort") is True
+            and conditions.__contains__("margin_group") is False
+        ):
+            for company in data:
+                if data[company]["size_cohort"] in conditions.get("size_cohort", []):
+                    companies_filtered[company] = data[company]
+        elif (
+            conditions.__contains__("margin_group") is True
+            and conditions.__contains__("size_cohort") is False
+        ):
+            for company in data:
+                if data[company]["margin_group"] in conditions.get("margin_group", []):
+                    companies_filtered[company] = data[company]
+        else:
+            companies_filtered = data
+        return companies_filtered
+
     def get_peers_comparison(
         self,
         company_id: str,
@@ -128,6 +184,8 @@ class ComparisonvsPeersService:
             )
 
             rule_of_40 = self.get_comparison_vs_data(data, access)
+
+            data = self.filter_by_conditions(data, **conditions)
 
             if not from_main and is_valid_company:
                 company = data.pop(company_id, dict())
