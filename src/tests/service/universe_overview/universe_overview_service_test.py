@@ -231,6 +231,51 @@ class TestUniverseOverview(TestCase):
 
         self.assertEqual(revenue_ebitda, expected_revenue_ebitda)
 
+    @parameterized.expand(
+        [
+            [
+                {
+                    "size_cohort": "$30-<$50 million",
+                    "margin_group": "Negative growth (<0%)",
+                },
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "$30-<$50 million",
+                        "margin_group": "Negative growth (<0%)",
+                    }
+                ],
+            ],
+            [
+                {"size_cohort": "$50-$100 million"},
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "$50-$100 million",
+                        "margin_group": "Low growth (0-<10%)",
+                    }
+                ],
+            ],
+            [
+                {"margin_group": "Medium growth (10%-<30%)"},
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "100 million+",
+                        "margin_group": "Medium growth (10%-<30%)",
+                    }
+                ],
+            ],
+        ]
+    )
+    def test_filter_by_conditions(self, conditions, data):
+
+        filters_by_conditions = self.overview_instance.filter_by_conditions(
+            data, **conditions
+        )
+
+        self.assertEqual(filters_by_conditions, data)
+
     def test_get_universe_overview_success(self):
         company = self.scenarios.copy()
         data = {self.company["id"]: company}
@@ -277,48 +322,3 @@ class TestUniverseOverview(TestCase):
             self.overview_instance.get_universe_overview("2020")
 
         self.assertEqual(str(context.exception), "error")
-
-    @parameterized.expand(
-        [
-            [
-                {
-                    "size_cohort": "$30-<$50 million",
-                    "margin_group": "Negative growth (<0%)",
-                },
-                [
-                    {
-                        "id": "0123456",
-                        "size_cohort": "$30-<$50 million",
-                        "margin_group": "Negative growth (<0%)",
-                    }
-                ],
-            ],
-            [
-                {"size_cohort": "$50-$100 million"},
-                [
-                    {
-                        "id": "0123456",
-                        "size_cohort": "$50-$100 million",
-                        "margin_group": "Low growth (0-<10%)",
-                    }
-                ],
-            ],
-            [
-                {"margin_group": "Medium growth (10%-<30%)"},
-                [
-                    {
-                        "id": "0123456",
-                        "size_cohort": "100 million+",
-                        "margin_group": "Medium growth (10%-<30%)",
-                    }
-                ],
-            ],
-        ]
-    )
-    def test_filter_by_conditions(self, conditions, data):
-
-        filters_by_conditions = self.overview_instance.filter_by_conditions(
-            data, **conditions
-        )
-
-        self.assertEqual(filters_by_conditions, data)
