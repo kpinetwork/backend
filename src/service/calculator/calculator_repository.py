@@ -37,7 +37,6 @@ class CalculatorRepository:
                     f"{self.company_table}.name",
                     f"{self.company_table}.sector",
                     f"{self.company_table}.vertical",
-                    f"{self.company_table}.size_cohort",
                     f"{self.company_table}.inves_profile_name",
                 ]
             )
