@@ -235,8 +235,8 @@ class TestUniverseOverview(TestCase):
         [
             [
                 {
-                    "size_cohort": "$30-<$50 million",
-                    "margin_group": "Negative growth (<0%)",
+                    "size_cohort": ["$30-<$50 million"],
+                    "margin_group": ["Negative growth (<0%)"],
                 },
                 [
                     {
@@ -247,7 +247,10 @@ class TestUniverseOverview(TestCase):
                 ],
             ],
             [
-                {"size_cohort": "$50-$100 million"},
+                {
+                    "size_cohort": ["$30-<$50 million", "$50-$100 million"],
+                    "margin_group": [],
+                },
                 [
                     {
                         "id": "0123456",
@@ -257,7 +260,7 @@ class TestUniverseOverview(TestCase):
                 ],
             ],
             [
-                {"margin_group": "Medium growth (10%-<30%)"},
+                {"margin_group": ["Medium growth (10%-<30%)"], "size_cohort": []},
                 [
                     {
                         "id": "0123456",

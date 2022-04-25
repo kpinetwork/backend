@@ -132,10 +132,10 @@ class ComparisonvsPeersService:
 
     def filter_by_conditions(self, data: dict, **conditions) -> dict:
         companies_filtered = dict()
-        if (
-            conditions.__contains__("size_cohort") is True
-            and conditions.__contains__("margin_group") is True
-        ):
+        size_cohort = conditions.get("size_cohort", [])
+        margin_group = conditions.get("margin_group", [])
+
+        if len(size_cohort) > 0 and len(margin_group) > 0:
             for company in data:
                 if data[company]["size_cohort"] in conditions.get(
                     "size_cohort", []
@@ -143,17 +143,11 @@ class ComparisonvsPeersService:
                     "margin_group", []
                 ):
                     companies_filtered[company] = data[company]
-        elif (
-            conditions.__contains__("size_cohort") is True
-            and conditions.__contains__("margin_group") is False
-        ):
+        elif len(size_cohort) > 0 and len(margin_group) == 0:
             for company in data:
                 if data[company]["size_cohort"] in conditions.get("size_cohort", []):
                     companies_filtered[company] = data[company]
-        elif (
-            conditions.__contains__("margin_group") is True
-            and conditions.__contains__("size_cohort") is False
-        ):
+        elif len(size_cohort) == 0 and len(margin_group) > 0:
             for company in data:
                 if data[company]["margin_group"] in conditions.get("margin_group", []):
                     companies_filtered[company] = data[company]

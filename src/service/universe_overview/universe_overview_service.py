@@ -175,10 +175,10 @@ class UniverseOverviewService:
 
     def filter_by_conditions(self, data: list, **conditions) -> list:
         companies_filtered = list()
-        if (
-            conditions.__contains__("size_cohort") is True
-            and conditions.__contains__("margin_group") is True
-        ):
+        size_cohort = conditions.get("size_cohort", [])
+        margin_group = conditions.get("margin_group", [])
+
+        if len(size_cohort) > 0 and len(margin_group) > 0:
             companies_filtered = filter(
                 lambda company: (
                     company["size_cohort"] in conditions.get("size_cohort", [])
@@ -186,20 +186,14 @@ class UniverseOverviewService:
                 ),
                 data,
             )
-        elif (
-            conditions.__contains__("size_cohort") is True
-            and conditions.__contains__("margin_group") is False
-        ):
+        elif len(size_cohort) > 0 and len(margin_group) == 0:
             companies_filtered = filter(
                 lambda company: (
                     company["size_cohort"] in conditions.get("size_cohort", [])
                 ),
                 data,
             )
-        elif (
-            conditions.__contains__("margin_group") is True
-            and conditions.__contains__("size_cohort") is False
-        ):
+        elif len(size_cohort) == 0 and len(margin_group) > 0:
             companies_filtered = filter(
                 lambda company: (
                     company["margin_group"] in conditions.get("margin_group", [])

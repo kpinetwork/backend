@@ -202,8 +202,8 @@ class TestComparisonvsPeers(TestCase):
         [
             [
                 {
-                    "size_cohort": "$30-<$50 million",
-                    "margin_group": "Negative growth (<0%)",
+                    "size_cohort": ["$30-<$50 million"],
+                    "margin_group": ["Negative growth (<0%)"],
                 },
                 {
                     "0123456": {
@@ -213,7 +213,10 @@ class TestComparisonvsPeers(TestCase):
                 },
             ],
             [
-                {"size_cohort": "$50-$100 million"},
+                {
+                    "size_cohort": ["$50-$100 million"],
+                    "margin_group": [],
+                },
                 {
                     "0123456": {
                         "size_cohort": "$50-$100 million",
@@ -222,7 +225,7 @@ class TestComparisonvsPeers(TestCase):
                 },
             ],
             [
-                {"margin_group": "Medium growth (10%-<30%)"},
+                {"margin_group": ["Medium growth (10%-<30%)"], "size_cohort": []},
                 {
                     "0123456": {
                         "size_cohort": "100 million+",
