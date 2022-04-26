@@ -1,7 +1,6 @@
 import sys
 import uuid
 import logging
-import datetime
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
@@ -75,8 +74,6 @@ company_schema = StructType(
         StructField("name", StringType(), False),
         StructField("sector", StringType(), False),
         StructField("vertical", StringType(), True),
-        StructField("from_date", StringType(), False),
-        StructField("fiscal_year", StringType(), False),
         StructField("inves_profile_name", StringType(), True),
         StructField("is_public", BooleanType(), False),
     ]
@@ -148,17 +145,12 @@ def get_company_description(row):
     sector = get_row_value(row, "Sector")
     vertical = get_row_value(row, "Vertical")
     inves_profile = get_row_value(row, "Investor profile")
-    now = datetime.datetime.utcnow()
-    from_date = now.strftime("%Y-%m-%d")
-    fiscal_year = now.strftime("%Y-%m-%d")
 
     return [
         company_id,
         name,
         sector,
         vertical,
-        from_date,
-        fiscal_year,
         inves_profile,
         True,
     ]
@@ -325,7 +317,6 @@ def get_dataframes_from_lists(data):
     (companies, periods, scenarios, metrics, scenario_metrics, currencies) = data
 
     df_companies = spark.createDataFrame(companies, schema=company_schema)
-    df_companies = dataframe_cast_date_type(df_companies, ["from_date", "fiscal_year"])
     df_time_periods = spark.createDataFrame(periods, schema=time_period_schema)
     df_time_periods = dataframe_cast_date_type(df_time_periods, ["start_at", "end_at"])
     df_scenarios = spark.createDataFrame(scenarios, schema=scenario_schema)

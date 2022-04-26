@@ -38,4 +38,4 @@ class ProfileRange:
             coincidences.append(revenue < max_value)
         if min_value:
             coincidences.append(revenue >= min_value)
-        return all(coincidences)
+        return coincidences and all(coincidences)
