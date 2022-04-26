@@ -73,7 +73,7 @@ class UniverseOverviewService:
                     ranges,
                 )
             )
-            return metric_ranges[-1].get("label")
+            return metric_ranges[0].get("label")
         except Exception as error:
             self.logger.info(error)
             return "NA"
