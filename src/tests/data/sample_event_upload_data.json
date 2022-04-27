@@ -1,3 +1,8 @@
 {
-    "body": "{\"file\": \"file.txt\", \"fileName\": \"fileName.txt\" }"
+    "body": "{\"file\": \"data\", \"fileName\": \"file.csv\" }",
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
 }

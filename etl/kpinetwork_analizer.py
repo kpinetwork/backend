@@ -1,11 +1,13 @@
 import sys
 import uuid
+import json
 import logging
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from pyspark.sql import SparkSession
 from awsglue.dynamicframe import DynamicFrame
+import boto3
 from pyspark.sql.types import (
     DateType,
     StructType,
@@ -397,17 +399,93 @@ def proccess_file(file_path, env):
     save_data_to_database(schemas_data, env)
 
 
-def main():
-    args = getResolvedOptions(sys.argv, ["ENV", "FILENAME", "BUCKET"])
-    file_name = args["FILENAME"]
-    bucket_name = args["BUCKET"]
-    env = args["ENV"]
+def start_job(env, file_name, bucket_name):
     file_path = "s3://{}/{}".format(bucket_name, file_name)
 
     logger.warning(file_path)
     logger.warning("env: {}".format(env))
 
     proccess_file(file_path, env)
+
+
+def get_values_from_dynamic_df(dynamic_df, user, file):
+    df = dynamic_df.toDF()
+    df.show()
+    df = df.filter((df.user_id == user) & (df.file_name == file))
+    df.show()
+    result = df.first()
+
+    if result:
+        return (result.connection_id, result.user_id, result.file_name)
+    return ("", "", "")
+
+
+def get_connection_option_to_read(catalog_connection, database):
+    return {
+        "url": "{}/{}".format(catalog_connection["url"], database),
+        "user": catalog_connection["user"],
+        "password": catalog_connection["password"],
+        "dbtable": "websocket",
+    }
+
+
+def get_user_and_file(filename):
+    file = filename.split(".csv")[0]
+    attrs = file.split(":")
+    return attrs[1]
+
+
+def call_lambda(env, user, file, connection_id):
+    name = "{}_message_lambda_function".format(env)
+    client = boto3.client("lambda")
+    data = json.dumps({"file": file, "connection_id": connection_id, "user": user})
+    event = {"requestContext": {"connectionId": connection_id}, "body": data}
+
+    client.invoke(FunctionName=name, Payload=json.dumps(event))
+
+
+def read_websocket_table(env, database, filename):
+    ctg_connection = "{}_connection".format(env)
+    catalog_connection = glueContext.extract_jdbc_conf(ctg_connection)
+
+    return glueContext.create_dynamic_frame.from_options(
+        connection_type="postgresql",
+        connection_options=get_connection_option_to_read(catalog_connection, database),
+    )
+
+
+def get_websocket_record(env, database, filename):
+    websocket_df = read_websocket_table(env, database, filename)
+    websocket_df.show()
+    user = get_user_and_file(filename)
+
+    (connection_id, user_id, file_name) = get_values_from_dynamic_df(
+        websocket_df, user, filename
+    )
+
+    websocket_result = "connection: {}, user: {}, file: {}".format(
+        connection_id, user_id, file_name
+    )
+    logger.warning(websocket_result)
+
+    return (connection_id, user_id, file_name)
+
+
+def main():
+    args = getResolvedOptions(sys.argv, ["ENV", "FILENAME", "BUCKET"])
+    file_name = args["FILENAME"]
+    bucket_name = args["BUCKET"]
+    env = args["ENV"]
+
+    file = file_name.split("{}/".format(env))[-1]
+    database = "kpinetworkdb"
+    if env == "demo":
+        database = "demokpinetworkdb"
+
+    start_job(env, file_name, bucket_name)
+
+    (connection_id, user_id, file_name) = get_websocket_record(env, database, file)
+    call_lambda(env, user_id, file_name, connection_id)
 
 
 main()

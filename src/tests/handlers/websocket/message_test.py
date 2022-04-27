@@ -21,18 +21,17 @@ class TestWebsocketMessageRoute(TestCase):
         self.assertEqual(response, api_url)
 
     @mock.patch("src.handlers.websocket.message.boto3")
-    def test_handler_should_response_success_status_code(self, mock_boto3):
+    def test_handler_with_valid_data_should_return_success(self, mock_boto3):
 
         response = handler(self.event, {})
 
-        self.assertEqual(response["statusCode"], 200)
         mock_boto3.assert_not_called()
+        self.assertEqual(response.get("statusCode"), 200)
 
     @mock.patch("src.handlers.websocket.message.boto3")
-    def test_handler_should_raise_exception(self, mock_boto3):
-        error_message = "Connection id not found"
+    def test_handler_without_connection_id_should_fail(self, mock_boto3):
 
         response = handler({}, {})
 
-        self.assertEqual(response["statusCode"], 400)
-        self.assertEqual(response["error"], error_message)
+        mock_boto3.assert_not_called()
+        self.assertEqual(response.get("statusCode"), 400)
