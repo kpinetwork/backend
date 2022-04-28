@@ -1258,7 +1258,7 @@ resource "aws_iam_role_policy_attachment" "register_lambda_logs" {
   policy_arn = var.aws_iam_policy_logs_arn
 }
 
-resource "aws_iam_role_policy_attachment" "cregister_lambda_vpc" {
+resource "aws_iam_role_policy_attachment" "register_lambda_vpc" {
   role = aws_iam_role.register_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
 }
