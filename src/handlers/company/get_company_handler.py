@@ -18,7 +18,7 @@ company_service = CompanyService(
 )
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         company_id = event.get("pathParameters").get("id")
         company = company_service.get_company(company_id)

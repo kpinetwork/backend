@@ -20,7 +20,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         user_service = get_user_details_service_instance()
         company_anonymization = CompanyAnonymization(user_service)

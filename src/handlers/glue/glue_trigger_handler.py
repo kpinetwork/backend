@@ -9,7 +9,7 @@ logger.setLevel(logging.INFO)
 glue_service = GlueService()
 
 
-def handler(event, context):
+def handler(event, _):
     return {
         "statusCode": 200,
         "body": json.dumps(glue_service.trigger(client, event, logger)),

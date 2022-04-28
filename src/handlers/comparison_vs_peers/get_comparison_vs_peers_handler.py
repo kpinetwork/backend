@@ -2,7 +2,7 @@ import json
 from get_peers_data import get_comparison_vs_peers
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         comparison_peers = get_comparison_vs_peers(event)
 

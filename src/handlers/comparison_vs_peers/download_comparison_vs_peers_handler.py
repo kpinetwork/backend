@@ -60,7 +60,7 @@ def get_file_data(data: dict, file_path: str) -> str:
     return file_data
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         comparison_peers = get_comparison_vs_peers(event)
 

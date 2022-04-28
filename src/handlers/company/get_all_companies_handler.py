@@ -18,7 +18,7 @@ company_service = CompanyService(
 )
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         offset = 0
         max_count = 20
