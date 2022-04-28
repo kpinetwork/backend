@@ -1,7 +1,7 @@
 import json
 
 
-def handler(event, context):
+def handler(_):
     try:
         return {"statusCode": 200, "body": json.dumps({"connected": False})}
 
