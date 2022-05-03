@@ -25,7 +25,7 @@ class UploadFileService:
             scenario_name.split("-")[1]
         ]
 
-    def __get_duplicated_values(self, companies: list, key: str) -> list:
+    def __get_duplicated_values(self, companies: list, key: str) -> dict:
         counts = dict(
             Counter([company.get(key) for company in companies if company.get(key)])
         )
