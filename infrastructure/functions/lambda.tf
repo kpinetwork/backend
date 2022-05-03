@@ -113,6 +113,13 @@ resource "aws_lambda_function" "glue_trigger_lambda_function" {
   s3_key           = var.object_bucket_references.glue_trigger_function_bucket.key
   function_name    = "${var.environment}_${var.lambdas_names.glue_trigger_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.glue_trigger_function_bucket.etag)
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
   environment {
     variables = {
       ENV          = var.environment
@@ -129,19 +136,6 @@ resource "aws_lambda_permission" "glue_trigger_event_permission" {
   source_arn    = "arn:aws:s3:::${var.bucket_files}"
 }
 
-resource "aws_s3_bucket_notification" "files_bucket_notification" {
-  bucket     = var.bucket_files
-  lambda_function {
-    id                  = "aws_s3_bucket_notification_${aws_lambda_function.glue_trigger_lambda_function.function_name}"
-    lambda_function_arn = aws_lambda_function.glue_trigger_lambda_function.arn
-    events              = ["s3:ObjectCreated:Put"]
-    filter_prefix       = "${var.environment}/"
-  }
-  depends_on = [
-    aws_lambda_function.glue_trigger_lambda_function,
-    aws_lambda_permission.glue_trigger_event_permission
-  ]
-}
 
 resource "aws_lambda_function" "get_universe_overview_lambda_function" {
   role = var.lambdas_exec_roles_arn.get_universe_overview_exec_role_arn
