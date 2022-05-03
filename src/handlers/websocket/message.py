@@ -28,7 +28,7 @@ def get_connection_id(event):
 
 
 def get_file_name(file: str) -> str:
-    file_name = file.split(":")[1]
+    file_name = file.split(":")[0]
     return "{name}.csv".format(name=file_name)
 
 

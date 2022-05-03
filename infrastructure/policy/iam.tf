@@ -1173,6 +1173,11 @@ resource "aws_iam_role_policy_attachment" "disconnect_lambda_logs" {
   policy_arn = var.aws_iam_policy_logs_arn
 }
 
+resource "aws_iam_role_policy_attachment" "disconnect_lambda_vpc" {
+  role = aws_iam_role.disconnect_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
 resource "aws_lambda_permission" "websocket_disconnect" {
   statement_id = "AllowExecutionFromApiGateway"
   action = "lambda:InvokeFunction"
@@ -1204,6 +1209,11 @@ EOF
 resource "aws_iam_role_policy_attachment" "message_lambda_logs" {
   role = aws_iam_role.message_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "message_lambda_vpc" {
+  role = aws_iam_role.message_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
 }
 
 resource "aws_lambda_permission" "websocket_message" {
