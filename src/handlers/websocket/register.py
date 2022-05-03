@@ -44,7 +44,7 @@ def handler(event, context):
         username, filename = get_username_and_filename(event.get("body"))
         is_registered = service.register_connection(connection_id, username, filename)
 
-        body = json.dumps({"registered": is_registered}).encode("utf-8")
+        body = json.dumps({"registered": is_registered})
 
         return {"statusCode": 200, "body": body}
 
