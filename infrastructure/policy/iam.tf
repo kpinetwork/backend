@@ -1232,3 +1232,60 @@ resource "aws_iam_role_policy" "allow_execute_api_message_connection" {
 }
 EOF
 }
+
+resource "aws_iam_role" "register_lambda_exec_role" {
+  name = "${var.environment}_register_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "register_lambda_logs" {
+  role = aws_iam_role.register_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "register_lambda_vpc" {
+  role = aws_iam_role.register_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "websocket_register" {
+  statement_id = "AllowExecutionFromApiGateway"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.register_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "${var.websocket_api_references.api.arn}/*/register"
+}
+
+resource "aws_iam_role_policy" "allow_execute_api_register_connection" {
+  name        = "${var.environment}_allow_execute_api_register_connection_policy"
+  role        = aws_iam_role.register_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "execute-api:ManageConnections"
+      ],
+      "Effect": "Allow",
+      "Resource": "${var.websocket_api_references.api.arn}/*"
+    }
+  ]
+}
+EOF
+}

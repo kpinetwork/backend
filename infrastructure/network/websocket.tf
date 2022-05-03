@@ -25,6 +25,13 @@ resource "aws_apigatewayv2_integration" "message_integration" {
   integration_method = "POST"
 }
 
+resource "aws_apigatewayv2_integration" "register_integration" {
+  api_id           = aws_apigatewayv2_api.websocket_api.id
+  integration_type = "AWS_PROXY"
+  integration_uri  = var.lambdas_functions_arn.register_lambda_function
+  integration_method = "POST"
+}
+
 resource "aws_apigatewayv2_route" "connect_route" {
   api_id    = aws_apigatewayv2_api.websocket_api.id
   route_key = "$connect"
@@ -41,6 +48,12 @@ resource "aws_apigatewayv2_route" "message_route" {
   api_id    = aws_apigatewayv2_api.websocket_api.id
   route_key = "message"
   target = "integrations/${aws_apigatewayv2_integration.message_integration.id}"
+}
+
+resource "aws_apigatewayv2_route" "register_route" {
+  api_id    = aws_apigatewayv2_api.websocket_api.id
+  route_key = "register"
+  target = "integrations/${aws_apigatewayv2_integration.register_integration.id}"
 }
 
 resource "aws_apigatewayv2_stage" "stage" {
