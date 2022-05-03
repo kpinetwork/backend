@@ -19,8 +19,11 @@ class CalculatorRepository:
     def add_company_filters(self, **kwargs) -> dict:
         filters = dict()
         for k, v in kwargs.items():
-            values = [f"'{element}'" for element in v if element and element.strip()]
-            filters[f"{self.company_table}.{k}"] = values
+            if k != "size_cohort" and k != "margin_group":
+                values = [
+                    f"'{element}'" for element in v if element and element.strip()
+                ]
+                filters[f"{self.company_table}.{k}"] = values
         return filters
 
     def get_columns(self, value_alias: str, need_all: bool) -> list:
@@ -34,7 +37,6 @@ class CalculatorRepository:
                     f"{self.company_table}.name",
                     f"{self.company_table}.sector",
                     f"{self.company_table}.vertical",
-                    f"{self.company_table}.size_cohort",
                     f"{self.company_table}.inves_profile_name",
                 ]
             )

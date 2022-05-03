@@ -241,12 +241,26 @@ functions:
     requirements: ./src/handlers/websocket/requirements.txt
     include:
     - ./src/handlers/websocket/disconnect.py
+    - ./src/exceptions/base_exception.py
+    - ./src/service/websocket/connection_service.py
+    - ./db/utils/connection.py
 
   message:
     requirements: ./src/handlers/websocket/requirements.txt
     include:
     - ./src/handlers/websocket/message.py
     - ./src/exceptions/base_exception.py
+    - ./src/service/websocket/connection_service.py
+    - ./db/utils/connection.py
+
+  register:
+    requirements: ./src/handlers/websocket/requirements.txt
+    include:
+    - ./src/handlers/websocket/register.py
+    - ./src/exceptions/base_exception.py
+    - ./src/service/websocket/connection_service.py
+    - ./db/utils/connection.py
+    
 
 layers:
   layer_libraries:

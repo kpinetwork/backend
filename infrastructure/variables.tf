@@ -53,6 +53,7 @@ variable "lambdas_names" {
     "connect_lambda_function" : "connect_lambda_function"
     "disconnect_lambda_function" : "disconnect_lambda_function"
     "message_lambda_function" : "message_lambda_function"
+    "register_lambda_function" : "register_lambda_function"
   }
 }
 

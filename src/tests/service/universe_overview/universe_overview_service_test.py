@@ -59,18 +59,18 @@ class TestUniverseOverview(TestCase):
             {"growth": "NA", "ebitda_margin": 40.5, "rule_of_40": "NA"},
         ]
 
-    def test_get_revenue_range_with_no_valid_number(self):
+    def test_get_profile_range_with_no_valid_number(self):
         metric = "NA"
 
-        range = self.overview_instance.get_revenue_range(30)
+        range = self.overview_instance.get_profile_range("hello", "size_profile")
 
         self.assertEqual(range, metric)
 
-    def test_get_revenue_range_with_error_should_return_NA(self):
+    def test_get_profile_range_with_error_should_return_NA(self):
         metric = "NA"
         self.mock_profile_range.get_profile_ranges.side_effect = Exception("Error")
 
-        range = self.overview_instance.get_revenue_range(metric)
+        range = self.overview_instance.get_profile_range(30, "growth profile")
 
         self.assertEqual(range, metric)
 
@@ -78,7 +78,9 @@ class TestUniverseOverview(TestCase):
         self.mock_profile_range.get_profile_ranges.return_value = [size_range]
         scenarios = self.scenarios.copy()
         company = self.scenarios.copy()
-        company.update(self.metrics)
+        metrics = self.metrics.copy()
+        metrics.update({"margin_group": "$30-<50 million"})
+        company.update(metrics)
 
         self.overview_instance.add_calculated_metrics_to_companies([scenarios])
 
@@ -228,6 +230,54 @@ class TestUniverseOverview(TestCase):
         )
 
         self.assertEqual(revenue_ebitda, expected_revenue_ebitda)
+
+    @parameterized.expand(
+        [
+            [
+                {
+                    "size_cohort": ["$30-<$50 million"],
+                    "margin_group": ["Negative growth (<0%)"],
+                },
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "$30-<$50 million",
+                        "margin_group": "Negative growth (<0%)",
+                    }
+                ],
+            ],
+            [
+                {
+                    "size_cohort": ["$30-<$50 million", "$50-$100 million"],
+                    "margin_group": [],
+                },
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "$50-$100 million",
+                        "margin_group": "Low growth (0-<10%)",
+                    }
+                ],
+            ],
+            [
+                {"margin_group": ["Medium growth (10%-<30%)"], "size_cohort": []},
+                [
+                    {
+                        "id": "0123456",
+                        "size_cohort": "100 million+",
+                        "margin_group": "Medium growth (10%-<30%)",
+                    }
+                ],
+            ],
+        ]
+    )
+    def test_filter_by_conditions(self, conditions, data):
+
+        filters_by_conditions = self.overview_instance.filter_by_conditions(
+            data, **conditions
+        )
+
+        self.assertEqual(filters_by_conditions, data)
 
     def test_get_universe_overview_success(self):
         company = self.scenarios.copy()

@@ -23,6 +23,7 @@ def remove_keys(company: dict):
     company.pop("id", None)
     company.pop("size_cohort", None)
     company.pop("inves_profile_name", None)
+    company.pop("margin_group", None)
     return company
 
 
