@@ -22,6 +22,7 @@ output "lambdas_invoke_arns" {
     "disconnect_lambda_function": aws_lambda_function.disconnect_lambda_function.invoke_arn
     "message_lambda_function": aws_lambda_function.message_lambda_function.invoke_arn
     "register_lambda_function": aws_lambda_function.register_lambda_function.invoke_arn
+    "validate_data_lambda_function": aws_lambda_function.validate_data_lambda_function.invoke_arn
   }
 }
 

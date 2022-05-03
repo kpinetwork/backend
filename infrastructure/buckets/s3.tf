@@ -181,3 +181,10 @@ resource "aws_s3_bucket_object" "register_function_object" {
   source = "${path.module}/../../dist/register.zip"
   etag = filemd5("${path.module}/../../dist/register.zip")
 }
+
+resource "aws_s3_bucket_object" "validate_data_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/validate_data_handler.zip"
+  source = "${path.module}/../../dist/validate_data_handler.zip"
+  etag = filemd5("${path.module}/../../dist/validate_data_handler.zip")
+}
