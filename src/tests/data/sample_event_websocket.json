@@ -1,5 +1,6 @@
 {
     "requestContext": {
         "connectionId": "connectionId"
-    }
+    },
+    "body": "{\"file\": \"file:user_id:27_04_22_13_35_46.csv\" }"
 }

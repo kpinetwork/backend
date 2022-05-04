@@ -1,2 +1,0 @@
-# Include the prod resources
-boto3==1.18.64
