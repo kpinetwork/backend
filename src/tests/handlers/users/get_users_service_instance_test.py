@@ -14,15 +14,17 @@ class TestGetUser(TestCase):
 
     @mock.patch.object(users_service_instance, "get_user_id_from_event")
     @mock.patch.object(users_service_instance, "verify_user_access")
+    @mock.patch.object(users_service_instance, "boto3")
     def test_get_users_service_instance_should_raise_an_exception(
-        self, mock_verify_access, mock_get_user_id_from_event
+        self, mock_boto3, mock_verify_access, mock_get_user_id_from_event
     ):
         mock_get_user_id_from_event.return_value = "user_id"
         mock_verify_access.return_value = False
 
         with self.assertRaises(Exception) as context:
-            get_users_service_instance(self.event, logger)
+            users_service_instance.get_users_service_instance(self.event, logger)
 
+        mock_boto3.assert_not_called()
         self.assertEqual(str(context.exception), "No permissions to get data")
 
     @mock.patch.object(users_service_instance, "get_user_id_from_event")
