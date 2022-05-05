@@ -1,0 +1,26 @@
+{
+    "f0e51d91-a55a-4f3b-9312-d2bab03b8020": {
+        "company_id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+        "company_name": "Sample Company",
+        "scenarios": {
+            "Budget-2021": [
+                "Revenue"
+            ],
+            "Budget-2022": [
+                "Ebitda"
+            ]
+        }
+    },
+    "30e51d91-a55a-4f3b-9312-d2bab03b8020": {
+        "company_id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+        "company_name": "Sample Company 2",
+        "scenarios": {
+            "Budget-2021": [
+                "Revenue"
+            ],
+            "Budget-2022": [
+                "Ebitda"
+            ]
+        }
+    }
+}
