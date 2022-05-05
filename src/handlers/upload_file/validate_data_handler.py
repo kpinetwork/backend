@@ -1,6 +1,6 @@
 import json
 import logging
-from upload_file_service import UploadFileService
+from preview_data_validation_service import PreviewDataValidationService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -12,7 +12,9 @@ query_builder = QuerySQLBuilder()
 response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-upload_file_service = UploadFileService(session, query_builder, logger, response_sql)
+preview_data_validation_service = PreviewDataValidationService(
+    session, query_builder, logger, response_sql
+)
 
 
 def handler(event, _):
@@ -22,7 +24,7 @@ def handler(event, _):
 
         data = json.loads(event.get("body"))
 
-        response = upload_file_service.validate_companies_data(data)
+        response = preview_data_validation_service.validate_companies_data(data)
 
         return {
             "statusCode": 200,

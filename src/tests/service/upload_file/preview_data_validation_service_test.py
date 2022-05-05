@@ -2,8 +2,8 @@ import logging
 from unittest import TestCase
 from unittest.mock import Mock
 from parameterized import parameterized
-from src.service.upload_file.upload_file_service import (
-    UploadFileService,
+from preview_data_validation_service import (
+    PreviewDataValidationService,
 )
 
 logger = logging.getLogger()
@@ -27,7 +27,7 @@ class TestUploadFileService(TestCase):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.upload_file_service_instance = UploadFileService(
+        self.preview_data_validation_service_instance = PreviewDataValidationService(
             self.mock_session, self.mock_query_builder, logger, self.mock_response_sql
         )
         return
@@ -41,23 +41,25 @@ class TestUploadFileService(TestCase):
     def test_get_companies_data_success(self):
         self.mock_response_query_sql(self.company_with_financial_info)
 
-        get_companies_out = self.upload_file_service_instance.get_companies_data()
+        get_companies_out = (
+            self.preview_data_validation_service_instance.get_companies_data()
+        )
 
         self.assertEqual(get_companies_out, self.company_with_financial_info)
-        self.upload_file_service_instance.session.execute.assert_called_once()
+        self.preview_data_validation_service_instance.session.execute.assert_called_once()
 
     def test_get_companies_data_failed(self):
-        self.upload_file_service_instance.session.execute.side_effect = Exception(
-            "error"
+        self.preview_data_validation_service_instance.session.execute.side_effect = (
+            Exception("error")
         )
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.upload_file_service_instance.get_companies_data()
+                self.preview_data_validation_service_instance.get_companies_data()
             )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
-            self.upload_file_service_instance.session.execute.assert_called_once()
+            self.preview_data_validation_service_instance.session.execute.assert_called_once()
 
     @parameterized.expand(
         [
@@ -122,21 +124,25 @@ class TestUploadFileService(TestCase):
     def test_validate_companies_data_success(self, companies_to_validate, expected):
         self.mock_response_query_sql(self.company_with_financial_info)
 
-        validated_companies = self.upload_file_service_instance.validate_companies_data(
-            companies_to_validate
+        validated_companies = (
+            self.preview_data_validation_service_instance.validate_companies_data(
+                companies_to_validate
+            )
         )
 
         self.assertEqual(validated_companies, expected)
 
     def test_validate_companies_data_failed(self):
-        self.upload_file_service_instance.session.execute.side_effect = Exception(
-            "error"
+        self.preview_data_validation_service_instance.session.execute.side_effect = (
+            Exception("error")
         )
         with self.assertRaises(Exception) as context:
             exception = self.assertRaises(
-                self.upload_file_service_instance.validate_companies_data([])
+                self.preview_data_validation_service_instance.validate_companies_data(
+                    []
+                )
             )
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
-            self.upload_file_service_instance.session.execute.assert_called_once()
+            self.preview_data_validation_service_instance.session.execute.assert_called_once()
