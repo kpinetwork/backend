@@ -44,7 +44,7 @@ def remove_connection(connection_id: str):
     service.remove_connection(connection_id)
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         api = get_api_url(os.environ.get("WEBSOCKET_API"))
         client = boto3.client("apigatewaymanagementapi", endpoint_url=api)
