@@ -458,7 +458,7 @@ resource "aws_api_gateway_integration" "validate_data_integration" {
   http_method             = aws_api_gateway_method.validate_data_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.upload_file_s3_lambda_function
+  uri                     = var.lambdas_functions_arn.validate_data_lambda_function
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY DOMAIN
