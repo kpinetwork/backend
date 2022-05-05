@@ -15,7 +15,7 @@ logger.setLevel(logging.INFO)
 upload_file_service = UploadFileService(session, query_builder, logger, response_sql)
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         if not event.get("body"):
             raise AppError("No company data provided")
