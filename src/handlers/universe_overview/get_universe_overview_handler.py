@@ -24,7 +24,7 @@ def get_overview_instance():
     return UniverseOverviewService(logger, calculator, repository, profile_range)
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         overview_service = get_overview_instance()
         year = datetime.datetime.today().year

@@ -20,6 +20,20 @@ class TestResponseBuilder(TestCase):
             "name": "Company Test",
             "sector": "Computer Hardware",
         }
+        self.companies_scenarios_data = [
+            {
+                "id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+                "name": "Sample Company",
+                "scenario": "Budget-2021",
+                "metric": "Revenue",
+            },
+            {
+                "id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+                "name": "Sample Company",
+                "scenario": "Budget-2021",
+                "metric": "Ebitda",
+            },
+        ]
 
     def test_process_query_result_success(self):
         records = [self.record]
@@ -109,3 +123,35 @@ class TestResponseBuilder(TestCase):
         )
 
         self.assertEqual(result, {expected_company["id"]: expected_company})
+
+    def test_process_companies_data_with_financial_information(self):
+        expected_record = {
+            "f0e51d91-a55a-4f3b-9312-d2bab03b8020": {
+                "company_id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+                "company_name": "Sample Company",
+                "scenarios": {"Budget-2021": ["Revenue", "Ebitda"]},
+            }
+        }
+
+        response = self.response_sql_instance.process_companies_data_with_financial_information(
+            self.companies_scenarios_data
+        )
+
+        self.assertEqual(response, expected_record)
+
+    def test_process_companies_data_with_financial_information_(self):
+        record = self.companies_scenarios_data.copy()
+        record[-1].update({"scenario": "Budget-2022"})
+        expected_record = {
+            "f0e51d91-a55a-4f3b-9312-d2bab03b8020": {
+                "company_id": "f0e51d91-a55a-4f3b-9312-d2bab03b8020",
+                "company_name": "Sample Company",
+                "scenarios": {"Budget-2021": ["Revenue"], "Budget-2022": ["Ebitda"]},
+            }
+        }
+
+        response = self.response_sql_instance.process_companies_data_with_financial_information(
+            record
+        )
+
+        self.assertEqual(response, expected_record)

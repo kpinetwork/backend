@@ -231,6 +231,16 @@ functions:
     include:
     - ./src/handlers/upload_file/upload_file_s3_handler.py
     - ./src/exceptions/base_exception.py
+
+  validate_data_handler:
+    requirements: ./src/handlers/upload_file/requirements.txt
+    include:
+    - ./src/handlers/upload_file/validate_data_handler.py
+    - ./src/service/upload_file/preview_data_validation_service.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
   
   connect:
     requirements: ./src/handlers/websocket/requirements.txt

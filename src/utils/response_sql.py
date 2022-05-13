@@ -44,3 +44,35 @@ class ResponseSQL:
         [data[metric.get("id")].update(metric) for metric in records]
 
         return data
+
+    def process_companies_data_with_financial_information(self, records: list) -> dict:
+        response = {}
+        for record in records:
+            company = dict(record)
+            if company.get("id") in response.keys():
+                self.__add_scenario_in_company(
+                    company, response[company.get("id")]["scenarios"]
+                )
+            else:
+                self.__add_company_information(company, response)
+
+        return response
+
+    def __add_scenario_in_company(self, company: dict, scenarios: dict) -> None:
+        scenario = company.get("scenario")
+        metric = company.get("metric")
+        if scenario in scenarios.keys():
+            scenarios[scenario].append(company.get("metric"))
+        else:
+            scenarios[scenario] = [metric]
+
+    def __add_company_information(self, company: dict, companies: dict) -> None:
+        companies.update(
+            {
+                company.get("id"): {
+                    "company_id": company.get("id"),
+                    "company_name": company.get("name"),
+                    "scenarios": {company.get("scenario"): [company.get("metric")]},
+                }
+            }
+        )

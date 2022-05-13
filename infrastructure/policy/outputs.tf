@@ -24,6 +24,7 @@ output "lambdas_exec_roles_arn" {
       "disconnect_exec_role_arn": aws_iam_role.disconnect_lambda_exec_role.arn
       "message_exec_role_arn": aws_iam_role.message_lambda_exec_role.arn
       "register_exec_role_arn": aws_iam_role.register_lambda_exec_role.arn
+      "validate_data_exec_role_arn": aws_iam_role.validate_data_lambda_exec_role.arn
   }
 }
 

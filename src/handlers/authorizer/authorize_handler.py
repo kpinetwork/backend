@@ -71,7 +71,7 @@ def get_policy(permission: str, user: str) -> dict:
     }
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         region = os.environ.get("REGION")
         user_pool_id = os.environ.get("USER_POOL_ID")

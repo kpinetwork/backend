@@ -174,7 +174,6 @@ class UniverseOverviewService:
         return revenue_vs_budget
 
     def filter_by_conditions(self, data: list, **conditions) -> list:
-        companies_filtered = list()
         size_cohort = conditions.get("size_cohort", [])
         margin_group = conditions.get("margin_group", [])
 

@@ -34,7 +34,7 @@ def get_company_report_instance():
     )
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         company_report_service = get_company_report_instance()
         user_id = get_user_id_from_event(event)

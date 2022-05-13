@@ -88,6 +88,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.upload_file_s3_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_validate_data_lambda_function": {
+      resource_path: aws_api_gateway_resource.validate_data.path,
+      http_method: aws_api_gateway_method.validate_data_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

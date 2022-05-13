@@ -1057,7 +1057,7 @@ resource "aws_lambda_permission" "apigw_change_company_publicly_lambda" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
-# AWS IAM UPLOAD FILE S3 
+# AWS IAM UPLOAD FILE S3 AND VALIDATION
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "upload_file_s3_lambda_exec_role" {
   name = "${var.environment}_upload_file_s3_lambda_exec_role"
@@ -1112,6 +1112,42 @@ resource "aws_lambda_permission" "apigw_upload_file_s3_lambda" {
   source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_upload_file_s3_lambda_function.api_id}/*/${var.api_gateway_references.apigw_upload_file_s3_lambda_function.http_method}${var.api_gateway_references.apigw_upload_file_s3_lambda_function.resource_path}"
 }
 
+resource "aws_iam_role" "validate_data_lambda_exec_role" {
+  name = "${var.environment}_validate_data_lambda_exec_role"
+  path = "/"
+  description = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "validate_data_lambda_logs" {
+  role = aws_iam_role.validate_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "validate_data_lambda_vpc" {
+  role = aws_iam_role.validate_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+resource "aws_lambda_permission" "apigw_validate_data_lambda" {
+  statement_id = "AllowExecutionFromAPIGatewayValidateData"
+  action = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.validate_data_lambda_function}"
+  principal = "apigateway.amazonaws.com"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_validate_data_lambda_function.api_id}/*/${var.api_gateway_references.apigw_validate_data_lambda_function.http_method}${var.api_gateway_references.apigw_validate_data_lambda_function.resource_path}"
+}
 # ----------------------------------------------------------------------------------------------------------------------
 # AWS WEBSOCKET
 # ----------------------------------------------------------------------------------------------------------------------

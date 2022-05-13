@@ -3,7 +3,7 @@ import os
 import boto3
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         boto3.Session(
             aws_access_key_id=os.environ.get("ACCESS_KEY"),
