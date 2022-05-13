@@ -1,7 +1,7 @@
 from collections import Counter
 
 
-class UploadFileService:
+class PreviewDataValidationService:
     def __init__(self, session, query_builder, logger, response_sql) -> None:
         self.logger = logger
         self.table_name = "company"

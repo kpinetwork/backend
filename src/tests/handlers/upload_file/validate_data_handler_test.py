@@ -21,7 +21,9 @@ class TestValidateDataHandler(TestCase):
             ],
         }
 
-    @mock.patch("upload_file_service.UploadFileService.validate_companies_data")
+    @mock.patch(
+        "preview_data_validation_service.PreviewDataValidationService.validate_companies_data"
+    )
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_validate_data_handler_success_should_return_200_response(
@@ -58,7 +60,9 @@ class TestValidateDataHandler(TestCase):
         self.assertEqual(response.get("statusCode"), 400)
         self.assertEqual(response.get("body"), json.dumps({"error": error_message}))
 
-    @mock.patch("upload_file_service.UploadFileService.validate_companies_data")
+    @mock.patch(
+        "preview_data_validation_service.PreviewDataValidationService.validate_companies_data"
+    )
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_validate_data_handler_fail_should_return_error_400_response(
