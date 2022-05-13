@@ -1,7 +1,7 @@
 import json
 import os
 import logging
-from src.handlers.users.get_users_service_instance import get_users_service_instance
+from get_users_service_instance import get_users_service_instance
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
