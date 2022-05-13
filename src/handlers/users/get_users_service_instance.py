@@ -18,4 +18,4 @@ def get_users_service_instance(event, logger):
     if not access:
         raise AppError("No permissions to get data")
 
-    return UsersService(cognito, response_user, logger)
+    return UsersService(logger, cognito, response_user)
