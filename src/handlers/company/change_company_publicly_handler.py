@@ -20,7 +20,7 @@ company_service = CompanyService(
 )
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)

@@ -5,7 +5,7 @@ from verify_user_permissions import verify_user_access, get_user_id_from_event
 from base_exception import AppError
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         if not event.get("body"):
             raise AppError("No roles data provided")

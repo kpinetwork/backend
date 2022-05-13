@@ -19,7 +19,7 @@ def get_connection_id(event):
     return request_context["connectionId"]
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         connection_id = get_connection_id(event)
 

@@ -4,7 +4,7 @@ import urllib.parse
 
 class GlueService:
     def __init__(self):
-        pass
+        pass  # This function initialize the glue service
 
     def trigger(self, glue_client, event, logger) -> dict:
         filename = urllib.parse.unquote_plus(

@@ -1,3 +1,7 @@
+company_location_city = "company_location.city"
+company_location_company_id = "company_location.company_id"
+
+
 class CompanyService:
     def __init__(
         self, session, query_builder, logger, response_sql, company_anonymization
@@ -15,13 +19,13 @@ class CompanyService:
                 query = (
                     self.query_builder.add_table_name(self.table_name)
                     .add_select_conditions(
-                        [f"{self.table_name}.*", "company_location.city"]
+                        [f"{self.table_name}.*", company_location_city]
                     )
                     .add_join_clause(
                         {
                             "company_location": {
                                 "from": f"{self.table_name}.id",
-                                "to": "company_location.company_id",
+                                "to": company_location_company_id,
                             }
                         },
                         self.query_builder.JoinType.LEFT,
@@ -67,14 +71,12 @@ class CompanyService:
         try:
             query = (
                 self.query_builder.add_table_name(self.table_name)
-                .add_select_conditions(
-                    [f"{self.table_name}.*", "company_location.city"]
-                )
+                .add_select_conditions([f"{self.table_name}.*", company_location_city])
                 .add_join_clause(
                     {
                         "company_location": {
                             "from": f"{self.table_name}.id",
-                            "to": "company_location.company_id",
+                            "to": company_location_company_id,
                         }
                     },
                     self.query_builder.JoinType.LEFT,
@@ -104,14 +106,12 @@ class CompanyService:
             where_condition = {f"{self.table_name}.is_public": True}
             query = (
                 self.query_builder.add_table_name(self.table_name)
-                .add_select_conditions(
-                    [f"{self.table_name}.*", "company_location.city"]
-                )
+                .add_select_conditions([f"{self.table_name}.*", company_location_city])
                 .add_join_clause(
                     {
                         "company_location": {
                             "from": f"{self.table_name}.id",
-                            "to": "company_location.company_id",
+                            "to": company_location_company_id,
                         }
                     },
                     self.query_builder.JoinType.LEFT,
