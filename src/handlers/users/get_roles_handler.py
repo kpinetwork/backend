@@ -11,7 +11,6 @@ def handler(event, _):
     try:
         users_service = get_users_service_instance(event, logger)
         groups = users_service.get_roles(os.environ.get("USER_POOL_ID"))
-
         return {
             "statusCode": 200,
             "body": json.dumps(groups, default=str),
