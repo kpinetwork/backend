@@ -25,7 +25,7 @@ def upgrade():
                 company_id VARCHAR(36) REFERENCES company (id),
                 investment_date DATE,
                 divestment_date DATE,
-                round TEXT,
+                round INTEGER,
                 structure TEXT,
                 ownership TEXT,
                 investor_type TEXT
