@@ -1335,3 +1335,85 @@ resource "aws_iam_role_policy" "allow_execute_api_register_connection" {
 }
 EOF
 }
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM INVESTMENTS
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "company_investments_lambda_exec_role" {
+  name               = "${var.environment}_get_company_investments_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "add_investment_lambda_exec_role" {
+  name               = "${var.environment}_add_investment_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+
+resource "aws_iam_role_policy_attachment" "company_investments_lambda_logs" {
+  role       = aws_iam_role.company_investments_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_investment_lambda_logs" {
+  role       = aws_iam_role.add_investment_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+
+resource "aws_iam_role_policy_attachment" "company_investments_lambda_vpc" {
+  role       = aws_iam_role.company_investments_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_investment_lambda_vpc" {
+  role       = aws_iam_role.add_investment_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_company_investments_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetCompanyInvestmentsId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_company_investments_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_company_investments_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_company_investments_lambda_function.http_method}${var.api_gateway_references.apigw_get_company_investments_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_add_investment_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayAddInvestmentId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.add_investment_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_add_investment_lambda_function.api_id}/*/${var.api_gateway_references.apigw_add_investment_lambda_function.http_method}${var.api_gateway_references.apigw_add_investment_lambda_function.resource_path}"
+}

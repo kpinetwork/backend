@@ -55,6 +55,8 @@ variable "lambdas_names" {
     "message_lambda_function" : "message_lambda_function"
     "register_lambda_function" : "register_lambda_function"
     "validate_data_lambda_function": "validate_data_lambda_function"
+    "get_company_investments_lambda_function": "get_company_investments_lambda_function"
+    "add_investment_lambda_function": "add_investment_lambda_function"
   }
 }
 
