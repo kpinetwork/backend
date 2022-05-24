@@ -1,0 +1,12 @@
+{
+    "company_id": "b1cc8c13-1db3-461c-9855-1bcee7589d73",
+    "investment": {
+        "invest": "2020-09",
+        "round": 1,
+        "structure": "Primary",
+        "ownership": "Majority",
+        "investor_type": "Public",
+        "investor": "Sample investor"
+    },
+    "added": true
+}

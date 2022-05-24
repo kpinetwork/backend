@@ -1,0 +1,20 @@
+[
+      {
+         "company_id":"zec4b0212-m385-4828-814c-0e6b21d98f87",
+         "investment_date":"2021-01",
+         "divestment_date":null,
+         "round":1,
+         "structure":"Primary and Secondary",
+         "ownership":"Minority",
+         "investor_type":"Early stage VC"
+      },
+      {
+         "company_id":"zec4b0212-m385-4828-814c-0e6b21d98f87",
+         "investment_date":"2022-01",
+         "divestment_date":null,
+         "round":2,
+         "structure":"Secondary",
+         "ownership":"Majority",
+         "investor_type":"Public"
+      }
+]

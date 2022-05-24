@@ -272,6 +272,25 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/service/websocket/connection_service.py
     - ./db/utils/connection.py
+
+  get_company_investments_handler:
+    requirements: ./src/handlers/investments/requirements.txt
+    include:
+    - ./src/handlers/investments/get_company_investments_handler.py
+    - ./src/service/investments/investments_service.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+
+  add_investment_handler:
+    requirements: ./src/handlers/investments/requirements.txt
+    include:
+    - ./src/handlers/investments/add_investment_handler.py
+    - ./src/service/investments/investments_service.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
     
 
 layers:
