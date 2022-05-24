@@ -281,7 +281,6 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-    - ./src/utils/company_anonymization.py
 
   add_investment_handler:
     requirements: ./src/handlers/investments/requirements.txt
@@ -291,7 +290,6 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
-    - ./src/utils/company_anonymization.py
     - ./src/exceptions/base_exception.py
     
 

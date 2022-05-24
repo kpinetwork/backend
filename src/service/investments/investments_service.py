@@ -2,15 +2,12 @@ import uuid
 
 
 class InvestmentsService:
-    def __init__(
-        self, session, query_builder, logger, response_sql, company_anonymization
-    ) -> None:
+    def __init__(self, session, query_builder, logger, response_sql) -> None:
         self.table_name = "investment"
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
-        self.company_anonymization = company_anonymization
 
     def get_company_investments(self, company_id: str) -> list:
         try:

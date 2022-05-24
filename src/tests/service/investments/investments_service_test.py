@@ -2,7 +2,6 @@ from unittest import TestCase
 import logging
 from unittest.mock import Mock
 from src.service.investments.investments_service import InvestmentsService
-from src.utils.company_anonymization import CompanyAnonymization
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -34,7 +33,6 @@ class TestInvestmentsService(TestCase):
             self.mock_query_builder,
             logger,
             self.mock_response_sql,
-            CompanyAnonymization(object()),
         )
         return
 
