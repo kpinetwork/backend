@@ -22,7 +22,7 @@ def handler(event, _):
             raise AppError("No data provided")
 
         company_id = event.get("pathParameters").get("company_id")
-        investment = json.loads(json.dumps(event.get("body")))
+        investment = json.loads(event.get("body"))
         response = investment_service.add_investment(company_id, investment)
 
         return {

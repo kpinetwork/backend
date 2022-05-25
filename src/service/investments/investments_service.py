@@ -15,6 +15,7 @@ class InvestmentsService:
                 date_format = "YYYY-MM"
                 select_columns = [
                     "company_id",
+                    "id",
                     f"to_char(investment_date, '{date_format}') as investment_date",
                     f"to_char(divestment_date, '{date_format}') as divestment_date",
                     "round",
