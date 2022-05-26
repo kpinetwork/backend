@@ -44,6 +44,12 @@ output "object_references" {
       bucket : aws_s3_bucket_object.download_comparison_vs_peers_function_object.bucket
     }
 
+    "get_investment_year_report_function_bucket": {
+      etag : aws_s3_bucket_object.get_investment_year_report_function_object.etag,
+      key : aws_s3_bucket_object.get_investment_year_report_function_object.key,
+      bucket : aws_s3_bucket_object.get_investment_year_report_function_object.bucket
+    }
+
     "add_user_to_customer_group_function_bucket" : {
       etag : aws_s3_bucket_object.add_user_to_customer_group_function_object.etag,
       key : aws_s3_bucket_object.add_user_to_customer_group_function_object.key,
