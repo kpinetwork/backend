@@ -22,7 +22,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(company, default=str),
-            "headers": {"Content-Type": "application/json"},
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
+            },
         }
 
     except Exception as error:

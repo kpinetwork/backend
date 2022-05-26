@@ -17,16 +17,26 @@ class TestGetCompanyInvestmentHandler(TestCase):
     ):
         id_from_event = self.event.get("pathParameters").get("company_id")
         investment_from_event = self.event.get("body")
+        expected_investment = {
+            "invest": "2020-09",
+            "round": 1,
+            "structure": "Primary",
+            "ownership": "Majority",
+            "investor_type": "Public",
+            "investor": "Sample investor",
+        }
         mock_add_investment.return_value = self.response
 
         response = handler(self.event, {})
 
-        mock_add_investment.assert_called_with(id_from_event, investment_from_event)
+        mock_add_investment.assert_called_with(
+            id_from_event, json.loads(investment_from_event)
+        )
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
         self.assertEqual(response.get("statusCode"), 201)
         self.assertTrue(self.response.get("added"))
-        self.assertEqual(self.response.get("investment"), investment_from_event)
+        self.assertEqual(self.response.get("investment"), expected_investment)
 
     @mock.patch("investments_service.InvestmentsService.add_investment")
     def test_add_investment_fail_no_body_400_response(self, mock_add_investment):
