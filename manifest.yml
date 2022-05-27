@@ -91,6 +91,7 @@ functions:
     - ./src/utils/profile_range.py
     - ./src/service/calculator/calculator_repository.py
     - ./src/service/calculator/calculator_service.py
+    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -112,6 +113,7 @@ functions:
     - ./src/utils/profile_range.py
     - ./src/service/calculator/calculator_repository.py
     - ./src/service/calculator/calculator_service.py
+    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -272,6 +274,48 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/service/websocket/connection_service.py
     - ./db/utils/connection.py
+
+  get_company_investments_handler:
+    requirements: ./src/handlers/investments/requirements.txt
+    include:
+    - ./src/handlers/investments/get_company_investments_handler.py
+    - ./src/service/investments/investments_service.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+
+  add_investment_handler:
+    requirements: ./src/handlers/investments/requirements.txt
+    include:
+    - ./src/handlers/investments/add_investment_handler.py
+    - ./src/service/investments/investments_service.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
+
+  get_investment_year_report_handler:
+    requirements: ./src/handlers/investment_year_report/requirements.txt
+    include:
+    - ./src/handlers/investment_year_report/get_investment_year_report_handler.py
+    - ./src/service/calculator/calculator_report.py
+    - ./src/service/investment_peers_report/investment_repository.py
+    - ./src/service/investment_peers_report/investment_year_report.py
+    - ./src/utils/commons_functions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+
     
 
 layers:

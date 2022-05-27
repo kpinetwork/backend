@@ -69,6 +69,13 @@ resource "aws_s3_bucket_object" "download_comparison_vs_peers_function_object" {
   etag = filemd5("${path.module}/../../dist/download_comparison_vs_peers_handler.zip")
 }
 
+resource "aws_s3_bucket_object" "get_investment_year_report_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_investment_year_report_handler.zip"
+  source = "${path.module}/../../dist/get_investment_year_report_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_investment_year_report_handler.zip")
+}
+
 resource "aws_s3_bucket_object" "add_user_to_customer_group_function_object" {
   bucket = var.bucket_name
   key = "${var.lambda_resource_name}/${var.environment}/add_user_to_customer_group_handler.zip"
@@ -187,4 +194,18 @@ resource "aws_s3_bucket_object" "validate_data_function_object" {
   key = "${var.lambda_resource_name}/${var.environment}/validate_data_handler.zip"
   source = "${path.module}/../../dist/validate_data_handler.zip"
   etag = filemd5("${path.module}/../../dist/validate_data_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_company_investments_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_company_investments_handler.zip"
+  source = "${path.module}/../../dist/get_company_investments_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_company_investments_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "add_investment_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/add_investment_handler.zip"
+  source = "${path.module}/../../dist/add_investment_handler.zip"
+  etag = filemd5("${path.module}/../../dist/add_investment_handler.zip")
 }

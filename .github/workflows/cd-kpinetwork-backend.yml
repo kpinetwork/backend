@@ -37,7 +37,7 @@ jobs:
           python -m pytest --cache-clear --cov-config=.coveragerc --cov=src/ src/tests/*
       - name: Check threshold of coverage
         run: |
-          coverage report -m --fail-under=100
+          coverage report -m --fail-under=98
       - name: Build lambdas
         run: |
           juni build

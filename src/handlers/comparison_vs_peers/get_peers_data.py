@@ -8,6 +8,7 @@ from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
 from calculator_repository import CalculatorRepository
 from calculator_service import CalculatorService
+from calculator_report import CalculatorReport
 from profile_range import ProfileRange
 from verify_user_permissions import (
     verify_user_access,
@@ -28,10 +29,9 @@ def get_comparison_vs_peers_service():
     calculator = CalculatorService(logger)
     repository = CalculatorRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
+    report = CalculatorReport(logger, calculator, profile_range, company_anonymization)
 
-    return ComparisonvsPeersService(
-        logger, calculator, repository, profile_range, company_anonymization
-    )
+    return ComparisonvsPeersService(logger, report, repository)
 
 
 def get_comparison_vs_peers(event: dict) -> dict:

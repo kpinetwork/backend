@@ -7,6 +7,7 @@ output "lambdas_invoke_arns" {
     "get_company_report_vs_peers_lambda_function": aws_lambda_function.get_company_report_vs_peers_lambda_function.invoke_arn
     "get_comparison_vs_peers_lambda_function": aws_lambda_function.get_comparison_vs_peers_lambda_function.invoke_arn
     "download_comparison_vs_peers_lambda_function": aws_lambda_function.download_comparison_vs_peers_lambda_function.invoke_arn
+    "get_investment_year_report_lambda_function": aws_lambda_function.get_investment_year_report_lambda_function.invoke_arn
     "add_user_to_customer_group_lambda_function": aws_lambda_function.add_user_to_customer_group_lambda_function.invoke_arn
     "authorize_lambda_function": aws_lambda_function.authorize_lambda_function.invoke_arn
     "verify_users_with_same_email_lambda_function": aws_lambda_function.verify_users_with_same_email_lambda_function.invoke_arn
@@ -23,6 +24,8 @@ output "lambdas_invoke_arns" {
     "message_lambda_function": aws_lambda_function.message_lambda_function.invoke_arn
     "register_lambda_function": aws_lambda_function.register_lambda_function.invoke_arn
     "validate_data_lambda_function": aws_lambda_function.validate_data_lambda_function.invoke_arn
+    "get_company_investments_lambda_function": aws_lambda_function.get_company_investments_lambda_function.invoke_arn
+    "add_investment_lambda_function": aws_lambda_function.add_investment_lambda_function.invoke_arn
   }
 }
 
