@@ -162,7 +162,10 @@ class InvestmentRepository:
 
     def get_metric(self, scenario: dict, base_year: int) -> dict:
         scenario_name = scenario.get("scenario")
+        metrics = ["Revenue", "Ebitda"]
         year = int(scenario_name.split("-")[1])
+        if scenario["metric"] not in metrics:
+            return dict()
         if year not in [base_year - 1, base_year]:
             return dict()
 
