@@ -162,7 +162,10 @@ class InvestmentRepository:
 
     def get_metric(self, scenario: dict, base_year: int) -> dict:
         scenario_name = scenario.get("scenario")
+        metrics = ["Revenue", "Ebitda"]
         year = int(scenario_name.split("-")[1])
+        if scenario["metric"] not in metrics:
+            return dict()
         if year not in [base_year - 1, base_year]:
             return dict()
 
@@ -172,11 +175,13 @@ class InvestmentRepository:
         scenario.update({metric_name: scenario.get("value")})
         return scenario
 
-    def get_scenarios_dict(self, data: list, investments: dict) -> dict:
+    def get_scenarios_dict(
+        self, data: list, investments: dict, invest_year: int
+    ) -> dict:
         scenarios_data = defaultdict(dict)
         for scenario in data:
             base_year = investments[scenario.get("id")]["invest_year"]
-            metric_data = self.get_metric(scenario, base_year)
+            metric_data = self.get_metric(scenario, base_year + invest_year)
             scenarios_data[scenario.get("id")].update(metric_data)
         return scenarios_data
 
@@ -194,4 +199,4 @@ class InvestmentRepository:
 
         scenarios = self.get_scenarios(companies, years, filters)
 
-        return self.get_scenarios_dict(scenarios, investments)
+        return self.get_scenarios_dict(scenarios, investments, invest_year)
