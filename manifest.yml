@@ -316,6 +316,16 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
 
+  update_data:
+    requirements: ./src/handlers/glue/requirements.txt
+    include:
+    - ./src/handlers/glue/update_data.py
+    - ./src/service/glue/update_data_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
+
     
 
 layers:

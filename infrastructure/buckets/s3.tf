@@ -209,3 +209,10 @@ resource "aws_s3_bucket_object" "add_investment_function_object" {
   source = "${path.module}/../../dist/add_investment_handler.zip"
   etag = filemd5("${path.module}/../../dist/add_investment_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "update_data_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/update_data.zip"
+  source = "${path.module}/../../dist/update_data.zip"
+  etag = filemd5("${path.module}/../../dist/update_data.zip")
+}
