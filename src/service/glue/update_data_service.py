@@ -34,13 +34,13 @@ class UpdateDataService:
     ) -> str:
         queries = []
         for row in rows_data:
-            id = row.pop("id")
+            primary_key = row.pop("id")
             conditions = self.__get_valid_conditions(row)
 
             query = (
                 self.query_builder.add_table_name(table)
                 .add_set_conditions(conditions)
-                .add_sql_where_equal_condition({f"{table}.id": f"'{id}'"})
+                .add_sql_where_equal_condition({f"{table}.id": f"'{primary_key}'"})
                 .build_update()
                 .get_query()
             )
