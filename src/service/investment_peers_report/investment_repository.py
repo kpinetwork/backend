@@ -183,7 +183,12 @@ class InvestmentRepository:
             base_year = investments[scenario.get("id")]["invest_year"]
             metric_data = self.get_metric(scenario, base_year + invest_year)
             scenarios_data[scenario.get("id")].update(metric_data)
-        return scenarios_data
+        scenarios = {
+            company_id: scenarios_data[company_id]
+            for company_id in scenarios_data.keys()
+            if scenarios_data[company_id]
+        }
+        return scenarios
 
     def get_base_metrics(self, invest_year: int, **conditions) -> dict:
         investments = self.get_investments()
