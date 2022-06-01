@@ -106,6 +106,15 @@ class TestInvestmentRepository(TestCase):
 
         self.assertEqual(metric_data, expected_scenario)
 
+    def test_get_metric_with_no_valid_name(self):
+        scenario = self.scenarios.copy()
+        scenario["metric"] = "Rule of 40"
+        base_year = self.investment["invest_year"] + 1
+
+        metric_data = self.repository.get_metric(scenario, base_year)
+
+        self.assertEqual(metric_data, dict())
+
     @mock.patch.object(InvestmentRepository, "get_investments")
     def test_get_base_metrics_success(self, mock_get_investments):
         self.mock_response_list_query_sql([self.scenarios])
