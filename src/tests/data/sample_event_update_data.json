@@ -1,0 +1,3 @@
+{
+    "body": "{\"companies\": [{\"id\": \"14cd42b8-b762-4cc9-a8f3-20c8dbbb1a11\", \"name\": \"Sample Company\", \"sector\": \"change sector\", \"vertical\": \"Environment\", \"inves_profile_name\": \"Early stage VC\", \"is_public\": true}], \"metrics\": [{\"id\": \"15cd42b8-b762-4cc9-a8f3-20c8dbbb1a11\", \"name\": \"Sample metric\", \"value\": 4, \"type\": \"standard\", \"data_type\": \"currency\", \"period_id\": \"d5f65bd4-cf9b-4c6a-aaf1-13ebaa6c9c83\", \"company_id\": \"14cd42b8-b762-4cc9-a8f3-20c8dbbb1a11\"}]}"   
+}
