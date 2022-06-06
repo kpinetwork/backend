@@ -41,6 +41,15 @@ class CalculatorService:
             return round(metric_value * 1)
         return "NA"
 
+    def calculate_sum(
+        self, number: float, second_number: float, rounded: bool = True
+    ) -> Union[float, str]:
+        try:
+            return round(number + second_number) if rounded else number + second_number
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
     def calculate_rule_of_40(
         self,
         revenue_recent_year: float,

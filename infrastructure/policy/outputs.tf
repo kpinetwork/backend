@@ -10,6 +10,7 @@ output "lambdas_exec_roles_arn" {
       "get_comparison_vs_peers_exec_role_arn": aws_iam_role.get_comparison_vs_peers_lambda_exec_role.arn
       "download_comparison_vs_peers_exec_role_arn": aws_iam_role.download_comparison_vs_peers_lambda_exec_role.arn
       "get_investment_year_report_exec_role_arn": aws_iam_role.get_investment_year_report_lambda_exec_role.arn
+      "get_by_metric_report_exec_role_arn": aws_iam_role.get_by_metric_report_lambda_exec_role.arn
       "add_user_to_customer_group_exec_role_arn": aws_iam_role.add_user_to_customer_group_lambda_exec_role.arn
       "authorize_exec_role_arn": aws_iam_role.authorize_lambda_exec_role.arn
       "verify_users_with_same_email_exec_role_arn": aws_iam_role.verify_users_with_same_email_lambda_exec_role.arn
