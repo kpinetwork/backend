@@ -1,7 +1,7 @@
 import json
 import logging
-from commons_functions import get_condition_params
 from connection import create_db_engine, create_db_session
+from commons_functions import get_condition_params
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization

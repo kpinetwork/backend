@@ -23,9 +23,6 @@ class ByMetricReport:
     def get_base_metrics(self) -> list:
         return ["actuals_revenue", "actuals_ebitda", "budget_revenue", "budget_ebitda"]
 
-    def get_metric_config(self) -> dict:
-        return {}
-
     def get_dynamic_ranges(self, records: list) -> list:
         values = [record["value"] for record in records]
         return self.profile_range.build_ranges_from_values(values)

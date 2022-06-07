@@ -1,0 +1,13 @@
+{
+    "queryStringParameters": {
+        "metric": "actuals_revenue"
+    },
+    "pathParameters": {
+        "id": null
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}
