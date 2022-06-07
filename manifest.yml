@@ -335,7 +335,8 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
-    
+    - ./src/exceptions/base_exception.py
+
   update_data:
     requirements: ./src/handlers/glue/requirements.txt
     include:

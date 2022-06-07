@@ -286,7 +286,7 @@ resource "aws_api_gateway_method" "get_investment_year_report_method" {
 
 resource "aws_api_gateway_method" "get_by_metric_report_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.investment_report_id.id
+  resource_id   = aws_api_gateway_resource.by_metric_report_id.id
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id

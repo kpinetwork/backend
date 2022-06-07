@@ -37,7 +37,7 @@ def get_metric_report_service():
     )
 
 
-def get_header(self) -> dict:
+def get_header() -> dict:
     return {
         "Content-Type": "application/json",
         "Access-Control-Allow-Headers": "Content-Type",

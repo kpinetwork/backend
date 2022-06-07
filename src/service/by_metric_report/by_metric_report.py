@@ -117,11 +117,10 @@ class ByMetricReport:
             )
             data[company] = {
                 "size_cohort": self.profile_range.get_range_from_value(
-                    actuals, self.calculator.is_valid_number, ranges=sizes
+                    actuals, ranges=sizes
                 ),
                 "margin_group": self.profile_range.get_range_from_value(
                     self.calculator.calculate_growth_rate(actuals, prior, False),
-                    self.calculator.is_valid_number,
                     ranges=growths,
                 ),
             }
@@ -170,9 +169,7 @@ class ByMetricReport:
             return metrics
 
         return {
-            year: self.profile_range.get_range_from_value(
-                metrics[year], self.calculator.is_valid_number, ranges=_ranges
-            )
+            year: self.profile_range.get_range_from_value(metrics[year], ranges=_ranges)
             for year in metrics
         }
 

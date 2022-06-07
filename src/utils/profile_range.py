@@ -1,6 +1,6 @@
 from strenum import StrEnum
 from decimal import Decimal
-import statistics
+import numpy
 
 
 class ProfileType(StrEnum):
@@ -48,13 +48,12 @@ class ProfileRange:
     def get_range_from_value(
         self,
         value: float,
-        is_valid_number,
         profile: str = "size profile",
         ranges: list = None,
     ) -> None:
         if not ranges:
             ranges = self.get_profile_ranges(profile)
-        if not is_valid_number(value):
+        if not self.is_valid_number(value):
             return "NA"
         else:
             metric_ranges = list(
@@ -68,13 +67,16 @@ class ProfileRange:
                 if (len(metric_ranges) == 1 and metric_ranges[0])
                 else {"label": "NA"}
             )
+
             return profile_range.get("label")
 
     def get_intervals(self, values: list) -> list:
-        values = list(filter(lambda x: self.is_valid_number(x), values))
+        values = [float(value) for value in values if self.is_valid_number(value)]
         if len(values) < 5:
             return values
-        return statistics.quantiles(values, n=5)
+        percentiles = [0.20, 0.40, 0.60, 0.8]
+
+        return [numpy.quantile(values, percentil) for percentil in percentiles]
 
     def __get_first_range(self, min_value: float) -> dict:
         return {
