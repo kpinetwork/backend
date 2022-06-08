@@ -1,6 +1,6 @@
 output "lambdas_invoke_arns" {
   value = {
-    "get_company_lambda_function": aws_lambda_function.get_company_lambda_function.invoke_arn
+    "get_company_details_lambda_function": aws_lambda_function.get_company_details_lambda_function.invoke_arn
     "get_all_companies_lambda_function": aws_lambda_function.get_all_companies_lambda_function.invoke_arn
     "get_all_public_companies_lambda_function": aws_lambda_function.get_all_public_companies_lambda_function.invoke_arn
     "get_universe_overview_lambda_function": aws_lambda_function.get_universe_overview_lambda_function.invoke_arn

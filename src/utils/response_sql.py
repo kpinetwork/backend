@@ -26,6 +26,11 @@ class ResponseSQL:
 
         return result if average else dict()
 
+    def process_revenue_profile_results(self, records: list) -> list:
+        result = self.process_query_list_results(records)
+        result.extend([{}, {}])
+        return tuple([record.get("value") for record in result[:2]])
+
     def process_metrics_group_by_size_cohort_results(self, records: list) -> list:
         def get_key(elem) -> str:
             return elem.get("size_cohort")

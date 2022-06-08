@@ -1,12 +1,25 @@
 {
     "id": "zec4b0212-m385-4828-814c-0e6b21d98f87",
-    "name": "A",
+    "name": "Company A",
     "from_date": "2010-01-01",
     "fiscal_year": "2010-01-01",
     "sector": "Application Software",
     "vertical": "Energy",
     "inves_profile_name": "Growth stage VC",
-    "margin_group": "Low",
+    "is_public": true,
     "size_cohort": "$100 million+",
-    "is_public": true
+    "margin_group": "Low growth (0-<10%)",
+    "scenarios": {
+        "total": 1,
+        "metrics": [
+            {
+                "scenario_id": "0514fc45-204c-450b-b4a2-525b31ad2323",
+                "scenario": "Actuals",
+                "year": 2021,
+                "metric_id": "02d20ace-79m1-42ta-8bac-c8b9g921a554",
+                "metric": "Revenue",
+                "value": 124
+            }
+        ]
+    }
 }
