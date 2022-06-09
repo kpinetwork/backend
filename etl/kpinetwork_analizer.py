@@ -169,16 +169,16 @@ def existing_metric_from_file(env, company_id, scenario_name, metric_name):
         metric_id = sc_metric_id
         dynamic_m_frame = read_table_from_database(env, database, "metric")
         dynamic_m_frame = create_temp_table(dynamic_m_frame, "metric_table")
-        m_dataframe = spark.sql(
+        metrics_dataframe = spark.sql(
             "SELECT * FROM metric_table WHERE id = '{}' AND name = '{}'".format(
                 metric_id, metric_name
             )
         )
-        result_m_dataframe = m_dataframe.collect()
-        m_ids = [row for row in result_m_dataframe]
+        result_metrics_dataframe = metrics_dataframe.collect()
+        metrics_ids = [row for row in result_metrics_dataframe]
 
-        if m_ids != []:
-            resultant_metric_id = m_ids
+        if metrics_ids:
+            resultant_metric_id = metrics_ids
             break
 
     return resultant_metric_id
@@ -190,25 +190,13 @@ def validate_existing_metric_from_dataframe(env, metric_id):
     if env == "demo":
         database = "demokpinetworkdb"
 
-    ctg_connection = "{}_connection".format(env)
-    catalog_connection = glueContext.extract_jdbc_conf(ctg_connection)
-
-    dynamic_m_frame = glueContext.create_dynamic_frame.from_options(
-        connection_type="postgresql",
-        connection_options={
-            "url": "{}/{}".format(catalog_connection["url"], database),
-            "user": catalog_connection["user"],
-            "password": catalog_connection["password"],
-            "dbtable": "metric",
-        },
-    )
-
-    dynamic_m_frame = dynamic_m_frame.toDF().createOrReplaceTempView("metric_table")
-    m_dataframe = spark.sql(
+    dynamic_metrics_frame = read_table_from_database(env, database, "metric")
+    dynamic_metrics_frame = create_temp_table(dynamic_metrics_frame, "metric_table")
+    metrics_dataframe = spark.sql(
         "SELECT * FROM metric_table WHERE id = '{}'".format(metric_id)
     )
-    result_m_dataframe = m_dataframe.collect()
-    if len(result_m_dataframe) > 0:
+    result_metrics_dataframe = metrics_dataframe.collect()
+    if result_metrics_dataframe:
         result = True
 
     return result
@@ -274,9 +262,9 @@ def get_limits(limits, count):
 
 
 def get_company_description(row, env):
-    exists_id = existing_ids_from_database(env, "company")
+    existing_id = existing_ids_from_database(env, "company")
     id_from_file = get_row_value(row, "Unique ID")
-    if id_from_file in exists_id:
+    if id_from_file in existing_id:
         company_id = id_from_file
     else:
         company_id = str(uuid.uuid4())
