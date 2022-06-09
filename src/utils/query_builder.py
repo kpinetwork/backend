@@ -187,6 +187,11 @@ class QuerySQLBuilder:
                 where_query += "WHERE " + " AND ".join(self.where_conditions_disj)
         return where_query
 
+    def get_where_query(self) -> str:
+        query = self.__build_where()
+        self.__clear
+        return query
+
     def __build_group_by(self):
         if len(self.group_by) > 0:
             groups = ", ".join(self.group_by)

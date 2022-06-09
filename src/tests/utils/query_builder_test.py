@@ -486,3 +486,14 @@ class TestQueryBuilder(TestCase):
         self.assertEqual(
             remove_white_spaces(query), remove_white_spaces(expected_query)
         )
+
+    def test_get_where_query(self):
+        company_name = "'Test'"
+        condition = {"company.name": f"{company_name}"}
+
+        where_query = self.query_sql_instance.add_sql_where_equal_condition(
+            condition
+        ).get_where_query()
+
+        self.assertTrue(where_query != "")
+        self.assertTrue(company_name in where_query)

@@ -45,6 +45,11 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_investment_year_report_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+    "apigw_get_by_metric_report_lambda_function": {
+      resource_path: aws_api_gateway_resource.by_metric_report_id.path,
+      http_method: aws_api_gateway_method.get_by_metric_report_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
 
     "apigw_get_users_lambda_function": {
       resource_path: aws_api_gateway_resource.users.path,
