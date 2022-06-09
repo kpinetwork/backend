@@ -1,5 +1,4 @@
 import json
-import src.tests.config_imports  # noqa
 from src.tests.data.data_reader import read
 from unittest import TestCase, mock
 from src.handlers.company.change_company_publicly_handler import handler

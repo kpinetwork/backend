@@ -99,3 +99,16 @@ class TestCalculatorService(TestCase):
         result = self.calculator.calculate_actual_vs_budget(actual, budget)
 
         self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [14, 16, 30],
+            [32, 41, 73],
+        ]
+    )
+    def test_calculate_dum(self, number, second_number, expected_sum):
+
+        result = self.calculator.calculate_sum(number, second_number)
+
+        self.assertEqual(result, expected_sum)

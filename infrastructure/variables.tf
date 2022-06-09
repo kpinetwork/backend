@@ -41,6 +41,7 @@ variable "lambdas_names" {
     "download_comparison_vs_peers_lambda_function": "download_comparison_vs_peers_lambda_function"
     "get_investment_year_report_lambda_function": "get_investment_year_report_lambda_function"
     "get_investment_year_options_lambda_function": "get_investment_year_options_lambda_function"
+    "get_by_metric_report_lambda_function": "get_by_metric_report_lambda_function"
     "add_user_to_customer_group_lambda_function": "add_user_to_customer_group_lambda_function"
     "authorize_lambda_function": "authorize_lambda_function"
     "verify_users_with_same_email_lambda_function" : "verify_users_with_same_email_lambda_function"
@@ -59,6 +60,7 @@ variable "lambdas_names" {
     "validate_data_lambda_function": "validate_data_lambda_function"
     "get_company_investments_lambda_function": "get_company_investments_lambda_function"
     "add_investment_lambda_function": "add_investment_lambda_function"
+    "update_data_lambda_function": "update_data_lambda_function"
   }
 }
 

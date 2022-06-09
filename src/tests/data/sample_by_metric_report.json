@@ -1,0 +1,28 @@
+{
+    "years": [
+        2019,
+        2020,
+        2021
+    ],
+    "company_comparison_data": {},
+    "peers_comparison_data": [
+        {
+            "id": "cab73877-8f9b-4942-9b66-78090592ce0f",
+            "name": "Company A",
+            "metrics": {
+                "2019": "NA",
+                "2020": 54,
+                "2021": 7
+            }
+        },
+        {
+            "id": "07a659ba-6cce-405d-a917-7e05cd35a9eb",
+            "name": "Company B",
+            "metrics": {
+                "2019": "NA",
+                "2020": -16,
+                "2021": 19
+            }
+        }
+    ]
+}

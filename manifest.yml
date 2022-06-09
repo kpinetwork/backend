@@ -325,6 +325,38 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
 
+  get_by_metric_report_handler:
+    requirements: ./src/handlers/by_metric_report/requirements.txt
+    include:
+    - ./src/handlers/by_metric_report/get_by_metric_report_handler.py
+    - ./src/service/by_metric_report/by_metric_report.py
+    - ./src/service/by_metric_report/metric_report_repository.py
+    - ./src/utils/commons_functions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
+
+  update_data:
+    requirements: ./src/handlers/glue/requirements.txt
+    include:
+    - ./src/handlers/glue/update_data.py
+    - ./src/service/glue/update_data_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
+
+    
 
 layers:
   layer_libraries:
