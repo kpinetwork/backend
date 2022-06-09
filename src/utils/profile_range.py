@@ -16,6 +16,9 @@ class ProfileRange:
         self.logger = logger
         self.table = "value_range"
 
+    def is_valid_number(self, number) -> bool:
+        return number is not None and isinstance(number, (int, float, Decimal))
+
     def get_profile_ranges(self, type: str) -> list:
         try:
             query = (
@@ -31,9 +34,6 @@ class ProfileRange:
         except Exception as error:
             self.logger.info(error)
             return []
-
-    def is_valid_number(self, number) -> bool:
-        return number is not None and isinstance(number, (int, float, Decimal))
 
     def verify_range(self, range, revenue):
         max_value = range.get("max_value")

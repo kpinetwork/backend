@@ -3,8 +3,8 @@
 # @param name The name of the log group
 # @param retention_in_days Specifies the number of days you want to retain log events in the specified log group
 # ----------------------------------------------------------------------------------------------------------------------
-resource "aws_cloudwatch_log_group" "get_company_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_lambda_function}"
+resource "aws_cloudwatch_log_group" "get_company_details_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_details_lambda_function}"
   retention_in_days = var.retention_days
 }
 

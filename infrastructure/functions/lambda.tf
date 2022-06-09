@@ -10,14 +10,15 @@
 # @param depends_on Set of dependencies to execute the definition
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_lambda_function" "get_company_lambda_function" {
-  role             = var.lambdas_exec_roles_arn.company_exec_role_arn
-  handler          = "get_company_handler.handler"
+resource "aws_lambda_function" "get_company_details_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.get_company_details_exec_role_arn
+  handler          = "get_company_details_handler.handler"
   runtime          = var.runtime
-  s3_bucket        = var.object_bucket_references.get_company_function_bucket.bucket
-  s3_key           = var.object_bucket_references.get_company_function_bucket.key
-  function_name    = "${var.environment}_${var.lambdas_names.get_company_lambda_function}"
-  source_code_hash = base64sha256(var.object_bucket_references.get_company_function_bucket.etag)
+  s3_bucket        = var.object_bucket_references.get_company_details_function_bucket.bucket
+  s3_key           = var.object_bucket_references.get_company_details_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.get_company_details_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_company_details_function_bucket.etag)
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -32,10 +33,13 @@ resource "aws_lambda_function" "get_company_lambda_function" {
 
   environment {
     variables = {
-      DB_HOST     = var.db_host
-      DB_NAME     = var.db_name
-      DB_USERNAME = var.db_username
-      DB_PASSWORD = var.db_password
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
     }
   }
 }

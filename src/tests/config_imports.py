@@ -3,6 +3,7 @@ import os
 
 root_path = os.path.abspath(".")
 sys.path.append(f"{root_path}/src/service/company/")
+sys.path.append(f"{root_path}/src/service/company_details/")
 sys.path.append(f"{root_path}/src/service/user_details/")
 sys.path.append(f"{root_path}/src/service/websocket/")
 sys.path.append(f"{root_path}/src/service/company_report_vs_peers")
