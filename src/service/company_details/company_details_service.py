@@ -1,3 +1,4 @@
+from typing import Union
 from base_exception import AppError
 from app_names import TableNames
 
@@ -28,7 +29,7 @@ class CompanyDetails:
             self.logger.info(error)
             return dict()
 
-    def get_profile_records(self, company_id: str) -> tuple:
+    def get_profile_records(self, company_id: str) -> Union[tuple, None]:
         try:
             columns = [f"{TableNames.METRIC}.value", f"{TableNames.SCENARIO}.name"]
             query = (
@@ -92,7 +93,7 @@ class CompanyDetails:
             self.logger.info(error)
             return {"size_cohort": "NA", "margin_group": "NA"}
 
-    def get_total_number_of_scenarios(self, company_id: str) -> int:
+    def get_total_number_of_scenarios(self, company_id: str) -> Union[int, None]:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.SCENARIO)
