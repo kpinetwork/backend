@@ -316,6 +316,15 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
 
+  get_investment_year_options_handler:
+    requirements: ./src/handlers/investment_year_report/requirements.txt
+    include:
+    - ./src/handlers/investment_year_report/get_investment_year_options_handler.py
+    - ./src/service/investment_peers_report/investment_options_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
   get_by_metric_report_handler:
     requirements: ./src/handlers/by_metric_report/requirements.txt
     include:

@@ -1,0 +1,14 @@
+[
+    {
+        "value": -2,
+        "name": "Two years before investment"
+    },
+    {
+        "value": 0,
+        "name": "Year of investment"
+    },
+    {
+        "value": 2,
+        "name": "Second full year after investment"
+    }
+]
