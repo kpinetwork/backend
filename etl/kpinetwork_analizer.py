@@ -262,9 +262,9 @@ def get_limits(limits, count):
 
 
 def get_company_description(row, env):
-    existing_id = existing_ids_from_database(env, "company")
+    existing_ids = existing_ids_from_database(env, "company")
     id_from_file = get_row_value(row, "Unique ID")
-    if id_from_file in existing_id:
+    if id_from_file in existing_ids:
         company_id = id_from_file
     else:
         company_id = str(uuid.uuid4())
