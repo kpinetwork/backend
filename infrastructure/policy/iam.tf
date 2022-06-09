@@ -345,6 +345,7 @@ resource "aws_iam_role_policy" "download_comparison_vs_peers_cognito_policy" {
 EOF
 }
 
+
 resource "aws_iam_role_policy_attachment" "get_comparison_vs_peers_lambda_logs" {
   role       = aws_iam_role.get_comparison_vs_peers_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn
@@ -377,6 +378,7 @@ resource "aws_lambda_permission" "apigw_download_comparison_vs_peers_lambda" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.api_id}/*/${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.http_method}${var.api_gateway_references.apigw_download_comparison_vs_peers_lambda_function.resource_path}"
 }
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 # INVESTMENT REPORT
@@ -1611,3 +1613,4 @@ resource "aws_iam_role_policy_attachment" "update_data_lambda_vpc" {
   role       = aws_iam_role.update_data_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
 }
+

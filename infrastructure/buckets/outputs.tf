@@ -49,6 +49,7 @@ output "object_references" {
       key : aws_s3_bucket_object.get_investment_year_report_function_object.key,
       bucket : aws_s3_bucket_object.get_investment_year_report_function_object.bucket
     }
+    
     "get_investment_year_options_function_bucket": {
       etag : aws_s3_bucket_object.get_investment_year_options_function_object.etag,
       key : aws_s3_bucket_object.get_investment_year_options_function_object.key,
