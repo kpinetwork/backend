@@ -82,7 +82,7 @@ company_schema = StructType(
 )
 
 
-def read_ids_from_database(env, db_table):
+def existing_ids_from_database(env, db_table):
     database = "kpinetworkdb"
     if env == "demo":
         database = "demokpinetworkdb"
@@ -108,87 +108,78 @@ def read_ids_from_database(env, db_table):
     return ids_from_db
 
 
-def exists_metric_from_file(env, company_id, scenario_name, metric_name):
-    resultant_metric_id = None
-    database = "kpinetworkdb"
-    if env == "demo":
-        database = "demokpinetworkdb"
-
+def read_table_from_database(env, database, db_table):
     ctg_connection = "{}_connection".format(env)
     catalog_connection = glueContext.extract_jdbc_conf(ctg_connection)
 
-    dynamic_fs_frame = glueContext.create_dynamic_frame.from_options(
+    return glueContext.create_dynamic_frame.from_options(
         connection_type="postgresql",
         connection_options={
             "url": "{}/{}".format(catalog_connection["url"], database),
             "user": catalog_connection["user"],
             "password": catalog_connection["password"],
-            "dbtable": "financial_scenario",
+            "dbtable": db_table,
         },
     )
 
-    dynamic_fs_frame = dynamic_fs_frame.toDF().createOrReplaceTempView(
-        "financial_scenario_table"
+
+def create_temp_table(dynamic_frame, table_name):
+    return dynamic_frame.toDF().createOrReplaceTempView(table_name)
+
+
+def existing_metric_from_file(env, company_id, scenario_name, metric_name):
+    resultant_metric_id = None
+    database = "kpinetworkdb"
+    if env == "demo":
+        database = "demokpinetworkdb"
+
+    dynamic_scenario_frame = read_table_from_database(
+        env, database, "financial_scenario"
     )
-    fs_dataframe = spark.sql(
+    dynamic_scenario_frame = create_temp_table(
+        dynamic_scenario_frame, "financial_scenario_table"
+    )
+    scenario_dataframe = spark.sql(
         "SELECT id FROM financial_scenario_table WHERE company_id = '{}' AND name = '{}'".format(
             company_id, scenario_name
         )
     )
-    result_fs_dataframe = fs_dataframe.collect()
-    fs_ids = [row.id for row in result_fs_dataframe]
+    result_scenario_dataframe = scenario_dataframe.collect()
+    scenario_ids = [row.id for row in result_scenario_dataframe]
 
-    if len(fs_ids) > 0:
-        financial_scenario_id = fs_ids[0]
-        dynamic_sm_frame = glueContext.create_dynamic_frame.from_options(
-            connection_type="postgresql",
-            connection_options={
-                "url": "{}/{}".format(catalog_connection["url"], database),
-                "user": catalog_connection["user"],
-                "password": catalog_connection["password"],
-                "dbtable": "scenario_metric",
-            },
-        )
+    if not scenario_ids:
+        return resultant_metric_id
 
-        dynamic_sm_frame = dynamic_sm_frame.toDF().createOrReplaceTempView(
-            "scenario_metric_table"
+    financial_scenario_id = scenario_ids[0]
+    dynamic_sm_frame = read_table_from_database(env, database, "scenario_metric")
+    dynamic_sm_frame = create_temp_table(dynamic_sm_frame, "scenario_metric_table")
+    sm_dataframe = spark.sql(
+        "SELECT metric_id FROM scenario_metric_table WHERE scenario_id = '{}'".format(
+            financial_scenario_id
         )
-        sm_dataframe = spark.sql(
-            "SELECT metric_id FROM scenario_metric_table WHERE scenario_id = '{}'".format(
-                financial_scenario_id
+    )
+    result_sm_dataframe = sm_dataframe.collect()
+    sm_ids = [row.metric_id for row in result_sm_dataframe]
+
+    if not sm_ids:
+        return resultant_metric_id
+
+    sc_metric_ids = sm_ids
+    for sc_metric_id in sc_metric_ids:
+        metric_id = sc_metric_id
+        dynamic_m_frame = read_table_from_database(env, database, "metric")
+        dynamic_m_frame = create_temp_table(dynamic_m_frame, "metric_table")
+        m_dataframe = spark.sql(
+            "SELECT * FROM metric_table WHERE id = '{}' AND name = '{}'".format(
+                metric_id, metric_name
             )
         )
-        result_sm_dataframe = sm_dataframe.collect()
-        sm_ids = [row.metric_id for row in result_sm_dataframe]
+        result_m_dataframe = m_dataframe.collect()
+        m_ids = [row for row in result_m_dataframe]
 
-        if len(sm_ids) > 0:
-            sc_metric_ids = sm_ids
-            for sc_metric_id in sc_metric_ids:
-                metric_id = sc_metric_id
-                dynamic_m_frame = glueContext.create_dynamic_frame.from_options(
-                    connection_type="postgresql",
-                    connection_options={
-                        "url": "{}/{}".format(catalog_connection["url"], database),
-                        "user": catalog_connection["user"],
-                        "password": catalog_connection["password"],
-                        "dbtable": "metric",
-                    },
-                )
-
-                dynamic_m_frame = dynamic_m_frame.toDF().createOrReplaceTempView(
-                    "metric_table"
-                )
-                m_dataframe = spark.sql(
-                    "SELECT * FROM metric_table WHERE id = '{}' AND name = '{}'".format(
-                        metric_id, metric_name
-                    )
-                )
-                result_m_dataframe = m_dataframe.collect()
-                m_ids = [row for row in result_m_dataframe]
-
-                if m_ids != []:
-                    resultant_metric_id = m_ids
-                    break
+        if m_ids != []:
+            resultant_metric_id = m_ids
+            break
 
     return resultant_metric_id
 
@@ -283,7 +274,7 @@ def get_limits(limits, count):
 
 
 def get_company_description(row, env):
-    exists_id = read_ids_from_database(env, "company")
+    exists_id = existing_ids_from_database(env, "company")
     id_from_file = get_row_value(row, "Unique ID")
     if id_from_file in exists_id:
         company_id = id_from_file
@@ -396,11 +387,11 @@ def get_financial_data(
 
             if is_valid_value(metric_value) and value is not None:
                 metric_and_year = scenario_type + "-" + year
-                exist_metric = exists_metric_from_file(
+                metric_exists = existing_metric_from_file(
                     env, company[0], metric_and_year, metric_name
                 )
 
-                if exist_metric is None:
+                if metric_exists is None:
                     time_period, scenario = get_scenario_data(
                         year, scenario_type, company, scenarios, periods
                     )
@@ -413,7 +404,7 @@ def get_financial_data(
                     scenario_metrics.append(scenario_metric)
                 else:
                     metric = get_updating_metric_data(
-                        exist_metric, metric_name, company[0], value
+                        metric_exists, metric_name, company[0], value
                     )
                     metrics.append(metric)
 
@@ -496,7 +487,7 @@ def get_existing_schemas_data_from_dataframe(headers, data, env):
     scenarios_index = get_index_limits(headers)
 
     for index in range(2, len(data)):
-        ids = read_ids_from_database(env, "company")
+        ids = existing_ids_from_database(env, "company")
         if is_valid_value(data[index][0]) and data[index][0] in ids:
             (
                 _companies,
@@ -626,11 +617,11 @@ def update_data_to_database(data, env):
     call_lambda_to_update(env, data_to_update)
 
     if (
-        df_new_metrics.collect() != []
-        and df_time_periods.collect() != []
-        and df_scenarios.collect() != []
-        and df_scenario_metrics.collect() != []
-        and df_currencies.collect() != []
+        df_new_metrics.collect()
+        and df_time_periods.collect()
+        and df_scenarios.collect()
+        and df_scenario_metrics.collect()
+        and df_currencies.collect()
     ):
         logger.warning("==========Time Period============================")
         df_time_periods.show()
