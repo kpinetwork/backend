@@ -27,4 +27,4 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [commit]
-        additional_dependencies: [strenum, pytest, pydash, parameterized, SQLAlchemy,psycopg2-binary, boto3, casbin, casbin_sqlalchemy_adapter]
+        additional_dependencies: [strenum, pytest, pydash, parameterized, SQLAlchemy,psycopg2-binary, boto3, casbin, casbin_sqlalchemy_adapter, numpy, num2words]

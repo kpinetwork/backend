@@ -12,9 +12,9 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
-    "apigw_get_company_lambda_function": {
-      resource_path: aws_api_gateway_resource.company.path,
-      http_method: aws_api_gateway_method.get_company_method.http_method,
+    "apigw_get_company_details_lambda_function": {
+      resource_path: aws_api_gateway_resource.company_details.path,
+      http_method: aws_api_gateway_method.get_company_details_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
 
@@ -43,6 +43,17 @@ output "api_gateway_references" {
     "apigw_get_investment_year_report_lambda_function": {
       resource_path: aws_api_gateway_resource.investment_report_id.path,
       http_method: aws_api_gateway_method.get_investment_year_report_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+    "apigw_get_investment_year_options_lambda_function": {
+      resource_path: aws_api_gateway_resource.invest_year_options.path,
+      http_method: aws_api_gateway_method.get_investment_year_options_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_get_by_metric_report_lambda_function": {
+      resource_path: aws_api_gateway_resource.by_metric_report_id.path,
+      http_method: aws_api_gateway_method.get_by_metric_report_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
 

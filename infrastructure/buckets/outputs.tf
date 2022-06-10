@@ -1,9 +1,9 @@
 output "object_references" {
   value = {
-    "get_company_function_bucket" : {
-      etag : aws_s3_bucket_object.get_company_function_object.etag,
-      key : aws_s3_bucket_object.get_company_function_object.key,
-      bucket : aws_s3_bucket_object.get_company_function_object.bucket
+    "get_company_details_function_bucket" : {
+      etag : aws_s3_bucket_object.get_company_details_function_object.etag,
+      key : aws_s3_bucket_object.get_company_details_function_object.key,
+      bucket : aws_s3_bucket_object.get_company_details_function_object.bucket
     }
     "get_all_companies_function_bucket" : {
       etag : aws_s3_bucket_object.get_all_companies_function_object.etag,
@@ -48,6 +48,18 @@ output "object_references" {
       etag : aws_s3_bucket_object.get_investment_year_report_function_object.etag,
       key : aws_s3_bucket_object.get_investment_year_report_function_object.key,
       bucket : aws_s3_bucket_object.get_investment_year_report_function_object.bucket
+    }
+    
+    "get_investment_year_options_function_bucket": {
+      etag : aws_s3_bucket_object.get_investment_year_options_function_object.etag,
+      key : aws_s3_bucket_object.get_investment_year_options_function_object.key,
+      bucket : aws_s3_bucket_object.get_investment_year_options_function_object.bucket
+    }
+
+    "get_by_metric_report_function_bucket": {
+      etag : aws_s3_bucket_object.get_by_metric_report_function_object.etag,
+      key : aws_s3_bucket_object.get_by_metric_report_function_object.key,
+      bucket : aws_s3_bucket_object.get_by_metric_report_function_object.bucket
     }
 
     "add_user_to_customer_group_function_bucket" : {
@@ -162,6 +174,12 @@ output "object_references" {
       etag : aws_s3_bucket_object.add_investment_function_object.etag,
       key : aws_s3_bucket_object.add_investment_function_object.key,
       bucket : aws_s3_bucket_object.add_investment_function_object.bucket
+    }
+
+    "update_data_function_bucket" : {
+      etag : aws_s3_bucket_object.update_data_function_object.etag,
+      key : aws_s3_bucket_object.update_data_function_object.key,
+      bucket : aws_s3_bucket_object.update_data_function_object.bucket
     }
   }
 }

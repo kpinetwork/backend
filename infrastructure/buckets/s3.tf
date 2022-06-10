@@ -6,11 +6,11 @@
 # @param etag Triggers updates when the value changes
 # ----------------------------------------------------------------------------------------------------------------------
 
-resource "aws_s3_bucket_object" "get_company_function_object" {
+resource "aws_s3_bucket_object" "get_company_details_function_object" {
   bucket = var.bucket_name
-  key = "${var.lambda_resource_name}/${var.environment}/get_company_handler.zip"
-  source = "${path.module}/../../dist/get_company_handler.zip"
-  etag = filemd5("${path.module}/../../dist/get_company_handler.zip")
+  key = "${var.lambda_resource_name}/${var.environment}/get_company_details_handler.zip"
+  source = "${path.module}/../../dist/get_company_details_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_company_details_handler.zip")
 }
 
 resource "aws_s3_bucket_object" "get_all_companies_function_object" {
@@ -74,6 +74,20 @@ resource "aws_s3_bucket_object" "get_investment_year_report_function_object" {
   key = "${var.lambda_resource_name}/${var.environment}/get_investment_year_report_handler.zip"
   source = "${path.module}/../../dist/get_investment_year_report_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_investment_year_report_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_investment_year_options_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_investment_year_options_handler.zip"
+  source = "${path.module}/../../dist/get_investment_year_options_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_investment_year_options_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_by_metric_report_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_by_metric_report_handler.zip"
+  source = "${path.module}/../../dist/get_by_metric_report_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_by_metric_report_handler.zip")
 }
 
 resource "aws_s3_bucket_object" "add_user_to_customer_group_function_object" {
@@ -208,4 +222,11 @@ resource "aws_s3_bucket_object" "add_investment_function_object" {
   key = "${var.lambda_resource_name}/${var.environment}/add_investment_handler.zip"
   source = "${path.module}/../../dist/add_investment_handler.zip"
   etag = filemd5("${path.module}/../../dist/add_investment_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "update_data_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/update_data.zip"
+  source = "${path.module}/../../dist/update_data.zip"
+  etag = filemd5("${path.module}/../../dist/update_data.zip")
 }

@@ -3,8 +3,8 @@
 # @param name The name of the log group
 # @param retention_in_days Specifies the number of days you want to retain log events in the specified log group
 # ----------------------------------------------------------------------------------------------------------------------
-resource "aws_cloudwatch_log_group" "get_company_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_lambda_function}"
+resource "aws_cloudwatch_log_group" "get_company_details_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_company_details_lambda_function}"
   retention_in_days = var.retention_days
 }
 
@@ -55,6 +55,16 @@ resource "aws_cloudwatch_log_group" "download_comparison_vs_peers_lambda_functio
 
 resource "aws_cloudwatch_log_group" "get_investment_year_report_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_investment_year_report_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_investment_year_options_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_investment_year_options_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_by_metric_report_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_by_metric_report_lambda_function}"
   retention_in_days = var.retention_days
 }
 
@@ -143,5 +153,10 @@ resource "aws_cloudwatch_log_group" "get_company_investments_lambda_function" {
 
 resource "aws_cloudwatch_log_group" "add_investment_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.add_investment_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "update_data_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.update_data_lambda_function}"
   retention_in_days = var.retention_days
 }

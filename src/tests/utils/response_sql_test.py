@@ -1,5 +1,6 @@
 from unittest import TestCase
 from src.utils.response_sql import ResponseSQL
+from parameterized import parameterized
 
 
 class TestResponseBuilder(TestCase):
@@ -62,6 +63,19 @@ class TestResponseBuilder(TestCase):
         response = self.response_sql_instance.process_query_list_results(records)
 
         self.assertEqual(response, [])
+
+    @parameterized.expand(
+        [
+            [[{"value": 3}, {"value": 10}], (3, 10)],
+            [[{"value": 2}], (2, None)],
+            [[], (None, None)],
+        ]
+    )
+    def test_process_revenue_profile_results(self, records, expected_revenues):
+
+        revenues = self.response_sql_instance.process_revenue_profile_results(records)
+
+        self.assertEqual(revenues, expected_revenues)
 
     def test_process_query_average_result_with_average_in_dict(self):
         expected_average = {"average": 123}

@@ -82,6 +82,126 @@ company_schema = StructType(
 )
 
 
+def existing_ids_from_database(env, db_table):
+    database = "kpinetworkdb"
+    if env == "demo":
+        database = "demokpinetworkdb"
+
+    ctg_connection = "{}_connection".format(env)
+    catalog_connection = glueContext.extract_jdbc_conf(ctg_connection)
+
+    dynamic_frame = glueContext.create_dynamic_frame.from_options(
+        connection_type="postgresql",
+        connection_options={
+            "url": "{}/{}".format(catalog_connection["url"], database),
+            "user": catalog_connection["user"],
+            "password": catalog_connection["password"],
+            "dbtable": db_table,
+        },
+    )
+    dynamic_frame = dynamic_frame.toDF().createOrReplaceTempView(
+        "{}_table".format(db_table)
+    )
+    sqldf = spark.sql("SELECT id FROM {}_table".format(db_table))
+    result_from_sqldf = sqldf.collect()
+    ids_from_db = [row.id for row in result_from_sqldf]
+    return ids_from_db
+
+
+def read_table_from_database(env, database, db_table):
+    ctg_connection = "{}_connection".format(env)
+    catalog_connection = glueContext.extract_jdbc_conf(ctg_connection)
+
+    return glueContext.create_dynamic_frame.from_options(
+        connection_type="postgresql",
+        connection_options={
+            "url": "{}/{}".format(catalog_connection["url"], database),
+            "user": catalog_connection["user"],
+            "password": catalog_connection["password"],
+            "dbtable": db_table,
+        },
+    )
+
+
+def create_temp_table(dynamic_frame, table_name):
+    return dynamic_frame.toDF().createOrReplaceTempView(table_name)
+
+
+def existing_metric_from_file(env, company_id, scenario_name, metric_name):
+    resultant_metric_id = None
+    database = "kpinetworkdb"
+    if env == "demo":
+        database = "demokpinetworkdb"
+
+    dynamic_scenario_frame = read_table_from_database(
+        env, database, "financial_scenario"
+    )
+    dynamic_scenario_frame = create_temp_table(
+        dynamic_scenario_frame, "financial_scenario_table"
+    )
+    scenario_dataframe = spark.sql(
+        "SELECT id FROM financial_scenario_table WHERE company_id = '{}' AND name = '{}'".format(
+            company_id, scenario_name
+        )
+    )
+    result_scenario_dataframe = scenario_dataframe.collect()
+    scenario_ids = [row.id for row in result_scenario_dataframe]
+
+    if not scenario_ids:
+        return resultant_metric_id
+
+    financial_scenario_id = scenario_ids[0]
+    dynamic_sm_frame = read_table_from_database(env, database, "scenario_metric")
+    dynamic_sm_frame = create_temp_table(dynamic_sm_frame, "scenario_metric_table")
+    sm_dataframe = spark.sql(
+        "SELECT metric_id FROM scenario_metric_table WHERE scenario_id = '{}'".format(
+            financial_scenario_id
+        )
+    )
+    result_sm_dataframe = sm_dataframe.collect()
+    sm_ids = [row.metric_id for row in result_sm_dataframe]
+
+    if not sm_ids:
+        return resultant_metric_id
+
+    sc_metric_ids = sm_ids
+    for sc_metric_id in sc_metric_ids:
+        metric_id = sc_metric_id
+        dynamic_m_frame = read_table_from_database(env, database, "metric")
+        dynamic_m_frame = create_temp_table(dynamic_m_frame, "metric_table")
+        metrics_dataframe = spark.sql(
+            "SELECT * FROM metric_table WHERE id = '{}' AND name = '{}'".format(
+                metric_id, metric_name
+            )
+        )
+        result_metrics_dataframe = metrics_dataframe.collect()
+        metrics_ids = [row for row in result_metrics_dataframe]
+
+        if metrics_ids:
+            resultant_metric_id = metrics_ids
+            break
+
+    return resultant_metric_id
+
+
+def validate_existing_metric_from_dataframe(env, metric_id):
+    result = False
+    database = "kpinetworkdb"
+    if env == "demo":
+        database = "demokpinetworkdb"
+
+    dynamic_metrics_frame = read_table_from_database(env, database, "metric")
+    dynamic_metrics_frame = create_temp_table(dynamic_metrics_frame, "metric_table")
+    metrics_dataframe = spark.sql(
+        "SELECT * FROM metric_table WHERE id = '{}'".format(metric_id)
+    )
+    result_metrics_dataframe = metrics_dataframe.collect()
+    if result_metrics_dataframe:
+        result = True
+
+    return result
+
+
 def save_to_database(env, db_table, dataframe):
     database = "kpinetworkdb"
     if env == "demo":
@@ -141,8 +261,13 @@ def get_limits(limits, count):
     return index_limits
 
 
-def get_company_description(row):
-    company_id = str(uuid.uuid4())
+def get_company_description(row, env):
+    existing_ids = existing_ids_from_database(env, "company")
+    id_from_file = get_row_value(row, "Unique ID")
+    if id_from_file in existing_ids:
+        company_id = id_from_file
+    else:
+        company_id = str(uuid.uuid4())
     name = get_row_value(row, "Name")
     sector = get_row_value(row, "Sector")
     vertical = get_row_value(row, "Vertical")
@@ -170,13 +295,25 @@ def get_metric(name, value, period, company):
     return [str(uuid.uuid4()), name, value, "standard", "currency", period, company]
 
 
+def get_existing_metric(row, name, value, company):
+    return [
+        str(row[0].id),
+        name,
+        value,
+        "standard",
+        "currency",
+        str(row[0].period_id),
+        company,
+    ]
+
+
 def get_time_period_str(year):
     start = "{}-01-01".format(year)
     end = "{}-12-31".format(year)
     return (start, end)
 
 
-def get_scenario_data(row, year, scenario_type, company, scenarios, periods):
+def get_scenario_data(year, scenario_type, company, scenarios, periods):
 
     scenario_name = "{}-{}".format(scenario_type, year)
     start_time, end_time = get_time_period_str(year)
@@ -203,7 +340,7 @@ def get_scenario_data(row, year, scenario_type, company, scenarios, periods):
     return (time_period, scenario)
 
 
-def get_metric_data(row, metric_name, period_id, scenario_id, company_id, value):
+def get_metric_data(metric_name, period_id, scenario_id, company_id, value):
     metric = get_metric(metric_name, value, period_id, company_id)
 
     currency_metric = [str(uuid.uuid4()), "USD", metric[0]]
@@ -213,8 +350,13 @@ def get_metric_data(row, metric_name, period_id, scenario_id, company_id, value)
     return (metric, currency_metric, scenario_metric)
 
 
+def get_updating_metric_data(row, metric_name, company_id, value):
+    metric = get_existing_metric(row, metric_name, value, company_id)
+    return metric
+
+
 def get_financial_data(
-    row, metric_limits, scenarios_index, header, years_row, metric_row, company
+    row, metric_limits, scenarios_index, header, years_row, metric_row, company, env
 ):
 
     periods, scenarios, metrics, scenario_metrics, currencies = [], [], [], [], []
@@ -230,39 +372,50 @@ def get_financial_data(
             metric_value = row[index]
             year = years_row[index]
             value = get_metric_value(metric_value)
+
             if is_valid_value(metric_value) and value is not None:
-
-                time_period, scenario = get_scenario_data(
-                    row, year, scenario_type, company, scenarios, periods
+                metric_and_year = scenario_type + "-" + year
+                metric_exists = existing_metric_from_file(
+                    env, company[0], metric_and_year, metric_name
                 )
 
-                metric, currency, scenario_metric = get_metric_data(
-                    row, metric_name, time_period[0], scenario[0], company[0], value
-                )
-                metrics.append(metric)
-                currencies.append(currency)
-                scenario_metrics.append(scenario_metric)
+                if metric_exists is None:
+                    time_period, scenario = get_scenario_data(
+                        year, scenario_type, company, scenarios, periods
+                    )
+
+                    metric, currency, scenario_metric = get_metric_data(
+                        metric_name, time_period[0], scenario[0], company[0], value
+                    )
+                    metrics.append(metric)
+                    currencies.append(currency)
+                    scenario_metrics.append(scenario_metric)
+                else:
+                    metric = get_updating_metric_data(
+                        metric_exists, metric_name, company[0], value
+                    )
+                    metrics.append(metric)
 
     return (periods, scenarios, metrics, scenario_metrics, currencies)
 
 
 def get_company_financial_data(
-    row, metric_limits, scenarios_index, header, years_row, metric_row
+    row, metric_limits, scenarios_index, header, years_row, metric_row, env
 ):
 
     companies = []
 
-    company = get_company_description(row)
+    company = get_company_description(row, env)
     companies.append(company)
 
     periods, scenarios, metrics, scenario_metrics, currencies = get_financial_data(
-        row, metric_limits, scenarios_index, header, years_row, metric_row, company
+        row, metric_limits, scenarios_index, header, years_row, metric_row, company, env
     )
 
     return (companies, periods, scenarios, metrics, scenario_metrics, currencies)
 
 
-def get_schemas_data_from_dataframe(headers, data):
+def get_schemas_data_from_dataframe(headers, data, env):
     data_periods = []
     data_metrics = []
     data_companies = []
@@ -290,6 +443,55 @@ def get_schemas_data_from_dataframe(headers, data):
                 headers,
                 data[1],
                 metric_row,
+                env,
+            )
+            data_periods.extend(_periods)
+            data_companies.extend(_companies)
+            data_scenarios.extend(_scenarios)
+            data_metrics.extend(_metrics)
+            data_scenario_metrics.extend(_scenario_metrics)
+            data_currencies.extend(_currencies)
+
+    return (
+        data_companies,
+        data_periods,
+        data_scenarios,
+        data_metrics,
+        data_scenario_metrics,
+        data_currencies,
+    )
+
+
+def get_existing_schemas_data_from_dataframe(headers, data, env):
+    data_periods = []
+    data_metrics = []
+    data_companies = []
+    data_scenarios = []
+    data_currencies = []
+    data_scenario_metrics = []
+
+    metric_row = data[0]
+    metric_limits = get_limits(get_index_limits(metric_row), len(headers))
+    scenarios_index = get_index_limits(headers)
+
+    for index in range(2, len(data)):
+        ids = existing_ids_from_database(env, "company")
+        if is_valid_value(data[index][0]) and data[index][0] in ids:
+            (
+                _companies,
+                _periods,
+                _scenarios,
+                _metrics,
+                _scenario_metrics,
+                _currencies,
+            ) = get_company_financial_data(
+                data[index],
+                metric_limits,
+                scenarios_index,
+                headers,
+                data[1],
+                metric_row,
+                env,
             )
             data_periods.extend(_periods)
             data_companies.extend(_companies)
@@ -336,6 +538,98 @@ def get_dataframes_from_lists(data):
         df_scenario_metrics,
         df_currencies,
     )
+
+
+def get_updating_dataframes_from_lists(data):
+    (companies, periods, scenarios, metrics, scenario_metrics, currencies) = data
+
+    df_companies = spark.createDataFrame(companies, schema=company_schema)
+    df_time_periods = spark.createDataFrame(periods, schema=time_period_schema)
+    df_time_periods = dataframe_cast_date_type(df_time_periods, ["start_at", "end_at"])
+    df_scenarios = spark.createDataFrame(scenarios, schema=scenario_schema)
+    df_metrics = spark.createDataFrame(metrics, schema=metric_schema)
+    df_currencies = spark.createDataFrame(currencies, schema=currency_schema)
+    df_scenario_metrics = spark.createDataFrame(
+        scenario_metrics, schema=scenario_metric_schema
+    )
+
+    return (
+        df_companies,
+        df_time_periods,
+        df_scenarios,
+        df_metrics,
+        df_scenario_metrics,
+        df_currencies,
+    )
+
+
+def call_lambda_to_update(env, data):
+    name = name = "{}_update_data_lambda_function".format(env)
+    client = boto3.client("lambda")
+    body = json.dumps(data)
+    event = {"body": body}
+
+    client.invoke(FunctionName=name, Payload=json.dumps(event))
+
+
+def update_data_to_database(data, env):
+    (
+        df_companies,
+        df_time_periods,
+        df_scenarios,
+        df_metrics,
+        df_scenario_metrics,
+        df_currencies,
+    ) = get_updating_dataframes_from_lists(data)
+
+    logger.warning("==========Company===============================")
+    df_companies.show()
+    companies_updatables = df_companies.rdd.map(lambda x: x.asDict()).collect()
+
+    logger.warning("==========Existing Metrics===============================")
+    result_metrics_df = df_metrics.collect()
+
+    new_metrics = []
+    existing_metrics = []
+    for row in result_metrics_df:
+        if validate_existing_metric_from_dataframe(env, row.id):
+            existing_metrics.append(row)
+        else:
+            new_metrics.append(row)
+    df_existing_metrics = spark.createDataFrame(existing_metrics, schema=metric_schema)
+    df_new_metrics = spark.createDataFrame(new_metrics, schema=metric_schema)
+    df_existing_metrics.show()
+
+    metrics_updatables = df_existing_metrics.rdd.map(lambda x: x.asDict()).collect()
+    data_to_update = {"companies": companies_updatables, "metrics": metrics_updatables}
+    call_lambda_to_update(env, data_to_update)
+
+    if (
+        df_new_metrics.collect()
+        and df_time_periods.collect()
+        and df_scenarios.collect()
+        and df_scenario_metrics.collect()
+        and df_currencies.collect()
+    ):
+        logger.warning("==========Time Period============================")
+        df_time_periods.show()
+        save_to_database(env, "time_period", df_time_periods)
+
+        logger.warning("==========Scenario===============================")
+        df_scenarios.show()
+        save_to_database(env, "financial_scenario", df_scenarios)
+
+        logger.warning("==========New Metric===============================")
+        df_new_metrics.show()
+        save_to_database(env, "metric", df_new_metrics)
+
+        logger.warning("==========Currency==============================")
+        df_currencies.show()
+        save_to_database(env, "currency", df_currencies)
+
+        logger.warning("==========Scenario Metric========================")
+        df_scenario_metrics.show()
+        save_to_database(env, "scenario_metric", df_scenario_metrics)
 
 
 def save_data_to_database(data, env):
@@ -394,9 +688,13 @@ def proccess_file(file_path, env):
     logger.warning("==========File Headers===============================")
     logger.warning(headers)
 
-    schemas_data = get_schemas_data_from_dataframe(headers, data)
-
+    logger.warning("==========New File Data===============================")
+    schemas_data = get_schemas_data_from_dataframe(headers, data, env)
     save_data_to_database(schemas_data, env)
+
+    logger.warning("==========existing Data===============================")
+    schemas_existing_data = get_existing_schemas_data_from_dataframe(headers, data, env)
+    update_data_to_database(schemas_existing_data, env)
 
 
 def start_job(env, file_name, bucket_name):

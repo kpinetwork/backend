@@ -1,14 +1,20 @@
 functions:
   # Name the zip file you want juni to create
-  get_company_handler:
-    requirements: ./src/handlers/company/requirements.txt
+  get_company_details_handler:
+    requirements: ./src/handlers/company_details/requirements.txt
     include:
-    - ./src/handlers/company/get_company_handler.py
-    - ./src/service/company/company_service.py
+    - ./src/handlers/company_details/get_company_details_handler.py
+    - ./src/service/company_details/company_details_service.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/utils/profile_range.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
-    - ./src/utils/company_anonymization.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+
 
   get_all_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -315,6 +321,46 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+
+  get_investment_year_options_handler:
+    requirements: ./src/handlers/investment_year_report/requirements.txt
+    include:
+    - ./src/handlers/investment_year_report/get_investment_year_options_handler.py
+    - ./src/service/investment_peers_report/investment_options_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+
+  get_by_metric_report_handler:
+    requirements: ./src/handlers/by_metric_report/requirements.txt
+    include:
+    - ./src/handlers/by_metric_report/get_by_metric_report_handler.py
+    - ./src/service/by_metric_report/by_metric_report.py
+    - ./src/service/by_metric_report/metric_report_repository.py
+    - ./src/utils/commons_functions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
+
+  update_data:
+    requirements: ./src/handlers/glue/requirements.txt
+    include:
+    - ./src/handlers/glue/update_data.py
+    - ./src/service/glue/update_data_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
 
     
 
