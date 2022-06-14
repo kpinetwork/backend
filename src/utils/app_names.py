@@ -10,3 +10,13 @@ class TableNames(StrEnum):
     INVESTMENT = "investment"
     SCENARIO = "financial_scenario"
     SCENARIO_METRIC = "scenario_metric"
+
+
+class ScenarioNames(StrEnum):
+    ACTUALS = "Actuals"
+    BUDGET = "Budget"
+
+
+class MetricNames(StrEnum):
+    REVENUE = "Revenue"
+    EBITDA = "Ebitda"
