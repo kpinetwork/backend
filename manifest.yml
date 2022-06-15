@@ -364,6 +364,18 @@ functions:
     - ./db/utils/connection.py
     - ./src/exceptions/base_exception.py
 
+  add_scenario_handler:
+    requirements: ./src/handlers/scenario/requirements.txt
+    include:
+    - ./src/handlers/scenario/add_scenario_handler.py
+    - ./src/service/scenario/scenario_service.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
+
     
 
 layers:

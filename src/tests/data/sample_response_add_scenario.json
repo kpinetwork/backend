@@ -1,0 +1,9 @@
+{
+    "company_id": "0b4085c1-a8f0-4a25-8ae0-ade5fca2d789",
+    "scenario": {
+        "id": "scenario_id",
+        "name": "Actuals-2020",
+        "metric_id": "metric_id"
+    },
+    "added": true
+}
