@@ -163,7 +163,7 @@ class ScenarioService:
         if not self.__is_valid_number(value):
             raise AppError("Invalid value, must be a number")
         current_year = datetime.now().year
-        if scenario == ScenarioNames.ACTUALS and year > current_year:
+        if scenario == ScenarioNames.ACTUALS and year > (current_year + 1):
             raise AppError(
                 "The actual scenario year cannot be greater than the current year"
             )

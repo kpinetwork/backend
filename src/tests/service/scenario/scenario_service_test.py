@@ -9,7 +9,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 message = "Cannot add new scenario:"
-next_year = datetime.now().year + 1
+next_year = datetime.now().year + 2
 args = {
     "company_id": "123",
     "scenario": "Actuals",
