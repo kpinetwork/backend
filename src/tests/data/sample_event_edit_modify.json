@@ -1,0 +1,34 @@
+{
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "body": {
+        "edit": [
+            {
+                "id": "9c5d17a4-186c-461e-955b-dcafd6b45fa7",
+                "description": {},
+                "scenarios": [
+                    {
+                        "scenario_id": "073b57d5-d809-449e-8c6d-148a4f96bfb6",
+                        "scenario":"Actuals", 
+                        "year": 2021,
+                        "metric": "Revenue",
+                        "metric_id": "1842fe06-0ece-4038-ab6a-00eb8260b524",
+                        "value": 32.154549
+                    }
+                ]
+            }
+        ],
+        "add": [
+            {
+                "company_id": "9c5d17a4-186c-461e-955b-dcafd6b45fa7",
+                "scenario": "Actuals", 
+                "year": 2020,
+                "metric": "Revenue",
+                "value": 45.6
+            }
+        ]
+    }
+}
