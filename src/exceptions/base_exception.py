@@ -4,7 +4,7 @@ class AppError(Exception):
     pass
 
 
-class AuthError(Exception):
+class AuthError(AppError):
     """Authentication exception"""
 
     pass
