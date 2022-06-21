@@ -106,7 +106,6 @@ class CalculatorReport:
         return {id: companies[id] for id in companies if companies[id][key] in values}
 
     def filter_by_conditions(self, data: dict, **conditions) -> dict:
-        companies_filtered = dict()
         size_cohort = conditions.get("size_cohort", [])
         margin_group = conditions.get("margin_group", [])
 

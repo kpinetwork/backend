@@ -36,7 +36,7 @@ def get_username_and_filename(body: str) -> tuple:
         raise error
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         service = WebsocketConnectionService(session, logger)
         connection_id = get_connection_id(event)

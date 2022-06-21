@@ -34,6 +34,12 @@ resource "aws_api_gateway_resource" "company_details" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "add_company_scenario" {
+  path_part   = "scenarios"
+  parent_id   = aws_api_gateway_resource.company_details.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "universe_overview" {
   path_part   = "universe_overview"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -198,6 +204,14 @@ resource "aws_api_gateway_method" "get_company_details_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.company_details.id
   http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "add_scenario_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.add_company_scenario.id
+  http_method   = "POST"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
@@ -444,6 +458,15 @@ resource "aws_api_gateway_integration" "get_company_details_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_company_details_lambda_function
+}
+
+resource "aws_api_gateway_integration" "add_company_scenario_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.add_company_scenario.id
+  http_method             = aws_api_gateway_method.add_scenario_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.add_scenario_lambda_function
 }
 
 resource "aws_api_gateway_integration" "universe_overview_integration" {
