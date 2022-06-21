@@ -43,7 +43,7 @@ def handler(event, _):
         access = verify_user_access(user_id)
 
         if not access:
-            raise AuthError("No permissions to add scenarios")
+            raise AuthError("No permissions to edit company and scenarios information")
 
         body = get_body(event)
         data = service.edit_modify_data(body)

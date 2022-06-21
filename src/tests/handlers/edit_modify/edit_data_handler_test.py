@@ -57,7 +57,7 @@ class TestEditModifyDataHandler(TestCase):
         self.assertEqual(response.get("statusCode"), 400)
         self.assertEqual(
             json.loads(response.get("body")),
-            {"error": "No permissions to add scenarios"},
+            {"error": "No permissions to edit company and scenarios information"},
         )
 
     @mock.patch("edit_service.EditModifyService.edit_modify_data")
