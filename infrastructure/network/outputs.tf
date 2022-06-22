@@ -123,6 +123,12 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
+    "apigw_delete_scenarios_lambda_function": {
+      resource_path: aws_api_gateway_resource.scenarios.path,
+      http_method: aws_api_gateway_method.delete_scenarios_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
   }
 }
 

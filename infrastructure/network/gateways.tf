@@ -159,6 +159,12 @@ resource "aws_api_gateway_resource" "company_investments" {
   parent_id   = aws_api_gateway_resource.investments.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
+
+resource "aws_api_gateway_resource" "scenarios" {
+  path_part   = "scenarios"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -408,6 +414,18 @@ resource "aws_api_gateway_method" "add_investment_method" {
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
+
+resource "aws_api_gateway_method" "delete_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios.id
+  http_method   = "DELETE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+
+  request_parameters = {
+    "method.request.querystring.from_details" = true
+  }
+}
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
 # Provides an HTTP Method Integration for an API Gateway Integration.
@@ -606,6 +624,15 @@ resource "aws_api_gateway_integration" "add_investment_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.add_investment_lambda_function
+}
+
+resource "aws_api_gateway_integration" "delete_scenarios_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios.id
+  http_method             = aws_api_gateway_method.delete_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.delete_scenarios_lambda_function
 }
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY DOMAIN

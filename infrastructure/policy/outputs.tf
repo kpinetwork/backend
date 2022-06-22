@@ -31,6 +31,7 @@ output "lambdas_exec_roles_arn" {
       "company_investments_exec_role_arn": aws_iam_role.company_investments_lambda_exec_role.arn
       "add_investment_exec_role_arn": aws_iam_role.add_investment_lambda_exec_role.arn
       "update_data_exec_role_arn": aws_iam_role.update_data_lambda_exec_role.arn
+      "delete_scenarios_exec_role_arn": aws_iam_role.delete_scenarios_lambda_exec_role.arn
   }
 }
 

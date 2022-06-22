@@ -362,6 +362,17 @@ functions:
     - ./db/utils/connection.py
     - ./src/exceptions/base_exception.py
 
+  delete_scenarios_handler:
+    requirements: ./src/handlers/scenarios/requirements.txt
+    include:
+    - ./src/handlers/scenarios/delete_scenarios_handler.py
+    - ./src/service/scenarios/delete_scenarios_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/verify_user_permissions.py
+
     
 
 layers:

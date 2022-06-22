@@ -29,6 +29,7 @@ output "lambdas_invoke_arns" {
     "get_company_investments_lambda_function": aws_lambda_function.get_company_investments_lambda_function.invoke_arn
     "add_investment_lambda_function": aws_lambda_function.add_investment_lambda_function.invoke_arn
     "update_data_lambda_function": aws_lambda_function.update_data_lambda_function.invoke_arn
+    "delete_scenarios_lambda_function": aws_lambda_function.delete_scenarios_lambda_function.invoke_arn
   }
 }
 
