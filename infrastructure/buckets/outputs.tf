@@ -182,6 +182,17 @@ output "object_references" {
       bucket : aws_s3_bucket_object.update_data_function_object.bucket
     }
 
+    "add_scenario_function_bucket" : {
+      etag : aws_s3_bucket_object.add_scenario_function_object.etag,
+      key : aws_s3_bucket_object.add_scenario_function_object.key,
+      bucket : aws_s3_bucket_object.add_scenario_function_object.bucket
+    }
+
+    "edit_modify_data_function_bucket" : {
+      etag : aws_s3_bucket_object.edit_modify_data_function_object.etag,
+      key : aws_s3_bucket_object.edit_modify_data_function_object.key,
+      bucket : aws_s3_bucket_object.edit_modify_data_function_object.bucket
+    }
     "delete_scenarios_function_bucket" : {
       etag : aws_s3_bucket_object.delete_scenarios_function_object.etag,
       key : aws_s3_bucket_object.delete_scenarios_function_object.key,

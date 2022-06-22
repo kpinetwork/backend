@@ -1,5 +1,6 @@
 import os
 import boto3
+from base_exception import AuthError
 
 
 def handler(event, _):
@@ -24,6 +25,6 @@ def handler(event, _):
             len(result["Users"]) > 0
             and result["Users"][0]["Username"] != event["userName"]
         ):
-            raise Exception("A user with the same email address exists")
+            raise AuthError("A user with the same email address exists")
         else:
             return event

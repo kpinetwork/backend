@@ -4,6 +4,7 @@ import logging
 import requests
 from jose import jwk, jwt
 from jose.utils import base64url_decode
+from base_exception import AuthError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -30,7 +31,7 @@ def get_public_key(keys: list, headers: dict):
             key_index = i
             break
     if key_index == -1:
-        raise Exception("Public key not found in jwks.json")
+        raise AuthError("Public key not found in jwks.json")
 
     return jwk.construct(keys[key_index])
 
@@ -40,17 +41,17 @@ def verify_token(token: str, public_key: object):
     decoded_signature = base64url_decode(encoded_signature.encode("utf-8"))
 
     if not public_key.verify(message.encode("utf8"), decoded_signature):
-        raise Exception("Invalid token")
+        raise AuthError("Invalid token")
 
 
 def verify_token_expiration(claims: dict):
     if time.time() > claims["exp"]:
-        raise Exception("Token is expired")
+        raise AuthError("Token is expired")
 
 
 def verify_token_application(app_client_id: str, claims: dict):
     if claims["aud"] != app_client_id:
-        raise Exception("Token was not issued for this audience")
+        raise AuthError("Token was not issued for this audience")
 
 
 def get_policy(permission: str, user: str) -> dict:
@@ -80,7 +81,7 @@ def handler(event, _):
         keys = get_keys(region, user_pool_id)
         token = event.get("authorizationToken")
         if not token:
-            raise Exception("No Token found")
+            raise AuthError("No Token found")
 
         headers = jwt.get_unverified_headers(token)
         public_key = get_public_key(keys, headers)

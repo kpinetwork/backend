@@ -1,0 +1,13 @@
+{
+    "edited": true,
+    "added": {
+        "company_id": [
+            {
+                "scenario": "Actuals-2020",
+                "metric": "Revenue", 
+                "added": true,
+                "error": ""
+            }
+        ]
+    }
+}

@@ -931,6 +931,75 @@ resource "aws_lambda_function" "update_data_lambda_function" {
   }
 }
 
+
+resource "aws_lambda_function" "add_scenario_lambda_function" {
+  role = var.lambdas_exec_roles_arn.add_scenario_exec_role_arn
+  handler = "add_scenario_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.add_scenario_function_bucket.bucket
+  s3_key = var.object_bucket_references.add_scenario_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.add_scenario_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.add_scenario_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY = var.aws_access_key_id
+      SECRET_KEY = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST = var.db_host
+      DB_NAME = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "edit_modify_data_lambda_function" {
+  role = var.lambdas_exec_roles_arn.edit_modify_data_exec_role_arn
+  handler = "edit_data_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.edit_modify_data_function_bucket.bucket
+  s3_key = var.object_bucket_references.edit_modify_data_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.edit_modify_data_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.edit_modify_data_function_bucket.etag)
+  timeout = 600
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY = var.aws_access_key_id
+      SECRET_KEY = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST = var.db_host
+      DB_NAME = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
+
 resource "aws_lambda_function" "delete_scenarios_lambda_function" {
   role = var.lambdas_exec_roles_arn.delete_scenarios_exec_role_arn
   handler = "delete_scenarios_handler.handler"
@@ -954,6 +1023,9 @@ resource "aws_lambda_function" "delete_scenarios_lambda_function" {
 
   environment {
     variables = {
+      ACCESS_KEY = var.aws_access_key_id
+      SECRET_KEY = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
       DB_HOST = var.db_host
       DB_NAME = var.db_name
       DB_USERNAME = var.db_username
