@@ -5,28 +5,15 @@ class DeleteScenariosService:
         self.logger = logger
         self.response_sql = response_sql
 
-    def delete_scenarios(
-        self, company_id: str, scenarios: list, from_details: bool
-    ) -> int:
+    def delete_scenarios(self, scenarios: list) -> int:
         scenarios_deleted = 0
-        if not from_details:
-            for scenario in scenarios:
-                scenario_is_deleted = self.delete_scenario_from_edit_scenarios(
-                    scenario.get("name"),
-                    scenario.get("year"),
-                    company_id,
-                    scenario.get("metric"),
-                    scenario.get("value"),
-                )
-                if scenario_is_deleted:
-                    scenarios_deleted += 1
-        else:
-            for scenario in scenarios:
-                scenario_is_deleted = self.delete_scenario(
-                    scenario.get("scenario_id"), scenario.get("metric_id")
-                )
-                if scenario_is_deleted:
-                    scenarios_deleted += 1
+
+        for scenario in scenarios:
+            scenario_is_deleted = self.delete_scenario(
+                scenario.get("scenario_id"), scenario.get("metric_id")
+            )
+            if scenario_is_deleted:
+                scenarios_deleted += 1
 
         return scenarios_deleted
 
@@ -87,15 +74,6 @@ class DeleteScenariosService:
             self.logger.info(error)
             return False
 
-    def delete_scenario_from_edit_scenarios(
-        self, name, year, company_id, metric_name, metric_value
-    ) -> bool:
-        scenario_id = self.get_scenario_id(name, year, company_id)
-        period_id = self.get_time_period_of_scenario(scenario_id)
-        metric_id = self.get_metric_id(metric_name, company_id, metric_value, period_id)
-        scenario_deleted = self.delete_scenario(scenario_id, metric_id)
-        return scenario_deleted
-
     def get_time_period_of_scenario(self, scenario_id: str) -> str:
         try:
             query = (
@@ -107,55 +85,6 @@ class DeleteScenariosService:
             )
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_result(result).get("period_id")
-
-        except Exception as error:
-            self.logger.info(error)
-            return None
-
-    def get_metric_id(
-        self, metric_name: str, company_id: str, metric_value: float, period_id: str
-    ) -> str:
-        try:
-            query = (
-                self.query_builder.add_table_name("metric")
-                .add_select_conditions(["id"])
-                .add_sql_where_equal_condition(
-                    {
-                        "name": "'{}'".format(metric_name),
-                        "company_id": "'{}'".format(company_id),
-                        "value": "'{}'".format(metric_value),
-                        "period_id": "'{}'".format(period_id),
-                    }
-                )
-                .build()
-                .get_query()
-            )
-
-            result = self.session.execute(query).fetchall()
-            return self.response_sql.process_query_result(result).get("id")
-
-        except Exception as error:
-            self.logger.info(error)
-            return None
-
-    def get_scenario_id(self, name: str, year: int, company_id: str) -> str:
-        try:
-            scenario_name = "{}-{}".format(name, year)
-            query = (
-                self.query_builder.add_table_name("financial_scenario")
-                .add_select_conditions(["id"])
-                .add_sql_where_equal_condition(
-                    {
-                        "name ": "'{}'".format(scenario_name),
-                        "company_id": "'{}'".format(company_id),
-                    }
-                )
-                .build()
-                .get_query()
-            )
-
-            result = self.session.execute(query).fetchall()
-            return self.response_sql.process_query_result(result).get("id")
 
         except Exception as error:
             self.logger.info(error)

@@ -374,6 +374,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
     - ./src/utils/app_names.py    
 
   add_scenario_handler:

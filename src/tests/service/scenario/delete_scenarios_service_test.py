@@ -47,22 +47,6 @@ class DeleteScenariosServiceTest(TestCase):
             self.mock_response_sql,
         )
 
-    def test_delete_metric_of_scenario(self):
-        expected_result = 2
-        scenarios_deleted = self.delete_scenarios_service.delete_scenarios(
-            company_id, scenarios_from_details, True
-        )
-
-        self.assertEqual(expected_result, scenarios_deleted)
-
-    def test_delete_metric_when_from_details_is_False(self):
-        expected_result = 2
-        scenarios_deleted = self.delete_scenarios_service.delete_scenarios(
-            company_id, scenarios, False
-        )
-
-        self.assertEqual(expected_result, scenarios_deleted)
-
     def test_delete_metric_handles_exception_return_False(self):
         self.mock_session.execute.side_effect = Exception("error")
         data = scenarios_from_details[0]
@@ -109,22 +93,3 @@ class DeleteScenariosServiceTest(TestCase):
         result = self.delete_scenarios_service.scenario_is_in_scenario_metric("123")
 
         self.assertFalse(result)
-
-    def test_get_metric_id_handles_exception_return_None(self):
-        self.mock_session.execute.side_effect = Exception("error")
-        period_id = "123"
-        data = scenarios[0]
-        result = self.delete_scenarios_service.get_metric_id(
-            data.get("metric"), company_id, data.get("value"), period_id
-        )
-
-        self.assertIsNone(result)
-
-    def test_get_scenario_id_handles_exception_return_None(self):
-        self.mock_session.execute.side_effect = Exception("error")
-        data = scenarios[0]
-        result = self.delete_scenarios_service.get_scenario_id(
-            data.get("name"), data.get("year"), company_id
-        )
-
-        self.assertIsNone(result)

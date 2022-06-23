@@ -80,13 +80,3 @@ class TestDeleteScenariosHandler(TestCase):
         self.assertEqual(
             response["body"], json.dumps({"error": "No scenarios data provided"})
         )
-
-    def test_get_company_id_from_body_should_return_company_id(self):
-        body = json.loads(self.event["body"])
-        expected_result = body.get("company_id")
-        test_event = self.event.copy()
-        test_event["pathParameters"] = {"id": None}
-        company_id = delete_scenario_handler.get_company_id(
-            test_event, test_event.get("pathParameters").get("from_details")
-        )
-        self.assertEqual(company_id, expected_result)

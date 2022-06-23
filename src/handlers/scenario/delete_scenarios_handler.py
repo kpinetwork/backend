@@ -18,15 +18,6 @@ delete_scenario_service = DeleteScenariosService(
 )
 
 
-def get_company_id(event: str, from_details: bool) -> str:
-    if from_details and event.get("pathParameters").get("id"):
-        company_id = event.get("pathParameters").get("id")
-    else:
-        body = json.loads(event.get("body"))
-        company_id = body.get("company_id")
-    return company_id
-
-
 def get_headers() -> dict:
     return {
         "Content-Type": "application/json",
@@ -48,14 +39,9 @@ def handler(event, _):
         if not event.get("body"):
             raise AppError("No scenarios data provided")
 
-        from_details = event.get("pathParameters").get("from_details")
         body = json.loads(event.get("body"))
-        company_id = get_company_id(event, from_details)
-
         scenarios = body.get("scenarios")
-        response = delete_scenario_service.delete_scenarios(
-            company_id, scenarios, from_details
-        )
+        response = delete_scenario_service.delete_scenarios(scenarios)
 
         return {
             "statusCode": 200,

@@ -1008,7 +1008,7 @@ resource "aws_lambda_function" "delete_scenarios_lambda_function" {
   s3_key = var.object_bucket_references.delete_scenarios_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.delete_scenarios_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.delete_scenarios_function_bucket.etag)
-  timeout = 100
+  timeout = 600
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
