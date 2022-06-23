@@ -161,6 +161,10 @@ resource "aws_cloudwatch_log_group" "update_data_lambda_function" {
   retention_in_days = var.retention_days
 }
 
+resource "aws_cloudwatch_log_group" "delete_scenarios_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.delete_scenarios_lambda_function}"
+  retention_in_days = var.retention_days
+}
 resource "aws_cloudwatch_log_group" "add_scenario_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.add_scenario_lambda_function}"
   retention_in_days = var.retention_days
