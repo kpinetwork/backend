@@ -58,10 +58,10 @@ class DeleteScenariosService:
             self.logger.info(error)
             return False
 
-    def delete_scenario(self, scenario_id: str, metric_id) -> bool:
+    def delete_scenario(self, scenario_id: str, metric_id: str) -> bool:
+        period_id = self.get_time_period_of_scenario(scenario_id)
         metric_is_deleted = self.delete_metric(scenario_id, metric_id)
         scenario_has_metric = self.scenario_is_in_scenario_metric(scenario_id)
-        period_id = self.get_time_period_of_scenario(scenario_id)
 
         if (not metric_is_deleted) or (metric_is_deleted and scenario_has_metric):
             return metric_is_deleted
@@ -90,12 +90,13 @@ class DeleteScenariosService:
     def delete_scenario_from_edit_scenarios(
         self, name, year, company_id, metric_name, metric_value
     ) -> bool:
-        metric_id = self.get_metric_id(metric_name, company_id, metric_value)
         scenario_id = self.get_scenario_id(name, year, company_id)
+        period_id = self.get_time_period_of_scenario(scenario_id)
+        metric_id = self.get_metric_id(metric_name, company_id, metric_value, period_id)
         scenario_deleted = self.delete_scenario(scenario_id, metric_id)
         return scenario_deleted
 
-    def get_time_period_of_scenario(self, scenario_id: str):
+    def get_time_period_of_scenario(self, scenario_id: str) -> str:
         try:
             query = (
                 self.query_builder.add_table_name("financial_scenario")
@@ -104,14 +105,16 @@ class DeleteScenariosService:
                 .build()
                 .get_query()
             )
-            result = self.session.execute(query)
-            return result.first()[0]
+            result = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_result(result).get("period_id")
 
         except Exception as error:
             self.logger.info(error)
             return None
 
-    def get_metric_id(self, metric_name: str, company_id: str, metric_value: float):
+    def get_metric_id(
+        self, metric_name: str, company_id: str, metric_value: float, period_id: str
+    ) -> str:
         try:
             query = (
                 self.query_builder.add_table_name("metric")
@@ -121,20 +124,21 @@ class DeleteScenariosService:
                         "name": "'{}'".format(metric_name),
                         "company_id": "'{}'".format(company_id),
                         "value": "'{}'".format(metric_value),
+                        "period_id": "'{}'".format(period_id),
                     }
                 )
                 .build()
                 .get_query()
             )
 
-            result = self.session.execute(query)
-            return result.first()[0]
+            result = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_result(result).get("id")
 
         except Exception as error:
             self.logger.info(error)
             return None
 
-    def get_scenario_id(self, name: str, year: int, company_id: str):
+    def get_scenario_id(self, name: str, year: int, company_id: str) -> str:
         try:
             scenario_name = "{}-{}".format(name, year)
             query = (
@@ -150,8 +154,8 @@ class DeleteScenariosService:
                 .get_query()
             )
 
-            result = self.session.execute(query)
-            return result.first()[0]
+            result = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_result(result).get("id")
 
         except Exception as error:
             self.logger.info(error)
@@ -171,8 +175,7 @@ class DeleteScenariosService:
             result = self.session.execute(query).fetchall()
             if not result:
                 return False
-            else:
-                return True
+            return True
         except Exception as error:
             self.logger.info(error)
             return False

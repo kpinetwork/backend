@@ -365,9 +365,9 @@ functions:
     - ./src/exceptions/base_exception.py
 
   delete_scenarios_handler:
-    requirements: ./src/handlers/scenarios/requirements.txt
+    requirements: ./src/handlers/scenario/requirements.txt
     include:
-    - ./src/handlers/scenarios/delete_scenarios_handler.py
+    - ./src/handlers/scenario/delete_scenarios_handler.py
     - ./src/service/scenario/delete_scenarios_service.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py

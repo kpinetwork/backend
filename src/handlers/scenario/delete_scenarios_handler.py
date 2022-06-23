@@ -18,6 +18,24 @@ delete_scenario_service = DeleteScenariosService(
 )
 
 
+def get_company_id(event: str, from_details: bool) -> str:
+    if from_details and event.get("pathParameters").get("id"):
+        company_id = event.get("pathParameters").get("id")
+    else:
+        body = json.loads(event.get("body"))
+        company_id = body.get("company_id")
+    return company_id
+
+
+def get_headers() -> dict:
+    return {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,DELETE,GET",
+    }
+
+
 def handler(event, _):
 
     try:
@@ -32,7 +50,8 @@ def handler(event, _):
 
         from_details = event.get("pathParameters").get("from_details")
         body = json.loads(event.get("body"))
-        company_id = body.get("company_id")
+        company_id = get_company_id(event, from_details)
+
         scenarios = body.get("scenarios")
         response = delete_scenario_service.delete_scenarios(
             company_id, scenarios, from_details
@@ -41,12 +60,7 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps({"scenarios deleted": response}),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,DELETE,GET",
-            },
+            "headers": get_headers(),
         }
 
     except Exception as error:
@@ -54,10 +68,5 @@ def handler(event, _):
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,DELETE,GET",
-            },
+            "headers": get_headers(),
         }

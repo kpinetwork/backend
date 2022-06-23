@@ -9,8 +9,8 @@ logger.setLevel(logging.INFO)
 
 company_id = "123"
 scenarios = [
-    {"name": "Budget", "year": "2020", "metric": "Revenue", "value": 10},
-    {"name": "Budget", "year": "2020", "metric": "Ebitda", "value": 11},
+    {"name": "Budget", "year": 2020, "metric": "Revenue", "value": 10},
+    {"name": "Budget", "year": 2020, "metric": "Ebitda", "value": 11},
 ]
 scenarios_from_details = [
     {
@@ -109,3 +109,22 @@ class DeleteScenariosServiceTest(TestCase):
         result = self.delete_scenarios_service.scenario_is_in_scenario_metric("123")
 
         self.assertFalse(result)
+
+    def test_get_metric_id_handles_exception_return_None(self):
+        self.mock_session.execute.side_effect = Exception("error")
+        period_id = "123"
+        data = scenarios[0]
+        result = self.delete_scenarios_service.get_metric_id(
+            data.get("metric"), company_id, data.get("value"), period_id
+        )
+
+        self.assertIsNone(result)
+
+    def test_get_scenario_id_handles_exception_return_None(self):
+        self.mock_session.execute.side_effect = Exception("error")
+        data = scenarios[0]
+        result = self.delete_scenarios_service.get_scenario_id(
+            data.get("name"), data.get("year"), company_id
+        )
+
+        self.assertIsNone(result)

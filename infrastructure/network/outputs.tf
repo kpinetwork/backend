@@ -130,7 +130,7 @@ output "api_gateway_references" {
     }
 
     "apigw_add_scenario_lambda_function": {
-      resource_path: aws_api_gateway_resource.add_company_scenario.path,
+      resource_path: aws_api_gateway_resource.scenarios.path,
       http_method: aws_api_gateway_method.add_scenario_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
