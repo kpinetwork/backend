@@ -1,6 +1,4 @@
 from collections import defaultdict
-from mimetypes import init
-from operator import index
 from app_names import TableNames, ScenarioNames, MetricNames, BASE_HEADERS
 
 
@@ -278,7 +276,6 @@ class EditModifyService:
             return processed
         except Exception as error:
             self.logger.info(error)
-            print(error)
             return []
 
     def __get_scenarios(self) -> list:
@@ -370,7 +367,7 @@ class EditModifyService:
         if element:
             row[0] = element
         return row
-    
+
     def __is_metric_scenario_valid(self, scenario: str, metric: str) -> bool:
         return scenario in list(ScenarioNames) and metric in list(MetricNames)
 
@@ -378,7 +375,7 @@ class EditModifyService:
         number_of_scenarios = len(
             [year for year in rows.get("years") if year and year.strip()]
         )
-        
+
         response = {}
         for record in records:
             company = dict(record)
@@ -404,7 +401,9 @@ class EditModifyService:
                 response[company_id] = description
 
             if self.__is_metric_scenario_valid(scenario, metric):
-                index = self.__find_scenario_index(scenario, metric, year, rows, number_of_scenarios)
+                index = self.__find_scenario_index(
+                    scenario, metric, year, rows, number_of_scenarios
+                )
                 scenarios = response.get(company_id).get("scenarios")
                 scenarios[index] = {
                     "scenario_id": company.get("scenario_id"),

@@ -398,6 +398,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
     - ./src/utils/response_user.py
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
