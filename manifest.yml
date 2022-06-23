@@ -388,6 +388,19 @@ functions:
     - ./src/utils/response_user.py
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
+
+  get_edit_modify_data_handler:
+    requirements: ./src/handlers/edit_modify/requirements.txt
+    include:
+    - ./src/handlers/edit_modify/get_edit_modify_data_handler.py
+    - ./src/service/edit_modify/edit_service.py
+    - ./src/service/scenario/scenario_service.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
     
 
 layers:

@@ -193,5 +193,11 @@ output "object_references" {
       key : aws_s3_bucket_object.edit_modify_data_function_object.key,
       bucket : aws_s3_bucket_object.edit_modify_data_function_object.bucket
     }
+
+    "get_edit_modify_data_function_bucket" : {
+      etag : aws_s3_bucket_object.get_edit_modify_data_function_object.etag,
+      key : aws_s3_bucket_object.get_edit_modify_data_function_object.key,
+      bucket : aws_s3_bucket_object.get_edit_modify_data_function_object.bucket
+    }
   }
 }

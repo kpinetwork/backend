@@ -31,6 +31,7 @@ output "lambdas_invoke_arns" {
     "update_data_lambda_function": aws_lambda_function.update_data_lambda_function.invoke_arn
     "add_scenario_lambda_function": aws_lambda_function.add_scenario_lambda_function.invoke_arn
     "edit_modify_data_lambda_function": aws_lambda_function.edit_modify_data_lambda_function.invoke_arn
+    "get_edit_modify_data_lambda_function": aws_lambda_function.get_edit_modify_data_lambda_function.invoke_arn
   }
 }
 

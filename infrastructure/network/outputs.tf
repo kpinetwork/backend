@@ -134,6 +134,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.edit_modify_data_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_edit_modify_data_lambda_function": {
+      resource_path: aws_api_gateway_resource.edit_modify.path,
+      http_method: aws_api_gateway_method.get_edit_modify_data_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

@@ -1,10 +1,15 @@
 from collections import defaultdict
-from app_names import TableNames
+from mimetypes import init
+from operator import index
+from app_names import TableNames, ScenarioNames, MetricNames, BASE_HEADERS
 
 
 class EditModifyService:
-    def __init__(self, session, query_builder, scenario_service, logger) -> None:
+    def __init__(
+        self, session, query_builder, scenario_service, response_sql, logger
+    ) -> None:
         self.logger = logger
+        self.response_sql = response_sql
         self.session = session
         self.query_builder = query_builder
         self.scenario_service = scenario_service
@@ -16,6 +21,20 @@ class EditModifyService:
             "metric": f"{TableNames.METRIC}.name",
             "metric_id": f"{TableNames.METRIC}.id",
         }
+
+    def __get_companies_select_conditions(self) -> list:
+        return [
+            f"{TableNames.COMPANY}.id",
+            f"{TableNames.COMPANY}.name",
+            f"{TableNames.COMPANY}.sector",
+            f"{TableNames.COMPANY}.vertical",
+            f"{TableNames.COMPANY}.inves_profile_name",
+            f"{TableNames.SCENARIO}.id as scenario_id",
+            f"{TableNames.SCENARIO}.name as scenario",
+            f"{TableNames.METRIC}.id as metric_id",
+            f"{TableNames.METRIC}.name as metric",
+            f"{TableNames.METRIC}.value as value",
+        ]
 
     def __get_scenarios_conditions(
         self, company_id: str, scenario: dict, names_config: dict
@@ -212,6 +231,230 @@ class EditModifyService:
             self.logger.info(error)
             return False
 
+    def get_companies_information(self, rows) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.COMPANY)
+                .add_select_conditions(self.__get_companies_select_conditions())
+                .add_join_clause(
+                    {
+                        f"{TableNames.SCENARIO}": {
+                            "from": f"{TableNames.SCENARIO}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.SCENARIO_METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                            "to": f"{TableNames.SCENARIO}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.METRIC}": {
+                            "from": f"{TableNames.METRIC}.id",
+                            "to": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(
+                    {
+                        f"{TableNames.COMPANY}.is_public ": True,
+                    }
+                )
+                .add_sql_order_by_condition(
+                    [f"{TableNames.COMPANY}.name"],
+                    self.query_builder.Order.ASC,
+                )
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+            processed = self.__build_companies_rows(results, rows)
+            return processed
+        except Exception as error:
+            self.logger.info(error)
+            print(error)
+            return []
+
+    def __get_scenarios(self) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.COMPANY)
+                .add_select_conditions(
+                    [
+                        f"DISTINCT ON(s.name, m.name) s.name as scenario, m.name as metric"
+                    ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.SCENARIO} s": {
+                            "from": "s.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.SCENARIO_METRIC} sm": {
+                            "from": "sm.scenario_id",
+                            "to": "s.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.METRIC} m": {
+                            "from": "m.id",
+                            "to": "sm.metric_id",
+                        }
+                    }
+                )
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            self.session.commit()
+            processed = self.response_sql.process_query_list_results(results)
+            return processed
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
+    def __get_main_rows(self, records: list) -> dict:
+        headers = BASE_HEADERS.copy()
+        metrics = self.__build_row(len(BASE_HEADERS))
+        years = self.__build_row(len(BASE_HEADERS))
+
+        for scenario in ScenarioNames:
+            filtered_scenarios = self.__filter_metrics_by_scenario(scenario, records)
+            headers.extend(
+                self.__build_row(len(filtered_scenarios), element=str(scenario))
+            )
+            self.__update_metrics_and_years_rows(filtered_scenarios, metrics, years)
+
+        return {"headers": headers, "metrics": metrics, "years": years}
+
+    def __update_metrics_and_years_rows(
+        self, scenarios, metrics: list, years: list
+    ) -> None:
+        for metric in MetricNames:
+            filtered_years = [
+                scenario[1] for scenario in scenarios if scenario[0] == metric
+            ]
+            years.extend(filtered_years)
+            metrics.extend(self.__build_row(len(filtered_years), element=str(metric)))
+
+    def __filter_metrics_by_scenario(
+        self, scenario_condition: str, records: list
+    ) -> list:
+        return [
+            (
+                record.get("metric"),
+                record.get("scenario").split("-")[1],
+                record.get("scenario").split("-")[0],
+            )
+            for record in records
+            if scenario_condition == record.get("scenario").split("-")[0]
+            and record.get("metric") in list(MetricNames)
+        ]
+
+    def __build_row(
+        self, num_of_elements: int, default_element: str = "", element: str = None
+    ) -> list:
+        row = [default_element] * num_of_elements
+        if element:
+            row[0] = element
+        return row
+    
+    def __is_metric_scenario_valid(self, scenario: str, metric: str) -> bool:
+        return scenario in list(ScenarioNames) and metric in list(MetricNames)
+
+    def __build_companies_rows(self, records: list, rows: dict) -> list:
+        number_of_scenarios = len(
+            [year for year in rows.get("years") if year and year.strip()]
+        )
+        
+        response = {}
+        for record in records:
+            company = dict(record)
+            company_id = company.get("id")
+            scenario_name = company.get("scenario").split("-")
+            scenario = scenario_name[0]
+            year = scenario_name[1]
+            metric = company.get("metric")
+
+            if company_id not in response.keys():
+                description = {
+                    key: company.get(key, None)
+                    for key in (
+                        "id",
+                        "name",
+                        "sector",
+                        "vertical",
+                        "inves_profile_name",
+                    )
+                }
+                scenarios = self.__build_row(number_of_scenarios, {})
+                description.update({"scenarios": scenarios})
+                response[company_id] = description
+
+            if self.__is_metric_scenario_valid(scenario, metric):
+                index = self.__find_scenario_index(scenario, metric, year, rows, number_of_scenarios)
+                scenarios = response.get(company_id).get("scenarios")
+                scenarios[index] = {
+                    "scenario_id": company.get("scenario_id"),
+                    "scenario": scenario_name[0],
+                    "year": scenario_name[1],
+                    "metric_id": company.get("metric_id"),
+                    "metric": company.get("metric"),
+                    "value": float(company.get("value")),
+                }
+                response.get(company_id).update({"scenarios": scenarios})
+
+        return response
+
+    def __find_scenario_index(
+        self,
+        scenario: str,
+        metric: str,
+        year: str,
+        rows: dict,
+        number_of_scenarios: int,
+    ) -> int:
+        actuals_scenario_index = rows.get("headers")[len(BASE_HEADERS) :].index(
+            "Actuals"
+        )
+        budget_scenario_index = rows.get("headers")[len(BASE_HEADERS) :].index("Budget")
+        range_index = [0, 0]
+        init_range_value = 0
+        if scenario == ScenarioNames.ACTUALS:
+            range_index = [actuals_scenario_index, budget_scenario_index - 1]
+            init_range_value = actuals_scenario_index
+        else:
+            range_index = [budget_scenario_index, number_of_scenarios - 1]
+            init_range_value = budget_scenario_index
+        sliced_metrics = rows.get("metrics")[len(BASE_HEADERS) :][
+            range_index[0] : range_index[1] + 1
+        ]
+        range_index[0] = sliced_metrics.index(metric) + init_range_value
+
+        if metric == MetricNames.REVENUE:
+            range_index[1] = (
+                sliced_metrics.index(str(MetricNames.EBITDA)) + init_range_value - 1
+            )
+        init_range_value = range_index[0]
+        return (
+            rows.get("years")[len(BASE_HEADERS) :][
+                range_index[0] : range_index[1] + 1
+            ].index(year)
+            + init_range_value
+        )
+
     def edit_modify_data(self, data: dict) -> dict:
         companies = data.get("edit", [])
         scenarios = data.get("add", [])
@@ -220,3 +463,10 @@ class EditModifyService:
         added_scenarios = self.add_data(scenarios)
 
         return {"edited": edited, "added": added_scenarios}
+
+    def get_data(self) -> dict:
+        rows = self.__get_main_rows(self.__get_scenarios())
+        companies = self.get_companies_information(rows)
+        rows.update({"companies": companies})
+
+        return rows
