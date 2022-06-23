@@ -26,7 +26,6 @@ class TestDeleteScenariosHandler(TestCase):
         mock_delete_scenarios.return_value = 1
 
         response = handler(self.event, {})
-        print(response)
 
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
