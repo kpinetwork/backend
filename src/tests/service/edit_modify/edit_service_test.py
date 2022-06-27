@@ -191,9 +191,10 @@ class TestEditModifyService(TestCase):
                 "Vertical",
                 "Investor Profile",
                 "Actuals",
+                "Budget",
             ],
-            "metrics": ["", "", "", "", "", "Revenue"],
-            "years": ["", "", "", "", "", "2020"],
+            "metrics": ["", "", "", "", "", "Revenue", "Revenue"],
+            "years": ["", "", "", "", "", "2020", "2020"],
             "companies": {},
         }
         self.mock_response_list_query_sql(
@@ -231,7 +232,8 @@ class TestEditModifyService(TestCase):
                                 "year": 2018,
                                 "metric": "Revenue",
                                 "value": 45.6,
-                            }
+                            },
+                            {},
                         ],
                     }
                 }
@@ -245,9 +247,10 @@ class TestEditModifyService(TestCase):
                 "Vertical",
                 "Investor Profile",
                 "Actuals",
+                "Budget",
             ],
-            "metrics": ["", "", "", "", "", "Revenue"],
-            "years": ["", "", "", "", "", "2020"],
+            "metrics": ["", "", "", "", "", "Revenue", "Revenue"],
+            "years": ["", "", "", "", "", "2020", "2020"],
         }
         expected_response.update(companies)
         self.mock_response_list_query_sql(
@@ -261,7 +264,7 @@ class TestEditModifyService(TestCase):
                     "sector": "Semiconductors",
                     "Vertical": "Education",
                     "investor_profile": "Public",
-                    "scenarios": [self.scenario],
+                    "scenarios": [self.scenario, {}],
                 }
             }
         ]

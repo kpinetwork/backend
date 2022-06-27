@@ -272,13 +272,12 @@ class EditModifyService:
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            processed = self.__build_companies_rows(results, rows)
-            return processed
+            return self.__build_companies_rows(results, rows)
         except Exception as error:
             self.logger.info(error)
             return {}
 
-    def __get_scenarios(self) -> list:
+    def __get_scenarios_by_type(self, scenario_type: str) -> list:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -309,28 +308,26 @@ class EditModifyService:
                         }
                     }
                 )
+                .add_sql_where_equal_condition({"s.type": f"'{scenario_type}'"})
                 .build()
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
             self.session.commit()
-            processed = self.response_sql.process_query_list_results(results)
-            return processed
+            return self.response_sql.process_query_list_results(results)
         except Exception as error:
             self.logger.info(error)
             return []
 
-    def __get_main_rows(self, records: list) -> dict:
+    def __get_main_rows(self) -> dict:
         headers = BASE_HEADERS.copy()
         metrics = self.__build_row(len(BASE_HEADERS))
         years = self.__build_row(len(BASE_HEADERS))
 
         for scenario in ScenarioNames:
-            filtered_scenarios = self.__filter_metrics_by_scenario(scenario, records)
-            headers.extend(
-                self.__build_row(len(filtered_scenarios), element=str(scenario))
-            )
-            self.__update_metrics_and_years_rows(filtered_scenarios, metrics, years)
+            scenarios = self.__process_scenarios(self.__get_scenarios_by_type(scenario))
+            headers.extend(self.__build_row(len(scenarios), element=str(scenario)))
+            self.__update_metrics_and_years_rows(scenarios, metrics, years)
 
         return {"headers": headers, "metrics": metrics, "years": years}
 
@@ -344,29 +341,26 @@ class EditModifyService:
             years.extend(filtered_years)
             metrics.extend(self.__build_row(len(filtered_years), element=str(metric)))
 
-    def __filter_metrics_by_scenario(
-        self, scenario_condition: str, records: list
-    ) -> list:
+    def __process_scenarios(self, scenarios: list) -> list:
         return [
             (
-                record.get("metric"),
-                record.get("scenario").split("-")[1],
-                record.get("scenario").split("-")[0],
+                scenario.get("metric"),
+                scenario.get("scenario").split("-")[1],
+                scenario.get("scenario").split("-")[0],
             )
-            for record in records
-            if scenario_condition == record.get("scenario").split("-")[0]
-            and record.get("metric") in list(MetricNames)
+            for scenario in scenarios
+            if scenario.get("metric") in list(MetricNames)
         ]
 
     def __build_row(
         self, num_of_elements: int, default_element: object = "", element: str = None
     ) -> list:
-        if num_of_elements > 0:
-            row = [default_element] * num_of_elements
-            if element:
-                row[0] = element
-            return row
-        return []
+        if num_of_elements <= 0:
+            return []
+        row = [default_element] * num_of_elements
+        if element:
+            row[0] = element
+        return row
 
     def __is_metric_scenario_valid(self, scenario: str, metric: str) -> bool:
         return scenario in list(ScenarioNames) and metric in list(MetricNames)
@@ -479,7 +473,7 @@ class EditModifyService:
         return {"edited": edited, "added": added_scenarios}
 
     def get_data(self) -> dict:
-        rows = self.__get_main_rows(self.__get_scenarios())
+        rows = self.__get_main_rows()
         companies = self.get_companies_information(rows)
         rows.update({"companies": companies})
 
