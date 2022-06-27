@@ -20,3 +20,6 @@ class ScenarioNames(StrEnum):
 class MetricNames(StrEnum):
     REVENUE = "Revenue"
     EBITDA = "Ebitda"
+
+
+BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]

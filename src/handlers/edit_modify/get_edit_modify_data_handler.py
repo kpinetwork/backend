@@ -2,8 +2,8 @@ import json
 import logging
 from query_builder import QuerySQLBuilder
 from edit_service import EditModifyService
-from scenario_service import ScenarioService
 from base_exception import AppError, AuthError
+from response_sql import ResponseSQL
 from connection import create_db_engine, create_db_session
 from verify_user_permissions import verify_user_access, get_user_id_from_event
 
@@ -12,15 +12,6 @@ engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-def get_body(event: dict) -> dict:
-    try:
-        return json.loads(event.get("body"))
-    except Exception as error:
-        logger.info(error)
-        raise AppError("Invalid body")
-
 
 def get_headers() -> dict:
     return {
@@ -32,8 +23,7 @@ def get_headers() -> dict:
 
 
 def get_service():
-    scenario_service = ScenarioService(session, QuerySQLBuilder(), logger)
-    return EditModifyService(session, QuerySQLBuilder(), scenario_service, {}, logger)
+    return EditModifyService(session, QuerySQLBuilder(), {}, ResponseSQL(), logger)
 
 
 def handler(event, _):
@@ -43,10 +33,9 @@ def handler(event, _):
         access = verify_user_access(user_id)
 
         if not access:
-            raise AuthError("No permissions to edit company and scenarios information")
+            raise AuthError("No permissions to get companies information")
 
-        body = get_body(event)
-        data = service.edit_modify_data(body)
+        data = service.get_data()
 
         return {
             "statusCode": 200,
