@@ -229,7 +229,7 @@ class EditModifyService:
             self.logger.info(error)
             return False
 
-    def get_companies_information(self, rows: dict) -> list:
+    def get_companies_information(self, rows: dict) -> dict:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -276,7 +276,7 @@ class EditModifyService:
             return processed
         except Exception as error:
             self.logger.info(error)
-            return []
+            return {}
 
     def __get_scenarios(self) -> list:
         try:
@@ -359,7 +359,7 @@ class EditModifyService:
         ]
 
     def __build_row(
-        self, num_of_elements: int, default_element: str = "", element: str = None
+        self, num_of_elements: int, default_element: object = "", element: str = None
     ) -> list:
         if num_of_elements > 0:
             row = [default_element] * num_of_elements
@@ -378,7 +378,7 @@ class EditModifyService:
     def __get_total_scenarios(self, years_row: list) -> int:
         return len([year for year in years_row if year and year.strip()])
 
-    def __build_companies_rows(self, records: list, rows: dict) -> list:
+    def __build_companies_rows(self, records: list, rows: dict) -> dict:
         number_of_scenarios = self.__get_total_scenarios(rows.get("years"))
         response = {}
 
@@ -422,8 +422,7 @@ class EditModifyService:
 
     def __get_range_in_scenarios_row(
         self, scenario, actuals_index, budget_index, num_of_scenarios
-    ) -> int:
-        range_index = [0, 0]
+    ) -> tuple:
         init_range_value = 0
 
         if scenario == ScenarioNames.ACTUALS:

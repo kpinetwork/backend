@@ -194,7 +194,7 @@ class TestEditModifyService(TestCase):
             ],
             "metrics": ["", "", "", "", "", "Revenue"],
             "years": ["", "", "", "", "", "2020"],
-            "companies": [],
+            "companies": {},
         }
         self.mock_response_list_query_sql(
             [{"scenario": "Actuals-2020", "metric": "Revenue"}]
