@@ -229,7 +229,7 @@ class EditModifyService:
             self.logger.info(error)
             return False
 
-    def get_companies_information(self, rows) -> list:
+    def get_companies_information(self, rows: dict) -> list:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -283,9 +283,7 @@ class EditModifyService:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
-                    [
-                        f"DISTINCT ON(s.name, m.name) s.name as scenario, m.name as metric"
-                    ]
+                    ["DISTINCT ON(s.name, m.name) s.name as scenario, m.name as metric"]
                 )
                 .add_join_clause(
                     {
@@ -363,46 +361,46 @@ class EditModifyService:
     def __build_row(
         self, num_of_elements: int, default_element: str = "", element: str = None
     ) -> list:
-        row = [default_element] * num_of_elements
-        if element:
-            row[0] = element
-        return row
+        if num_of_elements > 0:
+            row = [default_element] * num_of_elements
+            if element:
+                row[0] = element
+            return row
+        return []
 
     def __is_metric_scenario_valid(self, scenario: str, metric: str) -> bool:
         return scenario in list(ScenarioNames) and metric in list(MetricNames)
 
-    def __build_companies_rows(self, records: list, rows: dict) -> list:
-        number_of_scenarios = len(
-            [year for year in rows.get("years") if year and year.strip()]
-        )
+    def __add_company_description(self, company: dict) -> dict:
+        company_attrs = ("id", "name", "sector", "vertical", "inves_profile_name")
+        return {key: company.get(key, None) for key in company_attrs}
 
+    def __get_total_scenarios(self, years_row: list) -> int:
+        return len([year for year in years_row if year and year.strip()])
+
+    def __build_companies_rows(self, records: list, rows: dict) -> list:
+        number_of_scenarios = self.__get_total_scenarios(rows.get("years"))
         response = {}
+
         for record in records:
             company = dict(record)
             company_id = company.get("id")
             scenario_name = company.get("scenario").split("-")
             scenario = scenario_name[0]
-            year = scenario_name[1]
             metric = company.get("metric")
 
             if company_id not in response.keys():
-                description = {
-                    key: company.get(key, None)
-                    for key in (
-                        "id",
-                        "name",
-                        "sector",
-                        "vertical",
-                        "inves_profile_name",
-                    )
-                }
+                description = self.__add_company_description(company)
                 scenarios = self.__build_row(number_of_scenarios, {})
                 description.update({"scenarios": scenarios})
                 response[company_id] = description
-
             if self.__is_metric_scenario_valid(scenario, metric):
                 index = self.__find_scenario_index(
-                    scenario, metric, year, rows, number_of_scenarios
+                    rows,
+                    number_of_scenarios,
+                    metric=metric,
+                    scenario=scenario,
+                    year=scenario_name[1],
                 )
                 scenarios = response.get(company_id).get("scenarios")
                 scenarios[index] = {
@@ -417,42 +415,60 @@ class EditModifyService:
 
         return response
 
-    def __find_scenario_index(
-        self,
-        scenario: str,
-        metric: str,
-        year: str,
-        rows: dict,
-        number_of_scenarios: int,
+    def __slice_row(self, row: list, i_index: int, e_index: int = None) -> list:
+        if e_index:
+            return row[i_index:e_index]
+        return row[i_index:]
+
+    def __get_range_in_scenarios_row(
+        self, scenario, actuals_index, budget_index, num_of_scenarios
     ) -> int:
-        actuals_scenario_index = rows.get("headers")[len(BASE_HEADERS) :].index(
-            "Actuals"
-        )
-        budget_scenario_index = rows.get("headers")[len(BASE_HEADERS) :].index("Budget")
         range_index = [0, 0]
         init_range_value = 0
-        if scenario == ScenarioNames.ACTUALS:
-            range_index = [actuals_scenario_index, budget_scenario_index - 1]
-            init_range_value = actuals_scenario_index
-        else:
-            range_index = [budget_scenario_index, number_of_scenarios - 1]
-            init_range_value = budget_scenario_index
-        sliced_metrics = rows.get("metrics")[len(BASE_HEADERS) :][
-            range_index[0] : range_index[1] + 1
-        ]
-        range_index[0] = sliced_metrics.index(metric) + init_range_value
 
+        if scenario == ScenarioNames.ACTUALS:
+            range_index = [actuals_index, budget_index - 1]
+            init_range_value = actuals_index
+        else:
+            range_index = [budget_index, num_of_scenarios - 1]
+            init_range_value = budget_index
+
+        return range_index, init_range_value
+
+    def __get_range_in_metrics_row(self, metrics, metric, range, init_range_value):
+        range[0] = metrics.index(metric) + init_range_value
         if metric == MetricNames.REVENUE:
-            range_index[1] = (
-                sliced_metrics.index(str(MetricNames.EBITDA)) + init_range_value - 1
-            )
-        init_range_value = range_index[0]
-        return (
-            rows.get("years")[len(BASE_HEADERS) :][
-                range_index[0] : range_index[1] + 1
-            ].index(year)
-            + init_range_value
+            range[1] = metrics.index(str(MetricNames.EBITDA)) + init_range_value - 1
+        init_range_value = range[0]
+
+        return range, init_range_value
+
+    def __find_scenario_index(
+        self, rows: dict, number_of_scenarios: int, **kwargs
+    ) -> int:
+        sliced_headers = self.__slice_row(rows.get("headers"), len(BASE_HEADERS))
+
+        actuals_scenario_index = sliced_headers.index(str(ScenarioNames.ACTUALS))
+        budget_scenario_index = sliced_headers.index(str(ScenarioNames.BUDGET))
+
+        range_index, init_range_value = self.__get_range_in_scenarios_row(
+            kwargs.get("scenario"),
+            actuals_scenario_index,
+            budget_scenario_index,
+            number_of_scenarios,
         )
+
+        metrics = self.__slice_row(rows.get("metrics"), len(BASE_HEADERS))
+        sliced_metrics = self.__slice_row(metrics, range_index[0], range_index[1] + 1)
+
+        range_index, init_range_value = self.__get_range_in_metrics_row(
+            sliced_metrics, kwargs.get("metric"), range_index, init_range_value
+        )
+
+        years = self.__slice_row(rows.get("years"), len(BASE_HEADERS))
+        sliced_years = self.__slice_row(years, range_index[0], range_index[1] + 1)
+
+        return sliced_years.index(kwargs.get("year")) + init_range_value
 
     def edit_modify_data(self, data: dict) -> dict:
         companies = data.get("edit", [])
