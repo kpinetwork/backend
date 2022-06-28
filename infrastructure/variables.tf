@@ -61,6 +61,10 @@ variable "lambdas_names" {
     "get_company_investments_lambda_function": "get_company_investments_lambda_function"
     "add_investment_lambda_function": "add_investment_lambda_function"
     "update_data_lambda_function": "update_data_lambda_function"
+    "delete_scenarios_lambda_function": "delete_scenarios_lambda_function"
+    "add_scenario_lambda_function": "add_scenario_lambda_function"
+    "edit_modify_data_lambda_function": "edit_modify_data_lambda_function"
+    "get_edit_modify_data_lambda_function": "get_edit_modify_data_lambda_function"
   }
 }
 

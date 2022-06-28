@@ -174,7 +174,13 @@ class CompanyDetails:
                     {f"{TableNames.SCENARIO}.company_id": f"'{company_id}'"}
                 )
                 .add_sql_order_by_condition(
-                    [f"{TableNames.SCENARIO}.type", "start_at"],
+                    [
+                        f"{TableNames.SCENARIO}.id",
+                        f"{TableNames.SCENARIO}.type",
+                        f"{TableNames.METRIC}.name",
+                        "start_at",
+                        f"{TableNames.METRIC}.value",
+                    ],
                     self.query_builder.Order.ASC,
                 )
                 .add_sql_offset_condition(offset)

@@ -159,6 +159,69 @@ resource "aws_lambda_permission" "apigw_get_company_details_lambda" {
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM COMPANY SCENARIOS
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "add_scenario_lambda_exec_role" {
+  name               = "${var.environment}_add_scenario_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "add_scenario_cognito_policy" {
+  name        = "${var.environment}_add_scenario_cognito_policy"
+  role        = aws_iam_role.add_scenario_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "add_scenario_lambda_logs" {
+  role       = aws_iam_role.add_scenario_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_scenario_lambda_vpc" {
+  role       = aws_iam_role.add_scenario_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_add_scenario_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayCompanyId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.add_scenario_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_add_scenario_lambda_function.api_id}/*/${var.api_gateway_references.apigw_add_scenario_lambda_function.http_method}${var.api_gateway_references.apigw_add_scenario_lambda_function.resource_path}"
+}
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # AWS IAM ROLE OVERVIEW
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "get_universe_overview_lambda_exec_role" {
@@ -1632,5 +1695,188 @@ resource "aws_iam_role_policy_attachment" "update_data_lambda_logs" {
 resource "aws_iam_role_policy_attachment" "update_data_lambda_vpc" {
   role       = aws_iam_role.update_data_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_network_arn
+}
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM edit modify
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "edit_modify_data_lambda_exec_role" {
+  name               = "${var.environment}_edit_modify_data_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "get_edit_modify_data_lambda_exec_role" {
+  name               = "${var.environment}_get_edit_modify_data_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "edit_modify_data_cognito_policy" {
+  name        = "${var.environment}_edit_modify_data_cognito_policy"
+  role        = aws_iam_role.edit_modify_data_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "get_edit_modify_data_cognito_policy" {
+  name        = "${var.environment}_get_edit_modify_data_cognito_policy"
+  role        = aws_iam_role.get_edit_modify_data_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "edit_modify_data_lambda_logs" {
+  role       = aws_iam_role.edit_modify_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_edit_modify_data_lambda_logs" {
+  role       = aws_iam_role.get_edit_modify_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "edit_modify_data_lambda_vpc" {
+  role       = aws_iam_role.edit_modify_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_edit_modify_data_lambda_vpc" {
+  role       = aws_iam_role.get_edit_modify_data_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_edit_modify_data_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.edit_modify_data_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_edit_modify_data_lambda_function.api_id}/*/${var.api_gateway_references.apigw_edit_modify_data_lambda_function.http_method}${var.api_gateway_references.apigw_edit_modify_data_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_get_edit_modify_data_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_edit_modify_data_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_edit_modify_data_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_edit_modify_data_lambda_function.http_method}${var.api_gateway_references.apigw_get_edit_modify_data_lambda_function.resource_path}"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS SCENARIO LAMBDA
+# ----------------------------------------------------------------------------------------------------------------------
+
+resource "aws_iam_role" "delete_scenarios_lambda_exec_role" {
+  name               = "${var.environment}_delete_scenarios_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "delete_scenarios_cognito_policy" {
+  name        = "${var.environment}_delete_scenarios_cognito_policy"
+  role        = aws_iam_role.delete_scenarios_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "delete_scenarios_lambda_logs" {
+  role       = aws_iam_role.delete_scenarios_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "delete_scenarios_lambda_vpc" {
+  role       = aws_iam_role.delete_scenarios_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_delete_scenarios_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayAddInvestmentId"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.delete_scenarios_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_delete_scenarios_lambda_function.api_id}/*/${var.api_gateway_references.apigw_delete_scenarios_lambda_function.http_method}${var.api_gateway_references.apigw_delete_scenarios_lambda_function.resource_path}"
 }
 

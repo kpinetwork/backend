@@ -1,0 +1,9 @@
+{
+    "pathParameters": {"id": "0b4085c1-a8f0-4a25-8ae0-ade5fca2d789"},
+    "body": "{\"company_id\": \"0b4085c1-a8f0-4a25-8ae0-ade5fca2d789\", \"scenario\": \"Actuals\", \"year\": 2020, \"metric\": \"Revenue\", \"value\": 23.45}",
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}

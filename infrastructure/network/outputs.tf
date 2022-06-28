@@ -123,6 +123,29 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
+    "apigw_delete_scenarios_lambda_function": {
+      resource_path: aws_api_gateway_resource.scenarios.path,
+      http_method: aws_api_gateway_method.delete_scenarios_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_add_scenario_lambda_function": {
+      resource_path: aws_api_gateway_resource.scenarios.path,
+      http_method: aws_api_gateway_method.add_scenario_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_edit_modify_data_lambda_function": {
+      resource_path: aws_api_gateway_resource.edit_modify.path,
+      http_method: aws_api_gateway_method.edit_modify_data_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_get_edit_modify_data_lambda_function": {
+      resource_path: aws_api_gateway_resource.edit_modify.path,
+      http_method: aws_api_gateway_method.get_edit_modify_data_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

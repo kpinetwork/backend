@@ -133,12 +133,14 @@ functions:
   authorize_handler:
     requirements: ./src/handlers/authorizer/requirements.txt
     include:
-    - ./src/handlers/authorizer/authorize_handler.py   
+    - ./src/handlers/authorizer/authorize_handler.py
+    - ./src/exceptions/base_exception.py   
   
   verify_users_with_same_email_handler:
     requirements: ./src/handlers/pre_signup_trigger/requirements.txt
     include:
     - ./src/handlers/pre_signup_trigger/verify_users_with_same_email_handler.py
+    - ./src/exceptions/base_exception.py
     
   get_users_handler:
     requirements: ./src/handlers/users/requirements.txt
@@ -362,6 +364,57 @@ functions:
     - ./db/utils/connection.py
     - ./src/exceptions/base_exception.py
 
+  delete_scenarios_handler:
+    requirements: ./src/handlers/scenario/requirements.txt
+    include:
+    - ./src/handlers/scenario/delete_scenarios_handler.py
+    - ./src/service/scenario/delete_scenarios_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
+    - ./src/utils/app_names.py    
+
+  add_scenario_handler:
+    requirements: ./src/handlers/scenario/requirements.txt
+    include:
+    - ./src/handlers/scenario/add_scenario_handler.py
+    - ./src/service/scenario/scenario_service.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
+
+  edit_modify_data_handler:
+    requirements: ./src/handlers/edit_modify/requirements.txt
+    include:
+    - ./src/handlers/edit_modify/edit_data_handler.py
+    - ./src/service/edit_modify/edit_service.py
+    - ./src/service/scenario/scenario_service.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
+
+  get_edit_modify_data_handler:
+    requirements: ./src/handlers/edit_modify/requirements.txt
+    include:
+    - ./src/handlers/edit_modify/get_edit_modify_data_handler.py
+    - ./src/service/edit_modify/edit_service.py
+    - ./src/service/scenario/scenario_service.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/utils/response_user.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
     
 
 layers:

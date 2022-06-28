@@ -34,6 +34,12 @@ resource "aws_api_gateway_resource" "company_details" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "scenarios" {
+  path_part   = "scenarios"
+  parent_id   = aws_api_gateway_resource.company_details.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 resource "aws_api_gateway_resource" "universe_overview" {
   path_part   = "universe_overview"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
@@ -159,6 +165,13 @@ resource "aws_api_gateway_resource" "company_investments" {
   parent_id   = aws_api_gateway_resource.investments.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
+
+resource "aws_api_gateway_resource" "edit_modify" {
+  path_part   = "edit_modify"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -200,6 +213,26 @@ resource "aws_api_gateway_method" "get_company_details_method" {
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "add_scenario_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios.id
+  http_method   = "POST"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "delete_scenarios_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.scenarios.id
+  http_method   = "DELETE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+
+  request_parameters = {
+    "method.request.querystring.from_details" = true
+  }
 }
 
 resource "aws_api_gateway_method" "get_universe_overview_method" {
@@ -408,6 +441,23 @@ resource "aws_api_gateway_method" "add_investment_method" {
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
+
+resource "aws_api_gateway_method" "get_edit_modify_data_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.edit_modify.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "edit_modify_data_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.edit_modify.id
+  http_method   = "PUT"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
 # Provides an HTTP Method Integration for an API Gateway Integration.
@@ -444,6 +494,24 @@ resource "aws_api_gateway_integration" "get_company_details_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_company_details_lambda_function
+}
+
+resource "aws_api_gateway_integration" "add_company_scenario_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios.id
+  http_method             = aws_api_gateway_method.add_scenario_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.add_scenario_lambda_function
+}
+
+resource "aws_api_gateway_integration" "delete_scenarios_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.scenarios.id
+  http_method             = aws_api_gateway_method.delete_scenarios_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.delete_scenarios_lambda_function
 }
 
 resource "aws_api_gateway_integration" "universe_overview_integration" {
@@ -607,6 +675,25 @@ resource "aws_api_gateway_integration" "add_investment_integration" {
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.add_investment_lambda_function
 }
+
+resource "aws_api_gateway_integration" "get_edit_modify_data_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.edit_modify.id
+  http_method             = aws_api_gateway_method.get_edit_modify_data_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_edit_modify_data_lambda_function
+}
+
+resource "aws_api_gateway_integration" "edit_modify_data_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.edit_modify.id
+  http_method             = aws_api_gateway_method.edit_modify_data_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.edit_modify_data_lambda_function
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY DOMAIN
 # Manages domain SSL certificate

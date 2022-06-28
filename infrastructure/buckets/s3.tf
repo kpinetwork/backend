@@ -230,3 +230,31 @@ resource "aws_s3_bucket_object" "update_data_function_object" {
   source = "${path.module}/../../dist/update_data.zip"
   etag = filemd5("${path.module}/../../dist/update_data.zip")
 }
+
+resource "aws_s3_bucket_object" "add_scenario_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/add_scenario_handler.zip"
+  source = "${path.module}/../../dist/add_scenario_handler.zip"
+  etag = filemd5("${path.module}/../../dist/add_scenario_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "edit_modify_data_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/edit_modify_data_handler.zip"
+  source = "${path.module}/../../dist/edit_modify_data_handler.zip"
+  etag = filemd5("${path.module}/../../dist/edit_modify_data_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "get_edit_modify_data_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_edit_modify_data_handler.zip"
+  source = "${path.module}/../../dist/get_edit_modify_data_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_edit_modify_data_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "delete_scenarios_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/delete_scenarios_handler.zip"
+  source = "${path.module}/../../dist/delete_scenarios_handler.zip"
+  etag = filemd5("${path.module}/../../dist/delete_scenarios_handler.zip")
+}

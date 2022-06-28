@@ -59,7 +59,7 @@ def upload_file(bucket_name: str, file_info: dict, user_id: str) -> str:
     return filename
 
 
-def handler(event, context):
+def handler(event, _):
     try:
         if not event.get("body"):
             raise AppError("No data provided")
