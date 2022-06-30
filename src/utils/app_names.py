@@ -10,6 +10,7 @@ class TableNames(StrEnum):
     INVESTMENT = "investment"
     SCENARIO = "financial_scenario"
     SCENARIO_METRIC = "scenario_metric"
+    CURRENCY_METRIC = "currency_metric"
 
 
 class ScenarioNames(StrEnum):

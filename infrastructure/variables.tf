@@ -65,6 +65,7 @@ variable "lambdas_names" {
     "add_scenario_lambda_function": "add_scenario_lambda_function"
     "edit_modify_data_lambda_function": "edit_modify_data_lambda_function"
     "get_edit_modify_data_lambda_function": "get_edit_modify_data_lambda_function"
+    "delete_company_lambda_function": "delete_company_lambda_function"
   }
 }
 

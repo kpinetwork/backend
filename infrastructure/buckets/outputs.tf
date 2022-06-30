@@ -205,5 +205,11 @@ output "object_references" {
       key : aws_s3_bucket_object.delete_scenarios_function_object.key,
       bucket : aws_s3_bucket_object.delete_scenarios_function_object.bucket
     }
+
+    "delete_company_function_bucket" : {
+      etag : aws_s3_bucket_object.delete_company_function_object.etag,
+      key : aws_s3_bucket_object.delete_company_function_object.key,
+      bucket : aws_s3_bucket_object.delete_company_function_object.bucket
+    }
   }
 }

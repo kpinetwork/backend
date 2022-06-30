@@ -18,6 +18,12 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
+    "apigw_delete_company_lambda_function": {
+      resource_path: aws_api_gateway_resource.company_details.path,
+      http_method: aws_api_gateway_method.delete_company_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
     "apigw_get_universe_overview_lambda_function": {
       resource_path: aws_api_gateway_resource.universe_overview.path,
       http_method: aws_api_gateway_method.get_universe_overview_method.http_method,

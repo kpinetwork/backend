@@ -15,6 +15,19 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
 
+  delete_company_handler:
+    requirements: ./src/handlers/company_details/requirements.txt
+    include:
+    - ./src/handlers/company_details/delete_company_handler.py
+    - ./src/service/company_details/company_details_service.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+
 
   get_all_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
