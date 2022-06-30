@@ -1,6 +1,7 @@
 import os
 import boto3
 from response_user import ResponseUser
+from base_exception import AuthError
 
 cognito = None
 
@@ -12,7 +13,7 @@ def get_user_id_from_event(event: dict):
         authorizer = context.get("authorizer")
         return authorizer.get("principalId")
 
-    raise Exception("No user found")
+    raise AuthError("No user found")
 
 
 def get_email_from_user(user: dict) -> dict:
@@ -60,4 +61,4 @@ def verify_user_access(user_id: str) -> bool:
 
         if isinstance(roles, list):
             return "admin" in roles
-    raise Exception("Cannot verified permissions")
+    raise AuthError("Cannot verified permissions")

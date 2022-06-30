@@ -28,11 +28,6 @@ class QueryFetchAll:
         return None
 
 
-class QueryFetchAllHandleException:
-    def fetchall(self):
-        raise Exception("Error")
-
-
 class DeleteScenariosServiceTest(TestCase):
     def setUp(self):
         self.mock_session = Mock()
