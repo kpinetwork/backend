@@ -4,6 +4,7 @@ output "lambdas_exec_roles_arn" {
       "companies_exec_role_arn": aws_iam_role.companies_lambda_exec_role.arn
       "get_all_public_companies_exec_role_arn": aws_iam_role.get_all_public_companies_lambda_exec_role.arn
       "get_company_details_exec_role_arn": aws_iam_role.get_company_details_lambda_exec_role.arn
+      "delete_company_exec_role_arn": aws_iam_role.delete_company_lambda_exec_role.arn
       "glue_trigger_lambda_exec_role": aws_iam_role.glue_trigger_lambda_exec_role.arn
       "get_universe_overview_exec_role_arn": aws_iam_role.get_universe_overview_lambda_exec_role.arn
       "get_company_report_vs_peers_exec_role_arn": aws_iam_role.get_company_report_vs_peers_lambda_exec_role.arn
