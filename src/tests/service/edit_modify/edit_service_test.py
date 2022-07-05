@@ -312,3 +312,37 @@ class TestEditModifyService(TestCase):
         response = self.edit_service._EditModifyService__slice_row(row, 0, 2)
 
         self.assertEqual(response, expected_response)
+
+    def test_get_scenarios_and_filters_invalid_scenario_should_return_base_scenarios(
+        self,
+    ):
+        conditions = {"scenarios": "Actuals margin"}
+
+        (
+            scenarios,
+            filters,
+        ) = self.edit_service._EditModifyService__get_scenarios_and_filters(
+            **conditions
+        )
+
+        self.assertEqual(scenarios, ["Actuals", "Budget"])
+        self.assertEqual(
+            filters, {"financial_scenario.type": ["'Actuals'", "'Budget'"]}
+        )
+
+    def test_get_scenarios_and_filters_should_dict_with_conditions(self):
+        conditions = {"name": ["Sample Company"], "scenarios": ["Actuals"]}
+        expected_filters = {
+            "company.name": ["'Sample Company'"],
+            "financial_scenario.type": ["'Actuals'"],
+        }
+
+        (
+            scenarios,
+            filters,
+        ) = self.edit_service._EditModifyService__get_scenarios_and_filters(
+            **conditions
+        )
+
+        self.assertEqual(scenarios, ["Actuals"])
+        self.assertEqual(filters, expected_filters)
