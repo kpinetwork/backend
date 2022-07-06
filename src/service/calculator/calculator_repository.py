@@ -205,7 +205,7 @@ class CalculatorRepository:
                 f"{self.company_table}.is_public": True,
             }
 
-            if company_id and not filters:
+            if company_id and filters is not None:
                 company_condition = {f"{self.company_table}.id": f"'{company_id}'"}
                 where_condition.update(company_condition)
 
@@ -261,7 +261,9 @@ class CalculatorRepository:
         need_budget_prior_year: bool = False,
         **conditions,
     ) -> dict:
-        filters = self.add_company_filters(**conditions)
+        filters = None
+        if conditions:
+            filters = self.add_company_filters(**conditions)
         metric_options = self.get_base_metrics_options(
             year, need_actuals_prior_year, need_next_year, need_budget_prior_year
         )
