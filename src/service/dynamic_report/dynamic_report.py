@@ -125,7 +125,7 @@ class DynamicReport:
         company: str,
         invest_year_by_company: dict,
         invest_year: int,
-        years: int,
+        years: list,
         metric: str,
     ) -> dict:
         year_metric = (
