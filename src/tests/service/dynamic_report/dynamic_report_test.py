@@ -114,6 +114,44 @@ class TestDynamicReport(TestCase):
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
+    def test_get_dynamic_report_should_when_there_is_no_metric(
+        self, mock_set_company_permissions, mock_get_profiles, mock_get_records
+    ):
+        expected_response = {
+            "header": ["name", "actuals-revenue"],
+            "company_comparison_data": {},
+            "peers_comparison_data": [
+                {"id": "2", "name": "Company", "actuals-revenue": "NA"},
+                {"id": "1", "name": "Test", "actuals-revenue": 1},
+            ],
+        }
+        profiles = {
+            "1": {"size_cohort": "", "margin_group": ""},
+            "2": {"size_cohort": "", "margin_group": ""},
+        }
+        mock_get_records.return_value = {
+            "1": {"id": "1", "name": "Test", "metrics": {2020: 1, 2021: 2}},
+            "2": {"id": "2", "name": "Company", "metrics": {}},
+        }
+        mock_get_profiles.return_value = (profiles, self.sizes)
+        self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
+
+        response = self.report_instance.get_dynamic_report(
+            None, "user@mail.com", "actuals-revenue", 2020, None, False, True
+        )
+
+        mock_set_company_permissions.assert_called()
+        self.assertEqual(response, expected_response)
+
+    @mock.patch(
+        "src.service.by_metric_report.by_metric_report.ByMetricReport.get_records"
+    )
+    @mock.patch(
+        "src.service.by_metric_report.by_metric_report.ByMetricReport.get_profiles"
+    )
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
     def test_get_dynamic_report_should_return_dynamic_metrics_with_invest_year(
         self, mock_set_company_permissions, mock_get_profiles, mock_get_records
     ):

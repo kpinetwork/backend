@@ -71,6 +71,10 @@ def get_dynamic_report_service():
     return DynamicReport(logger, metric_report, investment_report, calendar_report)
 
 
+def get_value(params, value, default_value):
+    return int(params.get(value, default_value)) if params.get(value) else None
+
+
 def get_header() -> dict:
     return {
         "Content-Type": "application/json",
@@ -97,16 +101,8 @@ def handler(event, _):
             conditions = get_condition_params(params)
             from_main = params.get("from_main", from_main)
             metric = params.get("metric", metric)
-            calendar_year = (
-                int(params.get("calendar_year", calendar_year))
-                if params.get("calendar_year")
-                else None
-            )
-            investment_year = (
-                int(params.get("investment_year", investment_year))
-                if params.get("investment_year")
-                else None
-            )
+            calendar_year = get_value(params, "calendar_year", calendar_year)
+            investment_year = get_value(params, "investment_year", investment_year)
             username = get_username_from_user_id(user_id)
 
             report = report_service.get_dynamic_report(
