@@ -103,18 +103,18 @@ def handler(event, _):
             metric = params.get("metric", metric)
             calendar_year = get_value(params, "calendar_year", calendar_year)
             investment_year = get_value(params, "investment_year", investment_year)
-            username = get_username_from_user_id(user_id)
 
-            report = report_service.get_dynamic_report(
-                company_id,
-                username,
-                metric,
-                calendar_year,
-                investment_year,
-                from_main,
-                access,
-                **conditions
-            )
+        username = get_username_from_user_id(user_id)
+        report = report_service.get_dynamic_report(
+            company_id,
+            username,
+            metric,
+            calendar_year,
+            investment_year,
+            from_main,
+            access,
+            **conditions
+        )
         return {
             "statusCode": 200,
             "body": json.dumps(report),

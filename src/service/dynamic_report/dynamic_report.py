@@ -221,7 +221,7 @@ class DynamicReport:
             company = dict()
             is_valid_company = company_id and company_id.strip()
             header = []
-            data = []
+            data = dict()
 
             if self.__is_by_year_report(metric, calendar_year, investment_year):
                 return self.__get_by_year_report(
