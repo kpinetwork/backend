@@ -4,6 +4,9 @@
             "principalId": "user_id"
         }
     },
+    "queryStringParameters": {
+        "sectors": "Semiconductors"
+    },
     "body": {
         "edit": [
             {

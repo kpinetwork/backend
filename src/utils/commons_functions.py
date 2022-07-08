@@ -5,9 +5,21 @@ def remove_white_spaces(string: str):
 
 
 def get_list_param(param: str) -> list:
-    if param and param.strip() and len(param.strip()) > 1:
+    if param and param.strip() and len(param.strip()) > 2:
         return param.split(",")
     return []
+
+
+def get_conditions(query_params: dict, attributes: dict) -> dict:
+    conditions = dict()
+    if not query_params:
+        return conditions
+
+    for key in query_params:
+        if key in attributes:
+            param = attributes[key]
+            conditions[param] = get_list_param(query_params[key])
+    return conditions
 
 
 def get_company_attr() -> dict:
@@ -21,15 +33,20 @@ def get_company_attr() -> dict:
 
 
 def get_condition_params(query_params: dict) -> dict:
-    condition_params = dict()
-    if not query_params:
-        return condition_params
+    attrs = get_company_attr()
+    return get_conditions(query_params, attrs)
 
-    attr = get_company_attr()
 
-    for key in query_params:
-        if key in attr:
-            param = attr[key]
-            condition_params[param] = get_list_param(query_params[key])
+def get_edit_modify_attr() -> dict:
+    return {
+        "names": "name",
+        "sectors": "sector",
+        "verticals": "vertical",
+        "investor_profiles": "inves_profile_name",
+        "scenarios": "scenarios",
+    }
 
-    return condition_params
+
+def get_edit_modify_condition_params(query_params: dict) -> dict:
+    attrs = get_edit_modify_attr()
+    return get_conditions(query_params, attrs)

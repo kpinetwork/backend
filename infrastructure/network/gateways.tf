@@ -396,7 +396,7 @@ resource "aws_api_gateway_method" "get_users_method" {
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
-    request_parameters = {
+  request_parameters = {
     "method.request.querystring.token" = false
     "method.request.querystring.limit" = false
   }
@@ -488,6 +488,13 @@ resource "aws_api_gateway_method" "get_edit_modify_data_method" {
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+  request_parameters = {
+    "method.request.querystring.names" = false
+    "method.request.querystring.verticals" = false
+    "method.request.querystring.sectors" = false
+    "method.request.querystring.investor_profiles" = false
+    "method.request.querystring.scenarios" = false
+  }
 }
 
 resource "aws_api_gateway_method" "edit_modify_data_method" {
