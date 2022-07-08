@@ -295,7 +295,7 @@ class CompanyDetails:
             {scenario_query}
             {period_query}
             DELETE FROM {company} WHERE {company}.id = '{id}';
-          ROLLBACK;
+          COMMIT;
         """.format(
             scenario_metric_query=self.__get_delete_list_query(
                 TableNames.SCENARIO_METRIC, "scenario_id", scenarios
