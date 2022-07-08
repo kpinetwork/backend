@@ -1,0 +1,14 @@
+{
+    "queryStringParameters": {
+        "metric": "actuals_revenue",
+        "calendar_year": "2020"
+    },
+    "pathParameters": {
+        "id": null
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}

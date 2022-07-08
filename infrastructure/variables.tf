@@ -42,6 +42,7 @@ variable "lambdas_names" {
     "get_investment_year_report_lambda_function": "get_investment_year_report_lambda_function"
     "get_investment_year_options_lambda_function": "get_investment_year_options_lambda_function"
     "get_by_metric_report_lambda_function": "get_by_metric_report_lambda_function"
+    "get_dynamic_report_lambda_function": "get_dynamic_report_lambda_function"
     "add_user_to_customer_group_lambda_function": "add_user_to_customer_group_lambda_function"
     "authorize_lambda_function": "authorize_lambda_function"
     "verify_users_with_same_email_lambda_function" : "verify_users_with_same_email_lambda_function"

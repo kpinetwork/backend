@@ -68,6 +68,11 @@ resource "aws_cloudwatch_log_group" "get_by_metric_report_lambda_function" {
   retention_in_days = var.retention_days
 }
 
+resource "aws_cloudwatch_log_group" "get_dynamic_report_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_dynamic_report_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
 resource "aws_cloudwatch_log_group" "add_user_to_customer_group_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.add_user_to_customer_group_lambda_function}"
   retention_in_days = var.retention_days

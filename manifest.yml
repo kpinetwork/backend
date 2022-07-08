@@ -366,6 +366,34 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+  
+  get_dynamic_report_handler:
+    requirements: ./src/handlers/dynamic_report/requirements.txt
+    include:
+    - ./src/handlers/dynamic_report/get_dynamic_report_handler.py
+    - ./src/service/dynamic_report/dynamic_report.py
+    - ./src/service/by_metric_report/by_metric_report.py
+    - ./src/service/by_metric_report/metric_report_repository.py
+    - ./src/service/investment_peers_report/investment_year_report.py
+    - ./src/service/investment_peers_report/investment_repository.py
+    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/utils/commons_functions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/company_anonymization.py
+    - ./src/utils/response_user.py
+    - ./src/utils/profile_range.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/calculator/calculator_report.py
+    - ./src/service/user_details/get_user_details_service.py
+    - ./src/service/user_details/user_details_service.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
 
   update_data:
     requirements: ./src/handlers/glue/requirements.txt
