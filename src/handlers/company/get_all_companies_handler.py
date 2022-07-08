@@ -21,12 +21,12 @@ company_service = CompanyService(
 def handler(event, _):
     try:
         offset = 0
-        max_count = 20
+        max_count = None
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             offset = int(params.get("offset", offset))
-            max_count = int(params.get("limit", max_count))
+            max_count = int(params.get("limit", 20))
 
         companies = company_service.get_all_companies(offset, max_count)
 
