@@ -38,6 +38,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/utils/company_anonymization.py
+    - ./src/exceptions/base_exception.py
 
   get_all_public_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -54,6 +55,7 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
 
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt
@@ -73,6 +75,7 @@ functions:
     - ./src/utils/profile_range.py
     - ./src/service/calculator/calculator_repository.py
     - ./src/service/calculator/calculator_service.py
+    - ./src/exceptions/base_exception.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -93,6 +96,7 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -115,6 +119,7 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
 
   download_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -137,6 +142,7 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
@@ -304,6 +310,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
 
   add_investment_handler:
     requirements: ./src/handlers/investments/requirements.txt
@@ -336,6 +343,7 @@ functions:
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
+    - ./src/exceptions/base_exception.py
 
   get_investment_year_options_handler:
     requirements: ./src/handlers/investment_year_report/requirements.txt
@@ -345,6 +353,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/exceptions/base_exception.py
 
   get_by_metric_report_handler:
     requirements: ./src/handlers/by_metric_report/requirements.txt
@@ -366,6 +375,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
   
   get_dynamic_report_handler:
     requirements: ./src/handlers/dynamic_report/requirements.txt

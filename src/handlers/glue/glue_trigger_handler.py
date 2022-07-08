@@ -6,7 +6,7 @@ from glue_service import GlueService
 client = boto3.client("glue")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-glue_service = GlueService()
+glue_service = GlueService(logger)
 
 
 def handler(event, _):

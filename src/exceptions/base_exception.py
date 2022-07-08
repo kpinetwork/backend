@@ -8,3 +8,9 @@ class AuthError(AppError):
     """Authentication exception"""
 
     pass
+
+
+class QueryError(AppError):
+    """Query exception"""
+
+    pass

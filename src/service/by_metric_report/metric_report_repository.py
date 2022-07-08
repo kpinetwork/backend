@@ -1,4 +1,5 @@
 from base_exception import AppError
+from app_names import TableNames, ScenarioNames
 
 
 class MetricReportRepository:
@@ -7,11 +8,6 @@ class MetricReportRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
-        self.metric_table = "metric"
-        self.company_table = "company"
-        self.scenario_table = "financial_scenario"
-        self.scenario_metric_table = "scenario_metric"
-        self.time_period_table = "time_period"
 
     def add_company_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -20,14 +16,14 @@ class MetricReportRepository:
                 values = [
                     f"'{element}'" for element in v if element and element.strip()
                 ]
-                filters[f"{self.company_table}.{k}"] = values
+                filters[f"{TableNames.COMPANY}.{k}"] = values
         return filters
 
     def get_years(self) -> list:
         try:
             start = "start_at"
             query = (
-                self.query_builder.add_table_name(self.time_period_table)
+                self.query_builder.add_table_name(TableNames.PERIOD)
                 .add_select_conditions(
                     [f"DISTINCT ON({start}) extract(year from {start})::int as year"]
                 )
@@ -48,42 +44,42 @@ class MetricReportRepository:
     def get_base_metric(self, metric: str, scenario: str, filters: dict) -> list:
         try:
             where_conditions = {
-                f"{self.metric_table}.name": f"'{metric}'",
-                f"{self.scenario_table}.type": f"'{scenario}'",
+                f"{TableNames.METRIC}.name": f"'{metric}'",
+                f"{TableNames.SCENARIO}.type": f"'{scenario}'",
             }
             from_count = int(len(scenario) + 2)
             where_conditions.update(filters)
             query = (
-                self.query_builder.add_table_name(self.company_table)
+                self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
                     [
-                        f"{self.company_table}.id",
-                        f"{self.company_table}.name",
-                        f"substring({self.scenario_table}.name from {from_count})::int as year",
-                        f"{self.metric_table}.value",
+                        f"{TableNames.COMPANY}.id",
+                        f"{TableNames.COMPANY}.name",
+                        f"substring({TableNames.SCENARIO}.name from {from_count})::int as year",
+                        f"{TableNames.METRIC}.value",
                     ]
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_table}": {
-                            "from": f"{self.scenario_table}.company_id",
-                            "to": f"{self.company_table}.id",
+                        f"{TableNames.SCENARIO}": {
+                            "from": f"{TableNames.SCENARIO}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
-                            "to": f"{self.scenario_table}.id",
+                        f"{TableNames.SCENARIO_METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                            "to": f"{TableNames.SCENARIO}.id",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
+                        f"{TableNames.METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                            "to": f"{TableNames.METRIC}.id",
                         }
                     }
                 )
@@ -101,29 +97,29 @@ class MetricReportRepository:
     def get_subquery_metric(self, metric: str, scenario: str) -> str:
         substring = "substring(scenario.name from 9)"
         return (
-            self.query_builder.add_table_name(self.scenario_table)
-            .add_select_conditions([f"NULLIF({self.metric_table}.value, 0)"])
+            self.query_builder.add_table_name(TableNames.SCENARIO)
+            .add_select_conditions([f"NULLIF({TableNames.METRIC}.value, 0)"])
             .add_join_clause(
                 {
-                    f"{self.scenario_metric_table}": {
-                        "from": f"{self.scenario_metric_table}.scenario_id",
-                        "to": f"{self.scenario_table}.id",
+                    f"{TableNames.SCENARIO_METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                        "to": f"{TableNames.SCENARIO}.id",
                     }
                 }
             )
             .add_join_clause(
                 {
-                    f"{self.metric_table}": {
-                        "from": f"{self.scenario_metric_table}.metric_id",
-                        "to": f"{self.metric_table}.id",
+                    f"{TableNames.METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                        "to": f"{TableNames.METRIC}.id",
                     }
                 }
             )
             .add_sql_where_equal_condition(
                 {
-                    f"{self.scenario_table}.company_id": "company.id",
-                    f"{self.scenario_table}.name": f"concat('{scenario}-', {substring})",
-                    f"{self.metric_table}.name": f"'{metric}'",
+                    f"{TableNames.SCENARIO}.company_id": "company.id",
+                    f"{TableNames.SCENARIO}.name": f"concat('{scenario}-', {substring})",
+                    f"{TableNames.METRIC}.name": f"'{metric}'",
                 }
             )
             .build()
@@ -133,49 +129,49 @@ class MetricReportRepository:
     def get_actuals_vs_budget_metric(self, metric: str, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": "'Actuals'",
-                f"{self.metric_table}.name": f"'{metric}'",
+                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": f"'{metric}'",
             }
             where_conditions.update(filters)
-            subquery = self.get_subquery_metric(metric, "Budget")
+            subquery = self.get_subquery_metric(metric, ScenarioNames.BUDGET)
             query = (
-                self.query_builder.add_table_name(self.company_table)
+                self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
                     [
-                        f"{self.company_table}.id",
-                        f"{self.company_table}.name",
+                        f"{TableNames.COMPANY}.id",
+                        f"{TableNames.COMPANY}.name",
                         "substring(scenario.name from 9)::int as year",
-                        f"{self.metric_table}.value * 100 / ({subquery}) as value",
+                        f"{TableNames.METRIC}.value * 100 / ({subquery}) as value",
                     ]
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_table}": {
+                        f"{TableNames.SCENARIO}": {
                             "from": "scenario.company_id",
-                            "to": f"{self.company_table}.id",
+                            "to": f"{TableNames.COMPANY}.id",
                             "alias": "scenario",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
+                        f"{TableNames.SCENARIO_METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
                             "to": "scenario.id",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
+                        f"{TableNames.METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                            "to": f"{TableNames.METRIC}.id",
                         }
                     }
                 )
                 .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(
-                    [f"{self.company_table}.name", "scenario.name"],
+                    [f"{TableNames.COMPANY}.name", "scenario.name"],
                     self.query_builder.Order.ASC,
                 )
                 .build()
@@ -192,49 +188,49 @@ class MetricReportRepository:
     def get_ebitda_margin_metric(self, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": "'Actuals'",
-                f"{self.metric_table}.name": "'Ebitda'",
+                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": "'Ebitda'",
             }
             where_conditions.update(filters)
-            subquery = self.get_subquery_metric("Revenue", "Actuals")
+            subquery = self.get_subquery_metric("Revenue", ScenarioNames.ACTUALS)
             query = (
-                self.query_builder.add_table_name(self.company_table)
+                self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
                     [
-                        f"{self.company_table}.id",
-                        f"{self.company_table}.name",
+                        f"{TableNames.COMPANY}.id",
+                        f"{TableNames.COMPANY}.name",
                         "substring(scenario.name from 9)::int as year",
-                        f"{self.metric_table}.value * 100 / ({subquery}) as value",
+                        f"{TableNames.METRIC}.value * 100 / ({subquery}) as value",
                     ]
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_table}": {
+                        f"{TableNames.SCENARIO}": {
                             "from": "scenario.company_id",
-                            "to": f"{self.company_table}.id",
+                            "to": f"{TableNames.COMPANY}.id",
                             "alias": "scenario",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.scenario_metric_table}": {
-                            "from": f"{self.scenario_metric_table}.scenario_id",
+                        f"{TableNames.SCENARIO_METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
                             "to": "scenario.id",
                         }
                     }
                 )
                 .add_join_clause(
                     {
-                        f"{self.metric_table}": {
-                            "from": f"{self.scenario_metric_table}.metric_id",
-                            "to": f"{self.metric_table}.id",
+                        f"{TableNames.METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                            "to": f"{TableNames.METRIC}.id",
                         }
                     }
                 )
                 .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(
-                    [f"{self.company_table}.name", "scenario.name"],
+                    [f"{TableNames.COMPANY}.name", "scenario.name"],
                     self.query_builder.Order.ASC,
                 )
                 .build()
@@ -249,35 +245,35 @@ class MetricReportRepository:
 
     def get_revenue_subquery(self) -> str:
         return (
-            self.query_builder.add_table_name(self.scenario_table)
+            self.query_builder.add_table_name(TableNames.SCENARIO)
             .add_select_conditions(
-                [f"{self.scenario_table}.name", f"{self.metric_table}.value"]
+                [f"{TableNames.SCENARIO}.name", f"{TableNames.METRIC}.value"]
             )
             .add_join_clause(
                 {
-                    f"{self.scenario_metric_table}": {
-                        "from": f"{self.scenario_metric_table}.scenario_id",
-                        "to": f"{self.scenario_table}.id",
+                    f"{TableNames.SCENARIO_METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                        "to": f"{TableNames.SCENARIO}.id",
                     }
                 }
             )
             .add_join_clause(
                 {
-                    f"{self.metric_table}": {
-                        "from": f"{self.scenario_metric_table}.metric_id",
-                        "to": f"{self.metric_table}.id",
+                    f"{TableNames.METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                        "to": f"{TableNames.METRIC}.id",
                     }
                 }
             )
             .add_sql_where_equal_condition(
                 {
-                    f"{self.scenario_table}.company_id": "company.id",
-                    f"{self.scenario_table}.type": "'Actuals'",
-                    f"{self.metric_table}.name": "'Revenue'",
+                    f"{TableNames.SCENARIO}.company_id": "company.id",
+                    f"{TableNames.SCENARIO}.type": f"'{ScenarioNames.ACTUALS}'",
+                    f"{TableNames.METRIC}.name": "'Revenue'",
                 }
             )
             .add_sql_order_by_condition(
-                [f"{self.scenario_table}.name"], self.query_builder.Order.DESC
+                [f"{TableNames.SCENARIO}.name"], self.query_builder.Order.DESC
             )
             .add_sql_limit_condition(2)
             .build()
@@ -286,9 +282,9 @@ class MetricReportRepository:
 
     def get_most_recents_revenue(self, filters: dict) -> list:
         try:
-            columns = [f"{self.company_table}.id", "revenue.*"]
+            columns = [f"{TableNames.COMPANY}.id", "revenue.*"]
             select_query = (
-                self.query_builder.add_table_name(self.company_table)
+                self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(columns)
                 .build()
                 .get_query()
@@ -330,19 +326,27 @@ class MetricReportRepository:
         return {
             "actuals_revenue": {
                 "function": self.get_base_metric,
-                "arguments": self.get_arguments(filters, "Revenue", "Actuals"),
+                "arguments": self.get_arguments(
+                    filters, "Revenue", ScenarioNames.ACTUALS
+                ),
             },
             "actuals_ebitda": {
                 "function": self.get_base_metric,
-                "arguments": self.get_arguments(filters, "Ebitda", "Actuals"),
+                "arguments": self.get_arguments(
+                    filters, "Ebitda", ScenarioNames.ACTUALS
+                ),
             },
             "budget_revenue": {
                 "function": self.get_base_metric,
-                "arguments": self.get_arguments(filters, "Revenue", "Budget"),
+                "arguments": self.get_arguments(
+                    filters, "Revenue", ScenarioNames.BUDGET
+                ),
             },
             "budget_ebitda": {
                 "function": self.get_base_metric,
-                "arguments": self.get_arguments(filters, "Ebitda", "Budget"),
+                "arguments": self.get_arguments(
+                    filters, "Ebitda", ScenarioNames.BUDGET
+                ),
             },
             "revenue_vs_budget": {
                 "function": self.get_actuals_vs_budget_metric,
