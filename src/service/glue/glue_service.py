@@ -3,8 +3,8 @@ import urllib.parse
 
 
 class GlueService:
-    def __init__(self):
-        pass  # This function initialize the glue service
+    def __init__(self, logger):
+        self.logger = logger
 
     def trigger(self, glue_client, event, logger) -> dict:
         filename = urllib.parse.unquote_plus(
@@ -29,6 +29,8 @@ class GlueService:
             logger.info("GLUE JOB RUN ID: " + job_id)
             return {"job": job_name, "id": job_id}
         except Exception as e:
-            print("Error processing file {}/{}".format(bucket_files, filename))
-            print(e)
+            self.logger.info(
+                "Error processing file {}/{}".format(bucket_files, filename)
+            )
+            self.logger.info(e)
             raise e

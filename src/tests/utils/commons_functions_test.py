@@ -3,6 +3,7 @@ from src.utils.commons_functions import (
     get_list_param,
     remove_white_spaces,
     get_condition_params,
+    get_edit_modify_condition_params,
 )
 
 
@@ -11,8 +12,8 @@ class TestQueryBuilder(TestCase):
         self.text = "\t Test \n\n"
         self.expected_full_list = ["1", "2", "3", "4"]
         self.params = {
-            "sector": "A,B",
-            "vertical": "V1,V2",
+            "sector": "Application Software,Computer",
+            "vertical": "Law,Insurance",
             "size": "<$10million,$30-50million",
         }
 
@@ -54,3 +55,14 @@ class TestQueryBuilder(TestCase):
         conditions = get_condition_params(dict())
 
         self.assertEqual(conditions, expected_result)
+
+    def test_get_edit_modify_conditions_without_empty_strings(self):
+        edit_params = {"names": "Company A", "sectors": "Application Software"}
+        expected_conditions = {
+            "name": [edit_params["names"]],
+            "sector": [edit_params["sectors"]],
+        }
+
+        conditions = get_edit_modify_condition_params(edit_params)
+
+        self.assertEqual(conditions, expected_conditions)

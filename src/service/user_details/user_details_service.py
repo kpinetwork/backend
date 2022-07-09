@@ -1,3 +1,6 @@
+from base_exception import AppError
+
+
 class UserDetailsService:
     def __init__(
         self,
@@ -101,7 +104,7 @@ class UserDetailsService:
             return sorted(
                 permissions, key=lambda permission: permission.get("name", "").lower()
             )
-        raise Exception("No valid username provided")
+        raise AppError("No valid username provided")
 
     def add_company_permissions(self, username: str, companies: list) -> dict:
         rules = {
@@ -141,4 +144,4 @@ class UserDetailsService:
             add_permissions_result.update(remove_result)
             return add_permissions_result
 
-        raise Exception("No valid username or companies data")
+        raise AppError("No valid username or companies data")

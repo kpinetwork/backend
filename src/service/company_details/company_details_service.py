@@ -215,3 +215,133 @@ class CompanyDetails:
         }
 
         return company
+
+    def __get_company_scenarios_ids(self, company_id: str) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.SCENARIO)
+                .add_select_conditions(
+                    [
+                        f"{TableNames.SCENARIO}.id as scenario",
+                        f"{TableNames.METRIC}.id as metric",
+                        f"{TableNames.METRIC}.period_id as period",
+                    ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.SCENARIO_METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                            "to": f"{TableNames.SCENARIO}.id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.METRIC}": {
+                            "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                            "to": f"{TableNames.METRIC}.id",
+                        }
+                    }
+                )
+                .add_sql_where_equal_condition(
+                    {f"{TableNames.SCENARIO}.company_id": f"'{company_id}'"}
+                )
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            self.session.commit()
+            return self.response_sql.process_query_list_results(result)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
+    def __get_ids_list(self, records: list, field: str) -> list:
+        return [f"'{record.get(field)}'" for record in records if record.get(field)]
+
+    def __get_ids(self, company_id: str) -> dict:
+        records = self.__get_company_scenarios_ids(company_id)
+        metrics = self.__get_ids_list(records, "metric")
+        periods = self.__get_ids_list(records, "period")
+        scenarios = self.__get_ids_list(records, "scenario")
+
+        return {
+            f"{TableNames.METRIC}": metrics,
+            f"{TableNames.SCENARIO}": scenarios,
+            f"{TableNames.PERIOD}": periods,
+        }
+
+    def __get_delete_list_query(self, table: str, table_field: str, ids: list) -> str:
+        if not ids:
+            return ""
+
+        return """
+        DELETE FROM {table}
+        WHERE {table}.{field} IN ({values});
+        """.format(
+            table=table, field=table_field, values=",".join(ids)
+        )
+
+    def __get_delete_company_query(self, base_ids: dict, company_id: str) -> str:
+        scenarios = base_ids.get(TableNames.SCENARIO)
+        metrics = base_ids.get(TableNames.METRIC)
+        periods = base_ids.get(TableNames.PERIOD)
+
+        return """
+          BEGIN;
+            {scenario_metric_query}
+            {currency_query}
+            {metric_query}
+            {scenario_query}
+            {period_query}
+            DELETE FROM {company} WHERE {company}.id = '{id}';
+          COMMIT;
+        """.format(
+            scenario_metric_query=self.__get_delete_list_query(
+                TableNames.SCENARIO_METRIC, "scenario_id", scenarios
+            ),
+            currency_query=self.__get_delete_list_query(
+                TableNames.CURRENCY_METRIC, "metric_id", metrics
+            ),
+            scenario_query=self.__get_delete_list_query(
+                TableNames.SCENARIO, "id", scenarios
+            ),
+            metric_query=self.__get_delete_list_query(TableNames.METRIC, "id", metrics),
+            period_query=self.__get_delete_list_query(TableNames.PERIOD, "id", periods),
+            company=TableNames.COMPANY,
+            id=company_id,
+        )
+
+    def __verify_company_exist(self, company_id: str) -> None:
+        try:
+            query = (
+                self.query_builder.add_table_name(self.table)
+                .add_sql_where_equal_condition({"id": f"'{company_id}'"})
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            if not result:
+                raise AppError("Company not found")
+        except AppError as error:
+            raise error
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def delete_company(self, company_id: str) -> bool:
+        try:
+            self.__verify_company_exist(company_id)
+            base_ids = self.__get_ids(company_id)
+
+            query = self.__get_delete_company_query(base_ids, company_id)
+
+            self.session.execute(query)
+            self.session.commit()
+            return True
+        except AppError as error:
+            self.logger.info(error)
+            raise error
+        except Exception as error:
+            self.logger.info(error)
+            return False

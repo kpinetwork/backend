@@ -1,4 +1,5 @@
 from enum import Enum
+from base_exception import QueryError
 
 
 class QuerySQLBuilder:
@@ -39,7 +40,7 @@ class QuerySQLBuilder:
         if self.__is_valid_name(table_name):
             return f"{join_type.value} JOIN {table_name}"
         else:
-            raise Exception("No valid table name")
+            raise QueryError("No valid table name")
 
     def __get_alias_table_clause(self, alias: str):
         if self.__is_valid_name(alias):
@@ -53,14 +54,14 @@ class QuerySQLBuilder:
         if self.__is_valid_name(from_value) and self.__is_valid_name(to_value):
             return f"ON {from_value} = {to_value}"
         else:
-            raise Exception("No valid on clause in JOIN")
+            raise QueryError("No valid on clause in JOIN")
 
     def add_table_name(self, table_name: str):
         if self.__is_valid_name(table_name):
             self.table_name = table_name
             return self
         else:
-            raise Exception("No valid table name")
+            raise QueryError("No valid table name")
 
     def add_select_conditions(self, columns: list = None):
         columns = columns if columns else ["*"]
@@ -127,21 +128,21 @@ class QuerySQLBuilder:
             self.group_by = columns
             return self
         else:
-            raise Exception("No valid columns for group by")
+            raise QueryError("No valid columns for group by")
 
     def add_sql_limit_condition(self, limit):
         if limit is None or self.__is_valid_number(limit):
             self.limit = limit
             return self
         else:
-            raise Exception("No valid limit value")
+            raise QueryError("No valid limit value")
 
     def add_sql_offset_condition(self, offset):
         if self.__is_valid_number(offset):
             self.offset = offset
             return self
         else:
-            raise Exception("No valid offset value")
+            raise QueryError("No valid offset value")
 
     def add_sql_order_by_condition(self, attributes: list, order: Order):
         if attributes:

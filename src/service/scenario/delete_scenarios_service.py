@@ -1,3 +1,6 @@
+from typing import Union
+
+
 class DeleteScenariosService:
     def __init__(self, session, query_builder, logger, response_sql) -> None:
         self.session = session
@@ -48,7 +51,7 @@ class DeleteScenariosService:
     def delete_scenario(self, scenario_id: str, metric_id: str) -> bool:
         period_id = self.get_time_period_of_scenario(scenario_id)
         metric_is_deleted = self.delete_metric(scenario_id, metric_id)
-        scenario_has_metric = self.scenario_is_in_scenario_metric(scenario_id)
+        scenario_has_metric = self.scenario_has_metrics(scenario_id)
 
         if (not metric_is_deleted) or (metric_is_deleted and scenario_has_metric):
             return metric_is_deleted
@@ -74,7 +77,7 @@ class DeleteScenariosService:
             self.logger.info(error)
             return False
 
-    def get_time_period_of_scenario(self, scenario_id: str) -> str:
+    def get_time_period_of_scenario(self, scenario_id: str) -> Union[str, None]:
         try:
             query = (
                 self.query_builder.add_table_name("financial_scenario")
@@ -90,7 +93,7 @@ class DeleteScenariosService:
             self.logger.info(error)
             return None
 
-    def scenario_is_in_scenario_metric(self, scenario_id: str) -> bool:
+    def scenario_has_metrics(self, scenario_id: str) -> bool:
         try:
             query = (
                 self.query_builder.add_table_name("scenario_metric")

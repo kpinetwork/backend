@@ -56,14 +56,14 @@ class ByMetricReport:
         self.ranges = self.get_dynamic_ranges(records)
 
         for record in records:
-            id = record["id"]
+            company_id = record["id"]
             value = self.calculate_base_metric(record["value"], rounded)
             year_data = {record["year"]: value}
             company = {"id": record["id"], "name": record["name"], "metrics": year_data}
-            if data.get(id):
-                data[id]["metrics"].update(year_data)
+            if data.get(company_id):
+                data[company_id]["metrics"].update(year_data)
             else:
-                data[id] = company
+                data[company_id] = company
         return data
 
     def process_growth(self, records: list, years: list) -> dict:

@@ -15,7 +15,7 @@ env = "demo"
 
 class TestGlueService(TestCase):
     def setUp(self):
-        self.glue_service_instance = GlueService()
+        self.glue_service_instance = GlueService(logger)
         self.mock_event = {"Records": [{"s3": {"object": {"key": test_file_name}}}]}
         self.mock_boto_client = Mock()
         return

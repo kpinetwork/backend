@@ -13,6 +13,14 @@ company_service_class = (
 )
 
 
+class DummyFetch:
+    def __init__(self, records: list):
+        self.records = records
+
+    def fetchall(self):
+        return self.records
+
+
 class TestCompanyDetailsService(TestCase):
     def setUp(self):
         self.mock_session = Mock()
@@ -204,3 +212,102 @@ class TestCompanyDetailsService(TestCase):
 
             self.assertTrue("Invalid company id" in context.exception)
             self.assertEqual(exception, Exception)
+
+    def test_get_company_scenarios_ids_success(self) -> None:
+        scenario = {"scenario": "1", "metric": "1", "period": "1"}
+        self.mock_response_list_query_sql([scenario])
+
+        id_list = (
+            self.details_service_instance._CompanyDetails__get_company_scenarios_ids(
+                self.company["id"]
+            )
+        )
+
+        self.assertEqual(id_list, [scenario])
+
+    def test_get_company_scenarios_ids_fail_return_empty_list(self) -> None:
+        self.mock_session.execute.side_effect = Exception("error")
+
+        id_list = (
+            self.details_service_instance._CompanyDetails__get_company_scenarios_ids(
+                self.company["id"]
+            )
+        )
+
+        self.assertEqual(id_list, [])
+
+    def test_get_ids(self) -> None:
+        expected_dict = {
+            "financial_scenario": ["'1'"],
+            "metric": ["'1'"],
+            "time_period": ["'1'"],
+        }
+        self.mock_response_list_query_sql(
+            [{"scenario": "1", "metric": "1", "period": "1"}]
+        )
+
+        ids_dict = self.details_service_instance._CompanyDetails__get_ids(
+            self.company["id"]
+        )
+
+        self.assertEqual(ids_dict, expected_dict)
+
+    def test_get_delete_list_query_should_return_empty_string_with_empty_list(
+        self,
+    ) -> None:
+
+        query = self.details_service_instance._CompanyDetails__get_delete_list_query(
+            "metric", "id", []
+        )
+
+        self.assertEqual(query, "")
+
+    def test_verify_company_exist_should_raise_app_exception(self) -> None:
+        fetch_instance = DummyFetch([])
+        self.mock_session.execute.return_value = fetch_instance
+
+        with self.assertRaises(Exception) as context:
+            self.details_service_instance._CompanyDetails__verify_company_exist(
+                self.company["id"]
+            )
+
+        self.assertEqual(str(context.exception), "Company not found")
+
+    def test_verify_company_exist_should_raise_exception(self) -> None:
+        self.mock_session.execute.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.details_service_instance._CompanyDetails__verify_company_exist(
+                self.company["id"]
+            )
+
+        self.assertEqual(str(context.exception), "error")
+
+    def test_delete_company_should_raise_app_exception(self) -> None:
+        fetch_instance = DummyFetch([])
+        self.mock_session.execute.return_value = fetch_instance
+
+        with self.assertRaises(Exception) as context:
+            self.details_service_instance.delete_company(self.company["id"])
+
+        self.assertEqual(str(context.exception), "Company not found")
+
+    def test_delete_company_fail_with_exception_should_return_false(self) -> None:
+        self.mock_session.execute.side_effect = Exception("error")
+
+        deleted = self.details_service_instance.delete_company(self.company["id"])
+
+        self.assertFalse(deleted)
+
+    @mock.patch.object(CompanyDetails, "_CompanyDetails__verify_company_exist")
+    def test_delete_company_success_should_return_true(
+        self, mock_verify_company_exist
+    ) -> None:
+        self.mock_response_list_query_sql(
+            [{"scenario": "1", "metric": "1", "period": "1"}]
+        )
+
+        deleted = self.details_service_instance.delete_company(self.company["id"])
+
+        self.assertTrue(deleted)
+        mock_verify_company_exist.assert_called()

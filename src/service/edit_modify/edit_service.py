@@ -229,7 +229,19 @@ class EditModifyService:
             self.logger.info(error)
             return False
 
-    def get_companies_information(self, rows: dict) -> dict:
+    def __add_list_filters(self, table_name: str, **kwargs) -> dict:
+        filters = dict()
+        for k, v in kwargs.items():
+            values = [f"'{element}'" for element in v if element and element.strip()]
+            filters[f"{table_name}.{k}"] = values
+        return filters
+
+    def get_companies_information(self, rows: dict, filters: dict) -> dict:
+        conditions = {
+            f"{TableNames.COMPANY}.is_public ": True,
+        }
+        if filters:
+            conditions.update(filters)
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -258,11 +270,7 @@ class EditModifyService:
                         }
                     }
                 )
-                .add_sql_where_equal_condition(
-                    {
-                        f"{TableNames.COMPANY}.is_public ": True,
-                    }
-                )
+                .add_sql_where_equal_condition(conditions)
                 .add_sql_order_by_condition(
                     [f"{TableNames.COMPANY}.name"],
                     self.query_builder.Order.ASC,
@@ -278,6 +286,9 @@ class EditModifyService:
             return {}
 
     def __get_scenarios_by_type(self, scenario_type: str) -> list:
+        metrics = [f"'{metric.value}'" for metric in MetricNames]
+        conditions = {"s.type": f"'{scenario_type}'", "m.name": metrics}
+
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -308,7 +319,7 @@ class EditModifyService:
                         }
                     }
                 )
-                .add_sql_where_equal_condition({"s.type": f"'{scenario_type}'"})
+                .add_sql_where_equal_condition(conditions)
                 .build()
                 .get_query()
             )
@@ -319,15 +330,17 @@ class EditModifyService:
             self.logger.info(error)
             return []
 
-    def __get_main_rows(self) -> dict:
+    def __get_main_rows(self, scenarios: list) -> dict:
         headers = BASE_HEADERS.copy()
         metrics = self.__build_row(len(BASE_HEADERS))
         years = self.__build_row(len(BASE_HEADERS))
 
-        for scenario in ScenarioNames:
-            scenarios = self.__process_scenarios(self.__get_scenarios_by_type(scenario))
-            headers.extend(self.__build_row(len(scenarios), element=str(scenario)))
-            self.__update_metrics_and_years_rows(scenarios, metrics, years)
+        for scenario in scenarios:
+            scenarios_name = self.__process_scenarios(
+                self.__get_scenarios_by_type(scenario)
+            )
+            headers.extend(self.__build_row(len(scenarios_name), element=str(scenario)))
+            self.__update_metrics_and_years_rows(scenarios_name, metrics, years)
 
         return {"headers": headers, "metrics": metrics, "years": years}
 
@@ -463,6 +476,22 @@ class EditModifyService:
 
         return sliced_years.index(kwargs.get("year")) + init_range_value
 
+    def __get_scenarios_and_filters(self, **conditions):
+        scenarios = conditions.pop("scenarios", [])
+        valid_names = [name.value for name in ScenarioNames]
+        if scenarios:
+            scenarios = [scenario for scenario in scenarios if scenario in valid_names]
+        if not scenarios:
+            scenarios = [scenario.value for scenario in ScenarioNames]
+
+        scenarios_conditions = {"type": scenarios}
+
+        filters = self.__add_list_filters(TableNames.COMPANY, **conditions)
+        filters.update(
+            self.__add_list_filters(TableNames.SCENARIO, **scenarios_conditions)
+        )
+        return (scenarios, filters)
+
     def edit_modify_data(self, data: dict) -> dict:
         companies = data.get("edit", [])
         scenarios = data.get("add", [])
@@ -472,9 +501,10 @@ class EditModifyService:
 
         return {"edited": edited, "added": added_scenarios}
 
-    def get_data(self) -> dict:
-        rows = self.__get_main_rows()
-        companies = self.get_companies_information(rows)
+    def get_data(self, **conditions) -> dict:
+        scenarios, filters = self.__get_scenarios_and_filters(**conditions)
+        rows = self.__get_main_rows(scenarios)
+        companies = self.get_companies_information(rows, filters)
         rows.update({"companies": companies})
 
         return rows

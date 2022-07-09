@@ -1,4 +1,3 @@
-# test src.service.scenarios.delete_scenarios_service functions
 import logging
 from unittest import TestCase
 from unittest.mock import Mock
@@ -29,11 +28,6 @@ class QueryFetchAll:
         return None
 
 
-class QueryFetchAllHandleException:
-    def fetchall(self):
-        raise Exception("Error")
-
-
 class DeleteScenariosServiceTest(TestCase):
     def setUp(self):
         self.mock_session = Mock()
@@ -56,7 +50,7 @@ class DeleteScenariosServiceTest(TestCase):
 
         self.assertFalse(result)
 
-    def test_delete_scenario_when_metric_deleted_is_True_and_is_in_scenario_metric_is_False(
+    def test_delete_scenario_when_metric_was_deleted_and_scenario_does_not_have_metrics(
         self,
     ):
         self.mock_session.execute.return_value = Mock(fetchall=Mock(return_value=[]))
@@ -64,7 +58,17 @@ class DeleteScenariosServiceTest(TestCase):
 
         self.assertTrue(result)
 
-    def test_delete_scenario_when_metric_is_deleted_handles_exception_return_False(
+    def test_delete_scenario_success_when_metric_was_deleted_and_scenario_has_metrics(
+        self,
+    ):
+        self.mock_session.execute.return_value = Mock(
+            fetchall=Mock(return_value=[{"id": "2"}])
+        )
+        result = self.delete_scenarios_service.delete_scenario("123", "456")
+
+        self.assertTrue(result)
+
+    def test_delete_scenario_when_metric_was_deleted_and_fails_should_return_false(
         self,
     ):
         mock_metric_is_deleted = True
@@ -72,7 +76,7 @@ class DeleteScenariosServiceTest(TestCase):
         self.delete_scenarios_service.delete_metric = Mock(
             return_value=mock_metric_is_deleted
         )
-        self.delete_scenarios_service.scenario_is_in_scenario_metric = Mock(
+        self.delete_scenarios_service.scenario_has_metrics = Mock(
             return_value=mock_scenario_has_metric
         )
         self.mock_session.execute.side_effect = Exception("error")
@@ -80,16 +84,28 @@ class DeleteScenariosServiceTest(TestCase):
 
         self.assertFalse(result)
 
-    def test_scenario_is_in_scenario_metric_returns_False_when_query_fetch_all_is_empty(
+    def test_scenario_has_metrics_should_returns_false_query_result_is_empty(
         self,
     ):
         self.mock_session.execute.return_value = Mock(fetchall=Mock(return_value=[]))
-        result = self.delete_scenarios_service.scenario_is_in_scenario_metric("123")
+        result = self.delete_scenarios_service.scenario_has_metrics("123")
 
         self.assertFalse(result)
 
-    def test_scenario_is_in_scenario_metric_handle_exception_return_False(self):
+    def test_scenario_has_metrics_fails_should_raise_exception(self):
         self.mock_session.execute.side_effect = Exception("error")
-        result = self.delete_scenarios_service.scenario_is_in_scenario_metric("123")
+        result = self.delete_scenarios_service.scenario_has_metrics("123")
 
         self.assertFalse(result)
+
+    def test_delete_scenarios_success_should_return_the_same_len(self):
+        scenarios = [
+            {"scenario_id": "1", "metric_id": "1"},
+            {"scenario_id": "1", "metric_id": "2"},
+        ]
+
+        self.delete_scenarios_service.delete_scenario = Mock(return_value=True)
+
+        deleted = self.delete_scenarios_service.delete_scenarios(scenarios)
+
+        self.assertEqual(deleted, len(scenarios))
