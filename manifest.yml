@@ -467,6 +467,17 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
     - ./src/utils/commons_functions.py
+
+  get_metric_types_handler:
+    requirements: ./src/handlers/metric//requirements.txt
+    include:
+    - ./src/handlers/metric/get_metric_types_handler.py
+    - ./src/service/metric/metric_type_service.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/app_names.py
     
 
 layers:
