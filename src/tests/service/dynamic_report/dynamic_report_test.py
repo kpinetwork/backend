@@ -58,6 +58,10 @@ class TestDynamicReport(TestCase):
             "prior_actuals_revenue": 37.5,
             "budget_revenue": 35,
             "budget_ebitda": -12,
+            "actuals_cost_of_goods": 120,
+            "actuals_sales_of_marketing": 50,
+            "actuals_general_and_admin": 60,
+            "actuals_research_and_development": 70,
         }
         self.sizes = [
             {"label": ">$20 million", "min_value": None, "max_value": 20},
@@ -293,6 +297,11 @@ class TestDynamicReport(TestCase):
                     "rule_of_40": -31,
                     "size_cohort": "NA",
                     "margin_group": "NA",
+                    "gross_profit": -80,
+                    "gross_margin": -2,
+                    "sales_and_marketing": 125,
+                    "general_and_admin": 150,
+                    "research_and_development": 175,
                 }
             ],
         }
@@ -343,6 +352,11 @@ class TestDynamicReport(TestCase):
                     "rule_of_40": -31,
                     "size_cohort": "NA",
                     "margin_group": "NA",
+                    "gross_profit": -80,
+                    "gross_margin": -2,
+                    "sales_and_marketing": 125,
+                    "general_and_admin": 150,
+                    "research_and_development": 175,
                 }
             ],
         }
@@ -352,6 +366,8 @@ class TestDynamicReport(TestCase):
         )
 
         mock_set_company_permissions.assert_called()
+        print("response", response)
+        print("expected_result", expected_result)
         self.assertEqual(response, expected_result)
 
     @mock.patch(

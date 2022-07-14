@@ -77,3 +77,80 @@ class CalculatorService:
         except Exception as error:
             self.logger.info(error)
             return "NA"
+
+    def calculate_gross_profit(
+        self, revenue_value: float, cost_of_goods: float, rounded: bool = True
+    ) -> Union[float, str]:
+        try:
+            gross_profit = revenue_value - cost_of_goods
+            return round(revenue_value - cost_of_goods) if rounded else gross_profit
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_gross_margin(
+        self, revenue_value: float, cost_of_goods: float, rounded: bool = True
+    ) -> Union[float, str]:
+        try:
+            gross_profit = self.calculate_gross_profit(
+                revenue_value, cost_of_goods, False
+            )
+            gross_margin = gross_profit / revenue_value
+            return round(gross_margin) if rounded else gross_margin
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_sales_and_marketing_of_revenue(
+        self,
+        revenue_value: float,
+        sales_and_marketing_value: float,
+        rounded: bool = True,
+    ) -> Union[float, str]:
+        try:
+            sales_and_marketing_of_revenue = (
+                sales_and_marketing_value / revenue_value
+            ) * 100
+            return (
+                round(sales_and_marketing_of_revenue)
+                if rounded
+                else sales_and_marketing_of_revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_research_and_development_of_revenue(
+        self,
+        revenue_value: float,
+        research_and_development_value: float,
+        rounded: bool = True,
+    ) -> Union[float, str]:
+        try:
+            research_and_development_of_revenue = (
+                research_and_development_value / revenue_value
+            ) * 100
+            return (
+                round(research_and_development_of_revenue)
+                if rounded
+                else research_and_development_of_revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_general_and_admin_of_revenue(
+        self, revenue_value: float, general_and_admin_value: float, rounded: bool = True
+    ) -> Union[float, str]:
+        try:
+            general_and_admin_of_revenue = (
+                general_and_admin_value / revenue_value
+            ) * 100
+            return (
+                round(general_and_admin_of_revenue)
+                if rounded
+                else general_and_admin_of_revenue
+            )
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
