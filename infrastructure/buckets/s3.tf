@@ -272,3 +272,10 @@ resource "aws_s3_bucket_object" "delete_company_function_object" {
   source = "${path.module}/../../dist/delete_company_handler.zip"
   etag = filemd5("${path.module}/../../dist/delete_company_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "get_metric_types_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_metric_types_handler.zip"
+  source = "${path.module}/../../dist/get_metric_types_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_metric_types_handler.zip")
+}
