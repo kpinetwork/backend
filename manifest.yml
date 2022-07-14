@@ -469,7 +469,7 @@ functions:
     - ./src/utils/commons_functions.py
 
   get_metric_types_handler:
-    requirements: ./src/handlers/metric//requirements.txt
+    requirements: ./src/handlers/metric/requirements.txt
     include:
     - ./src/handlers/metric/get_metric_types_handler.py
     - ./src/service/metric/metric_type_service.py
