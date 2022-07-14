@@ -55,8 +55,38 @@ class CalculatorRepository:
         return [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
+            self.get_metric_option(
+                "Actuals", "Cost_of_Goods", "actuals_cost_of_goods", year
+            ),
+            self.get_metric_option(
+                "Actuals", "Sales_Marketing_Cost", "actuals_sales_marketing_cost", year
+            ),
+            self.get_metric_option(
+                "Actuals", "General_Admin_Cost", "actuals_general_admin_cost", year
+            ),
+            self.get_metric_option(
+                "Actuals",
+                "Research_Development_Cost",
+                "actuals_research_development_cost",
+                year,
+            ),
             self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
             self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
+            self.get_metric_option(
+                "Budget", "Cost_of_Goods", "budget_cost_of_goods", year
+            ),
+            self.get_metric_option(
+                "Budget", "Sales_Marketing_Cost", "budget_sales_marketing_cost", year
+            ),
+            self.get_metric_option(
+                "Budget", "General_Admin_Cost", "budget_general_admin_cost", year
+            ),
+            self.get_metric_option(
+                "Budget",
+                "Research_Development_Cost",
+                "budget_research_development_cost",
+                year,
+            ),
         ]
 
     def get_budget_options(self, year: int, need_prior: bool, need_next: bool) -> list:
@@ -71,6 +101,30 @@ class CalculatorRepository:
                     self.get_metric_option(
                         "Budget", "Ebitda", "prior_budget_ebitda", prior_year
                     ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Cost_of_Goods",
+                        "prior_budget_cost_of_goods",
+                        prior_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Sales_Marketing_Cost",
+                        "prior_budget_sales_marketing_cost",
+                        prior_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "General_Admin_Cost",
+                        "prior_budget_general_admin_cost",
+                        prior_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Research_Development_Cost",
+                        "prior_budget_research_development_cost",
+                        prior_year,
+                    ),
                 ]
             )
 
@@ -83,6 +137,30 @@ class CalculatorRepository:
                     ),
                     self.get_metric_option(
                         "Budget", "Ebitda", "next_budget_ebitda", next_year
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Cost_of_Goods",
+                        "next_budget_cost_of_goods",
+                        next_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Sales_Marketing_Cost",
+                        "next_budget_sales_marketing_cost",
+                        next_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "General_Admin_Cost",
+                        "next_budget_general_admin_cost",
+                        next_year,
+                    ),
+                    self.get_metric_option(
+                        "Budget",
+                        "Research_Development_Cost",
+                        "next_budget_research_development_cost",
+                        next_year,
                     ),
                 ]
             )

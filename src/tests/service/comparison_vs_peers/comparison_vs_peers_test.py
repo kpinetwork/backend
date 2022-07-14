@@ -45,6 +45,11 @@ class TestComparisonvsPeers(TestCase):
             "revenue_vs_budget": 114,
             "ebitda_vs_budget": 125,
             "rule_of_40": -31,
+            "gross_profit": -80,
+            "gross_margin": -2,
+            "sales_and_marketing": 125,
+            "general_and_admin": 150,
+            "research_and_development": 175,
         }
 
         self.scenarios = {
@@ -53,6 +58,10 @@ class TestComparisonvsPeers(TestCase):
             "prior_actuals_revenue": 37.5,
             "budget_revenue": 35,
             "budget_ebitda": -12,
+            "actuals_cost_of_goods": 120,
+            "actuals_sales_of_marketing": 50,
+            "actuals_general_and_admin": 60,
+            "actuals_research_and_development": 70,
         }
 
         self.rule_of_40 = {
