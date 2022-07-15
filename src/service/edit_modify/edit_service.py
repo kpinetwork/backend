@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Union
 from app_names import TableNames, ScenarioNames, MetricNames, BASE_HEADERS
 
 
@@ -433,6 +434,9 @@ class EditModifyService:
         init_range_value = 0
 
         if scenario == ScenarioNames.ACTUALS:
+            budget_index = (
+                budget_index if budget_index is not None else num_of_scenarios
+            )
             range_index = [actuals_index, budget_index - 1]
             init_range_value = actuals_index
         else:
@@ -449,13 +453,20 @@ class EditModifyService:
 
         return range, init_range_value
 
+    def __get_elem_index(self, elem: str, elem_list: list) -> Union[int, None]:
+        return elem_list.index(elem) if elem in elem_list else None
+
     def __find_scenario_index(
         self, rows: dict, number_of_scenarios: int, **kwargs
     ) -> int:
         sliced_headers = self.__slice_row(rows.get("headers"), len(BASE_HEADERS))
 
-        actuals_scenario_index = sliced_headers.index(str(ScenarioNames.ACTUALS))
-        budget_scenario_index = sliced_headers.index(str(ScenarioNames.BUDGET))
+        actuals_scenario_index = self.__get_elem_index(
+            str(ScenarioNames.ACTUALS), sliced_headers
+        )
+        budget_scenario_index = self.__get_elem_index(
+            str(ScenarioNames.BUDGET), sliced_headers
+        )
 
         range_index, init_range_value = self.__get_range_in_scenarios_row(
             kwargs.get("scenario"),
@@ -484,6 +495,7 @@ class EditModifyService:
         if not scenarios:
             scenarios = [scenario.value for scenario in ScenarioNames]
 
+        scenarios.sort()
         scenarios_conditions = {"type": scenarios}
 
         filters = self.__add_list_filters(TableNames.COMPANY, **conditions)
