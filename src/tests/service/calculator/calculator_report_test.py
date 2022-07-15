@@ -34,7 +34,7 @@ class TestCalculatorReport(TestCase):
             "ebitda_vs_budget": 125,
             "rule_of_40": -31,
             "gross_profit": -80,
-            "gross_margin": -2,
+            "gross_margin": -200,
             "sales_and_marketing": 125,
             "general_and_admin": 150,
             "research_and_development": 175,
