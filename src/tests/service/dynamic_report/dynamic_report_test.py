@@ -366,8 +366,6 @@ class TestDynamicReport(TestCase):
         )
 
         mock_set_company_permissions.assert_called()
-        print("response", response)
-        print("expected_result", expected_result)
         self.assertEqual(response, expected_result)
 
     @mock.patch(
