@@ -56,7 +56,7 @@ class CalculatorRepository:
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
             self.get_metric_option(
-                "Actuals", "Cost of good", "actuals_cost_of_goods", year
+                "Actuals", "Cost of goods", "actuals_cost_of_goods", year
             ),
             self.get_metric_option(
                 "Actuals", "Sales & marketing", "actuals_sales_marketing_cost", year
@@ -75,12 +75,12 @@ class CalculatorRepository:
             ),
         ]
 
-    def get_actual_budget_options(self, year: int) -> list:
+    def get_budget_options(self, year: int) -> list:
         return [
             self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
             self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
             self.get_metric_option(
-                "Budget", "Cost of good", "budget_cost_of_goods", year
+                "Budget", "Cost of goods", "budget_cost_of_goods", year
             ),
             self.get_metric_option(
                 "Budget", "Sales & marketing", "budget_sales_marketing_cost", year
@@ -96,7 +96,9 @@ class CalculatorRepository:
             ),
         ]
 
-    def get_budget_options(self, year: int, need_prior: bool, need_next: bool) -> list:
+    def get_forward_budget_options(
+        self, year: int, need_prior: bool, need_next: bool
+    ) -> list:
         budget_options = []
         if need_prior:
             prior_year = year - 1
@@ -107,30 +109,6 @@ class CalculatorRepository:
                     ),
                     self.get_metric_option(
                         "Budget", "Ebitda", "prior_budget_ebitda", prior_year
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Cost of good",
-                        "prior_budget_cost_of_goods",
-                        prior_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Sales & marketing",
-                        "prior_budget_sales_marketing_cost",
-                        prior_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "General & administration",
-                        "prior_budget_general_admin_cost",
-                        prior_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Research & development",
-                        "prior_budget_research_development_cost",
-                        prior_year,
                     ),
                 ]
             )
@@ -145,30 +123,6 @@ class CalculatorRepository:
                     self.get_metric_option(
                         "Budget", "Ebitda", "next_budget_ebitda", next_year
                     ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Cost of good",
-                        "next_budget_cost_of_goods",
-                        next_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Sales_Marketing_Cost",
-                        "next_budget_sales_marketing_cost",
-                        next_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "General & administration",
-                        "next_budget_general_admin_cost",
-                        next_year,
-                    ),
-                    self.get_metric_option(
-                        "Budget",
-                        "Research & development",
-                        "next_budget_research_development_cost",
-                        next_year,
-                    ),
                 ]
             )
 
@@ -182,7 +136,7 @@ class CalculatorRepository:
         need_budget_prior_year: bool,
     ) -> list:
         metrics = self.get_actuals_options(year)
-        metrics.extend(self.get_actual_budget_options(year))
+        metrics.extend(self.get_budget_options(year))
 
         if need_actuals_prior_year:
             metrics.append(
@@ -191,7 +145,7 @@ class CalculatorRepository:
                 )
             )
 
-        budget_options = self.get_budget_options(
+        budget_options = self.get_forward_budget_options(
             year, need_budget_prior_year, need_next_year
         )
         metrics.extend(budget_options)
