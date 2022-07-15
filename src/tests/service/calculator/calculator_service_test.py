@@ -129,8 +129,8 @@ class TestCalculatorService(TestCase):
     @parameterized.expand(
         [
             [None, 45, "NA"],
-            [2, 8, -3],
-            [10, 40, -3],
+            [2, 5, -150],
+            [10, 40, -300],
         ]
     )
     def test_calculate_gross_margin(self, revenue, cost_of_goods, expected_value):

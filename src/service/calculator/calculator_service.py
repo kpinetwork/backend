@@ -95,7 +95,7 @@ class CalculatorService:
             gross_profit = self.calculate_gross_profit(
                 revenue_value, cost_of_goods, False
             )
-            gross_margin = gross_profit / revenue_value
+            gross_margin = (gross_profit / revenue_value) * 100
             return round(gross_margin) if rounded else gross_margin
         except Exception as error:
             self.logger.info(error)
