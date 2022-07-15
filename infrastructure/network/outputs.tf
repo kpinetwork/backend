@@ -158,6 +158,12 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_edit_modify_data_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+
+    "apigw_get_metric_types_lambda_function": {
+      resource_path: aws_api_gateway_resource.metric_types.path,
+      http_method: aws_api_gateway_method.get_metric_types_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

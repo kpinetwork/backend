@@ -67,6 +67,7 @@ variable "lambdas_names" {
     "edit_modify_data_lambda_function": "edit_modify_data_lambda_function"
     "get_edit_modify_data_lambda_function": "get_edit_modify_data_lambda_function"
     "delete_company_lambda_function": "delete_company_lambda_function"
+    "get_metric_types_lambda_function": "get_metric_types_lambda_function"
   }
 }
 

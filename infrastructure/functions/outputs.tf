@@ -35,6 +35,7 @@ output "lambdas_invoke_arns" {
     "get_edit_modify_data_lambda_function": aws_lambda_function.get_edit_modify_data_lambda_function.invoke_arn
     "delete_scenarios_lambda_function": aws_lambda_function.delete_scenarios_lambda_function.invoke_arn
     "delete_company_lambda_function": aws_lambda_function.delete_company_lambda_function.invoke_arn
+    "get_metric_types_lambda_function": aws_lambda_function.get_metric_types_lambda_function.invoke_arn
   }
 }
 

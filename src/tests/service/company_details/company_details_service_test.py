@@ -241,9 +241,10 @@ class TestCompanyDetailsService(TestCase):
             "financial_scenario": ["'1'"],
             "metric": ["'1'"],
             "time_period": ["'1'"],
+            "investment": ["'1'"],
         }
         self.mock_response_list_query_sql(
-            [{"scenario": "1", "metric": "1", "period": "1"}]
+            [{"scenario": "1", "metric": "1", "period": "1", "invest": "1"}]
         )
 
         ids_dict = self.details_service_instance._CompanyDetails__get_ids(
@@ -251,6 +252,17 @@ class TestCompanyDetailsService(TestCase):
         )
 
         self.assertEqual(ids_dict, expected_dict)
+
+    def test_get_investments_ids_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("Invalid query")
+
+        invest_ids = (
+            self.details_service_instance._CompanyDetails__get_company_investments_ids(
+                self.company["id"]
+            )
+        )
+
+        self.assertEqual(invest_ids, [])
 
     def test_get_delete_list_query_should_return_empty_string_with_empty_list(
         self,
@@ -262,7 +274,19 @@ class TestCompanyDetailsService(TestCase):
 
         self.assertEqual(query, "")
 
-    def test_verify_company_exist_should_raise_app_exception(self) -> None:
+    def test_verify_company_exist_should_raise_app_exception_when_id_is_invalid(
+        self,
+    ) -> None:
+        error_message = "Invalid company id"
+
+        with self.assertRaises(Exception) as context:
+            self.details_service_instance._CompanyDetails__verify_company_exist("")
+
+        self.assertEqual(str(context.exception), error_message)
+
+    def test_verify_company_exist_should_raise_app_exception_when_query_return_is_empty(
+        self,
+    ) -> None:
         fetch_instance = DummyFetch([])
         self.mock_session.execute.return_value = fetch_instance
 

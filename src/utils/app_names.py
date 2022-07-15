@@ -11,6 +11,7 @@ class TableNames(StrEnum):
     SCENARIO = "financial_scenario"
     SCENARIO_METRIC = "scenario_metric"
     CURRENCY_METRIC = "currency_metric"
+    METRIC_TYPES = "metric_types"
 
 
 class ScenarioNames(StrEnum):
