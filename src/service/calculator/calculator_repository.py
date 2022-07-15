@@ -51,39 +51,46 @@ class CalculatorRepository:
             "alias": f"{alias}",
         }
 
-    def get_actuals_budget_options(self, year: int) -> list:
+    def get_actuals_options(self, year: int) -> list:
         return [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
             self.get_metric_option(
-                "Actuals", "Cost_of_Goods", "actuals_cost_of_goods", year
+                "Actuals", "Cost of good", "actuals_cost_of_goods", year
             ),
             self.get_metric_option(
-                "Actuals", "Sales_Marketing_Cost", "actuals_sales_marketing_cost", year
-            ),
-            self.get_metric_option(
-                "Actuals", "General_Admin_Cost", "actuals_general_admin_cost", year
+                "Actuals", "Sales & marketing", "actuals_sales_marketing_cost", year
             ),
             self.get_metric_option(
                 "Actuals",
-                "Research_Development_Cost",
+                "General & administration",
+                "actuals_general_admin_cost",
+                year,
+            ),
+            self.get_metric_option(
+                "Actuals",
+                "Research & development",
                 "actuals_research_development_cost",
                 year,
             ),
+        ]
+
+    def get_actual_budget_options(self, year: int) -> list:
+        return [
             self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
             self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
             self.get_metric_option(
-                "Budget", "Cost_of_Goods", "budget_cost_of_goods", year
+                "Budget", "Cost of good", "budget_cost_of_goods", year
             ),
             self.get_metric_option(
-                "Budget", "Sales_Marketing_Cost", "budget_sales_marketing_cost", year
+                "Budget", "Sales & marketing", "budget_sales_marketing_cost", year
             ),
             self.get_metric_option(
-                "Budget", "General_Admin_Cost", "budget_general_admin_cost", year
+                "Budget", "General & administration", "budget_general_admin_cost", year
             ),
             self.get_metric_option(
                 "Budget",
-                "Research_Development_Cost",
+                "Research & development",
                 "budget_research_development_cost",
                 year,
             ),
@@ -103,25 +110,25 @@ class CalculatorRepository:
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "Cost_of_Goods",
+                        "Cost of good",
                         "prior_budget_cost_of_goods",
                         prior_year,
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "Sales_Marketing_Cost",
+                        "Sales & marketing",
                         "prior_budget_sales_marketing_cost",
                         prior_year,
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "General_Admin_Cost",
+                        "General & administration",
                         "prior_budget_general_admin_cost",
                         prior_year,
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "Research_Development_Cost",
+                        "Research & development",
                         "prior_budget_research_development_cost",
                         prior_year,
                     ),
@@ -140,7 +147,7 @@ class CalculatorRepository:
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "Cost_of_Goods",
+                        "Cost of good",
                         "next_budget_cost_of_goods",
                         next_year,
                     ),
@@ -152,13 +159,13 @@ class CalculatorRepository:
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "General_Admin_Cost",
+                        "General & administration",
                         "next_budget_general_admin_cost",
                         next_year,
                     ),
                     self.get_metric_option(
                         "Budget",
-                        "Research_Development_Cost",
+                        "Research & development",
                         "next_budget_research_development_cost",
                         next_year,
                     ),
@@ -174,7 +181,8 @@ class CalculatorRepository:
         need_next_year: bool,
         need_budget_prior_year: bool,
     ) -> list:
-        metrics = self.get_actuals_budget_options(year)
+        metrics = self.get_actuals_options(year)
+        metrics.extend(self.get_actual_budget_options(year))
 
         if need_actuals_prior_year:
             metrics.append(

@@ -12,9 +12,13 @@ class ComparisonvsPeersService:
             "budget_revenue",
             "budget_ebitda",
             "actuals_cost_of_goods",
+            "budget_cost_of_goods",
             "actuals_sales_of_marketing",
+            "budget_sales_of_marketing",
             "actuals_general_and_admin",
+            "budget_general_and_admin",
             "actuals_research_and_development",
+            "budget_research_and_development",
         ]
 
         for metric in base_metrics:
