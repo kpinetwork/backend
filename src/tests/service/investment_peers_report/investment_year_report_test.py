@@ -56,9 +56,9 @@ class TestInvestmentYearReport(TestCase):
             "budget_revenue": 35,
             "budget_ebitda": -12,
             "actuals_cost_of_goods": 120,
-            "actuals_sales_of_marketing": 50,
-            "actuals_general_and_admin": 60,
-            "actuals_research_and_development": 70,
+            "actuals_sales_marketing": 50,
+            "actuals_general_admin": 60,
+            "actuals_research_development": 70,
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}

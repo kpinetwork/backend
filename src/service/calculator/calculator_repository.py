@@ -59,18 +59,18 @@ class CalculatorRepository:
                 "Actuals", "Cost of goods", "actuals_cost_of_goods", year
             ),
             self.get_metric_option(
-                "Actuals", "Sales & marketing", "actuals_sales_marketing_cost", year
+                "Actuals", "Sales & marketing", "actuals_sales_marketing", year
             ),
             self.get_metric_option(
                 "Actuals",
                 "General & administration",
-                "actuals_general_admin_cost",
+                "actuals_general_admin",
                 year,
             ),
             self.get_metric_option(
                 "Actuals",
                 "Research & development",
-                "actuals_research_development_cost",
+                "actuals_research_development",
                 year,
             ),
         ]
@@ -83,15 +83,15 @@ class CalculatorRepository:
                 "Budget", "Cost of goods", "budget_cost_of_goods", year
             ),
             self.get_metric_option(
-                "Budget", "Sales & marketing", "budget_sales_marketing_cost", year
+                "Budget", "Sales & marketing", "budget_sales_marketing", year
             ),
             self.get_metric_option(
-                "Budget", "General & administration", "budget_general_admin_cost", year
+                "Budget", "General & administration", "budget_general_admin", year
             ),
             self.get_metric_option(
                 "Budget",
                 "Research & development",
-                "budget_research_development_cost",
+                "budget_research_development",
                 year,
             ),
         ]
