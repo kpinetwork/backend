@@ -16,10 +16,12 @@ class TestEditModifyService(TestCase):
         self.query_builder = QuerySQLBuilder()
         self.mock_response_sql = Mock()
         self.mock_scenario_service = Mock()
+        self.mock_metric_service = Mock()
         self.edit_service = EditModifyService(
             self.mock_session,
             self.query_builder,
             self.mock_scenario_service,
+            self.mock_metric_service,
             self.mock_response_sql,
             logger,
         )
@@ -197,6 +199,7 @@ class TestEditModifyService(TestCase):
             "years": ["", "", "", "", "", "2020", "2020"],
             "companies": {},
         }
+        self.mock_metric_service.get_metric_types.return_value = ["Revenue", "Ebitda"]
         self.mock_response_list_query_sql(
             [{"scenario": "Actuals-2020", "metric": "Revenue"}]
         )
@@ -253,6 +256,7 @@ class TestEditModifyService(TestCase):
             "years": ["", "", "", "", "", "2020", "2020"],
         }
         expected_response.update(companies)
+        self.mock_metric_service.get_metric_types.return_value = ["Revenue", "Ebitda"]
         self.mock_response_list_query_sql(
             [{"scenario": "Actuals-2020", "metric": "Revenue"}]
         )
@@ -298,6 +302,8 @@ class TestEditModifyService(TestCase):
                 }
             }
         )
+        self.mock_metric_service.get_metric_types.return_value = ["Revenue", "Ebitda"]
+
         response = self.edit_service._EditModifyService__build_companies_rows(
             self.fetched_companies,
             self.rows,

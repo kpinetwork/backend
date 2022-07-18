@@ -34,7 +34,7 @@ def get_headers() -> dict:
 def get_service():
     scenario_service = ScenarioService(session, QuerySQLBuilder(), logger)
     return EditModifyService(
-        session, QuerySQLBuilder(), scenario_service, object(), logger
+        session, QuerySQLBuilder(), scenario_service, object(), object(), logger
     )
 
 
