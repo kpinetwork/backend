@@ -429,7 +429,11 @@ class EditModifyService:
         return row[i_index:]
 
     def __get_range_in_scenarios_row(
-        self, scenario, actuals_index, budget_index, num_of_scenarios
+        self,
+        scenario: str,
+        actuals_index: int,
+        budget_index: int,
+        num_of_scenarios: int,
     ) -> tuple:
         init_range_value = 0
 
@@ -445,11 +449,21 @@ class EditModifyService:
 
         return range_index, init_range_value
 
-    def __get_range_in_metrics_row(self, metrics, metric, range, init_range_value):
+    def __get_range_in_metrics_row(
+        self, metrics: list, metric: str, range: list, init_range_value: int
+    ) -> tuple:
         range[0] = metrics.index(metric) + init_range_value
-        if metric == MetricNames.REVENUE:
-            range[1] = metrics.index(str(MetricNames.EBITDA)) + init_range_value - 1
+        metrics_indexes = [
+            i
+            for i, metric in enumerate(self.__slice_row(metrics, metrics.index(metric)))
+            if metric.strip()
+        ]
         init_range_value = range[0]
+
+        if len(metrics_indexes) == 1:
+            range[1] = len(metrics) + init_range_value - 1
+        else:
+            range[1] = metrics_indexes[1] + range[0] - 1
 
         return range, init_range_value
 
