@@ -10,9 +10,9 @@ class InvestmentYearReport:
             "revenue",
             "ebitda",
             "cost_of_goods",
-            "sales_of_marketing",
-            "general_and_admin",
-            "research_and_development",
+            "sales_marketing",
+            "general_admin",
+            "research_development",
         ]
         fields = []
         for scenario in scenarios:

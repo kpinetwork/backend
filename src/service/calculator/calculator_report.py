@@ -81,17 +81,17 @@ class CalculatorReport:
         company[
             "sales_and_marketing"
         ] = self.calculator.calculate_sales_and_marketing_of_revenue(
-            revenue, company.get("actuals_sales_of_marketing")
+            revenue, company.get("actuals_sales_marketing")
         )
         company[
             "general_and_admin"
         ] = self.calculator.calculate_general_and_admin_of_revenue(
-            revenue, company.get("actuals_general_and_admin")
+            revenue, company.get("actuals_general_admin")
         )
         company[
             "research_and_development"
         ] = self.calculator.calculate_research_and_development_of_revenue(
-            revenue, company.get("actuals_research_and_development")
+            revenue, company.get("actuals_research_development")
         )
 
     def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
