@@ -8,6 +8,7 @@ class MetricReportRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.scenario_table_label = "scenario"
 
     def add_company_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -142,9 +143,9 @@ class MetricReportRepository:
                 .add_join_clause(
                     {
                         f"{TableNames.SCENARIO}": {
-                            "from": "scenario.company_id",
+                            "from": f"{self.scenario_table_label}.company_id",
                             "to": f"{TableNames.COMPANY}.id",
-                            "alias": "scenario",
+                            "alias": f"{self.scenario_table_label}",
                         }
                     }
                 )
@@ -152,7 +153,7 @@ class MetricReportRepository:
                     {
                         f"{TableNames.SCENARIO_METRIC}": {
                             "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
-                            "to": "scenario.id",
+                            "to": f"{self.scenario_table_label}.id",
                         }
                     }
                 )
@@ -166,7 +167,7 @@ class MetricReportRepository:
                 )
                 .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(
-                    [f"{TableNames.COMPANY}.name", "scenario.name"],
+                    [f"{TableNames.COMPANY}.name", f"{self.scenario_table_label}.name"],
                     self.query_builder.Order.ASC,
                 )
                 .build()
@@ -181,7 +182,7 @@ class MetricReportRepository:
     def get_actuals_vs_budget_metric(self, metric: str, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
                 f"{TableNames.METRIC}.name": f"'{metric}'",
             }
             where_conditions.update(filters)
@@ -198,7 +199,7 @@ class MetricReportRepository:
     def get_gross_profit(self, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
                 f"{TableNames.METRIC}.name": "'Revenue'",
             }
             where_conditions.update(filters)
@@ -216,7 +217,7 @@ class MetricReportRepository:
     def get_gross_margin(self, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
                 f"{TableNames.METRIC}.name": "'Cost of goods'",
             }
             where_conditions.update(filters)
@@ -232,7 +233,7 @@ class MetricReportRepository:
     def get_metric_as_percentage_of_revenue(self, metric: str, filters: dict) -> list:
         try:
             where_conditions = {
-                "scenario.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
                 f"{TableNames.METRIC}.name": f"'{metric}'",
             }
             where_conditions.update(filters)
