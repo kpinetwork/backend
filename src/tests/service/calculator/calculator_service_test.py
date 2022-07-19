@@ -112,3 +112,80 @@ class TestCalculatorService(TestCase):
         result = self.calculator.calculate_sum(number, second_number)
 
         self.assertEqual(result, expected_sum)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [14, 16, -2],
+            [32, 41, -9],
+        ]
+    )
+    def test_calculate_gross_profit(self, revenue, cost_of_goods, expected_value):
+
+        result = self.calculator.calculate_gross_profit(revenue, cost_of_goods)
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [2, 5, -150],
+            [10, 40, -300],
+        ]
+    )
+    def test_calculate_gross_margin(self, revenue, cost_of_goods, expected_value):
+
+        result = self.calculator.calculate_gross_margin(revenue, cost_of_goods)
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [8, 2, 25],
+            [10, 3, 30],
+        ]
+    )
+    def test_calculate_sales_and_markenting_of_revenue(
+        self, revenue_value, sales_and_marketing_value, expected_value
+    ):
+
+        result = self.calculator.calculate_sales_and_marketing_of_revenue(
+            revenue_value, sales_and_marketing_value
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [8, 2, 25],
+            [10, 3, 30],
+        ]
+    )
+    def test_calculate_research_and_development_of_revenue(
+        self, revenue_value, research_and_development, expected_value
+    ):
+
+        result = self.calculator.calculate_research_and_development_of_revenue(
+            revenue_value, research_and_development
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [None, 45, "NA"],
+            [8, 2, 25],
+            [10, 3, 30],
+        ]
+    )
+    def test_calculate_general_and_admin_of_revenue(
+        self, revenue_value, general_and_admin_value, expected_value
+    ):
+
+        result = self.calculator.calculate_general_and_admin_of_revenue(
+            revenue_value, general_and_admin_value
+        )
+
+        self.assertEqual(result, expected_value)
