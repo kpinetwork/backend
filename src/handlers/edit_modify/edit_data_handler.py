@@ -41,7 +41,7 @@ def get_service():
         session, QuerySQLBuilder(), metric_service, logger
     )
     return EditModifyService(
-        session, QuerySQLBuilder(), scenario_service, object(), logger
+        session, QuerySQLBuilder(), scenario_service, object(), object(), logger
     )
 
 
