@@ -19,8 +19,22 @@ class InvestmentRepository:
         self.scenario_metric_table = "scenario_metric"
         self.time_period_table = "time_period"
         self.base_metrics = {
-            "Actuals": {"Revenue": "actuals_revenue", "Ebitda": "actuals_ebitda"},
-            "Budget": {"Revenue": "budget_revenue", "Ebitda": "budget_ebitda"},
+            "Actuals": {
+                "Revenue": "actuals_revenue",
+                "Ebitda": "actuals_ebitda",
+                "Cost of goods": "actuals_cost_of_goods",
+                "Sales & marketing": "actuals_sales_marketing",
+                "General & administration": "actuals_general_admin",
+                "Research & development": "actuals_research_development",
+            },
+            "Budget": {
+                "Revenue": "budget_revenue",
+                "Ebitda": "budget_ebitda",
+                "Cost of goods": "budget_cost_of_goods",
+                "Sales & marketing": "budget_sales_marketing",
+                "General & administration": "budget_general_admin",
+                "Research & development": "budget_research_development",
+            },
         }
 
     def add_company_filters(self, **kwargs) -> dict:
@@ -162,7 +176,14 @@ class InvestmentRepository:
 
     def get_metric(self, scenario: dict, base_year: int) -> dict:
         scenario_name = scenario.get("scenario")
-        metrics = ["Revenue", "Ebitda"]
+        metrics = [
+            "Revenue",
+            "Ebitda",
+            "Cost of goods",
+            "Sales & marketing",
+            "General & administration",
+            "Research & development",
+        ]
         year = int(scenario_name.split("-")[1])
         if scenario["metric"] not in metrics:
             return dict()
