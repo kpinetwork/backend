@@ -2,13 +2,14 @@ from uuid import uuid4
 from decimal import Decimal
 from datetime import datetime
 from base_exception import AppError
-from app_names import TableNames, ScenarioNames, MetricNames
+from app_names import TableNames, ScenarioNames
 
 
 class ScenarioService:
-    def __init__(self, session, query_builder, logger):
+    def __init__(self, session, query_builder, metric_service, logger):
         self.session = session
         self.query_builder = query_builder
+        self.metric_scenario = metric_service
         self.logger = logger
 
     def __get_name_values_from_dict(self, **data) -> tuple:
@@ -154,7 +155,7 @@ class ScenarioService:
     def __verify_names(self, scenario: str, metric: str) -> None:
         if scenario not in ScenarioNames._value2member_map_:
             raise AppError("Invalid scenario type")
-        if metric not in MetricNames._value2member_map_:
+        if metric not in self.metric_scenario.get_metric_types():
             raise AppError("Invalid metric name")
 
     def __verify_numbers(self, year: int, value: float, scenario: str) -> None:
