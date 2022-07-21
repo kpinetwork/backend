@@ -28,6 +28,7 @@ class ByMetricReport:
             "sales_marketing",
             "general_admin",
             "research_development",
+            "gross_profit",
         ]
 
         metrics = [f"actuals_{metric}" for metric in base_metrics]

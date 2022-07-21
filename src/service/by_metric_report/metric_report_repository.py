@@ -96,7 +96,7 @@ class MetricReportRepository:
             return []
 
     def __get_subquery_metric(self, metric: str, scenario: str) -> str:
-        substring = "substring(scenario.name from 9)"
+        substring = f"substring(scenario.name from {int(len(scenario) + 2)})"
         return (
             self.query_builder.add_table_name(TableNames.SCENARIO)
             .add_select_conditions([f"NULLIF({TableNames.METRIC}.value, 0)"])
@@ -196,20 +196,22 @@ class MetricReportRepository:
             self.logger.info(error)
             return []
 
-    def get_gross_profit(self, filters: dict) -> list:
+    def get_gross_profit(
+        self, filters: dict, scenario: ScenarioNames = ScenarioNames.ACTUALS
+    ) -> list:
         try:
             where_conditions = {
-                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{self.scenario_table_label}.type": f"'{scenario}'",
                 f"{TableNames.METRIC}.name": "'Revenue'",
             }
             where_conditions.update(filters)
-            subquery = self.__get_subquery_metric(
-                "Cost of goods", ScenarioNames.ACTUALS
-            )
+            subquery = self.__get_subquery_metric("Cost of goods", scenario)
             select_value = [
                 f"{TableNames.METRIC}.value - ({subquery}) as value",
             ]
-            return self.__get_no_base_metrics(where_conditions, select_value)
+            return self.__get_no_base_metrics(
+                where_conditions, select_value, from_count=int(len(scenario) + 2)
+            )
         except Exception as error:
             self.logger.info(error)
             return []
@@ -366,14 +368,26 @@ class MetricReportRepository:
             },
         }
 
+    def __get_gross_profit_functions_metric(self, filters: dict) -> dict:
+        return {
+            "actuals_gross_profit": {
+                "function": self.get_gross_profit,
+                "arguments": self.__get_arguments(
+                    filters, scenario=ScenarioNames.ACTUALS
+                ),
+            },
+            "budget_gross_profit": {
+                "function": self.get_gross_profit,
+                "arguments": self.__get_arguments(
+                    filters, scenario=ScenarioNames.BUDGET
+                ),
+            },
+        }
+
     def get_functions_metric(self, filters: dict) -> dict:
         metric_config = {
             "ebitda_margin": {
                 "function": self.get_ebitda_margin_metric,
-                "arguments": self.__get_arguments(filters),
-            },
-            "gross_profit": {
-                "function": self.get_gross_profit,
                 "arguments": self.__get_arguments(filters),
             },
             "gross_margin": {
@@ -399,6 +413,7 @@ class MetricReportRepository:
         metric_config.update(
             self.__get_base_functions_metric(filters, ScenarioNames.BUDGET)
         )
+        metric_config.update(self.__get_gross_profit_functions_metric(filters))
         metric_config.update(self.__get_actuals_vs_budget_functions_metric(filters))
 
         return metric_config
