@@ -1,16 +1,24 @@
 from collections import defaultdict
-from app_names import TableNames, ScenarioNames, MetricNames, BASE_HEADERS
+from typing import Union
+from app_names import TableNames, ScenarioNames, BASE_HEADERS
 
 
 class EditModifyService:
     def __init__(
-        self, session, query_builder, scenario_service, response_sql, logger
+        self,
+        session,
+        query_builder,
+        scenario_service,
+        metric_service,
+        response_sql,
+        logger,
     ) -> None:
         self.logger = logger
         self.response_sql = response_sql
         self.session = session
         self.query_builder = query_builder
         self.scenario_service = scenario_service
+        self.metric_service = metric_service
 
     def __get_scenarios_config_names(self) -> dict:
         return {
@@ -286,10 +294,12 @@ class EditModifyService:
             return {}
 
     def __get_scenarios_by_type(self, scenario_type: str) -> list:
-        metrics = [f"'{metric.value}'" for metric in MetricNames]
-        conditions = {"s.type": f"'{scenario_type}'", "m.name": metrics}
-
         try:
+            metrics = [
+                f"'{metric}'" for metric in self.metric_service.get_metric_types()
+            ]
+            conditions = {"s.type": f"'{scenario_type}'", "m.name": metrics}
+
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
@@ -347,7 +357,7 @@ class EditModifyService:
     def __update_metrics_and_years_rows(
         self, scenarios, metrics: list, years: list
     ) -> None:
-        for metric in MetricNames:
+        for metric in self.metric_service.get_metric_types():
             filtered_years = [
                 scenario[1] for scenario in scenarios if scenario[0] == metric
             ]
@@ -362,7 +372,7 @@ class EditModifyService:
                 scenario.get("scenario").split("-")[0],
             )
             for scenario in scenarios
-            if scenario.get("metric") in list(MetricNames)
+            if scenario.get("metric") in self.metric_service.get_metric_types()
         ]
 
     def __build_row(
@@ -376,7 +386,10 @@ class EditModifyService:
         return row
 
     def __is_metric_scenario_valid(self, scenario: str, metric: str) -> bool:
-        return scenario in list(ScenarioNames) and metric in list(MetricNames)
+        return (
+            scenario in list(ScenarioNames)
+            and metric in self.metric_service.get_metric_types()
+        )
 
     def __add_company_description(self, company: dict) -> dict:
         company_attrs = ("id", "name", "sector", "vertical", "inves_profile_name")
@@ -428,11 +441,18 @@ class EditModifyService:
         return row[i_index:]
 
     def __get_range_in_scenarios_row(
-        self, scenario, actuals_index, budget_index, num_of_scenarios
+        self,
+        scenario: str,
+        actuals_index: int,
+        budget_index: int,
+        num_of_scenarios: int,
     ) -> tuple:
         init_range_value = 0
 
         if scenario == ScenarioNames.ACTUALS:
+            budget_index = (
+                budget_index if budget_index is not None else num_of_scenarios
+            )
             range_index = [actuals_index, budget_index - 1]
             init_range_value = actuals_index
         else:
@@ -441,21 +461,38 @@ class EditModifyService:
 
         return range_index, init_range_value
 
-    def __get_range_in_metrics_row(self, metrics, metric, range, init_range_value):
+    def __get_range_in_metrics_row(
+        self, metrics: list, metric: str, range: list, init_range_value: int
+    ) -> tuple:
         range[0] = metrics.index(metric) + init_range_value
-        if metric == MetricNames.REVENUE:
-            range[1] = metrics.index(str(MetricNames.EBITDA)) + init_range_value - 1
+        metrics_indexes = [
+            i
+            for i, metric in enumerate(self.__slice_row(metrics, metrics.index(metric)))
+            if metric.strip()
+        ]
         init_range_value = range[0]
 
+        if len(metrics_indexes) == 1:
+            range[1] = len(metrics) + init_range_value - 1
+        else:
+            range[1] = metrics_indexes[1] + range[0] - 1
+
         return range, init_range_value
+
+    def __get_elem_index(self, elem: str, elem_list: list) -> Union[int, None]:
+        return elem_list.index(elem) if elem in elem_list else None
 
     def __find_scenario_index(
         self, rows: dict, number_of_scenarios: int, **kwargs
     ) -> int:
         sliced_headers = self.__slice_row(rows.get("headers"), len(BASE_HEADERS))
 
-        actuals_scenario_index = sliced_headers.index(str(ScenarioNames.ACTUALS))
-        budget_scenario_index = sliced_headers.index(str(ScenarioNames.BUDGET))
+        actuals_scenario_index = self.__get_elem_index(
+            str(ScenarioNames.ACTUALS), sliced_headers
+        )
+        budget_scenario_index = self.__get_elem_index(
+            str(ScenarioNames.BUDGET), sliced_headers
+        )
 
         range_index, init_range_value = self.__get_range_in_scenarios_row(
             kwargs.get("scenario"),
@@ -484,6 +521,7 @@ class EditModifyService:
         if not scenarios:
             scenarios = [scenario.value for scenario in ScenarioNames]
 
+        scenarios.sort()
         scenarios_conditions = {"type": scenarios}
 
         filters = self.__add_list_filters(TableNames.COMPANY, **conditions)

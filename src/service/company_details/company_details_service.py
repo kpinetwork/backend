@@ -259,16 +259,36 @@ class CompanyDetails:
     def __get_ids_list(self, records: list, field: str) -> list:
         return [f"'{record.get(field)}'" for record in records if record.get(field)]
 
+    def __get_company_investments_ids(self, company_id) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.INVESTMENT)
+                .add_select_conditions(["id as invest"])
+                .add_sql_where_equal_condition(
+                    {f"{TableNames.INVESTMENT}.company_id": f"'{company_id}'"}
+                )
+                .build()
+                .get_query()
+            )
+            result = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_list_results(result)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
     def __get_ids(self, company_id: str) -> dict:
         records = self.__get_company_scenarios_ids(company_id)
+        invests = self.__get_company_investments_ids(company_id)
         metrics = self.__get_ids_list(records, "metric")
         periods = self.__get_ids_list(records, "period")
         scenarios = self.__get_ids_list(records, "scenario")
+        investments = self.__get_ids_list(invests, "invest")
 
         return {
             f"{TableNames.METRIC}": metrics,
             f"{TableNames.SCENARIO}": scenarios,
             f"{TableNames.PERIOD}": periods,
+            f"{TableNames.INVESTMENT}": investments,
         }
 
     def __get_delete_list_query(self, table: str, table_field: str, ids: list) -> str:
@@ -286,16 +306,17 @@ class CompanyDetails:
         scenarios = base_ids.get(TableNames.SCENARIO)
         metrics = base_ids.get(TableNames.METRIC)
         periods = base_ids.get(TableNames.PERIOD)
+        investments = base_ids.get(TableNames.INVESTMENT)
 
         return """
-          BEGIN;
             {scenario_metric_query}
             {currency_query}
             {metric_query}
             {scenario_query}
             {period_query}
+            {investor_query}
+            {invest_query}
             DELETE FROM {company} WHERE {company}.id = '{id}';
-          COMMIT;
         """.format(
             scenario_metric_query=self.__get_delete_list_query(
                 TableNames.SCENARIO_METRIC, "scenario_id", scenarios
@@ -306,6 +327,12 @@ class CompanyDetails:
             scenario_query=self.__get_delete_list_query(
                 TableNames.SCENARIO, "id", scenarios
             ),
+            investor_query=self.__get_delete_list_query(
+                TableNames.INVESTOR, "investment_id", investments
+            ),
+            invest_query=self.__get_delete_list_query(
+                TableNames.INVESTMENT, "id", investments
+            ),
             metric_query=self.__get_delete_list_query(TableNames.METRIC, "id", metrics),
             period_query=self.__get_delete_list_query(TableNames.PERIOD, "id", periods),
             company=TableNames.COMPANY,
@@ -314,6 +341,8 @@ class CompanyDetails:
 
     def __verify_company_exist(self, company_id: str) -> None:
         try:
+            if not company_id or not company_id.strip():
+                raise AppError("Invalid company id")
             query = (
                 self.query_builder.add_table_name(self.table)
                 .add_sql_where_equal_condition({"id": f"'{company_id}'"})
@@ -343,5 +372,6 @@ class CompanyDetails:
             self.logger.info(error)
             raise error
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False
