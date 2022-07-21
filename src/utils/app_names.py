@@ -23,10 +23,9 @@ class MetricNames(StrEnum):
     REVENUE = "Revenue"
     EBITDA = "Ebitda"
     COST_OF_GOODS = "Cost of goods"
-    GROSS_PROFIT = "Gross profit"
     SALES_AND_MARKETING = "Sales & marketing"
-    R_AND_D = "R&D"
-    G_AND_D = "G&D"
+    GENERAL_ADN_ADMINISTRATION = "General & administration"
+    RESEARCH_AND_DEVELOPMENT = "Research & development"
 
 
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]
