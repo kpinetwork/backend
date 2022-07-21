@@ -24,7 +24,7 @@ class MetricNames(StrEnum):
     EBITDA = "Ebitda"
     COST_OF_GOODS = "Cost of goods"
     SALES_AND_MARKETING = "Sales & marketing"
-    GENERAL_ADN_ADMINISTRATION = "General & administration"
+    GENERAL_AND_ADMINISTRATION = "General & administration"
     RESEARCH_AND_DEVELOPMENT = "Research & development"
 
 
