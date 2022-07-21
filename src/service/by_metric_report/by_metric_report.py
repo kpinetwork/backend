@@ -21,7 +21,19 @@ class ByMetricReport:
         return [*self.repository.get_functions_metric(dict())]
 
     def get_base_metrics(self) -> list:
-        return ["actuals_revenue", "actuals_ebitda", "budget_revenue", "budget_ebitda"]
+        base_metrics = [
+            "revenue",
+            "ebitda",
+            "cost_of_goods",
+            "sales_marketing",
+            "general_admin",
+            "research_development",
+            "gross_profit",
+        ]
+
+        metrics = [f"actuals_{metric}" for metric in base_metrics]
+        metrics.extend([f"budget_{metric}" for metric in base_metrics])
+        return metrics
 
     def get_dynamic_ranges(self, records: list) -> list:
         values = [record["value"] for record in records]
@@ -220,7 +232,7 @@ class ByMetricReport:
         metric: str,
         from_main: bool,
         access: bool,
-        **conditions
+        **conditions,
     ) -> dict:
         try:
             company = dict()
