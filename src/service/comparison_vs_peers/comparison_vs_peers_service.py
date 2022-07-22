@@ -24,6 +24,22 @@ class ComparisonvsPeersService:
         for metric in base_metrics:
             company.pop(metric, None)
 
+    def anonymized_companies(
+        self, access: bool, companies: dict, allowed_companies: list
+    ) -> None:
+        gross_profit_records = []
+
+        for id in companies:
+            company = companies[id]
+            gross_profit_records.append(company.get("gross_profit"))
+
+        for company_id in companies:
+            company_data = companies[company_id]
+            if not access and company_id not in allowed_companies:
+                self.report.anonymized_company(
+                    company_data, allowed_companies, gross_profit_records
+                )
+
     def get_comparison_vs_data(self, data: dict, access: bool) -> list:
         allowed_companies = self.report.get_allowed_companies()
         rule_of_40 = []
@@ -33,7 +49,7 @@ class ComparisonvsPeersService:
             company_revenue = company_data.get("actuals_revenue")
             self.report.calculate_metrics(company_data)
             if not access and id not in allowed_companies:
-                self.report.anonymized_company(company_data, allowed_companies)
+                self.report.anonymize_company_name(company_data, allowed_companies)
             company_rule_of_40 = self.report.get_rule_of_40(
                 company_data, company_revenue
             )
@@ -41,6 +57,7 @@ class ComparisonvsPeersService:
                 rule_of_40.append(company_rule_of_40)
             self.remove_base_metrics(company_data)
 
+        self.anonymized_companies(access, data, allowed_companies)
         return rule_of_40
 
     def get_peers_comparison(

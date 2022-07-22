@@ -26,6 +26,15 @@ class CalculatorReport:
             )
             company["revenue"] = profile_range.get("label")
 
+    def get_dynamic_ranges(self, records: list) -> list:
+        return self.profile_range.build_ranges_from_values(records)
+
+    def replace_gross_profit(self, company: dict, gross_profit_records: list) -> None:
+        _ranges = self.get_dynamic_ranges(gross_profit_records)
+        company["gross_profit"] = self.profile_range.get_range_from_value(
+            company["gross_profit"], ranges=_ranges
+        )
+
     def get_metric_range(self, metric: float, profile_type: str) -> str:
         if not self.calculator.is_valid_number(metric):
             return "NA"
@@ -104,9 +113,19 @@ class CalculatorReport:
             "revenue": self.calculator.calculate_base_metric(company_revenue),
         }
 
-    def anonymized_company(self, company: dict, allowed_companies: list) -> None:
+    def anonymized_company(
+        self, company: dict, allowed_companies: list, gross_profit_records: list
+    ) -> None:
         if company.get("id") not in allowed_companies:
             self.replace_revenue(company)
+            self.replace_gross_profit(company, gross_profit_records)
+            anonymized_name = self.company_anonymization.anonymize_company_name(
+                company.get("id")
+            )
+            company["name"] = anonymized_name
+
+    def anonymize_company_name(self, company: dict, allowed_companies: list) -> None:
+        if company.get("id") not in allowed_companies:
             anonymized_name = self.company_anonymization.anonymize_company_name(
                 company.get("id")
             )
