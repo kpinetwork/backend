@@ -14,6 +14,11 @@ header = [
     "revenue_vs_budget",
     "ebitda_vs_budget",
     "rule_of_40",
+    "gross_profit",
+    "gross_margin",
+    "sales_and_marketing",
+    "general_and_admin",
+    "research_and_development",
 ]
 
 file_path = os.environ.get("FILE_PATH")
