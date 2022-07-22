@@ -1,4 +1,5 @@
 from collections import defaultdict
+from app_names import MetricNames
 
 
 class InvestmentRepository:
@@ -20,20 +21,20 @@ class InvestmentRepository:
         self.time_period_table = "time_period"
         self.base_metrics = {
             "Actuals": {
-                "Revenue": "actuals_revenue",
-                "Ebitda": "actuals_ebitda",
-                "Cost of goods": "actuals_cost_of_goods",
-                "Sales & marketing": "actuals_sales_marketing",
-                "General & administration": "actuals_general_admin",
-                "Research & development": "actuals_research_development",
+                MetricNames.REVENUE: "actuals_revenue",
+                MetricNames.EBITDA: "actuals_ebitda",
+                MetricNames.COST_OF_GOODS: "actuals_cost_of_goods",
+                MetricNames.SALES_AND_MARKETING: "actuals_sales_marketing",
+                MetricNames.GENERAL_AND_ADMINISTRATION: "actuals_general_admin",
+                MetricNames.RESEARCH_AND_DEVELOPMENT: "actuals_research_development",
             },
             "Budget": {
-                "Revenue": "budget_revenue",
-                "Ebitda": "budget_ebitda",
-                "Cost of goods": "budget_cost_of_goods",
-                "Sales & marketing": "budget_sales_marketing",
-                "General & administration": "budget_general_admin",
-                "Research & development": "budget_research_development",
+                MetricNames.REVENUE: "budget_revenue",
+                MetricNames.EBITDA: "budget_ebitda",
+                MetricNames.COST_OF_GOODS: "budget_cost_of_goods",
+                MetricNames.SALES_AND_MARKETING: "budget_sales_marketing",
+                MetricNames.GENERAL_AND_ADMINISTRATION: "budget_general_admin",
+                MetricNames.RESEARCH_AND_DEVELOPMENT: "budget_research_development",
             },
         }
 
@@ -177,12 +178,12 @@ class InvestmentRepository:
     def get_metric(self, scenario: dict, base_year: int) -> dict:
         scenario_name = scenario.get("scenario")
         metrics = [
-            "Revenue",
-            "Ebitda",
-            "Cost of goods",
-            "Sales & marketing",
-            "General & administration",
-            "Research & development",
+            MetricNames.REVENUE,
+            MetricNames.EBITDA,
+            MetricNames.COST_OF_GOODS,
+            MetricNames.SALES_AND_MARKETING,
+            MetricNames.GENERAL_AND_ADMINISTRATION,
+            MetricNames.RESEARCH_AND_DEVELOPMENT,
         ]
         year = int(scenario_name.split("-")[1])
         if scenario["metric"] not in metrics:
