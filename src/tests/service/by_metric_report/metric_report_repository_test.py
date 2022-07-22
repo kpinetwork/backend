@@ -122,7 +122,9 @@ class TestMetricReportRepository(TestCase):
     )
     def test_get_arguments(self, metric, scenario, expected_arguments):
 
-        arguments = self.repository.get_arguments({}, metric, scenario)
+        arguments = self.repository._MetricReportRepository__get_arguments(
+            {}, metric, scenario
+        )
 
         self.assertEqual(arguments, expected_arguments)
 
@@ -138,3 +140,31 @@ class TestMetricReportRepository(TestCase):
             self.repository.get_metric_records("invalid", dict())
 
         self.assertEqual(str(context.exception), "Metric not found")
+
+    def test_get_gross_profit_should_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_gross_profit(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_gross_profit_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_gross_profit(dict())
+
+        self.assertEqual(metrics, [])
+
+    def test_get_gross_margin_should_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_gross_margin(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_gross_margin_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_gross_margin(dict())
+
+        self.assertEqual(metrics, [])

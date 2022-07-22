@@ -1,8 +1,10 @@
 import json
 import logging
 from scenario_service import ScenarioService
+from metric_type_service import MetricTypesService
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 from verify_user_permissions import verify_user_access, get_user_id_from_event
 from base_exception import AppError
 
@@ -35,9 +37,16 @@ def get_headers() -> dict:
     }
 
 
+def get_service() -> object:
+    metric_service = MetricTypesService(
+        session, QuerySQLBuilder(), ResponseSQL(), logger
+    )
+    return ScenarioService(session, QuerySQLBuilder(), metric_service, logger)
+
+
 def handler(event, _):
     try:
-        service = ScenarioService(session, QuerySQLBuilder(), logger)
+        service = get_service()
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
 

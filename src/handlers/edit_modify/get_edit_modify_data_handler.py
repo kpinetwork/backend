@@ -2,6 +2,7 @@ import json
 import logging
 from query_builder import QuerySQLBuilder
 from edit_service import EditModifyService
+from metric_type_service import MetricTypesService
 from base_exception import AuthError
 from response_sql import ResponseSQL
 from commons_functions import get_edit_modify_condition_params
@@ -25,8 +26,11 @@ def get_headers() -> dict:
 
 
 def get_service():
+    metric_service = MetricTypesService(
+        session, QuerySQLBuilder(), ResponseSQL(), logger
+    )
     return EditModifyService(
-        session, QuerySQLBuilder(), object(), ResponseSQL(), logger
+        session, QuerySQLBuilder(), object(), metric_service, ResponseSQL(), logger
     )
 
 

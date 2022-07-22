@@ -100,8 +100,9 @@ class ProfileRange:
         }
 
     def build_ranges_from_values(self, values: list) -> list:
-        if not values:
+        if not values or all(value is None for value in values):
             return []
+        values = list(filter(lambda value: value is not None, values))
         intervals = self.get_intervals(values)
         min_value = min(intervals)
         max_value = max(intervals)

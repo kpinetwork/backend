@@ -39,9 +39,14 @@ class TestScenarioService(TestCase):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.scenario_service_intance = ScenarioService(
-            self.mock_session, self.mock_query_builder, logger
+        self.mock_metric_service = Mock()
+        self.scenario_service_instance = ScenarioService(
+            self.mock_session, self.mock_query_builder, self.mock_metric_service, logger
         )
+
+    def get_metric_types_response(self, response: list):
+        self.mock_metric_service.get_metric_types.return_value = ["Revenue", "Ebitda"]
+        return self
 
     @parameterized.expand(
         [
@@ -67,25 +72,27 @@ class TestScenarioService(TestCase):
     def test_add_scenario_with_invalid_values_should_fail(
         self, args: dict, error_message: str
     ):
-
+        self.get_metric_types_response(["Revenue", "Ebitda"])
         with self.assertRaises(Exception) as context:
-            self.scenario_service_intance.add_company_scenario(**args)
+            self.scenario_service_instance.add_company_scenario(**args)
 
         self.assertEqual(str(context.exception), error_message)
 
     def test_add_scenario_with_invalid_company_id_should_fail(self):
+        self.get_metric_types_response(["Revenue", "Ebitda"])
         self.mock_session.execute.return_value = DummyResponse({})
 
         with self.assertRaises(Exception) as context:
-            self.scenario_service_intance.add_company_scenario(**args)
+            self.scenario_service_instance.add_company_scenario(**args)
 
         self.assertEqual(str(context.exception), f"{message} Company doesn't exist")
 
     def test_add_scenario_with_repeated_scenario_should_fail(self):
+        self.get_metric_types_response(["Revenue", "Ebitda"])
         self.mock_session.execute.return_value = DummyResponse({"name": "Actuals"})
 
         with self.assertRaises(Exception) as context:
-            self.scenario_service_intance.add_company_scenario(**args)
+            self.scenario_service_instance.add_company_scenario(**args)
 
         self.assertEqual(str(context.exception), f"{message} Scenario already exists")
 
@@ -94,7 +101,7 @@ class TestScenarioService(TestCase):
         fields = ["id", "name", "metric_id"]
         expected_name = f"{args['scenario']}-{args['year']}"
 
-        scenario = self.scenario_service_intance.add_company_scenario(**args)
+        scenario = self.scenario_service_instance.add_company_scenario(**args)
 
         self.assertEqual([*scenario], fields)
         self.assertEqual(scenario["name"], expected_name)
