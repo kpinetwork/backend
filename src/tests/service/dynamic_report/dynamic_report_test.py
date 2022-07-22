@@ -281,6 +281,11 @@ class TestDynamicReport(TestCase):
                 "revenue_vs_budget",
                 "ebitda_vs_budget",
                 "rule_of_40",
+                "gross_profit",
+                "gross_margin",
+                "sales_and_marketing",
+                "general_and_admin",
+                "research_and_development",
             ],
             "company_comparison_data": {},
             "peers_comparison_data": [
@@ -336,6 +341,11 @@ class TestDynamicReport(TestCase):
                 "revenue_vs_budget",
                 "ebitda_vs_budget",
                 "rule_of_40",
+                "gross_profit",
+                "gross_margin",
+                "sales_and_marketing",
+                "general_and_admin",
+                "research_and_development",
             ],
             "company_comparison_data": {},
             "peers_comparison_data": [

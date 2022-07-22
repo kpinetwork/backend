@@ -23,10 +23,9 @@ class MetricNames(StrEnum):
     REVENUE = "Revenue"
     EBITDA = "Ebitda"
     COST_OF_GOODS = "Cost of goods"
-    GROSS_PROFIT = "Gross profit"
     SALES_AND_MARKETING = "Sales & marketing"
-    R_AND_D = "R&D"
-    G_AND_D = "G&D"
+    GENERAL_AND_ADMINISTRATION = "General & administration"
+    RESEARCH_AND_DEVELOPMENT = "Research & development"
 
 
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]
@@ -38,4 +37,9 @@ COMPARISON_METRICS = [
     "revenue_vs_budget",
     "ebitda_vs_budget",
     "rule_of_40",
+    "gross_profit",
+    "gross_margin",
+    "sales_and_marketing",
+    "general_and_admin",
+    "research_and_development",
 ]
