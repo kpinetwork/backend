@@ -113,18 +113,30 @@ class CalculatorReport:
             "revenue": self.calculator.calculate_base_metric(company_revenue),
         }
 
-    def anonymized_company(
+    def anonymized_companies_metrics(
+        self, access: bool, companies: dict, allowed_companies: list
+    ) -> None:
+        gross_profit_records = []
+
+        for id in companies:
+            company = companies[id]
+            gross_profit_records.append(company.get("gross_profit"))
+
+        for company_id in companies:
+            company_data = companies[company_id]
+            if not access and company_id not in allowed_companies:
+                self.anonymize_revenue_and_gross_profit(
+                    company_data, allowed_companies, gross_profit_records
+                )
+
+    def anonymize_revenue_and_gross_profit(
         self, company: dict, allowed_companies: list, gross_profit_records: list
     ) -> None:
         if company.get("id") not in allowed_companies:
             self.replace_revenue(company)
             self.replace_gross_profit(company, gross_profit_records)
-            anonymized_name = self.company_anonymization.anonymize_company_name(
-                company.get("id")
-            )
-            company["name"] = anonymized_name
 
-    def anonymize_company_name(self, company: dict, allowed_companies: list) -> None:
+    def anonymize_name(self, company: dict, allowed_companies: list) -> None:
         if company.get("id") not in allowed_companies:
             anonymized_name = self.company_anonymization.anonymize_company_name(
                 company.get("id")

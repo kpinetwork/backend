@@ -22,7 +22,7 @@ class ScenarioNames(StrEnum):
 class MetricNames(StrEnum):
     REVENUE = "Revenue"
     EBITDA = "Ebitda"
-    COST_OF_GOODS = "Cost of Goods"
+    COST_OF_GOODS = "Cost of goods"
     SALES_AND_MARKETING = "Sales & marketing"
     GENERAL_AND_ADMINISTRATION = "General & administration"
     RESEARCH_AND_DEVELOPMENT = "Research & development"

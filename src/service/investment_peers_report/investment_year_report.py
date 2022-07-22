@@ -29,22 +29,6 @@ class InvestmentYearReport:
         for fields in unused_fields:
             company.pop(fields, None)
 
-    def anonymized_companies(
-        self, access: bool, companies: dict, allowed_companies: list
-    ) -> None:
-        gross_profit_records = []
-
-        for id in companies:
-            company = companies[id]
-            gross_profit_records.append(company.get("gross_profit"))
-
-        for company_id in companies:
-            company_data = companies[company_id]
-            if not access and company_id not in allowed_companies:
-                self.report.anonymized_company(
-                    company_data, allowed_companies, gross_profit_records
-                )
-
     def add_calculated_metrics(self, companies: dict, access: bool) -> None:
         allowed_companies = self.report.get_allowed_companies()
 
@@ -52,9 +36,10 @@ class InvestmentYearReport:
             company_data = companies[id]
             self.report.calculate_metrics(company_data)
             self.remove_unused_fields(company_data)
+            if not access and id not in allowed_companies:
+                self.report.anonymize_name(company_data, allowed_companies)
 
-        if not access and id not in allowed_companies:
-            self.anonymized_companies(access, companies, allowed_companies)
+        self.report.anonymized_companies_metrics(access, companies, allowed_companies)
 
     def get_peers_by_investment_year(
         self,

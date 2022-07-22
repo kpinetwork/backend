@@ -128,13 +128,10 @@ class TestCalculatorReport(TestCase):
     def test_anonymized_company(self, allowed_companies, name, revenue):
         company = self.company.copy()
         company.update(self.metrics)
-        gross_profit_records = [{"gross_profit": -80}]
 
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
-        self.report_instance.anonymized_company(
-            company, allowed_companies, gross_profit_records
-        )
+        self.report_instance.anonymize_name(company, allowed_companies)
 
         self.assertEqual(company.get("name"), name)
 
