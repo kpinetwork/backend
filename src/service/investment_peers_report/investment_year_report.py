@@ -6,7 +6,14 @@ class InvestmentYearReport:
 
     def get_unused_fields(self) -> list:
         scenarios = ["actuals", "budget"]
-        metrics = ["revenue", "ebitda"]
+        metrics = [
+            "revenue",
+            "ebitda",
+            "cost_of_goods",
+            "sales_marketing",
+            "general_admin",
+            "research_development",
+        ]
         fields = []
         for scenario in scenarios:
             for metric in metrics:

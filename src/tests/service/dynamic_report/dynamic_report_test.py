@@ -58,6 +58,10 @@ class TestDynamicReport(TestCase):
             "prior_actuals_revenue": 37.5,
             "budget_revenue": 35,
             "budget_ebitda": -12,
+            "actuals_cost_of_goods": 120,
+            "actuals_sales_marketing": 50,
+            "actuals_general_admin": 60,
+            "actuals_research_development": 70,
         }
         self.sizes = [
             {"label": ">$20 million", "min_value": None, "max_value": 20},
@@ -277,6 +281,11 @@ class TestDynamicReport(TestCase):
                 "revenue_vs_budget",
                 "ebitda_vs_budget",
                 "rule_of_40",
+                "gross_profit",
+                "gross_margin",
+                "sales_and_marketing",
+                "general_and_admin",
+                "research_and_development",
             ],
             "company_comparison_data": {},
             "peers_comparison_data": [
@@ -293,6 +302,11 @@ class TestDynamicReport(TestCase):
                     "rule_of_40": -31,
                     "size_cohort": "NA",
                     "margin_group": "NA",
+                    "gross_profit": -80,
+                    "gross_margin": -200,
+                    "sales_and_marketing": 125,
+                    "general_and_admin": 150,
+                    "research_and_development": 175,
                 }
             ],
         }
@@ -327,6 +341,11 @@ class TestDynamicReport(TestCase):
                 "revenue_vs_budget",
                 "ebitda_vs_budget",
                 "rule_of_40",
+                "gross_profit",
+                "gross_margin",
+                "sales_and_marketing",
+                "general_and_admin",
+                "research_and_development",
             ],
             "company_comparison_data": {},
             "peers_comparison_data": [
@@ -343,6 +362,11 @@ class TestDynamicReport(TestCase):
                     "rule_of_40": -31,
                     "size_cohort": "NA",
                     "margin_group": "NA",
+                    "gross_profit": -80,
+                    "gross_margin": -200,
+                    "sales_and_marketing": 125,
+                    "general_and_admin": 150,
+                    "research_and_development": 175,
                 }
             ],
         }

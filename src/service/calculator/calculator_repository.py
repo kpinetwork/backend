@@ -51,15 +51,54 @@ class CalculatorRepository:
             "alias": f"{alias}",
         }
 
-    def get_actuals_budget_options(self, year: int) -> list:
+    def get_actuals_options(self, year: int) -> list:
         return [
             self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
             self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
-            self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
-            self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
+            self.get_metric_option(
+                "Actuals", "Cost of goods", "actuals_cost_of_goods", year
+            ),
+            self.get_metric_option(
+                "Actuals", "Sales & marketing", "actuals_sales_marketing", year
+            ),
+            self.get_metric_option(
+                "Actuals",
+                "General & administration",
+                "actuals_general_admin",
+                year,
+            ),
+            self.get_metric_option(
+                "Actuals",
+                "Research & development",
+                "actuals_research_development",
+                year,
+            ),
         ]
 
-    def get_budget_options(self, year: int, need_prior: bool, need_next: bool) -> list:
+    def get_budget_options(self, year: int) -> list:
+        return [
+            self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
+            self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
+            self.get_metric_option(
+                "Budget", "Cost of goods", "budget_cost_of_goods", year
+            ),
+            self.get_metric_option(
+                "Budget", "Sales & marketing", "budget_sales_marketing", year
+            ),
+            self.get_metric_option(
+                "Budget", "General & administration", "budget_general_admin", year
+            ),
+            self.get_metric_option(
+                "Budget",
+                "Research & development",
+                "budget_research_development",
+                year,
+            ),
+        ]
+
+    def get_forward_budget_options(
+        self, year: int, need_prior: bool, need_next: bool
+    ) -> list:
         budget_options = []
         if need_prior:
             prior_year = year - 1
@@ -96,7 +135,8 @@ class CalculatorRepository:
         need_next_year: bool,
         need_budget_prior_year: bool,
     ) -> list:
-        metrics = self.get_actuals_budget_options(year)
+        metrics = self.get_actuals_options(year)
+        metrics.extend(self.get_budget_options(year))
 
         if need_actuals_prior_year:
             metrics.append(
@@ -105,7 +145,7 @@ class CalculatorRepository:
                 )
             )
 
-        budget_options = self.get_budget_options(
+        budget_options = self.get_forward_budget_options(
             year, need_budget_prior_year, need_next_year
         )
         metrics.extend(budget_options)

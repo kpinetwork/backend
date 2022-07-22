@@ -72,6 +72,27 @@ class CalculatorReport:
         )
         growth_range = self.get_metric_range(growth, "growth profile")
         company["margin_group"] = growth_range
+        company["gross_profit"] = self.calculator.calculate_gross_profit(
+            revenue, company.get("actuals_cost_of_goods")
+        )
+        company["gross_margin"] = self.calculator.calculate_gross_margin(
+            revenue, company.get("actuals_cost_of_goods")
+        )
+        company[
+            "sales_and_marketing"
+        ] = self.calculator.calculate_sales_and_marketing_of_revenue(
+            revenue, company.get("actuals_sales_marketing")
+        )
+        company[
+            "general_and_admin"
+        ] = self.calculator.calculate_general_and_admin_of_revenue(
+            revenue, company.get("actuals_general_admin")
+        )
+        company[
+            "research_and_development"
+        ] = self.calculator.calculate_research_and_development_of_revenue(
+            revenue, company.get("actuals_research_development")
+        )
 
     def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
         no_data = "NA"

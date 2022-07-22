@@ -42,6 +42,11 @@ class TestInvestmentYearReport(TestCase):
             "revenue_vs_budget": 114,
             "ebitda_vs_budget": 125,
             "rule_of_40": -31,
+            "gross_profit": -80,
+            "gross_margin": -200,
+            "sales_and_marketing": 125,
+            "general_and_admin": 150,
+            "research_and_development": 175,
         }
 
         self.scenarios = {
@@ -50,6 +55,10 @@ class TestInvestmentYearReport(TestCase):
             "prior_actuals_revenue": 37.5,
             "budget_revenue": 35,
             "budget_ebitda": -12,
+            "actuals_cost_of_goods": 120,
+            "actuals_sales_marketing": 50,
+            "actuals_general_admin": 60,
+            "actuals_research_development": 70,
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
