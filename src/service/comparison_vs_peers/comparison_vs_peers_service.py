@@ -33,7 +33,7 @@ class ComparisonvsPeersService:
             company_revenue = company_data.get("actuals_revenue")
             self.report.calculate_metrics(company_data)
             if not access and id not in allowed_companies:
-                self.report.anonymized_company(company_data, allowed_companies)
+                self.report.anonymize_name(company_data)
             company_rule_of_40 = self.report.get_rule_of_40(
                 company_data, company_revenue
             )
@@ -41,6 +41,7 @@ class ComparisonvsPeersService:
                 rule_of_40.append(company_rule_of_40)
             self.remove_base_metrics(company_data)
 
+        self.report.anonymized_companies_metrics(access, data, allowed_companies)
         return rule_of_40
 
     def get_peers_comparison(

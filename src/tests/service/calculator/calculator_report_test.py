@@ -122,15 +122,14 @@ class TestCalculatorReport(TestCase):
 
         self.assertEqual(company, expected_company)
 
-    @parameterized.expand(
-        [[[], "0123-xxxx", "$30-<50 million"], [["0123456"], "Company Test", 40]]
-    )
+    @parameterized.expand([[[], "0123-xxxx", "$30-<50 million"]])
     def test_anonymized_company(self, allowed_companies, name, revenue):
         company = self.company.copy()
+        company.update(self.metrics)
+
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
-        self.report_instance.anonymized_company(company, allowed_companies)
-
+        self.report_instance.anonymize_name(company)
         self.assertEqual(company.get("name"), name)
 
     def test_get_rule_of_40(self):

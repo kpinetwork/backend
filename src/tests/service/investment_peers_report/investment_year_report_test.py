@@ -91,6 +91,7 @@ class TestInvestmentYearReport(TestCase):
         self.assertEqual(data[company["id"]], expected_company)
 
     def test_add_calculated_metrics_without_access(self):
+        gross_profit_range = {"label": "$<0 million"}
         company = self.company.copy()
         company.update(self.scenarios)
         data = {company["id"]: company}
@@ -101,8 +102,12 @@ class TestInvestmentYearReport(TestCase):
         )
         expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
+        expected_company["gross_profit"] = gross_profit_range["label"]
         expected_company["name"] = "0123-xxxx"
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
+        self.mock_profile_range.get_range_from_value.return_value = gross_profit_range[
+            "label"
+        ]
 
         self.report_instance.add_calculated_metrics(data, False)
 
