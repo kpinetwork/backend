@@ -53,12 +53,16 @@ def handler(event, _):
         company_service = get_company_details_service()
         offset = 0
         limit = 20
+        ordered = True
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             offset = get_number_from_query(params, "offset", offset)
             limit = get_number_from_query(params, "limit", limit)
+            ordered = params.get("ordered", ordered)
 
-        details = company_service.get_company_details(company_id, offset, limit)
+        details = company_service.get_company_details(
+            company_id, offset, limit, ordered
+        )
 
         return {
             "statusCode": 200,

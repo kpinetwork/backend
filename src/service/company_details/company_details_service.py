@@ -1,6 +1,6 @@
 from typing import Union
 from base_exception import AppError
-from app_names import TableNames
+from app_names import TableNames, ScenarioNames
 
 
 class CompanyDetails:
@@ -133,7 +133,21 @@ class CompanyDetails:
                 float(value) if self.calculator.is_valid_number(value) else "NA"
             )
 
-    def get_company_scenarios(self, company_id: str, offset: int, limit: int) -> list:
+    def __get_case_order(self, ordered: bool) -> str:
+        scenarios = list(ScenarioNames)
+        if not ordered:
+            scenarios.sort(reverse=True)
+
+        return f"""
+                CASE
+                WHEN {TableNames.SCENARIO}.type='{scenarios[0]}' then 0
+                WHEN {TableNames.SCENARIO}.type='{scenarios[1]}' then 1
+                ELSE 2 end
+                """
+
+    def get_company_scenarios(
+        self, company_id: str, offset: int, limit: int, ordered: bool
+    ) -> list:
         try:
             columns = [
                 f"{TableNames.SCENARIO}.id as scenario_id",
@@ -143,6 +157,8 @@ class CompanyDetails:
                 f"{TableNames.METRIC}.name as metric",
                 f"{TableNames.METRIC}.value",
             ]
+            case_query = self.__get_case_order(ordered)
+
             query = (
                 self.query_builder.add_table_name(TableNames.SCENARIO)
                 .add_select_conditions(columns)
@@ -170,16 +186,23 @@ class CompanyDetails:
                         }
                     }
                 )
+                .add_join_clause(
+                    {
+                        f"{TableNames.METRIC_SORT}": {
+                            "from": f"{TableNames.METRIC_SORT}.name",
+                            "to": f"{TableNames.METRIC}.name",
+                        }
+                    }
+                )
                 .add_sql_where_equal_condition(
                     {f"{TableNames.SCENARIO}.company_id": f"'{company_id}'"}
                 )
                 .add_sql_order_by_condition(
                     [
-                        f"{TableNames.SCENARIO}.id",
+                        case_query,
                         f"{TableNames.SCENARIO}.type",
-                        f"{TableNames.METRIC}.name",
-                        "start_at",
-                        f"{TableNames.METRIC}.value",
+                        "year",
+                        "sort_value",
                     ],
                     self.query_builder.Order.ASC,
                 )
@@ -198,7 +221,7 @@ class CompanyDetails:
             return []
 
     def get_company_details(
-        self, company_id: str, offset: int = 0, limit: int = 20
+        self, company_id: str, offset: int = 0, limit: int = 20, ordered: bool = True
     ) -> dict:
         if not (company_id and company_id.strip()):
             raise AppError("Invalid company id")
@@ -211,7 +234,7 @@ class CompanyDetails:
 
         company["scenarios"] = {
             "total": self.get_total_number_of_scenarios(company_id),
-            "metrics": self.get_company_scenarios(company_id, offset, limit),
+            "metrics": self.get_company_scenarios(company_id, offset, limit, ordered),
         }
 
         return company

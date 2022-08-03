@@ -153,7 +153,17 @@ class TestCompanyDetailsService(TestCase):
         self.mock_response_list_query_sql(expected_scenarios)
 
         scenarios = self.details_service_instance.get_company_scenarios(
-            self.company["id"], 0, 1
+            self.company["id"], 0, 1, True
+        )
+
+        self.assertEqual(scenarios, expected_scenarios)
+
+    def test_get_company_scenarios_should_return_list_when_ordered_is_false(self):
+        expected_scenarios = self.company["scenarios"]["metrics"].copy()
+        self.mock_response_list_query_sql(expected_scenarios)
+
+        scenarios = self.details_service_instance.get_company_scenarios(
+            self.company["id"], 0, 1, False
         )
 
         self.assertEqual(scenarios, expected_scenarios)
@@ -162,7 +172,7 @@ class TestCompanyDetailsService(TestCase):
         self.mock_session.execute.side_effect = Exception("error")
 
         scenarios = self.details_service_instance.get_company_scenarios(
-            self.company["id"], 0, 1
+            self.company["id"], 0, 1, True
         )
 
         self.assertEqual(scenarios, [])
