@@ -36,6 +36,14 @@ class InvestmentRepository:
                 "Research & development": "budget_research_development",
             },
         }
+        self.metrics = [
+            "Revenue",
+            "Ebitda",
+            "Cost of goods",
+            "Sales & marketing",
+            "General & administration",
+            "Research & development",
+        ]
 
     def add_company_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -176,16 +184,8 @@ class InvestmentRepository:
 
     def get_metric(self, scenario: dict, base_year: int) -> dict:
         scenario_name = scenario.get("scenario")
-        metrics = [
-            "Revenue",
-            "Ebitda",
-            "Cost of goods",
-            "Sales & marketing",
-            "General & administration",
-            "Research & development",
-        ]
         year = int(scenario_name.split("-")[1])
-        if scenario["metric"] not in metrics:
+        if scenario["metric"] not in self.metrics:
             return dict()
         if year not in [base_year - 1, base_year]:
             return dict()
@@ -218,6 +218,8 @@ class InvestmentRepository:
             investments[company_id]["invest_year"] + invest_year
             for company_id in investments
         ]
+        if not years:
+            return dict()
 
         years = self.get_years(years)
 
