@@ -127,3 +127,16 @@ class TestInvestmentRepository(TestCase):
         response = self.repository.get_base_metrics(0, sector=["Computer Hardware"])
 
         self.assertEqual(response, {invest["id"]: invest})
+
+    @mock.patch.object(InvestmentRepository, "get_investments")
+    def test_get_base_metrics_return_empty_list_when_there_is_not_investments(
+        self, mock_get_investments
+    ):
+        self.mock_response_list_query_sql([self.scenarios])
+        invest = self.scenarios.copy()
+        invest["actuals_revenue"] = self.scenarios["value"]
+        mock_get_investments.return_value = {}
+
+        response = self.repository.get_base_metrics(0, sector=["Computer Hardware"])
+
+        self.assertEqual(response, {})
