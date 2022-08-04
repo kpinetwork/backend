@@ -190,7 +190,7 @@ class QuerySQLBuilder:
 
     def get_where_query(self) -> str:
         query = self.__build_where()
-        self.__clear
+        self.__clear()
         return query
 
     def __build_group_by(self):
