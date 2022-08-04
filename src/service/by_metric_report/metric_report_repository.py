@@ -95,8 +95,11 @@ class MetricReportRepository:
             self.logger.info(error)
             return []
 
-    def __get_subquery_metric(self, metric: str, scenario: str) -> str:
-        substring = f"substring(scenario.name from {int(len(scenario) + 2)})"
+    def __get_subquery_metric(
+        self, metric: str, scenario: str, from_count: int = None
+    ) -> str:
+        from_count = from_count if from_count else int(len(scenario) + 2)
+        substring = f"substring(scenario.name from {from_count})"
         return (
             self.query_builder.add_table_name(TableNames.SCENARIO)
             .add_select_conditions([f"NULLIF({TableNames.METRIC}.value, 0)"])
@@ -186,7 +189,11 @@ class MetricReportRepository:
                 f"{TableNames.METRIC}.name": f"'{metric}'",
             }
             where_conditions.update(filters)
-            subquery = self.__get_subquery_metric(metric, ScenarioNames.BUDGET)
+            subquery = self.__get_subquery_metric(
+                metric,
+                ScenarioNames.BUDGET,
+                from_count=int(len(ScenarioNames.ACTUALS) + 2),
+            )
             select_value = [
                 f"{TableNames.METRIC}.value * 100 / ({subquery}) as value",
             ]
