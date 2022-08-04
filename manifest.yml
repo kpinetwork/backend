@@ -344,6 +344,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
 
   get_investment_year_options_handler:
     requirements: ./src/handlers/investment_year_report/requirements.txt
