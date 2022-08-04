@@ -389,7 +389,7 @@ resource "aws_api_gateway_method" "dynamic_report_method" {
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
-    "method.request.querystring.metrics" = false
+    "method.request.querystring.metric" = false
     "method.request.querystring.calendar_year" = false
     "method.request.querystring.investment_year" = false
     "method.request.querystring.vertical" = false
