@@ -35,9 +35,11 @@ class InvestmentYearReport:
         for id in companies:
             company_data = companies[id]
             self.report.calculate_metrics(company_data)
-            if not access and id not in allowed_companies:
-                self.report.anonymized_company(company_data, allowed_companies)
             self.remove_unused_fields(company_data)
+            if not access and id not in allowed_companies:
+                self.report.anonymize_name(company_data)
+
+        self.report.anonymized_companies_metrics(access, companies, allowed_companies)
 
     def get_peers_by_investment_year(
         self,
