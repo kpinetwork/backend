@@ -222,10 +222,10 @@ class EditModifyService:
     def edit_data(self, companies: list) -> bool:
         try:
             queries = self.__get_companies_query(companies)
+            if not queries:
+                return True
             query = """
-                BEGIN;
-                    {updates};
-                COMMIT;
+                {updates};
             """.format(
                 updates=";".join(queries)
             )
@@ -234,6 +234,7 @@ class EditModifyService:
             self.session.commit()
             return True
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False
 

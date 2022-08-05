@@ -134,6 +134,12 @@ class TestEditModifyService(TestCase):
 
         self.assertTrue(edited)
 
+    def test_edit_data_should_return_true_when_there_is_no_data_to_edit(self):
+
+        edited = self.edit_service.edit_data([])
+
+        self.assertTrue(edited)
+
     @mock.patch.object(EditModifyService, "_EditModifyService__get_companies_query")
     def test_edit_data_fail_should_return_false(self, mock_get_companies_query):
         company = self.company.copy()

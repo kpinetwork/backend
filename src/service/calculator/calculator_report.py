@@ -26,6 +26,15 @@ class CalculatorReport:
             )
             company["revenue"] = profile_range.get("label")
 
+    def get_dynamic_ranges(self, records: list) -> list:
+        return self.profile_range.build_ranges_from_values(records)
+
+    def replace_gross_profit(self, company: dict, gross_profit_records: list) -> None:
+        _ranges = self.get_dynamic_ranges(gross_profit_records)
+        company["gross_profit"] = self.profile_range.get_range_from_value(
+            company["gross_profit"], ranges=_ranges
+        )
+
     def get_metric_range(self, metric: float, profile_type: str) -> str:
         if not self.calculator.is_valid_number(metric):
             return "NA"
@@ -104,13 +113,32 @@ class CalculatorReport:
             "revenue": self.calculator.calculate_base_metric(company_revenue),
         }
 
-    def anonymized_company(self, company: dict, allowed_companies: list) -> None:
+    def anonymized_companies_metrics(
+        self, access: bool, companies: dict, allowed_companies: list
+    ) -> None:
+        gross_profit_records = [
+            companies[company_id].get("gross_profit") for company_id in companies
+        ]
+
+        for company_id in companies:
+            company_data = companies[company_id]
+            if not access and company_id not in allowed_companies:
+                self.anonymize_revenue_and_gross_profit(
+                    company_data, allowed_companies, gross_profit_records
+                )
+
+    def anonymize_revenue_and_gross_profit(
+        self, company: dict, allowed_companies: list, gross_profit_records: list
+    ) -> None:
         if company.get("id") not in allowed_companies:
             self.replace_revenue(company)
-            anonymized_name = self.company_anonymization.anonymize_company_name(
-                company.get("id")
-            )
-            company["name"] = anonymized_name
+            self.replace_gross_profit(company, gross_profit_records)
+
+    def anonymize_name(self, company: dict) -> None:
+        anonymized_name = self.company_anonymization.anonymize_company_name(
+            company.get("id")
+        )
+        company["name"] = anonymized_name
 
     def get_peers_sorted(self, data: dict) -> list:
         return sorted(

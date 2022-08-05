@@ -185,12 +185,10 @@ class ScenarioService:
         scenario_metric_query: str,
     ) -> str:
         return """
-        BEGIN;
         {period}
         {metric}
         {scenario}
         {scenario_metric}
-        COMMIT;
         """.format(
             period=period_query,
             metric=metric_query,
@@ -223,11 +221,13 @@ class ScenarioService:
             )
 
             self.session.execute(query)
+            self.session.commit()
             return {
                 "id": scenario_id,
                 "name": f"{scenario}-{year}",
                 "metric_id": metric_id,
             }
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             raise AppError(f"Cannot add new scenario: {error}")

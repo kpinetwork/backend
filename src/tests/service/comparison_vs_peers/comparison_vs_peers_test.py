@@ -102,6 +102,7 @@ class TestComparisonvsPeers(TestCase):
         self.assertEqual(data[company["id"]], expected_company)
 
     def test_get_comparison_vs_data_without_access(self):
+        gross_profit_range = {"label": "$<0 million"}
         company = self.company.copy()
         company.update(self.scenarios)
         data = {company["id"]: company}
@@ -112,10 +113,14 @@ class TestComparisonvsPeers(TestCase):
         )
         expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
+        expected_company["gross_profit"] = gross_profit_range["label"]
         expected_company["name"] = "0123-xxxx"
         expected_rule_of_40 = self.rule_of_40.copy()
         expected_rule_of_40["name"] = "0123-xxxx"
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
+        self.mock_profile_range.get_range_from_value.return_value = gross_profit_range[
+            "label"
+        ]
 
         rule_of_40 = self.comparison_service_instance.get_comparison_vs_data(
             data, False
