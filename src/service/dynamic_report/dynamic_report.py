@@ -51,8 +51,10 @@ class DynamicReport:
         return self.by_year_repository.process_base_data(data)
 
     def remove_fields(self, company_data: dict, headers: list) -> None:
-        company_data.pop("prior_actuals_revenue")
-        to_delete = set(company_data.keys()).difference(headers)
+        company_data.pop("prior_actuals_revenue", None)
+        header = ["id"]
+        header.extend(headers)
+        to_delete = set(company_data.keys()).difference(header)
         for field in to_delete:
             company_data.pop(field, None)
 
@@ -136,7 +138,7 @@ class DynamicReport:
         try:
             company = dict()
             is_valid_company = company_id and company_id.strip()
-            headers = ["id", "name"]
+            headers = ["name"]
             if not metrics:
                 metrics = COMPARISON_METRICS.copy()
             headers.extend(metrics)

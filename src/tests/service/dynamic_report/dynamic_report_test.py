@@ -113,7 +113,7 @@ class TestInvestmentYearReport(TestCase):
     def test_remove_fields_should_change_dict(self):
         company = self.company.copy()
         company["prior_actuals_revenue"] = 13
-        headers = ["id", "name"]
+        headers = ["name"]
 
         self.report_instance.remove_fields(company, headers)
 
@@ -239,7 +239,7 @@ class TestInvestmentYearReport(TestCase):
         self.assertEqual(
             peers,
             {
-                "headers": ["id", "name", "gross_profit", "id", "name"],
+                "headers": ["name", "gross_profit", "id", "name"],
                 "company_comparison_data": {
                     "name": "Test Company",
                     "sector": "Something",
@@ -252,7 +252,7 @@ class TestInvestmentYearReport(TestCase):
 
     def test_get_year_report_without_metrics_should_return_empty_dict(self):
         self.user_service.get_user_company_permissions.return_value = [{"id": "1"}]
-        headers = ["id", "name"]
+        headers = ["name"]
         headers.extend(COMPARISON_METRICS)
 
         peers = self.report_instance.get_year_report(
@@ -270,7 +270,7 @@ class TestInvestmentYearReport(TestCase):
 
     def test_get_year_report_should_raise_exception(self):
         self.user_service.get_user_company_permissions.side_effect = Exception("error")
-        headers = ["id", "name"]
+        headers = ["name"]
         headers.extend(COMPARISON_METRICS)
 
         with self.assertRaises(Exception) as context:
@@ -290,7 +290,7 @@ class TestInvestmentYearReport(TestCase):
         self, mock_get_base_metrics, mock_get_year_report
     ):
         expected_peers = {
-            "headers": ["id", "name", "actuals_revenue"],
+            "headers": ["name", "actuals_revenue"],
             "company_comparison_data": {},
             "peers_comparison_data": [
                 {"id": "1", "name": "Test company", "actuals_revenue": 34}
@@ -311,7 +311,7 @@ class TestInvestmentYearReport(TestCase):
     )
     def test_get_dynamic_report_with_investment_year(self, mock_get_year_report):
         expected_peers = {
-            "headers": ["id", "name", "actuals_revenue"],
+            "headers": ["name", "actuals_revenue"],
             "company_comparison_data": {},
             "peers_comparison_data": [
                 {"id": "1", "name": "Test company", "actuals_revenue": 34}
