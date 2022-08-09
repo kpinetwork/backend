@@ -42,6 +42,10 @@ def get_number_from_query(params: dict, type: str, default: int) -> int:
         return default
 
 
+def get_boolean_from_query(params: dict, type: str) -> bool:
+    return params.get(type) != "false"
+
+
 def handler(event, _):
     try:
         user_id = get_user_id_from_event(event)
@@ -58,7 +62,7 @@ def handler(event, _):
             params = event.get("queryStringParameters")
             offset = get_number_from_query(params, "offset", offset)
             limit = get_number_from_query(params, "limit", limit)
-            ordered = params.get("ordered", ordered)
+            ordered = get_boolean_from_query(params, "ordered")
 
         details = company_service.get_company_details(
             company_id, offset, limit, ordered
