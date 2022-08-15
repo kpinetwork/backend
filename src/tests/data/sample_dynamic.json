@@ -1,5 +1,5 @@
 {
-    "header": ["name", "revenue"],
+    "headers": ["name", "revenue"],
     "company_comparison_data": {"id": "821603b7-0263-4c47-83b3-00b41665faaa", "name": "Boxlight Corp", "revenue": -28},
     "peers_comparison_data": [{"id": "0b4085c1-a8f0-4a25-8ae0-ade5fca2d789", "name": "Guidance Software, Inc.", "revenue": -17}]
 }
