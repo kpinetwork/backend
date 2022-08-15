@@ -12,6 +12,9 @@ class CalculatorService:
     def is_valid_number(self, number) -> bool:
         return number is not None and isinstance(number, (int, float, Decimal))
 
+    def add_digit_to_value(self, digit: str, value: Union[float, str]) -> str:
+        return f"{str(value)}{digit}"
+
     def calculate_growth_rate(
         self, value_recent_year: float, value_prior_year: float, rounded: bool = True
     ) -> Union[float, str]:
@@ -151,6 +154,102 @@ class CalculatorService:
                 if rounded
                 else general_and_admin_of_revenue
             )
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_ratio(
+        self,
+        dividend_value: float,
+        divisor_value: float,
+        decimal_places: int,
+        rounded: bool = True,
+    ) -> str:
+        try:
+            ratio = dividend_value / divisor_value
+            return (
+                self.add_digit_to_value("x", f"{ratio:.{decimal_places}f}")
+                if rounded
+                else self.add_digit_to_value("x", ratio)
+            )
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_opex_of_revenue(
+        self,
+        sales_and_marketing_value: float,
+        research_and_development_value: float,
+        general_and_admin_value: float,
+        other_operating_expenses: float,
+        revenue: float,
+        rounded: bool = True,
+    ) -> Union[int, str]:
+        try:
+            opex_of_revenue = (
+                (
+                    sales_and_marketing_value
+                    + research_and_development_value
+                    + general_and_admin_value
+                    + other_operating_expenses
+                )
+                / revenue
+            ) * 100
+            return round(opex_of_revenue) if rounded else opex_of_revenue
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_revenue_per_employee(
+        self, run_rate_revenue: float, headcount: int, rounded: bool = True
+    ) -> Union[float, str]:
+        try:
+            revenue_per_employee = (run_rate_revenue / headcount) * 1000000
+            return round(revenue_per_employee) if rounded else revenue_per_employee
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_gross_retention(
+        self,
+        run_rate_revenue: float,
+        losses_and_downgrades: float,
+        rounded: bool = True,
+    ) -> Union[int, str]:
+        try:
+            gross_retention = (
+                (run_rate_revenue - losses_and_downgrades) / run_rate_revenue
+            ) * 100
+            return round(gross_retention) if rounded else gross_retention
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_net_retention(
+        self,
+        run_rate_revenue: float,
+        losses_and_downgrades: float,
+        upsells: float,
+        rounded: bool = True,
+    ) -> Union[int, str]:
+        try:
+            net_retention = (
+                (run_rate_revenue - losses_and_downgrades + upsells) / run_rate_revenue
+            ) * 100
+            return round(net_retention) if rounded else net_retention
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
+
+    def calculate_new_bookings_growth(
+        self,
+        current_new_bookings: float,
+        previous_new_bookings: float,
+        rounded: bool = True,
+    ) -> Union[float, str]:
+        try:
+            net_retention = (current_new_bookings / previous_new_bookings) * 100
+            return round(net_retention, 2) if rounded else net_retention
         except Exception as error:
             self.logger.info(error)
             return "NA"

@@ -38,6 +38,13 @@ class TestCalculatorReport(TestCase):
             "sales_and_marketing": 125,
             "general_and_admin": 150,
             "research_and_development": 175,
+            "clv_cac_ratio": "0.9x",
+            "cac_ratio": "1.38x",
+            "opex_of_revenue": 620,
+            "revenue_per_employee": 981132,
+            "gross_retention": -67,
+            "net_retention": -50,
+            "new_bookings_growth": 10.53,
         }
 
         self.scenarios = {
@@ -50,6 +57,16 @@ class TestCalculatorReport(TestCase):
             "actuals_sales_marketing": 50,
             "actuals_general_admin": 60,
             "actuals_research_development": 70,
+            "actuals_customer_lifetime_value": 82,
+            "actuals_customer_acquition_costs": 87,
+            "actuals_customer_annual_value": 63,
+            "actuals_other_operating_expenses": 68,
+            "actuals_headcount": 53,
+            "actuals_run_rate_revenue": 52,
+            "actuals_losses_and_downgrades": 87,
+            "actuals_upsells": 9,
+            "actuals_new_bookings": 8,
+            "prior_actuals_new_bookings": 76,
         }
 
         self.rule_of_40 = {

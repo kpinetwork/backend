@@ -13,6 +13,15 @@ class InvestmentYearReport:
             "sales_marketing",
             "general_admin",
             "research_development",
+            "customer_lifetime_value",
+            "customer_acquition_costs",
+            "customer_annual_value",
+            "other_operating_expenses",
+            "headcount",
+            "run_rate_revenue",
+            "losses_and_downgrades",
+            "upsells",
+            "new_bookings",
         ]
         fields = []
         for scenario in scenarios:

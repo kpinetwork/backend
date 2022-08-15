@@ -189,3 +189,126 @@ class TestCalculatorService(TestCase):
         )
 
         self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [95, 3, 1, "31.7x"],
+            [16.5, 15.8, 1, "1.0x"],
+            [5, 2.7, 1, "1.9x"],
+            [None, 2, 1, "NA"],
+            [1, 0, 1, "NA"],
+            [5, 2, 2, "2.50x"],
+            [9, 3.5, 2, "2.57x"],
+            [18, 4.3, 2, "4.19x"],
+            [None, 1, 2, "NA"],
+            [1, 0, 2, "NA"],
+            [0, 1, 2, "0.00x"],
+        ]
+    )
+    def test_calculate_ratio(
+        self, dividend_value, divisor_value, decimal_places, expected_value
+    ):
+
+        result = self.calculator.calculate_ratio(
+            dividend_value, divisor_value, decimal_places
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [3.8, 5.9, 1, 1.6, 50, 25],
+            [1, "NA", 0, 8, 50, "NA"],
+            [None, 1, 0, 8, 50, "NA"],
+            [3.8, 5.9, 1, 1000, 0, "NA"],
+            [3.8, 5.9, 1, 1000, None, "NA"],
+        ]
+    )
+    def test_calculate_opex_of_revenue(
+        self,
+        sales_and_marketing_value,
+        research_and_development_value,
+        general_and_admin_value,
+        other_operating_expenses,
+        revenue,
+        expected_value,
+    ):
+
+        result = self.calculator.calculate_opex_of_revenue(
+            sales_and_marketing_value,
+            research_and_development_value,
+            general_and_admin_value,
+            other_operating_expenses,
+            revenue,
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [2, 5, 400000],
+            [None, 5, "NA"],
+            [1, 0, "NA"],
+        ]
+    )
+    def test_calculate_revenue_per_employee(
+        self, run_rate_revenue, headcount, expected_value
+    ):
+
+        result = self.calculator.calculate_revenue_per_employee(
+            run_rate_revenue, headcount
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [2.8, 5.9, -111],
+            [0, 5.9, "NA"],
+            [None, 5.9, "NA"],
+        ]
+    )
+    def test_calculate_gross_retention(
+        self, run_rate_revenue, losses_and_downgrades, expected_value
+    ):
+
+        result = self.calculator.calculate_gross_retention(
+            run_rate_revenue, losses_and_downgrades
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [6.8, 9.3, 8.7, 91],
+            [0, 5.9, 19, "NA"],
+            [None, 5.9, 16, "NA"],
+        ]
+    )
+    def test_calculate_net_retention(
+        self, run_rate_revenue, losses_and_downgrades, upsells, expected_value
+    ):
+
+        result = self.calculator.calculate_net_retention(
+            run_rate_revenue, losses_and_downgrades, upsells
+        )
+
+        self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [86.8, 89.3, 97.20],
+            [0, 5.9, 0],
+            [None, 5.9, "NA"],
+            [65, 0, "NA"],
+        ]
+    )
+    def test_calculate_new_bookings_growth(
+        self, current_new_bookings, previous_new_bookings, expected_value
+    ):
+
+        result = self.calculator.calculate_new_bookings_growth(
+            current_new_bookings, previous_new_bookings
+        )
+
+        self.assertEqual(result, expected_value)

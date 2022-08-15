@@ -102,6 +102,41 @@ class CalculatorReport:
         ] = self.calculator.calculate_research_and_development_of_revenue(
             revenue, company.get("actuals_research_development")
         )
+        company["clv_cac_ratio"] = self.calculator.calculate_ratio(
+            company.get("actuals_customer_lifetime_value"),
+            company.get("actuals_customer_acquition_costs"),
+            1,
+        )
+        company["cac_ratio"] = self.calculator.calculate_ratio(
+            company.get("actuals_customer_acquition_costs"),
+            company.get("actuals_customer_annual_value"),
+            2,
+        )
+        company["opex_of_revenue"] = self.calculator.calculate_opex_of_revenue(
+            company.get("actuals_sales_marketing"),
+            company.get("actuals_research_development"),
+            company.get("actuals_general_admin"),
+            company.get("actuals_other_operating_expenses"),
+            revenue,
+        )
+        company[
+            "revenue_per_employee"
+        ] = self.calculator.calculate_revenue_per_employee(
+            company.get("actuals_run_rate_revenue"), company.get("actuals_headcount")
+        )
+        company["gross_retention"] = self.calculator.calculate_gross_retention(
+            company.get("actuals_run_rate_revenue"),
+            company.get("actuals_losses_and_downgrades"),
+        )
+        company["net_retention"] = self.calculator.calculate_net_retention(
+            company.get("actuals_run_rate_revenue"),
+            company.get("actuals_losses_and_downgrades"),
+            company.get("actuals_upsells"),
+        )
+        company["new_bookings_growth"] = self.calculator.calculate_new_bookings_growth(
+            company.get("actuals_new_bookings"),
+            company.get("prior_actuals_new_bookings"),
+        )
 
     def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
         no_data = "NA"

@@ -62,6 +62,16 @@ class TestDynamicReport(TestCase):
             "actuals_sales_marketing": 50,
             "actuals_general_admin": 60,
             "actuals_research_development": 70,
+            "actuals_customer_lifetime_value": 0.4,
+            "actuals_customer_acquition_costs": 3,
+            "actuals_customer_annual_value": 9.7,
+            "actuals_other_operating_expenses": 3,
+            "actuals_headcount": 0.9,
+            "actuals_run_rate_revenue": 3,
+            "actuals_losses_and_downgrades": 4,
+            "actuals_upsells": 6,
+            "actuals_new_bookings": 4,
+            "prior_actuals_new_bookings": 5,
         }
         self.sizes = [
             {"label": ">$20 million", "min_value": None, "max_value": 20},
@@ -307,6 +317,13 @@ class TestDynamicReport(TestCase):
                     "sales_and_marketing": 125,
                     "general_and_admin": 150,
                     "research_and_development": 175,
+                    "clv_cac_ratio": "0.1x",
+                    "cac_ratio": "0.31x",
+                    "opex_of_revenue": 458,
+                    "revenue_per_employee": 3333333,
+                    "gross_retention": -33,
+                    "net_retention": 167,
+                    "new_bookings_growth": 80.0,
                 }
             ],
         }
@@ -367,6 +384,13 @@ class TestDynamicReport(TestCase):
                     "sales_and_marketing": 125,
                     "general_and_admin": 150,
                     "research_and_development": 175,
+                    "clv_cac_ratio": "0.1x",
+                    "cac_ratio": "0.31x",
+                    "opex_of_revenue": 458,
+                    "revenue_per_employee": 3333333,
+                    "gross_retention": -33,
+                    "net_retention": 167,
+                    "new_bookings_growth": 80.0,
                 }
             ],
         }
