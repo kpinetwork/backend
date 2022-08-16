@@ -1,7 +1,7 @@
 import json
 import logging
 from connection import create_db_engine, create_db_session
-from commons_functions import get_condition_params
+from commons_functions import get_condition_params, get_list_param
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
@@ -61,6 +61,9 @@ def get_dynamic_report_service():
     calculator = CalculatorService(logger)
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
     report = CalculatorReport(logger, calculator, profile_range, company_anonymization)
+    calculator_repository = CalculatorRepository(
+        session, QuerySQLBuilder(), ResponseSQL(), logger
+    )
 
     metric_report = get_metric_report_service(
         calculator, profile_range, company_anonymization
@@ -68,7 +71,14 @@ def get_dynamic_report_service():
     investment_report = get_investment_year_report_service(report)
     calendar_report = get_calendar_year_report_service(report)
 
-    return DynamicReport(logger, metric_report, investment_report, calendar_report)
+    return DynamicReport(
+        logger,
+        metric_report,
+        investment_report,
+        calendar_report,
+        calculator_repository,
+        profile_range,
+    )
 
 
 def get_value(params, value, default_value):
@@ -90,7 +100,7 @@ def handler(event, _):
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
         company_id = event.get("pathParameters").get("company_id")
-        metric = None
+        metrics = []
         calendar_year = None
         investment_year = None
         from_main = False
@@ -100,7 +110,7 @@ def handler(event, _):
             params = event.get("queryStringParameters")
             conditions = get_condition_params(params)
             from_main = params.get("from_main", from_main)
-            metric = params.get("metric", metric)
+            metrics = get_list_param(params.get("metrics"))
             calendar_year = get_value(params, "calendar_year", calendar_year)
             investment_year = get_value(params, "investment_year", investment_year)
 
@@ -108,7 +118,7 @@ def handler(event, _):
         report = report_service.get_dynamic_report(
             company_id,
             username,
-            metric,
+            metrics,
             calendar_year,
             investment_year,
             from_main,

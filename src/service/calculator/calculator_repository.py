@@ -302,6 +302,9 @@ class CalculatorRepository:
             self.logger.info(error)
             raise error
 
+    def process_base_data(self, data: dict) -> dict:
+        return self.response_sql.proccess_base_metrics_results(data)
+
     def get_base_metrics(
         self,
         year: int,
@@ -328,4 +331,4 @@ class CalculatorRepository:
             )
             data.extend(base_metric)
 
-        return self.response_sql.proccess_base_metrics_results(data)
+        return self.process_base_data(data)
