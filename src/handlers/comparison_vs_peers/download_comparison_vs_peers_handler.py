@@ -19,6 +19,13 @@ header = [
     "sales_and_marketing",
     "general_and_admin",
     "research_and_development",
+    "clv_cac_ratio",
+    "cac_ratio",
+    "opex_of_revenue",
+    "revenue_per_employee",
+    "gross_retention",
+    "net_retention",
+    "new_bookings_growth",
 ]
 
 file_path = os.environ.get("FILE_PATH")

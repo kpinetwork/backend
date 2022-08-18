@@ -7,11 +7,13 @@ class CalculatorReport:
         self.profile_range = profile_range
         self.company_anonymization = company_anonymization
 
-    def replace_revenue(self, company: dict) -> None:
-        revenue = company.get("revenue")
-        ranges = self.profile_range.get_profile_ranges("size profile")
+    def replace_metric_by_defined_ranges(
+        self, company: dict, metric: str, ranges_type: str
+    ) -> None:
+        revenue = company.get(metric)
+        ranges = self.profile_range.get_profile_ranges(ranges_type)
         if not self.calculator.is_valid_number(revenue):
-            company["revenue"] = "NA"
+            company[metric] = "NA"
         else:
             revenue_ranges = list(
                 filter(
@@ -24,7 +26,7 @@ class CalculatorReport:
                 if (len(revenue_ranges) == 1 and revenue_ranges[0])
                 else {"label": "NA"}
             )
-            company["revenue"] = profile_range.get("label")
+            company[metric] = profile_range.get("label")
 
     def get_dynamic_ranges(self, records: list) -> list:
         return self.profile_range.build_ranges_from_values(records)
@@ -125,11 +127,11 @@ class CalculatorReport:
             company.get("actuals_run_rate_revenue"), company.get("actuals_headcount")
         )
         company["gross_retention"] = self.calculator.calculate_gross_retention(
-            company.get("actuals_run_rate_revenue"),
+            company.get("prior_actuals_run_rate_revenue"),
             company.get("actuals_losses_and_downgrades"),
         )
         company["net_retention"] = self.calculator.calculate_net_retention(
-            company.get("actuals_run_rate_revenue"),
+            company.get("prior_actuals_run_rate_revenue"),
             company.get("actuals_losses_and_downgrades"),
             company.get("actuals_upsells"),
         )
@@ -166,7 +168,10 @@ class CalculatorReport:
         self, company: dict, allowed_companies: list, gross_profit_records: list
     ) -> None:
         if company.get("id") not in allowed_companies:
-            self.replace_revenue(company)
+            self.replace_metric_by_defined_ranges(company, "revenue", "size profile")
+            self.replace_metric_by_defined_ranges(
+                company, "revenue_per_employee", "revenue per employee"
+            )
             self.replace_gross_profit(company, gross_profit_records)
 
     def anonymize_name(self, company: dict) -> None:

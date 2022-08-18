@@ -54,9 +54,9 @@ class TestComparisonvsPeers(TestCase):
             "cac_ratio": "1.79x",
             "opex_of_revenue": 585,
             "revenue_per_employee": -2666667,
-            "gross_retention": -188,
-            "net_retention": 238,
-            "new_bookings_growth": -13.04,
+            "gross_retention": -77,
+            "net_retention": 185,
+            "new_bookings_growth": -13,
         }
 
         self.scenarios = {
@@ -79,6 +79,7 @@ class TestComparisonvsPeers(TestCase):
             "actuals_upsells": 34,
             "actuals_new_bookings": -3,
             "prior_actuals_new_bookings": 23,
+            "prior_actuals_run_rate_revenue": 13,
         }
 
         self.rule_of_40 = {
@@ -131,6 +132,7 @@ class TestComparisonvsPeers(TestCase):
         expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
         expected_company["gross_profit"] = gross_profit_range["label"]
+        expected_company["revenue_per_employee"] = self.range["label"]
         expected_company["name"] = "0123-xxxx"
         expected_rule_of_40 = self.rule_of_40.copy()
         expected_rule_of_40["name"] = "0123-xxxx"

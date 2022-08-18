@@ -42,9 +42,9 @@ class TestCalculatorReport(TestCase):
             "cac_ratio": "1.38x",
             "opex_of_revenue": 620,
             "revenue_per_employee": 981132,
-            "gross_retention": -67,
-            "net_retention": -50,
-            "new_bookings_growth": 10.53,
+            "gross_retention": -569,
+            "net_retention": -500,
+            "new_bookings_growth": 11,
         }
 
         self.scenarios = {
@@ -67,6 +67,7 @@ class TestCalculatorReport(TestCase):
             "actuals_upsells": 9,
             "actuals_new_bookings": 8,
             "prior_actuals_new_bookings": 76,
+            "prior_actuals_run_rate_revenue": 13,
         }
 
         self.rule_of_40 = {
@@ -89,12 +90,14 @@ class TestCalculatorReport(TestCase):
             [50, {}, "NA"],
         ]
     )
-    def test_replace_revenue(self, revenue, ranges, label):
+    def test_replace_metric_by_defined_ranges(self, revenue, ranges, label):
         company = self.company.copy()
         company["revenue"] = revenue
         self.mock_profile_range.get_profile_ranges.return_value = [ranges]
 
-        self.report_instance.replace_revenue(company)
+        self.report_instance.replace_metric_by_defined_ranges(
+            company, "revenue", "size profile"
+        )
 
         self.assertEqual(company.get("revenue"), label)
         self.mock_profile_range.get_profile_ranges.assert_called()

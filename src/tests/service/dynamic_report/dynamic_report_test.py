@@ -97,6 +97,7 @@ class TestInvestmentYearReport(TestCase):
             "actuals_upsells": 6,
             "actuals_new_bookings": 4,
             "prior_actuals_new_bookings": 5,
+            "prior_actuals_run_rate_revenue": 3,
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}

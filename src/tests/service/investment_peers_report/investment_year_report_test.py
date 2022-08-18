@@ -51,9 +51,9 @@ class TestInvestmentYearReport(TestCase):
             "cac_ratio": "0.31x",
             "opex_of_revenue": 458,
             "revenue_per_employee": 3333333,
-            "gross_retention": -33,
-            "net_retention": 167,
-            "new_bookings_growth": 80.0,
+            "gross_retention": -100,
+            "net_retention": 200,
+            "new_bookings_growth": 80,
         }
 
         self.scenarios = {
@@ -76,6 +76,7 @@ class TestInvestmentYearReport(TestCase):
             "actuals_upsells": 6,
             "actuals_new_bookings": 4,
             "prior_actuals_new_bookings": 5,
+            "prior_actuals_run_rate_revenue": 2,
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
@@ -120,6 +121,7 @@ class TestInvestmentYearReport(TestCase):
         expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
         expected_company["gross_profit"] = gross_profit_range["label"]
+        expected_company["revenue_per_employee"] = self.range["label"]
         expected_company["name"] = "0123-xxxx"
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
         self.mock_profile_range.get_range_from_value.return_value = gross_profit_range[

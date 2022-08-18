@@ -153,6 +153,12 @@ class CalculatorRepository:
                         "prior_actuals_new_bookings",
                         year - 1,
                     ),
+                    self.get_metric_option(
+                        "Actuals",
+                        "Run rate revenue",
+                        "prior_actuals_run_rate_revenue",
+                        year - 1,
+                    ),
                 ]
             )
 

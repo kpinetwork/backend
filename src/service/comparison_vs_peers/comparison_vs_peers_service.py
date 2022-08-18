@@ -38,6 +38,7 @@ class ComparisonvsPeersService:
             "actuals_new_bookings",
             "budget_new_bookings",
             "prior_actuals_new_bookings",
+            "prior_actuals_run_rate_revenue",
         ]
 
         for metric in base_metrics:

@@ -297,7 +297,7 @@ class TestCalculatorService(TestCase):
 
     @parameterized.expand(
         [
-            [86.8, 89.3, 97.20],
+            [86.8, 89.3, 97],
             [0, 5.9, 0],
             [None, 5.9, "NA"],
             [65, 0, "NA"],

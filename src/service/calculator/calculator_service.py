@@ -249,7 +249,7 @@ class CalculatorService:
     ) -> Union[float, str]:
         try:
             net_retention = (current_new_bookings / previous_new_bookings) * 100
-            return round(net_retention, 2) if rounded else net_retention
+            return round(net_retention) if rounded else net_retention
         except Exception as error:
             self.logger.info(error)
             return "NA"
