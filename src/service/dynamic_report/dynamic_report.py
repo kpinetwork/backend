@@ -1,216 +1,203 @@
 from app_names import COMPARISON_METRICS
+from by_metric_report import ByMetricReport
+from investment_year_report import InvestmentYearReport
+from comparison_vs_peers_service import ComparisonvsPeersService
+from calculator_repository import CalculatorRepository
+from profile_range import ProfileRange
 
 
 class DynamicReport:
     def __init__(
         self,
         logger,
-        metric_report,
-        investment_report,
-        calendar_report,
+        metric_report: ByMetricReport,
+        investment_report: InvestmentYearReport,
+        calendar_report: ComparisonvsPeersService,
+        by_year_repository: CalculatorRepository,
+        profile_range: ProfileRange,
     ) -> None:
         self.logger = logger
         self.metric_report = metric_report
         self.investment_report = investment_report
         self.calendar_report = calendar_report
+        self.by_year_repository = by_year_repository
+        self.profile_range = profile_range
 
-    def __get_dynamic_report_dict(
-        self, header: list, company: dict, peers: list
-    ) -> dict:
-        return {
-            "header": header,
-            "company_comparison_data": company,
-            "peers_comparison_data": peers,
-        }
-
-    def __is_by_year_report(
-        self, metric: str, calendar_year: int, invest_year: int
-    ) -> bool:
-        return (calendar_year or (invest_year is not None)) and not metric
-
-    def __get_by_year_report_header(self) -> list:
-        base_header = ["name", "sector", "vertical"]
-        base_header.extend(COMPARISON_METRICS)
-        return base_header
-
-    def __get_by_year_report(
+    def get_base_metrics(
         self,
-        calendar_year: int,
-        invest_year: int,
-        company_id: str,
-        username: str,
-        from_main: bool,
-        access: bool,
+        year: int,
+        company_id: str = None,
         **conditions,
     ) -> dict:
-        if calendar_year is not None:
-            return self.__get_calendar_year_report(
-                company_id, calendar_year, username, from_main, access, **conditions
+        filters = self.by_year_repository.add_company_filters(**conditions)
+        metric_options = self.by_year_repository.get_base_metrics_options(
+            year=year,
+            need_next_year=False,
+            need_actuals_prior_year=True,
+            need_budget_prior_year=False,
+        )
+        data = []
+        for metric in metric_options:
+            base_metric = self.by_year_repository.get_metric_by_scenario(
+                metric.get("scenario"),
+                metric.get("metric"),
+                metric.get("alias"),
+                company_id,
+                filters,
+                True,
             )
-        if invest_year is not None:
-            return self.__get_invest_year_report(
-                company_id, invest_year, username, from_main, access, **conditions
-            )
+            data.extend(base_metric)
 
-    def __get_calendar_year_report(
-        self,
-        company_id: str,
-        calendar_year: int,
-        username: str,
-        from_main: bool,
-        access: bool,
-        **conditions,
-    ) -> dict:
-        peers_comparison = self.calendar_report.get_peers_comparison(
-            company_id, username, calendar_year, from_main, access, **conditions
-        )
-        header = self.__get_by_year_report_header()
+        return self.by_year_repository.process_base_data(data)
 
-        return self.__get_dynamic_report_dict(
-            header,
-            peers_comparison.get("company_comparison_data"),
-            peers_comparison.get("peers_comparison_data"),
-        )
+    def remove_fields(self, company_data: dict, headers: list) -> None:
+        company_data.pop("prior_actuals_revenue", None)
+        header = ["id"]
+        header.extend(headers)
+        to_delete = set(company_data.keys()).difference(header)
+        for field in to_delete:
+            company_data.pop(field, None)
 
-    def __get_invest_year_report(
-        self,
-        company_id: str,
-        invest_year: int,
-        username: str,
-        from_main: bool,
-        access: bool,
-        **conditions,
-    ) -> list:
-        header = self.__get_by_year_report_header()
-        investment_report = self.investment_report.get_peers_by_investment_year(
-            company_id, invest_year, username, from_main, access, **conditions
-        )
-        investment_report.update({"header": header})
-
-        return investment_report
-
-    def __get_metric_report(
-        self, metric: str, access: bool, username: str, **conditions
-    ) -> tuple:
-        self.investment_report.report.set_company_permissions(username)
-        years = self.metric_report.repository.get_years()
-        header = ["name"] + years
-        data = self.metric_report.get_by_metric_records(
-            metric, years, access, **conditions
-        )
-
-        return header, data
-
-    def __get_investment_values(self, invest_year: int) -> tuple:
-        investments = self.investment_report.repository.get_investments()
-        companies_with_investments = investments.keys()
-        invest_year_by_company = {
-            company_id: investments.get(company_id)["invest_year"] + invest_year
-            for company_id in companies_with_investments
-        }
-        filters = {
-            "company.id": [f"'{company}'" for company in companies_with_investments]
-        }
-
-        return invest_year_by_company, filters
-
-    def __get_valid_metric_value(self, metric_dict: dict, metric: str) -> dict:
-        if metric_dict:
-            return metric_dict
-        return {metric: "NA"}
-
-    def __get_company_dict(
-        self,
-        id: str,
-        company: str,
-        invest_year_by_company: dict,
-        invest_year: int,
-        years: list,
-        metric: str,
-    ) -> dict:
-        year_metric = (
-            invest_year_by_company.get(id) if invest_year is not None else years[0]
-        )
-        metric_value = {
-            metric: (value if value else "NA")
-            for key, value in company.get("metrics").items()
-            if key == year_metric
-        }
-        company.pop("metrics")
-        company.update(self.__get_valid_metric_value(metric_value, metric))
-
-        return company
-
-    def __get_dynamic_metrics(
-        self,
-        metric: str,
-        calendar_year: int,
-        invest_year: int,
-        access: bool,
-        username: str,
-        **conditions,
-    ) -> dict:
-        invest_year_by_company = dict()
-        years = [calendar_year] if calendar_year else []
-        filters = self.metric_report.repository.add_company_filters(**conditions)
-        self.metric_report.company_anonymization.set_company_permissions(username)
-
-        if invest_year is not None:
-            invest_year_by_company, invest_filters = self.__get_investment_values(
-                invest_year
-            )
-            years = set(invest_year_by_company.values())
-            filters.update(invest_filters)
-
-        data = self.metric_report.get_records(metric, years, filters)
-        profiles, sizes = self.metric_report.get_profiles(filters)
-
-        return self.__get_dynamic_dict(
-            data,
-            profiles,
-            sizes,
-            metric,
-            invest_year_by_company,
-            invest_year,
-            years,
-            access,
-            **conditions,
-        )
-
-    def __get_dynamic_dict(
-        self,
-        data: list,
-        profiles: dict,
-        sizes: dict,
-        metric: str,
-        invest_year_by_company: dict,
-        invest_year: int,
-        years: list,
-        access: bool,
-        **conditions,
-    ):
-        companies = dict()
-        for id in data:
-            company = data[id]
-            if self.metric_report.is_in_range(profiles.get(id), **conditions):
-                self.metric_report.verify_anonimization(
-                    access,
-                    metric,
-                    company,
-                    sizes,
-                    self.metric_report.company_anonymization.companies,
+    def replace_base_input_values(self, company_data: dict, headers: list) -> None:
+        metrics = self.metric_report.get_base_metrics()
+        for metric in metrics:
+            if "gross_profit" not in metric and metric in company_data:
+                company_data[metric] = self.metric_report.calculate_base_metric(
+                    company_data.get(metric)
                 )
-                company = self.__get_company_dict(
-                    id, company, invest_year_by_company, invest_year, years, metric
+        self.remove_fields(company_data, headers)
+
+    def get_metrics_for_dynamic_ranges(self, metrics: list) -> list:
+        base_metrics = self.metric_report.get_base_metrics()
+        base_metrics.extend(["gross_profit", "revenue", "growth"])
+        return list(set(base_metrics) & set(metrics))
+
+    def get_dynamic_range(self, metric: str, data: dict) -> list:
+        values = [data[company_id].get(metric) for company_id in data]
+        return self.profile_range.build_ranges_from_values(values)
+
+    def get_dynamic_ranges(self, metrics: list, data: dict) -> dict:
+        dyanmic_ranges = dict()
+        for metric in metrics:
+            dyanmic_ranges[metric] = self.get_dynamic_range(metric, data)
+
+        return dyanmic_ranges
+
+    def anonymize_company(
+        self, metrics: list, ranges: dict, profiles: dict, company_data: dict
+    ) -> None:
+        for metric in metrics:
+            value = company_data.get(metric)
+            if "revenue" in metric:
+                company_data[metric] = self.profile_range.get_range_from_value(
+                    value, ranges=profiles.get("revenue", [])
                 )
-                companies[id] = company
-        return companies
+            elif metric == "growth":
+                company_data[metric] = self.profile_range.get_range_from_value(
+                    value, ranges=profiles.get("growth", [])
+                )
+            else:
+                company_data[metric] = self.profile_range.get_range_from_value(
+                    value, ranges=ranges.get(metric, [])
+                )
+            company_data["name"] = self.metric_report.anonymized_name(
+                company_data.get("id")
+            )
+
+    def anonymize_data(self, metrics: list, data: dict, access: bool = False) -> None:
+        allowed_companies = self.calendar_report.report.get_allowed_companies()
+        profiles = {
+            "revenue": self.profile_range.get_profile_ranges("size profile"),
+            "growth": self.profile_range.get_profile_ranges("growth profile"),
+        }
+        metrics_for_ranges = self.get_metrics_for_dynamic_ranges(metrics)
+        ranges = self.get_dynamic_ranges(metrics_for_ranges, data)
+
+        for company_id in data:
+            if not access and company_id not in allowed_companies:
+                self.anonymize_company(
+                    metrics_for_ranges, ranges, profiles, data[company_id]
+                )
+
+    def add_metrics(self, data: dict, headers: list) -> list:
+        for company_id in data:
+            company_data = data[company_id]
+            self.calendar_report.report.calculate_metrics(company_data)
+            self.replace_base_input_values(company_data, headers)
+
+    def get_year_report(
+        self,
+        company_id: str,
+        username: str,
+        data: dict,
+        from_main: bool,
+        access: bool,
+        metrics: list,
+        **conditions,
+    ) -> dict:
+        try:
+            company = dict()
+            is_valid_company = company_id and company_id.strip()
+            headers = ["name"]
+            if not metrics:
+                metrics = COMPARISON_METRICS.copy()
+            headers.extend(metrics)
+            self.calendar_report.report.set_company_permissions(username)
+            self.add_metrics(data, headers)
+            self.anonymize_data(metrics, data, access)
+            data = self.calendar_report.report.filter_by_conditions(data, **conditions)
+
+            if not from_main and is_valid_company:
+                company = data.pop(company_id, dict())
+
+            peers = self.calendar_report.report.get_peers_sorted(data)
+
+            return {
+                "headers": headers,
+                "company_comparison_data": company,
+                "peers_comparison_data": peers,
+            }
+        except Exception as error:
+            self.logger.info(error)
+            raise error
+
+    def get_dynamic_calendar_year_report(
+        self,
+        company_id: str,
+        username: str,
+        year: str,
+        from_main: bool,
+        access: bool,
+        metrics: list,
+        **conditions,
+    ) -> dict:
+        data = self.get_base_metrics(year=year, company_id=company_id, **conditions)
+        return self.get_year_report(
+            company_id, username, data, from_main, access, metrics, **conditions
+        )
+
+    def get_dynamic_investment_year_report(
+        self,
+        company_id: str,
+        invest_year: int,
+        username: str,
+        from_main: bool,
+        metrics: list,
+        access: bool,
+        **conditions,
+    ) -> dict:
+        data = self.investment_report.repository.get_base_metrics(
+            invest_year, **conditions
+        )
+        return self.get_year_report(
+            company_id, username, data, from_main, access, metrics, **conditions
+        )
 
     def get_dynamic_report(
         self,
         company_id: str,
         username: str,
-        metric: str,
+        metrics: list,
         calendar_year: int,
         investment_year: int,
         from_main: bool,
@@ -218,44 +205,32 @@ class DynamicReport:
         **conditions,
     ) -> dict:
         try:
-            company = dict()
-            is_valid_company = company_id and company_id.strip()
-            header = []
-            data = dict()
-
-            if self.__is_by_year_report(metric, calendar_year, investment_year):
-                return self.__get_by_year_report(
-                    calendar_year,
-                    investment_year,
+            if calendar_year is not None:
+                return self.get_dynamic_calendar_year_report(
                     company_id,
                     username,
+                    calendar_year,
                     from_main,
                     access,
+                    metrics,
                     **conditions,
                 )
-
-            elif metric and calendar_year is None and investment_year is None:
-                header, data = self.__get_metric_report(
-                    metric, access, username, **conditions
-                )
-
-            elif calendar_year is not None or investment_year is not None and metric:
-                header = ["name", metric]
-                data = self.__get_dynamic_metrics(
-                    metric,
-                    calendar_year,
+            if investment_year is not None:
+                return self.get_dynamic_investment_year_report(
+                    company_id,
                     investment_year,
-                    access,
                     username,
+                    from_main,
+                    metrics,
+                    access,
                     **conditions,
                 )
 
-            if not from_main and is_valid_company:
-                company = data.pop(company_id, dict())
-
-            peers = self.metric_report.sort_peers(data)
-
-            return self.__get_dynamic_report_dict(header, company, peers)
+            return {
+                "headers": [],
+                "company_comparison_data": {},
+                "peers_comparison_data": [],
+            }
         except Exception as error:
             self.logger.info(error)
             raise error

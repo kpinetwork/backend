@@ -4,6 +4,7 @@ from parameterized import parameterized
 from unittest import TestCase, mock
 from src.handlers.company_details.get_company_details_handler import (
     handler,
+    get_boolean_from_query,
     get_number_from_query,
 )
 import src.handlers.company_details.get_company_details_handler as details_handler
@@ -11,6 +12,7 @@ from src.service.company_details.company_details_service import CompanyDetails
 
 offset = "offset"
 limit = "limit"
+ordered = "ordered"
 
 
 class TestGetCompanyHandler(TestCase):
@@ -33,6 +35,21 @@ class TestGetCompanyHandler(TestCase):
 
         value = get_number_from_query(params, field, default_value)
 
+        self.assertEqual(value, expected_value)
+
+    @parameterized.expand(
+        [
+            [{ordered: ""}, ordered, True],
+            [{ordered: None}, ordered, True],
+            [{ordered: "undefined"}, ordered, True],
+            [{ordered: "true"}, ordered, True],
+            [{ordered: "false"}, ordered, False],
+            [{}, ordered, True],
+        ]
+    )
+    def test_get_boolean_from_query(self, params, field, expected_value):
+
+        value = get_boolean_from_query(params, field)
         self.assertEqual(value, expected_value)
 
     @mock.patch("company_details_service.CompanyDetails.get_company_details")
