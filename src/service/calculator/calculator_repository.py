@@ -52,48 +52,51 @@ class CalculatorRepository:
         }
 
     def get_actuals_options(self, year: int) -> list:
+        actuals_options = [
+            ("Actuals", "Revenue", "actuals_revenue"),
+            ("Actuals", "Ebitda", "actuals_ebitda"),
+            ("Actuals", "Cost of goods", "actuals_cost_of_goods"),
+            ("Actuals", "Sales & marketing", "actuals_sales_marketing"),
+            ("Actuals", "General & administration", "actuals_general_admin"),
+            ("Actuals", "Research & development", "actuals_research_development"),
+            ("Actuals", "CLV", "actuals_customer_lifetime_value"),
+            ("Actuals", "CAC", "actuals_customer_acquition_costs"),
+            ("Actuals", "CAV", "actuals_customer_annual_value"),
+            ("Actuals", "Other operating expenses", "actuals_other_operating_expenses"),
+            ("Actuals", "Run rate revenue", "actuals_run_rate_revenue"),
+            ("Actuals", "Headcount", "actuals_headcount"),
+            ("Actuals", "Losses and downgrades", "actuals_losses_and_downgrades"),
+            ("Actuals", "Upsells", "actuals_upsells"),
+            ("Actuals", "New bookings", "actuals_new_bookings"),
+        ]
+
         return [
-            self.get_metric_option("Actuals", "Revenue", "actuals_revenue", year),
-            self.get_metric_option("Actuals", "Ebitda", "actuals_ebitda", year),
-            self.get_metric_option(
-                "Actuals", "Cost of goods", "actuals_cost_of_goods", year
-            ),
-            self.get_metric_option(
-                "Actuals", "Sales & marketing", "actuals_sales_marketing", year
-            ),
-            self.get_metric_option(
-                "Actuals",
-                "General & administration",
-                "actuals_general_admin",
-                year,
-            ),
-            self.get_metric_option(
-                "Actuals",
-                "Research & development",
-                "actuals_research_development",
-                year,
-            ),
+            self.get_metric_option(metric[0], metric[1], metric[2], year)
+            for metric in actuals_options
         ]
 
     def get_budget_options(self, year: int) -> list:
+        budget_options = [
+            ("Budget", "Revenue", "budget_revenue"),
+            ("Budget", "Ebitda", "budget_ebitda"),
+            ("Budget", "Cost of goods", "budget_cost_of_goods"),
+            ("Budget", "Sales & marketing", "budget_sales_marketing"),
+            ("Budget", "General & administration", "budget_general_admin"),
+            ("Budget", "Research & development", "budget_research_development"),
+            ("Budget", "CLV", "budget_customer_lifetime_value"),
+            ("Budget", "CAC", "budget_customer_acquition_costs"),
+            ("Budget", "CAV", "budget_customer_annual_value"),
+            ("Budget", "Other operating expenses", "budget_other_operating_expenses"),
+            ("Budget", "Run rate revenue", "budget_run_rate_revenue"),
+            ("Budget", "Headcount", "budget_headcount"),
+            ("Budget", "Losses and downgrades", "budget_losses_and_downgrades"),
+            ("Budget", "Upsells", "budget_upsells"),
+            ("Budget", "New bookings", "budget_new_bookings"),
+        ]
+
         return [
-            self.get_metric_option("Budget", "Revenue", "budget_revenue", year),
-            self.get_metric_option("Budget", "Ebitda", "budget_ebitda", year),
-            self.get_metric_option(
-                "Budget", "Cost of goods", "budget_cost_of_goods", year
-            ),
-            self.get_metric_option(
-                "Budget", "Sales & marketing", "budget_sales_marketing", year
-            ),
-            self.get_metric_option(
-                "Budget", "General & administration", "budget_general_admin", year
-            ),
-            self.get_metric_option(
-                "Budget",
-                "Research & development",
-                "budget_research_development",
-                year,
-            ),
+            self.get_metric_option(metric[0], metric[1], metric[2], year)
+            for metric in budget_options
         ]
 
     def get_forward_budget_options(
@@ -139,10 +142,24 @@ class CalculatorRepository:
         metrics.extend(self.get_budget_options(year))
 
         if need_actuals_prior_year:
-            metrics.append(
-                self.get_metric_option(
-                    "Actuals", "Revenue", "prior_actuals_revenue", year - 1
-                )
+            metrics.extend(
+                [
+                    self.get_metric_option(
+                        "Actuals", "Revenue", "prior_actuals_revenue", year - 1
+                    ),
+                    self.get_metric_option(
+                        "Actuals",
+                        "New bookings",
+                        "prior_actuals_new_bookings",
+                        year - 1,
+                    ),
+                    self.get_metric_option(
+                        "Actuals",
+                        "Run rate revenue",
+                        "prior_actuals_run_rate_revenue",
+                        year - 1,
+                    ),
+                ]
             )
 
         budget_options = self.get_forward_budget_options(
