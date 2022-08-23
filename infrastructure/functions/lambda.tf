@@ -1167,3 +1167,33 @@ resource "aws_lambda_function" "get_metric_types_lambda_function" {
     }
   }
 }
+resource "aws_lambda_function" "investment_date_report_lambda_function" {
+  role = var.lambdas_exec_roles_arn.investment_date_report_exec_role_arn
+  handler = "investment_date_report_handler.handler"
+  runtime = var.runtime
+  s3_bucket = var.object_bucket_references.investment_date_report_function_bucket.bucket
+  s3_key = var.object_bucket_references.investment_date_report_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.investment_date_report_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.investment_date_report_function_bucket.etag)
+  timeout = 600
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      DB_HOST = var.db_host
+      DB_NAME = var.db_name
+      DB_USERNAME = var.db_username
+      DB_PASSWORD = var.db_password
+    }
+  }
+}
