@@ -168,3 +168,59 @@ class TestMetricReportRepository(TestCase):
         metrics = self.repository.get_gross_margin(dict())
 
         self.assertEqual(metrics, [])
+
+    def test_get_revenue_per_employee_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_revenue_per_employee(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_revenue_per_employee_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_revenue_per_employee(dict())
+
+        self.assertEqual(metrics, [])
+
+    def test_get_opex_as_revenue_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_opex_as_revenue(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_opex_as_revenue_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_opex_as_revenue(dict())
+
+        self.assertEqual(metrics, [])
+
+    def test_get_gross_retention_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_gross_retention(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_gross_retention_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_gross_retention(dict())
+
+        self.assertEqual(metrics, [])
+
+    def test_get_metric_ratio_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_metric_ratio("CAV", "CAC", dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_metric_ratio_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_metric_ratio("CAV", "CAC", dict())
+
+        self.assertEqual(metrics, [])

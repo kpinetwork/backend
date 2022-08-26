@@ -1,5 +1,5 @@
 from base_exception import AppError
-from app_names import TableNames, ScenarioNames
+from app_names import TableNames, ScenarioNames, MetricNames
 
 
 class MetricReportRepository:
@@ -239,6 +239,66 @@ class MetricReportRepository:
             self.logger.info(error)
             return []
 
+    def get_revenue_per_employee(self, filters: dict) -> list:
+        try:
+            where_conditions = {
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": "'Run rate revenue'",
+            }
+            where_conditions.update(filters)
+            subquery = self.__get_subquery_metric("Headcount", ScenarioNames.ACTUALS)
+            select_value = [
+                f"({TableNames.METRIC}.value / ({subquery})) * 1000000 as value",
+            ]
+            return self.__get_no_base_metrics(where_conditions, select_value)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
+    def get_opex_as_revenue(self, filters: dict) -> list:
+        try:
+            where_conditions = {
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": "'Other operating expenses'",
+            }
+            where_conditions.update(filters)
+            sales_and_marketing = self.__get_subquery_metric(
+                MetricNames.SALES_AND_MARKETING, ScenarioNames.ACTUALS
+            )
+            research_and_dev = self.__get_subquery_metric(
+                MetricNames.RESEARCH_AND_DEVELOPMENT, ScenarioNames.ACTUALS
+            )
+            general_and_admin = self.__get_subquery_metric(
+                MetricNames.GENERAL_AND_ADMINISTRATION, ScenarioNames.ACTUALS
+            )
+            revenue = self.__get_subquery_metric("Revenue", ScenarioNames.ACTUALS)
+            sum_factors = f"({sales_and_marketing}) + ({research_and_dev}) + ({general_and_admin})"
+            select_value = [
+                f"({TableNames.METRIC}.value + {sum_factors}) / ({revenue}) * 100 as value",
+            ]
+            return self.__get_no_base_metrics(where_conditions, select_value)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
+    def get_gross_retention(self, filters: dict) -> list:
+        try:
+            where_conditions = {
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": "'Losses and downgrades'",
+            }
+            where_conditions.update(filters)
+            subquery = self.__get_subquery_metric(
+                "Run rate revenue", ScenarioNames.ACTUALS
+            )
+            select_value = [
+                f"(1 - ({TableNames.METRIC}.value / ({subquery}))) * 100 as value",
+            ]
+            return self.__get_no_base_metrics(where_conditions, select_value)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
     def get_metric_as_percentage_of_revenue(self, metric: str, filters: dict) -> list:
         try:
             where_conditions = {
@@ -249,6 +309,22 @@ class MetricReportRepository:
             subquery = self.__get_subquery_metric("Revenue", ScenarioNames.ACTUALS)
             select_value = [
                 f"{TableNames.METRIC}.value * 100 / ({subquery}) as value",
+            ]
+            return self.__get_no_base_metrics(where_conditions, select_value)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
+    def get_metric_ratio(self, dividend: str, divisor: str, filters: dict) -> list:
+        try:
+            where_conditions = {
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": f"'{dividend}'",
+            }
+            where_conditions.update(filters)
+            subquery = self.__get_subquery_metric(f"{divisor}", ScenarioNames.ACTUALS)
+            select_value = [
+                f"{TableNames.METRIC}.value / ({subquery}) as value",
             ]
             return self.__get_no_base_metrics(where_conditions, select_value)
         except Exception as error:
@@ -337,6 +413,16 @@ class MetricReportRepository:
             arguments["scenario"] = scenario
         return arguments
 
+    def __get_ratio_arguments(
+        self, filters: dict, dividend: str = None, divisor: str = None
+    ) -> dict:
+        arguments = {"filters": filters}
+        if dividend:
+            arguments["dividend"] = dividend
+        if divisor:
+            arguments["divisor"] = divisor
+        return arguments
+
     def __get_metric_names_config(self) -> dict:
         return {
             "revenue": "Revenue",
@@ -345,6 +431,15 @@ class MetricReportRepository:
             "sales_marketing": "Sales & marketing",
             "general_admin": "General & administration",
             "research_development": "Research & development",
+            "customer_lifetime_value": "CLV",
+            "customer_acquition_costs": "CAC",
+            "customer_annual_value": "CAV",
+            "other_operating_expenses": "Other operating expenses",
+            "run_rate_revenue": "Run rate revenue",
+            "headcount": "Headcount",
+            "losses_and_downgrades": "Losses and downgrades",
+            "upsells": "Upsells",
+            "new_bookings": "New bookings",
         }
 
     def __get_base_functions_metric(
@@ -403,15 +498,37 @@ class MetricReportRepository:
             },
             "sales_and_marketing": {
                 "function": self.get_metric_as_percentage_of_revenue,
-                "arguments": self.__get_arguments(filters, "Sales & marketing"),
+                "arguments": self.__get_arguments(
+                    filters, MetricNames.SALES_AND_MARKETING
+                ),
             },
             "general_and_admin": {
                 "function": self.get_metric_as_percentage_of_revenue,
-                "arguments": self.__get_arguments(filters, "General & administration"),
+                "arguments": self.__get_arguments(
+                    filters, MetricNames.GENERAL_AND_ADMINISTRATION
+                ),
             },
             "research_and_development": {
                 "function": self.get_metric_as_percentage_of_revenue,
-                "arguments": self.__get_arguments(filters, "Research & development"),
+                "arguments": self.__get_arguments(
+                    filters, MetricNames.RESEARCH_AND_DEVELOPMENT
+                ),
+            },
+            "clv_cac_ratio": {
+                "function": self.get_metric_ratio,
+                "arguments": self.__get_ratio_arguments(filters, "CLV", "CAC"),
+            },
+            "cac_ratio": {
+                "function": self.get_metric_ratio,
+                "arguments": self.__get_ratio_arguments(filters, "CAC", "CAV"),
+            },
+            "revenue_per_employee": {
+                "function": self.get_revenue_per_employee,
+                "arguments": self.__get_arguments(filters),
+            },
+            "opex_as_revenue": {
+                "function": self.get_opex_as_revenue,
+                "arguments": self.__get_arguments(filters),
             },
         }
         metric_config.update(
