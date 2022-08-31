@@ -26,6 +26,11 @@ class ByMetricReport:
             "cac_ratio": {"decimal_places": 2},
         }
 
+    def build_base_metrics(self, base_metrics: list) -> list:
+        metrics = [f"actuals_{metric}" for metric in base_metrics]
+        metrics.extend([f"budget_{metric}" for metric in base_metrics])
+        return metrics
+
     def get_base_metrics(self) -> list:
         base_metrics = [
             "revenue",
@@ -46,9 +51,11 @@ class ByMetricReport:
             "new_bookings",
         ]
 
-        metrics = [f"actuals_{metric}" for metric in base_metrics]
-        metrics.extend([f"budget_{metric}" for metric in base_metrics])
-        return metrics
+        return self.build_base_metrics(base_metrics)
+
+    def get_unrestricted_base_metrics(self) -> list:
+        base_metrics = ["headcount"]
+        return self.build_base_metrics(base_metrics)
 
     def get_dynamic_ranges(self, records: list) -> list:
         values = [record["value"] for record in records]
@@ -307,7 +314,10 @@ class ByMetricReport:
             return self.anonymized_metric(metrics, revenue_per_employee_ranges)
 
         _ranges = sizes if "revenue" in metric else self.ranges
-        if metric not in self.get_base_metrics():
+        if (
+            metric not in self.get_base_metrics()
+            or metric in self.get_unrestricted_base_metrics()
+        ):
             return metrics
 
         return self.anonymized_metric(metrics, _ranges)

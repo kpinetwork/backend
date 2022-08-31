@@ -68,9 +68,14 @@ class DynamicReport:
         self.remove_fields(company_data, headers)
 
     def get_metrics_for_dynamic_ranges(self, metrics: list) -> list:
-        base_metrics = self.metric_report.get_base_metrics()
-        base_metrics.extend(["gross_profit", "revenue", "growth"])
-        return list(set(base_metrics) & set(metrics))
+        restricted_base_metrics = list(
+            set(self.metric_report.get_base_metrics())
+            - set(self.metric_report.get_unrestricted_base_metrics())
+        )
+        restricted_base_metrics.extend(
+            ["gross_profit", "revenue", "growth", "revenue_per_employee"]
+        )
+        return list(set(restricted_base_metrics) & set(metrics))
 
     def get_dynamic_range(self, metric: str, data: dict) -> list:
         values = [data[company_id].get(metric) for company_id in data]
@@ -88,9 +93,13 @@ class DynamicReport:
     ) -> None:
         for metric in metrics:
             value = company_data.get(metric)
-            if "revenue" in metric:
+            if metric == "actuals_revenue" or metric == "budget_revenue":
                 company_data[metric] = self.profile_range.get_range_from_value(
                     value, ranges=profiles.get("revenue", [])
+                )
+            elif metric == "revenue_per_employee":
+                company_data[metric] = self.profile_range.get_range_from_value(
+                    value, ranges=profiles.get("revenue_per_employee", [])
                 )
             elif metric == "growth":
                 company_data[metric] = self.profile_range.get_range_from_value(
@@ -109,6 +118,9 @@ class DynamicReport:
         profiles = {
             "revenue": self.profile_range.get_profile_ranges("size profile"),
             "growth": self.profile_range.get_profile_ranges("growth profile"),
+            "revenue_per_employee": self.profile_range.get_profile_ranges(
+                "revenue per employee"
+            ),
         }
         metrics_for_ranges = self.get_metrics_for_dynamic_ranges(metrics)
         ranges = self.get_dynamic_ranges(metrics_for_ranges, data)
