@@ -39,12 +39,12 @@ class TestGetCompanyHandler(TestCase):
 
     @parameterized.expand(
         [
-            [{ordered: ""}, ordered, True],
-            [{ordered: None}, ordered, True],
-            [{ordered: "undefined"}, ordered, True],
+            [{ordered: ""}, ordered, False],
+            [{ordered: None}, ordered, False],
+            [{ordered: "undefined"}, ordered, False],
             [{ordered: "true"}, ordered, True],
             [{ordered: "false"}, ordered, False],
-            [{}, ordered, True],
+            [{}, ordered, False],
         ]
     )
     def test_get_boolean_from_query(self, params, field, expected_value):

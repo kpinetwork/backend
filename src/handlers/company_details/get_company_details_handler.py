@@ -43,7 +43,7 @@ def get_number_from_query(params: dict, type: str, default: int) -> int:
 
 
 def get_boolean_from_query(params: dict, type: str) -> bool:
-    return params.get(type) != "false"
+    return params.get(type) == "true"
 
 
 def handler(event, _):
