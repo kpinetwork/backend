@@ -366,8 +366,14 @@ resource "aws_api_gateway_method" "get_investment_date_report_method" {
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 
   request_parameters = {
+    "method.request.querystring.company_id" = false
     "method.request.querystring.metrics" = false
     "method.request.querystring.from_main" = false
+    "method.request.querystring.vertical" = false
+    "method.request.querystring.sector" = false
+    "method.request.querystring.investor_profile" = false
+    "method.request.querystring.growth_profile" = false
+    "method.request.querystring.size" = false
   }
 }
 

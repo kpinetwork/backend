@@ -65,7 +65,7 @@ def handler(event, _):
         report_service = get_investment_date_report_service()
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
-        company_id = event.get("pathParameters").get("company_id")
+        company_id = None
         metrics = ["growth", "ebitda_margin"]
         from_main = False
         conditions = dict()
@@ -73,6 +73,7 @@ def handler(event, _):
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             conditions = get_condition_params(params)
+            company_id = event.get("queryStringParameters").get("company_id")
             from_main = params.get("from_main", from_main)
             metrics = get_list_param(params.get("metrics", metrics))
 
