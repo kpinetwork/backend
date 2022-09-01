@@ -20,6 +20,12 @@ class ByMetricReport:
     def get_standard_metrics(self) -> list:
         return [*self.repository.get_functions_metric(dict())]
 
+    def get_ratio_metrics(self) -> dict:
+        return {
+            "clv_cac_ratio": {"decimal_places": 1},
+            "cac_ratio": {"decimal_places": 2},
+        }
+
     def get_base_metrics(self) -> list:
         base_metrics = [
             "revenue",
@@ -29,6 +35,15 @@ class ByMetricReport:
             "general_admin",
             "research_development",
             "gross_profit",
+            "customer_lifetime_value",
+            "customer_acquition_costs",
+            "customer_annual_value",
+            "other_operating_expenses",
+            "run_rate_revenue",
+            "headcount",
+            "losses_and_downgrades",
+            "upsells",
+            "new_bookings",
         ]
 
         metrics = [f"actuals_{metric}" for metric in base_metrics]
@@ -39,12 +54,45 @@ class ByMetricReport:
         values = [record["value"] for record in records]
         return self.profile_range.build_ranges_from_values(values)
 
-    def get_growth_metrics(self, company: dict, years: list) -> dict:
+    def get_growth_metrics(self, metric: str, company: dict, years: list) -> dict:
         metrics = dict()
         for year in years:
             actual = company["metrics"].get(year)
             prior = company["metrics"].get(year - 1)
-            metrics[year] = self.calculator.calculate_growth_rate(actual, prior)
+            metrics[year] = (
+                self.calculator.calculate_new_bookings_growth(actual, prior)
+                if metric == "new_bookings_growth"
+                else self.calculator.calculate_growth_rate(actual, prior)
+            )
+        return metrics
+
+    def get_retention_metrics(
+        self,
+        metric: str,
+        company_run_rate_revenue: dict,
+        company_losses_and_downgrades: dict,
+        company_upsells: dict,
+        years: list,
+    ) -> dict:
+        metrics = dict()
+        for year in years:
+            prior_run_rate_revenue = company_run_rate_revenue["metrics"].get(year - 1)
+            losses_and_downgrades = (
+                company_losses_and_downgrades["metrics"].get(year)
+                if company_losses_and_downgrades
+                else None
+            )
+            if metric == "net_retention":
+                upsells = (
+                    company_upsells["metrics"].get(year) if company_upsells else None
+                )
+                metrics[year] = self.calculator.calculate_net_retention(
+                    prior_run_rate_revenue, losses_and_downgrades, upsells
+                )
+            else:
+                metrics[year] = self.calculator.calculate_gross_retention(
+                    prior_run_rate_revenue, losses_and_downgrades
+                )
         return metrics
 
     def get_rule_of_40_metrics(
@@ -78,12 +126,62 @@ class ByMetricReport:
                 data[company_id] = company
         return data
 
-    def process_growth(self, records: list, years: list) -> dict:
+    def process_ratio_metrics(self, metric, filters) -> dict:
+        records = self.process_standard_metrics(
+            self.repository.get_metric_records(metric, filters), False
+        )
+        for id in records.keys():
+            metrics = records.get(id).get("metrics")
+            for year in metrics.keys():
+                value = metrics.get(year)
+                if value is None:
+                    metrics.update({year: "NA"})
+                if value != "NA" and value is not None:
+                    decimal_places = (
+                        self.get_ratio_metrics().get(metric).get("decimal_places")
+                    )
+                    metrics.update({year: f"{value:.{decimal_places}f}x"})
+        return records
+
+    def process_growth_metrics(self, metric: str, records: list, years: list) -> dict:
         data = defaultdict(dict)
         growth = self.process_standard_metrics(records, False)
         for id in growth:
             company = growth[id]
-            metrics = self.get_growth_metrics(company, years)
+            metrics = self.get_growth_metrics(metric, company, years)
+            company = {"id": company["id"], "name": company["name"], "metrics": metrics}
+            data[id] = company
+        return data
+
+    def process_retention(
+        self,
+        metric: str,
+        run_rate_revenue: list,
+        losses_and_downgrades: list,
+        years: list,
+        filters: list,
+    ) -> dict:
+        data = defaultdict(dict)
+        run_rate_revenue_metrics = self.process_standard_metrics(
+            run_rate_revenue, False
+        )
+        losses_and_downgrades_metrics = self.process_standard_metrics(
+            losses_and_downgrades, False
+        )
+        upsells = dict()
+        if metric == "net_retention":
+            upsells = self.process_standard_metrics(
+                self.repository.get_metric_records("actuals_upsells", filters), False
+            )
+        for id in run_rate_revenue_metrics:
+            company = run_rate_revenue_metrics[id]
+            metrics = self.get_retention_metrics(
+                metric,
+                run_rate_revenue_metrics.get(id),
+                losses_and_downgrades_metrics.get(id, dict()),
+                upsells.get(id, dict()),
+                years,
+            )
             company = {"id": company["id"], "name": company["name"], "metrics": metrics}
             data[id] = company
         return data
@@ -135,17 +233,40 @@ class ByMetricReport:
             }
         return (data, sizes)
 
+    def get_retention_records(self, metric: str, years: list, filters: dict) -> dict:
+        run_rate_revenue = self.repository.get_metric_records(
+            "actuals_run_rate_revenue", filters
+        )
+        losses_and_downgrades = self.repository.get_metric_records(
+            "actuals_losses_and_downgrades", filters
+        )
+        return self.process_retention(
+            metric, run_rate_revenue, losses_and_downgrades, years, filters
+        )
+
     def get_no_standard_records(self, metric: str, years: list, filters: dict) -> dict:
+        if "retention" in metric:
+            return self.get_retention_records(metric, years, filters)
+
+        if metric == "new_bookings_growth":
+            new_bookings = self.repository.get_metric_records(
+                "actuals_new_bookings", filters
+            )
+            return self.process_growth_metrics(metric, new_bookings, years)
+
         revenue = self.repository.get_metric_records("actuals_revenue", filters)
-        data_growth = self.process_growth(revenue, years)
+        data_growth = self.process_growth_metrics(metric, revenue, years)
         if metric == "growth":
             return data_growth
+
         margin = self.repository.get_metric_records("ebitda_margin", filters)
         data_margin = self.process_standard_metrics(margin)
         return self.process_rule_of_40(data_growth, data_margin)
 
     def get_records(self, metric: str, years: list, filters: dict) -> dict:
         standard = self.get_standard_metrics()
+        if metric in self.get_ratio_metrics().keys():
+            return self.process_ratio_metrics(metric, filters)
         if metric in standard:
             records = self.repository.get_metric_records(metric, filters)
             return self.process_standard_metrics(records)
@@ -172,15 +293,24 @@ class ByMetricReport:
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
 
+    def anonymized_metric(self, metrics: dict, ranges: str):
+        return {
+            year: self.profile_range.get_range_from_value(metrics[year], ranges=ranges)
+            for year in metrics
+        }
+
     def anonymized_value(self, metric: str, metrics: dict, sizes: list) -> dict:
+        if metric == "revenue_per_employee":
+            revenue_per_employee_ranges = self.profile_range.get_profile_ranges(
+                "revenue per employee"
+            )
+            return self.anonymized_metric(metrics, revenue_per_employee_ranges)
+
         _ranges = sizes if "revenue" in metric else self.ranges
         if metric not in self.get_base_metrics():
             return metrics
 
-        return {
-            year: self.profile_range.get_range_from_value(metrics[year], ranges=_ranges)
-            for year in metrics
-        }
+        return self.anonymized_metric(metrics, _ranges)
 
     def verify_anonimization(
         self,
