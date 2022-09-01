@@ -29,7 +29,7 @@ class InvestmentDateReport:
             "Year of investment",
             "Investment + 1",
             "Investment + 2",
-            "Invetment +3",
+            "Investment +3",
         ]
 
     def get_by_metric_records(

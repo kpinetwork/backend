@@ -84,7 +84,7 @@ class TestInvestmentDateReport(TestCase):
             "Year of investment",
             "Investment + 1",
             "Investment + 2",
-            "Invetment +3",
+            "Investment +3",
         ]
 
     def test_get_by_metrics_records(self):
