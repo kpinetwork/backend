@@ -1,7 +1,7 @@
 import json
 import logging
 from connection import create_db_engine, create_db_session
-from commons_functions import get_condition_params
+from commons_functions import get_condition_params, get_list_param
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
@@ -74,7 +74,7 @@ def handler(event, _):
             params = event.get("queryStringParameters")
             conditions = get_condition_params(params)
             from_main = params.get("from_main", from_main)
-            metrics = params.get("metrics", metrics)
+            metrics = get_list_param(params.get("metrics", metrics))
 
         username = get_username_from_user_id(user_id)
         report = report_service.get_peers_by_investment_date_report(
