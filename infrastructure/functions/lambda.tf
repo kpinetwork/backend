@@ -1167,14 +1167,14 @@ resource "aws_lambda_function" "get_metric_types_lambda_function" {
     }
   }
 }
-resource "aws_lambda_function" "investment_date_report_lambda_function" {
-  role = var.lambdas_exec_roles_arn.investment_date_report_exec_role_arn
-  handler = "investment_date_report_handler.handler"
+resource "aws_lambda_function" "get_investment_date_report_lambda_function" {
+  role = var.lambdas_exec_roles_arn.get_investment_date_report_exec_role_arn
+  handler = "get_investment_date_report_handler.handler"
   runtime = var.runtime
-  s3_bucket = var.object_bucket_references.investment_date_report_function_bucket.bucket
-  s3_key = var.object_bucket_references.investment_date_report_function_bucket.key
-  function_name = "${var.environment}_${var.lambdas_names.investment_date_report_lambda_function}"
-  source_code_hash = base64sha256(var.object_bucket_references.investment_date_report_function_bucket.etag)
+  s3_bucket = var.object_bucket_references.get_investment_date_report_function_bucket.bucket
+  s3_key = var.object_bucket_references.get_investment_date_report_function_bucket.key
+  function_name = "${var.environment}_${var.lambdas_names.get_investment_date_report_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_investment_date_report_function_bucket.etag)
   timeout = 600
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]

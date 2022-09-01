@@ -11,6 +11,7 @@ output "lambdas_exec_roles_arn" {
       "get_comparison_vs_peers_exec_role_arn": aws_iam_role.get_comparison_vs_peers_lambda_exec_role.arn
       "download_comparison_vs_peers_exec_role_arn": aws_iam_role.download_comparison_vs_peers_lambda_exec_role.arn
       "get_investment_year_report_exec_role_arn": aws_iam_role.get_investment_year_report_lambda_exec_role.arn
+      "get_investment_date_report_exec_role_arn": aws_iam_role.get_investment_date_report_lambda_exec_role.arn
       "get_investment_year_options_exec_role_arn": aws_iam_role.get_investment_year_options_lambda_exec_role.arn
       "get_by_metric_report_exec_role_arn": aws_iam_role.get_by_metric_report_lambda_exec_role.arn
       "get_dynamic_report_exec_role_arn": aws_iam_role.get_dynamic_report_lambda_exec_role.arn

@@ -75,7 +75,6 @@ resource "aws_api_gateway_resource" "investment_report" {
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
-
 resource "aws_api_gateway_resource" "invest_year_options" {
   path_part   = "options"
   parent_id   = aws_api_gateway_resource.investment_report.id
@@ -193,6 +192,11 @@ resource "aws_api_gateway_resource" "metrics" {
 resource "aws_api_gateway_resource" "metric_types" {
   path_part   = "type"
   parent_id   = aws_api_gateway_resource.metrics.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+resource "aws_api_gateway_resource" "investment_date_report" {
+  path_part   = "investment_date_report"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -351,6 +355,18 @@ resource "aws_api_gateway_method" "get_investment_year_report_method" {
     "method.request.querystring.growth_profile" = false
     "method.request.querystring.size" = false
     "method.request.querystring.invest_year" = false
+    "method.request.querystring.from_main" = false
+  }
+}
+resource "aws_api_gateway_method" "get_investment_date_report_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.investment_date_report.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+
+  request_parameters = {
+    "method.request.querystring.metrics" = false
     "method.request.querystring.from_main" = false
   }
 }
@@ -633,6 +649,14 @@ resource "aws_api_gateway_integration" "investment_report_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_investment_year_report_lambda_function
+}
+resource "aws_api_gateway_integration" "investment_date_report_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.investment_date_report.id
+  http_method             = aws_api_gateway_method.get_investment_date_report_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_investment_date_report_lambda_function
 }
 
 resource "aws_api_gateway_integration" "invest_year_options_integration" {

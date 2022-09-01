@@ -223,10 +223,10 @@ output "object_references" {
       key : aws_s3_bucket_object.get_metric_types_function_object.key,
       bucket : aws_s3_bucket_object.get_metric_types_function_object.bucket
     }
-    "investment_date_report_function_bucket" : {
-      etag : aws_s3_bucket_object.investment_date_report_function_object.etag,
-      key : aws_s3_bucket_object.investment_date_report_function_object.key,
-      bucket : aws_s3_bucket_object.investment_date_report_function_object.bucket
+    "get_investment_date_report_function_bucket" : {
+      etag : aws_s3_bucket_object.get_investment_date_report_function_object.etag,
+      key : aws_s3_bucket_object.get_investment_date_report_function_object.key,
+      bucket : aws_s3_bucket_object.get_investment_date_report_function_object.bucket
     }
   }
 }
