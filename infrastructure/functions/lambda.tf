@@ -1190,10 +1190,13 @@ resource "aws_lambda_function" "get_investment_date_report_lambda_function" {
 
   environment {
     variables = {
-      DB_HOST = var.db_host
-      DB_NAME = var.db_name
-      DB_USERNAME = var.db_username
-      DB_PASSWORD = var.db_password
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
     }
   }
 }
