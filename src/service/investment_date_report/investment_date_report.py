@@ -44,22 +44,23 @@ class InvestmentDateReport:
 
         for id in data:
             company = data[id]
-            if company["id"] == company_id:
-                if self.by_metric_report.is_in_range(profiles.get(id), **conditions):
-                    metric_data["metric_name"] = metric
-                    self.by_metric_report.verify_anonimization(
-                        access,
-                        metric,
-                        company,
-                        sizes,
-                        self.company_anonymization.companies,
-                    )
-                    data[id]["metrics"].update(
-                        self.by_metric_report.get_na_year_records(company, years)
-                    )
-                    metric_data.update(self.sort_metric_values(data[id]["metrics"]))
-                    company_data["id"] = company["id"]
-                    company_data["name"] = company["name"]
+            if (company["id"] == company_id) and (
+                self.by_metric_report.is_in_range(profiles.get(id), **conditions)
+            ):
+                metric_data["metric_name"] = metric
+                self.by_metric_report.verify_anonimization(
+                    access,
+                    metric,
+                    company,
+                    sizes,
+                    self.company_anonymization.companies,
+                )
+                data[id]["metrics"].update(
+                    self.by_metric_report.get_na_year_records(company, years)
+                )
+                metric_data.update(self.sort_metric_values(data[id]["metrics"]))
+                company_data["id"] = company["id"]
+                company_data["name"] = company["name"]
 
         return [company_data, metric_data]
 
