@@ -1,0 +1,31 @@
+
+{
+    "headers": ["id", "name", "metric name", "Investment - 2", "Investment - 1", "Year of investment", "Investment + 1", "Investment + 2", "Invetment +3"], 
+    "company_comparison_data": {}, 
+    "peers_comparison_data": [
+        {
+            "id": "821603b7-0263-4c47-83b3-00b41665faaa", 
+            "name": "Boxlight Corp", 
+            "metrics": [
+                {
+                    "metric_name": "growth", 
+                    "2019": "NA", 
+                    "2020": -8, 
+                    "2021": 145, 
+                    "2022": "NA", 
+                    "2023": "NA", 
+                    "2024": "NA"
+                }, 
+                {
+                    "metric_name": "actuals_revenue", 
+                    "2019": 37, 
+                    "2020": 34, 
+                    "2021": 83, 
+                    "2022": "NA", 
+                    "2023": "NA", 
+                    "2024": "NA"
+                }
+            ]
+        }
+    ]
+}

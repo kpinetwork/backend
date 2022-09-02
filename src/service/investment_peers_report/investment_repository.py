@@ -27,6 +27,15 @@ class InvestmentRepository:
                 MetricNames.SALES_AND_MARKETING: "actuals_sales_marketing",
                 MetricNames.GENERAL_AND_ADMINISTRATION: "actuals_general_admin",
                 MetricNames.RESEARCH_AND_DEVELOPMENT: "actuals_research_development",
+                MetricNames.CUSTOMER_LIFETIME_VALUE: "actuals_customer_lifetime_value",
+                MetricNames.CUSTOMER_ANNUAL_VALUE: "actuals_customer_annual_value",
+                MetricNames.CUSTOMER_ACQUITION_COSTS: "actuals_customer_acquition_costs",
+                MetricNames.OTHER_OPERATING_EXPENSES: "actuals_other_operating_expenses",
+                MetricNames.HEADCOUNT: "actuals_headcount",
+                MetricNames.RUN_RATE_REVENUE: "actuals_run_rate_revenue",
+                MetricNames.LOSSES_AND_DOWNGRADES: "actuals_losses_and_downgrades",
+                MetricNames.UPSELLS: "actuals_upsells",
+                MetricNames.NEW_BOOKINGS: "actuals_new_bookings",
             },
             "Budget": {
                 MetricNames.REVENUE: "budget_revenue",
@@ -35,6 +44,15 @@ class InvestmentRepository:
                 MetricNames.SALES_AND_MARKETING: "budget_sales_marketing",
                 MetricNames.GENERAL_AND_ADMINISTRATION: "budget_general_admin",
                 MetricNames.RESEARCH_AND_DEVELOPMENT: "budget_research_development",
+                MetricNames.CUSTOMER_LIFETIME_VALUE: "budget_customer_lifetime_value",
+                MetricNames.CUSTOMER_ANNUAL_VALUE: "budget_customer_annual_value",
+                MetricNames.CUSTOMER_ACQUITION_COSTS: "budget_customer_acquition_costs",
+                MetricNames.OTHER_OPERATING_EXPENSES: "budget_other_operating_expenses",
+                MetricNames.HEADCOUNT: "budget_headcount",
+                MetricNames.RUN_RATE_REVENUE: "budget_run_rate_revenue",
+                MetricNames.LOSSES_AND_DOWNGRADES: "budget_losses_and_downgrades",
+                MetricNames.UPSELLS: "budget_upsells",
+                MetricNames.NEW_BOOKINGS: "budget_new_bookings",
             },
         }
         self.metrics = [
@@ -44,6 +62,15 @@ class InvestmentRepository:
             "Sales & marketing",
             "General & administration",
             "Research & development",
+            "CLV",
+            "CAC",
+            "CAV",
+            "Other operating expenses",
+            "Headcount",
+            "Run rate revenue",
+            "Losses and downgrades",
+            "Upsells",
+            "New bookings",
         ]
 
     def add_company_filters(self, **kwargs) -> dict:

@@ -50,6 +50,13 @@ class TestComparisonvsPeers(TestCase):
             "sales_and_marketing": 125,
             "general_and_admin": 150,
             "research_and_development": 175,
+            "clv_cac_ratio": "1.3x",
+            "cac_ratio": "1.79x",
+            "opex_of_revenue": 585,
+            "revenue_per_employee": -2666667,
+            "gross_retention": -77,
+            "net_retention": 185,
+            "new_bookings_growth": -13,
         }
 
         self.scenarios = {
@@ -62,6 +69,17 @@ class TestComparisonvsPeers(TestCase):
             "actuals_sales_marketing": 50,
             "actuals_general_admin": 60,
             "actuals_research_development": 70,
+            "actuals_customer_lifetime_value": 5.6,
+            "actuals_customer_acquition_costs": 4.3,
+            "actuals_customer_annual_value": 2.4,
+            "actuals_other_operating_expenses": 54,
+            "actuals_headcount": -3,
+            "actuals_run_rate_revenue": 8,
+            "actuals_losses_and_downgrades": 23,
+            "actuals_upsells": 34,
+            "actuals_new_bookings": -3,
+            "prior_actuals_new_bookings": 23,
+            "prior_actuals_run_rate_revenue": 13,
         }
 
         self.rule_of_40 = {
@@ -114,6 +132,7 @@ class TestComparisonvsPeers(TestCase):
         expected_company.update(metrics)
         expected_company["revenue"] = self.range["label"]
         expected_company["gross_profit"] = gross_profit_range["label"]
+        expected_company["revenue_per_employee"] = self.range["label"]
         expected_company["name"] = "0123-xxxx"
         expected_rule_of_40 = self.rule_of_40.copy()
         expected_rule_of_40["name"] = "0123-xxxx"

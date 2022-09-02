@@ -12,6 +12,17 @@ class MetricTypesService:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.METRIC_TYPES)
+                .add_join_clause(
+                    {
+                        f"{TableNames.METRIC_SORT}": {
+                            "from": f"{TableNames.METRIC_SORT}.name",
+                            "to": f"{TableNames.METRIC_TYPES}.name",
+                        }
+                    }
+                )
+                .add_sql_order_by_condition(
+                    ["sort_value"], self.query_builder.Order.ASC
+                )
                 .build()
                 .get_query()
             )

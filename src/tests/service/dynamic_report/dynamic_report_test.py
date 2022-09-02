@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 
 
-class TestInvestmentYearReport(TestCase):
+class TestDynamicReport(TestCase):
     def setUp(self):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
@@ -87,6 +87,17 @@ class TestInvestmentYearReport(TestCase):
             "actuals_sales_marketing": 50,
             "actuals_general_admin": 60,
             "actuals_research_development": 70,
+            "actuals_customer_lifetime_value": 0.4,
+            "actuals_customer_acquition_costs": 3,
+            "actuals_customer_annual_value": 9.7,
+            "actuals_other_operating_expenses": 3,
+            "actuals_headcount": 0.9,
+            "actuals_run_rate_revenue": 3,
+            "actuals_losses_and_downgrades": 4,
+            "actuals_upsells": 6,
+            "actuals_new_bookings": 4,
+            "prior_actuals_new_bookings": 5,
+            "prior_actuals_run_rate_revenue": 3,
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
@@ -161,6 +172,27 @@ class TestInvestmentYearReport(TestCase):
                 "id": "1234",
                 "name": "1234-xxxx",
                 "gross_profit": self.range.get("label"),
+            },
+        )
+
+    def test_anonymize_company_should_change_revenue_per_employee_value(self):
+        metrics = ["revenue_per_employee"]
+        profiles = {"revenue_per_employee": self.range}
+        company_data = {
+            "revenue_per_employee": 34,
+            "id": "1234",
+            "name": "Test company",
+        }
+        self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
+
+        self.report_instance.anonymize_company(metrics, {}, profiles, company_data)
+
+        self.assertEqual(
+            company_data,
+            {
+                "revenue_per_employee": self.range.get("label"),
+                "id": "1234",
+                "name": "1234-xxxx",
             },
         )
 

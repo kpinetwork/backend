@@ -27,6 +27,15 @@ class MetricNames(StrEnum):
     SALES_AND_MARKETING = "Sales & marketing"
     GENERAL_AND_ADMINISTRATION = "General & administration"
     RESEARCH_AND_DEVELOPMENT = "Research & development"
+    CUSTOMER_LIFETIME_VALUE = "CLV"
+    CUSTOMER_ACQUITION_COSTS = "CAC"
+    CUSTOMER_ANNUAL_VALUE = "CAV"
+    OTHER_OPERATING_EXPENSES = "Other operating expenses"
+    HEADCOUNT = "Headcount"
+    RUN_RATE_REVENUE = "Run rate revenue"
+    LOSSES_AND_DOWNGRADES = "Losses and downgrades"
+    UPSELLS = "Upsells"
+    NEW_BOOKINGS = "New bookings"
 
 
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]

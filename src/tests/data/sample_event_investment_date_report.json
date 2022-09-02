@@ -1,0 +1,13 @@
+{
+    "queryStringParameters": {
+        "metrics": "growth,actuals_revenue"
+    },
+    "pathParameters": {
+        "company_id": null
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}
