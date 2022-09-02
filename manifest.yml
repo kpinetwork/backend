@@ -1,3 +1,7 @@
+global:
+  image: lambci/lambda:build-python3.8
+  output: ./dist
+
 functions:
   # Name the zip file you want juni to create
   get_company_details_handler:
@@ -512,4 +516,5 @@ functions:
 
 layers:
   layer_libraries:
+    image: lambci/lambda:build-python3.8
     requirements: ./requirements/lambda_layer/requirements.txt
