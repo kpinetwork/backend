@@ -1,20 +1,22 @@
 from collections import OrderedDict
 from by_metric_report import ByMetricReport
-
+from calculator_service import CalculatorService
+from company_anonymization import CompanyAnonymization
 from investment_date_repository import InvestmentDateReportRepository
 from metric_report_repository import MetricReportRepository
+from profile_range import ProfileRange
 
 
 class InvestmentDateReport:
     def __init__(
         self,
         logger,
-        calculator,
+        calculator: CalculatorService,
         repository: InvestmentDateReportRepository,
         metric_repository: MetricReportRepository,
         metric_report: ByMetricReport,
-        profile_range,
-        company_anonymization,
+        profile_range: ProfileRange,
+        company_anonymization: CompanyAnonymization,
     ) -> None:
         self.ranges = []
         self.logger = logger

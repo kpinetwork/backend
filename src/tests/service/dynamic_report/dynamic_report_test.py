@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 
 
-class TestInvestmentYearReport(TestCase):
+class TestDynamicReport(TestCase):
     def setUp(self):
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
