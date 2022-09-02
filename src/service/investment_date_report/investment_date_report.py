@@ -1,4 +1,8 @@
 from collections import OrderedDict
+from by_metric_report import ByMetricReport
+
+from investment_date_repository import InvestmentDateReportRepository
+from metric_report_repository import MetricReportRepository
 
 
 class InvestmentDateReport:
@@ -6,9 +10,9 @@ class InvestmentDateReport:
         self,
         logger,
         calculator,
-        repository,
-        metric_repository,
-        metric_report,
+        repository: InvestmentDateReportRepository,
+        metric_repository: MetricReportRepository,
+        metric_report: ByMetricReport,
         profile_range,
         company_anonymization,
     ) -> None:
@@ -31,6 +35,15 @@ class InvestmentDateReport:
             "Investment + 2",
             "Investment +3",
         ]
+
+    def get_valid_year_records(self, company: dict, years: list) -> dict:
+        metric_years = [*company["metrics"]]
+        included_years = set(metric_years).union(set(years))
+        return {
+            year: company["metrics"].get(year, "NA")
+            for year in included_years
+            if year in years
+        }
 
     def get_by_metric_records(
         self, metric: str, years: list, access: bool, company_id, **conditions
@@ -55,9 +68,8 @@ class InvestmentDateReport:
                     sizes,
                     self.company_anonymization.companies,
                 )
-                data[id]["metrics"].update(
-                    self.by_metric_report.get_na_year_records(company, years)
-                )
+                data[id]["metrics"] = self.get_valid_year_records(company, years)
+
                 metric_data.update(self.sort_metric_values(data[id]["metrics"]))
                 company_data["id"] = company["id"]
                 company_data["name"] = company["name"]
@@ -86,10 +98,9 @@ class InvestmentDateReport:
         companies_result = dict()
         investments = self.repository.get_investments()
         companies = investments.keys()
-        invest_year = 0
 
         for company in companies:
-            years = [investments[company]["invest_year"] + invest_year]
+            years = [investments[company]["invest_year"]]
             years = self.repository.get_years(years)
             companies_result[company] = self.get_by_company_metrics(
                 metrics, years, access, company, **conditions
