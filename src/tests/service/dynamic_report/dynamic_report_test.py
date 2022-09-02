@@ -175,6 +175,27 @@ class TestInvestmentYearReport(TestCase):
             },
         )
 
+    def test_anonymize_company_should_change_revenue_per_employee_value(self):
+        metrics = ["revenue_per_employee"]
+        profiles = {"revenue_per_employee": self.range}
+        company_data = {
+            "revenue_per_employee": 34,
+            "id": "1234",
+            "name": "Test company",
+        }
+        self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
+
+        self.report_instance.anonymize_company(metrics, {}, profiles, company_data)
+
+        self.assertEqual(
+            company_data,
+            {
+                "revenue_per_employee": self.range.get("label"),
+                "id": "1234",
+                "name": "1234-xxxx",
+            },
+        )
+
     def test_anonymize_company_should_change_growth_value(self):
         metrics = ["growth"]
         profiles = {"growth": self.range}
