@@ -1,6 +1,7 @@
 {
     "queryStringParameters": {
-        "metrics": "growth,actuals_revenue"
+        "metrics": "growth,actuals_revenue",
+        "company_id": null
     },
     "pathParameters": {
         "company_id": null

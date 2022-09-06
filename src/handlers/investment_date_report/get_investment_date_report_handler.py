@@ -60,22 +60,29 @@ def get_header() -> dict:
     }
 
 
+def get_metrics(param_metrics) -> str:
+    default_metrics = "growth,ebitda_margin"
+    if param_metrics != "" and param_metrics:
+        default_metrics = param_metrics
+    return default_metrics
+
+
 def handler(event, _):
     try:
         report_service = get_investment_date_report_service()
         user_id = get_user_id_from_event(event)
         access = verify_user_access(user_id)
         company_id = None
-        metrics = ["growth", "ebitda_margin"]
         from_main = False
         conditions = dict()
+        metrics = []
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             conditions = get_condition_params(params)
             company_id = event.get("queryStringParameters").get("company_id")
             from_main = params.get("from_main", from_main)
-            metrics = get_list_param(params.get("metrics", metrics))
+            metrics = get_list_param(get_metrics(params.get("metrics")))
 
         username = get_username_from_user_id(user_id)
         report = report_service.get_peers_by_investment_date_report(
