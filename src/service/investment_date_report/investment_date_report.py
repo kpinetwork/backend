@@ -40,7 +40,6 @@ class InvestmentDateReport:
 
     def get_valid_year_records(self, company: dict, years: list) -> dict:
         metric_years = [*company["metrics"]]
-        included_years = set(metric_years) & set(years)
         included_years = set(metric_years).union(set(years))
         return {
             year: company["metrics"].get(year, "NA")
@@ -99,14 +98,12 @@ class InvestmentDateReport:
             data = self.get_by_metric_records(
                 metric, years, access, companies_by_investment, **conditions
             )
-            company_data = dict()
             for id in data:
                 metric_values = list()
-                company_data = data[id]
                 if id in companies:
                     metric_values = companies[id]["metrics"]
                 metric_values.append(data[id]["metrics"])
-                companies[id] = company_data
+                companies[id] = data[id]
                 companies[id]["metrics"] = metric_values
 
         return companies
@@ -119,10 +116,8 @@ class InvestmentDateReport:
         companies_result = dict()
         investments = self.repository.get_investments()
         companies = investments.keys()
-        initial_year = 0
         invest_years = [
-            investments[company_id]["invest_year"] + initial_year
-            for company_id in investments
+            investments[company_id]["invest_year"] for company_id in investments
         ]
 
         companies_and_invest = dict(zip(companies, invest_years))
