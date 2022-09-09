@@ -61,10 +61,9 @@ def get_header() -> dict:
 
 
 def get_metrics(param_metrics) -> str:
-    default_metrics = "growth,ebitda_margin"
     if param_metrics != "" and param_metrics:
-        default_metrics = param_metrics
-    return default_metrics
+        return param_metrics
+    return "growth,ebitda_margin"
 
 
 def handler(event, _):
