@@ -1159,7 +1159,8 @@ resource "aws_iam_role_policy" "authorize_lambda_get_users_and_groups" {
       "Effect": "Allow",
       "Action": [
         "cognito-idp:AdminListGroupsForUser",
-        "cognito-idp:ListUsers"
+        "cognito-idp:ListUsers",
+        "cognito-id:ListUsersInGroup"
       ],
       "Resource": "${var.cognito_user_pool_arn}"
       }
