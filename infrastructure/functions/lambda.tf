@@ -149,7 +149,7 @@ resource "aws_lambda_function" "get_universe_overview_lambda_function" {
   s3_key = var.object_bucket_references.get_universe_overview_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_universe_overview_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_universe_overview_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -184,7 +184,7 @@ resource "aws_lambda_function" "get_company_report_vs_peers_lambda_function" {
   s3_key = var.object_bucket_references.get_company_report_vs_peers_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_company_report_vs_peers_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_company_report_vs_peers_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -219,7 +219,7 @@ resource "aws_lambda_function" "get_comparison_vs_peers_lambda_function" {
   s3_key = var.object_bucket_references.get_comparison_vs_peers_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_comparison_vs_peers_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_comparison_vs_peers_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -254,7 +254,7 @@ resource "aws_lambda_function" "download_comparison_vs_peers_lambda_function" {
   s3_key = var.object_bucket_references.download_comparison_vs_peers_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.download_comparison_vs_peers_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.download_comparison_vs_peers_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -290,7 +290,7 @@ resource "aws_lambda_function" "get_investment_year_report_lambda_function" {
   s3_key = var.object_bucket_references.get_investment_year_report_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_investment_year_report_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_investment_year_report_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -325,7 +325,7 @@ resource "aws_lambda_function" "get_investment_year_options_lambda_function" {
   s3_key = var.object_bucket_references.get_investment_year_options_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_investment_year_options_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_investment_year_options_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -357,7 +357,7 @@ resource "aws_lambda_function" "get_by_metric_report_lambda_function" {
   s3_key = var.object_bucket_references.get_by_metric_report_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_by_metric_report_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_by_metric_report_function_bucket.etag)
-  memory_size = 520
+  memory_size = 128
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -392,7 +392,7 @@ resource "aws_lambda_function" "get_dynamic_report_lambda_function" {
   s3_key = var.object_bucket_references.get_dynamic_report_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_dynamic_report_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_dynamic_report_function_bucket.etag)
-  memory_size = 520
+  memory_size = 256
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
@@ -1111,7 +1111,7 @@ resource "aws_lambda_function" "delete_company_lambda_function" {
   s3_key = var.object_bucket_references.delete_company_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.delete_company_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.delete_company_function_bucket.etag)
-  timeout = 600
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -1145,7 +1145,7 @@ resource "aws_lambda_function" "get_metric_types_lambda_function" {
   s3_key = var.object_bucket_references.get_metric_types_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_metric_types_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_metric_types_function_bucket.etag)
-  timeout = 600
+  timeout = 3
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
@@ -1175,7 +1175,7 @@ resource "aws_lambda_function" "get_investment_date_report_lambda_function" {
   s3_key = var.object_bucket_references.get_investment_date_report_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_investment_date_report_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_investment_date_report_function_bucket.etag)
-  timeout = 600
+  timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]
 
