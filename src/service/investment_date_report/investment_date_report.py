@@ -48,10 +48,9 @@ class InvestmentDateReport:
         }
 
     def get_by_metric_records(
-        self, metric: str, years: list, access: bool, company_id, **conditions
+        self, metric: str, years: list, access: bool, companies: dict, **conditions
     ) -> list:
-        metric_data = dict()
-        company_data = dict()
+        companies_data = dict()
         filters = self.metric_repository.add_company_filters(**conditions)
         data = self.by_metric_report.get_records(metric, years, filters)
 
@@ -59,9 +58,10 @@ class InvestmentDateReport:
 
         for id in data:
             company = data[id]
-            if (company["id"] == company_id) and (
+            if (company["id"] in companies) and (
                 self.by_metric_report.is_in_range(profiles.get(id), **conditions)
             ):
+                metric_data = dict()
                 metric_data["metric_name"] = metric
                 self.by_metric_report.verify_anonimization(
                     access,
@@ -70,43 +70,61 @@ class InvestmentDateReport:
                     sizes,
                     self.company_anonymization.companies,
                 )
-                data[id]["metrics"] = self.get_valid_year_records(company, years)
+                metric_values = self.get_records_by_invest_year(company, companies)
+                data[id]["metrics"] = metric_values
+                metric_data.update(self.sort_metric_values(metric_values))
+                data[id]["metrics"].update(metric_data)
+                companies_data[id] = company
 
-                metric_data.update(self.sort_metric_values(data[id]["metrics"]))
-                company_data["id"] = company["id"]
-                company_data["name"] = company["name"]
+        return companies_data
 
-        return [company_data, metric_data]
+    def get_records_by_invest_year(self, company: dict, companies_by_invest) -> dict:
+        years = [companies_by_invest[company["id"]]]
+        years = self.repository.get_years(years)
+        metric_data = self.get_valid_year_records(company, years)
 
-    def get_by_company_metrics(
-        self, metrics: list, years: list, access: bool, company_id, **conditions
+        return metric_data
+
+    def join_company_metrics(
+        self,
+        metrics: list,
+        years: list,
+        access: bool,
+        companies_by_investment,
+        **conditions,
     ) -> dict:
-        company = dict()
-        metrics_values = list()
+        companies = dict()
         for metric in metrics:
             data = self.get_by_metric_records(
-                metric, years, access, company_id, **conditions
+                metric, years, access, companies_by_investment, **conditions
             )
-            company.update(data[0])
-            metrics_values.append(data[1])
-        company["metrics"] = metrics_values
-        return company
+            for id in data:
+                metric_values = list()
+                if id in companies:
+                    metric_values = companies[id]["metrics"]
+                metric_values.append(data[id]["metrics"])
+                companies[id] = data[id]
+                companies[id]["metrics"] = metric_values
+
+        return companies
 
     def sort_metric_values(self, metric_values: dict) -> dict:
         metric = {int(k): v for k, v in metric_values.items()}
         return OrderedDict(sorted(metric.items()))
 
-    def get_companies_metrics(self, metrics: list, access: bool, **conditions) -> dict:
+    def get_companies(self, metrics: list, access: bool, **conditions) -> dict:
         companies_result = dict()
         investments = self.repository.get_investments()
         companies = investments.keys()
+        invest_years = [
+            investments[company_id]["invest_year"] for company_id in investments
+        ]
 
-        for company in companies:
-            years = [investments[company]["invest_year"]]
-            years = self.repository.get_years(years)
-            companies_result[company] = self.get_by_company_metrics(
-                metrics, years, access, company, **conditions
-            )
+        companies_and_invest = dict(zip(companies, invest_years))
+        years = self.repository.get_years(invest_years)
+        companies_result = self.join_company_metrics(
+            metrics, years, access, companies_and_invest, **conditions
+        )
 
         return companies_result
 
@@ -124,7 +142,7 @@ class InvestmentDateReport:
             is_valid_company = company_id and company_id.strip()
             self.company_anonymization.set_company_permissions(username)
 
-            data = self.get_companies_metrics(metrics, access, **conditions)
+            data = self.get_companies(metrics, access, **conditions)
 
             if not from_main and is_valid_company:
                 company = data.pop(company_id, dict())
