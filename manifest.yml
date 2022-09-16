@@ -94,7 +94,8 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
