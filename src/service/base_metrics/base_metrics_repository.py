@@ -57,11 +57,13 @@ class BaseMetricsRepository:
             )
 
     def __get_scenario_metric_field(self, record: dict, year: int) -> dict:
-        record_year = record.get("year", year) - year
-        metric_name = self.__get_metric_name_year(
-            record.get("metric"), record.get("scenario"), record_year
-        )
-        return {metric_name: record.get("value")}
+        if record.get("metric") in METRICS_CONFIG_NAME:
+            record_year = record.get("year", year) - year
+            metric_name = self.__get_metric_name_year(
+                record.get("metric"), record.get("scenario"), record_year
+            )
+            return {metric_name: record.get("value")}
+        return dict()
 
     def __get_scenario_values(
         self, scenario: str, years: list, filters: dict, metrics: list = []

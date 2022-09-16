@@ -5,15 +5,10 @@ from commons_functions import get_condition_params, get_list_param
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
-from comparison_vs_peers_service import ComparisonvsPeersService
 from dynamic_report import DynamicReport
 from by_metric_report import ByMetricReport
 from metric_report_repository import MetricReportRepository
-from investment_repository import InvestmentRepository
-from investment_year_report import InvestmentYearReport
 from calculator_service import CalculatorService
-from calculator_report import CalculatorReport
-from calculator_repository import CalculatorRepository
 from profile_range import ProfileRange
 from verify_user_permissions import (
     verify_user_access,
@@ -21,6 +16,9 @@ from verify_user_permissions import (
     get_username_from_user_id,
 )
 from get_user_details_service import get_user_details_service_instance
+from by_year_report_service import ByYearReportService
+from base_metrics_report import BaseMetricsReport
+from base_metrics_repository import BaseMetricsRepository
 
 
 engine = create_db_engine()
@@ -43,40 +41,29 @@ def get_metric_report_service(calculator, profile_range, company_anonymization):
     )
 
 
-def get_investment_year_report_service(report):
-    repository = InvestmentRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
-
-    return InvestmentYearReport(logger, report, repository)
-
-
-def get_calendar_year_report_service(report):
-    repository = CalculatorRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
-
-    return ComparisonvsPeersService(logger, report, repository)
-
-
 def get_dynamic_report_service():
     user_service = get_user_details_service_instance()
     company_anonymization = CompanyAnonymization(user_service)
     calculator = CalculatorService(logger)
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
-    report = CalculatorReport(logger, calculator, profile_range, company_anonymization)
-    calculator_repository = CalculatorRepository(
-        session, QuerySQLBuilder(), ResponseSQL(), logger
+    repository = BaseMetricsRepository(
+        logger, session, QuerySQLBuilder(), ResponseSQL()
     )
+    base_metric_report = BaseMetricsReport(
+        logger, calculator, profile_range, company_anonymization
+    )
+    report = ByYearReportService(logger, base_metric_report, repository)
 
     metric_report = get_metric_report_service(
         calculator, profile_range, company_anonymization
     )
-    investment_report = get_investment_year_report_service(report)
-    calendar_report = get_calendar_year_report_service(report)
+    calendar_report = ByYearReportService(logger, report, repository)
 
     return DynamicReport(
         logger,
         metric_report,
-        investment_report,
         calendar_report,
-        calculator_repository,
+        repository,
         profile_range,
     )
 
@@ -102,7 +89,6 @@ def handler(event, _):
         company_id = event.get("pathParameters").get("company_id")
         metrics = []
         calendar_year = None
-        investment_year = None
         from_main = False
         conditions = dict()
 
@@ -112,7 +98,6 @@ def handler(event, _):
             from_main = params.get("from_main", from_main)
             metrics = get_list_param(params.get("metrics"))
             calendar_year = get_value(params, "calendar_year", calendar_year)
-            investment_year = get_value(params, "investment_year", investment_year)
 
         username = get_username_from_user_id(user_id)
         report = report_service.get_dynamic_report(
@@ -120,7 +105,6 @@ def handler(event, _):
             username,
             metrics,
             calendar_year,
-            investment_year,
             from_main,
             access,
             **conditions

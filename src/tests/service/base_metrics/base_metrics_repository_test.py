@@ -63,6 +63,21 @@ class TestBaseMetricsRepository(TestCase):
 
         self.assertEqual(metric_name, expected_name)
 
+    def test_process_scenario_values_without_valid_metric_name(self):
+        company = self.company.copy()
+        company.update(
+            {
+                "metric": "Custom",
+                "scenario": "Actuals",
+                "year": 2020,
+                "value": self.scenarios["actuals_revenue"],
+            }
+        )
+
+        data = self.repository.process_scenario_values(2020, [company], True)
+
+        self.assertEqual(data, {self.company["id"]: self.company})
+
     def test_get_actuals_values_should_return_data_with_descriptive_company_info(self):
         company = self.company.copy()
         company.update(
