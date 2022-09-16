@@ -146,9 +146,9 @@ class BaseMetricsRepository:
             True,
         )
 
-    def get_actuals_values(self, year: int, filters: dict) -> dict:
+    def get_actuals_values(self, year: int, filters: dict, metrics: list = []) -> dict:
         return self.process_scenario_values(
-            year, self.__get_scenario_values("Actuals", [year], filters), True
+            year, self.__get_scenario_values("Actuals", [year], filters, metrics), True
         )
 
     def get_prior_year_revenue_values(self, base_year: int, filters) -> dict:
