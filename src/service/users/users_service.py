@@ -34,7 +34,6 @@ class UsersService:
         params = self.get_users_params(user_pool_id, limit, token, group)
         response = self.client.list_users_in_group(**params)
         users = self.response_user.proccess_users(response.get("Users", []))
-        print("token", response)
         sort = sorted(users, key=lambda user: user.get("email"))
         return {"users": sort, "token": response.get("NextToken"), "group": group}
 
