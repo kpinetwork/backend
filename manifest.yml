@@ -77,9 +77,11 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -102,6 +104,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -126,6 +129,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
 
   download_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -150,6 +154,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
