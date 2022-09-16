@@ -107,7 +107,7 @@ functions:
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
     - ./src/handlers/comparison_vs_peers/get_peers_data.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/service/by_year_report/by_year_report_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -116,9 +116,10 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_report.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
-    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -130,7 +131,7 @@ functions:
     include:
     - ./src/handlers/comparison_vs_peers/download_comparison_vs_peers_handler.py
     - ./src/handlers/comparison_vs_peers/get_peers_data.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/service/by_year_report/by_year_report_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -139,9 +140,10 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_report.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
-    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
