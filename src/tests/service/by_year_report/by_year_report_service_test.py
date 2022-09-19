@@ -12,7 +12,7 @@ size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 service_path = "src.service.by_year_report.by_year_report_service.ByYearReportService"
 
 
-class TestCalculatorReport(TestCase):
+class TestByYearReport(TestCase):
     def setUp(self):
         self.calculator = CalculatorService(logger)
         self.company_anonymization = CompanyAnonymization(object)
