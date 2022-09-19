@@ -73,7 +73,8 @@ class BaseMetricsRepository:
                 {
                     f"{TableNames.SCENARIO}.name": self.__get_scenario_name_with_year(
                         scenario, years
-                    )
+                    ),
+                    f"{TableNames.COMPANY}.is_public": True,
                 }
             )
             if metrics:
