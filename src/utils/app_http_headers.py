@@ -10,8 +10,4 @@ class AppHttpHeaders:
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": self.http_methods,
             "X-Content-Type-Options": "nosniff",
-            "Content-Security-Policy": "default-src 'self' *kpinetwork.com; "
-            "script-src 'self' *kpinetwork.com; "
-            "form-action 'none'; "
-            "frame-ancestors 'none'",
         }
