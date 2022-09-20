@@ -21,8 +21,9 @@ from verify_user_permissions import (
     get_username_from_user_id,
 )
 from get_user_details_service import get_user_details_service_instance
+from app_http_headers import AppHttpHeaders
 
-
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
@@ -85,15 +86,6 @@ def get_value(params, value, default_value):
     return int(params.get(value, default_value)) if params.get(value) else None
 
 
-def get_header() -> dict:
-    return {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-    }
-
-
 def handler(event, _):
     try:
         report_service = get_dynamic_report_service()
@@ -128,7 +120,7 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(report),
-            "headers": get_header(),
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
@@ -136,5 +128,5 @@ def handler(event, _):
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": get_header(),
+            "headers": headers.get_headers(),
         }

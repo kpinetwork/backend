@@ -17,8 +17,10 @@ from verify_user_permissions import (
     get_username_from_user_id,
 )
 from get_user_details_service import get_user_details_service_instance
+from app_http_headers import AppHttpHeaders
 
 
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
@@ -51,15 +53,6 @@ def get_investment_date_report_service():
     )
 
 
-def get_header() -> dict:
-    return {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-    }
-
-
 def get_metrics(param_metrics) -> str:
     if param_metrics != "" and param_metrics:
         return param_metrics
@@ -75,7 +68,6 @@ def handler(event, _):
         from_main = False
         conditions = dict()
         metrics = []
-
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             conditions = get_condition_params(params)
@@ -90,7 +82,7 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(report),
-            "headers": get_header(),
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
@@ -98,5 +90,5 @@ def handler(event, _):
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": get_header(),
+            "headers": headers.get_headers(),
         }

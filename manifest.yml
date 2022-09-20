@@ -18,6 +18,7 @@ functions:
     - ./src/utils/response_user.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   delete_company_handler:
     requirements: ./src/handlers/company_details/requirements.txt
@@ -31,6 +32,7 @@ functions:
     - ./src/utils/response_user.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
 
   get_all_companies_handler:
@@ -43,6 +45,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/company_anonymization.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_all_public_companies_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -60,6 +63,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   glue_trigger_handler:
     requirements: ./src/handlers/glue/requirements.txt
@@ -80,6 +84,7 @@ functions:
     - ./src/service/calculator/calculator_repository.py
     - ./src/service/calculator/calculator_service.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -101,6 +106,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -124,6 +130,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   download_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -147,6 +154,7 @@ functions:
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
@@ -174,6 +182,7 @@ functions:
     - ./src/utils/response_user.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_roles_handler:
     requirements: ./src/handlers/users/requirements.txt
@@ -184,6 +193,7 @@ functions:
     - ./src/utils/response_user.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_user_details_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -199,6 +209,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   change_user_role_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -214,6 +225,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   assign_company_permissions_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -229,6 +241,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_company_permissions_handler:
     requirements: ./src/handlers/user_details/requirements.txt
@@ -244,6 +257,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./src/utils/verify_user_permissions.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   change_company_publicly_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -260,12 +274,14 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/company_anonymization.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   upload_file_s3_handler:
     requirements: ./src/handlers/upload_file/requirements.txt
     include:
     - ./src/handlers/upload_file/upload_file_s3_handler.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   validate_data_handler:
     requirements: ./src/handlers/upload_file/requirements.txt
@@ -276,6 +292,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
+    - ./src/utils/app_http_headers.py
   
   connect:
     requirements: ./src/handlers/websocket/requirements.txt
@@ -315,6 +332,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   add_investment_handler:
     requirements: ./src/handlers/investments/requirements.txt
@@ -325,6 +343,7 @@ functions:
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_investment_year_report_handler:
     requirements: ./src/handlers/investment_year_report/requirements.txt
@@ -349,6 +368,7 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   get_investment_year_options_handler:
     requirements: ./src/handlers/investment_year_report/requirements.txt
@@ -359,6 +379,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/exceptions/base_exception.py
+    - ./src/utils/app_http_headers.py
 
   get_by_metric_report_handler:
     requirements: ./src/handlers/by_metric_report/requirements.txt
@@ -381,6 +402,7 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
   
   get_dynamic_report_handler:
     requirements: ./src/handlers/dynamic_report/requirements.txt
@@ -409,6 +431,7 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   update_data:
     requirements: ./src/handlers/glue/requirements.txt
@@ -432,6 +455,7 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/response_user.py
     - ./src/utils/app_names.py    
+    - ./src/utils/app_http_headers.py    
 
   add_scenario_handler:
     requirements: ./src/handlers/scenario/requirements.txt
@@ -446,6 +470,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   edit_modify_data_handler:
     requirements: ./src/handlers/edit_modify/requirements.txt
@@ -461,6 +486,7 @@ functions:
     - ./src/utils/response_user.py
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   get_edit_modify_data_handler:
     requirements: ./src/handlers/edit_modify/requirements.txt
@@ -477,6 +503,7 @@ functions:
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
     - ./src/utils/commons_functions.py
+    - ./src/utils/app_http_headers.py
 
   get_metric_types_handler:
     requirements: ./src/handlers/metric/requirements.txt
@@ -488,6 +515,7 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
   get_investment_date_report_handler:
     requirements: ./src/handlers/investment_date_report/requirements.txt
@@ -512,6 +540,7 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
     
 
 layers:

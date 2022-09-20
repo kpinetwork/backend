@@ -5,7 +5,9 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
@@ -33,17 +35,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(companies, default=str),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

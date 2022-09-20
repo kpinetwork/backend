@@ -7,7 +7,9 @@ from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
 from verify_user_permissions import verify_user_access, get_user_id_from_event
 from base_exception import AppError
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,POST,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
@@ -39,17 +41,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps({"modified": response}, default=str),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }
