@@ -122,8 +122,6 @@ class TestUsersService(TestCase):
         get_users_out = self.users_service_instance.get_users(
             "userPoolId", token="end", limit=1, group="demo_customer_group"
         )
-        print("expected", expected_result)
-        print("result", get_users_out)
 
         self.assertEqual(get_users_out, expected_result)
 
