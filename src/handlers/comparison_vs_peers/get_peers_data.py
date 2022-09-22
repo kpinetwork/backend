@@ -1,14 +1,14 @@
 import logging
 import datetime
-from comparison_vs_peers_service import ComparisonvsPeersService
+from by_year_report_service import ByYearReportService
 from commons_functions import get_condition_params
 from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
-from calculator_repository import CalculatorRepository
+from base_metrics_repository import BaseMetricsRepository
 from calculator_service import CalculatorService
-from calculator_report import CalculatorReport
+from base_metrics_report import BaseMetricsReport
 from profile_range import ProfileRange
 from verify_user_permissions import (
     verify_user_access,
@@ -27,11 +27,13 @@ def get_comparison_vs_peers_service():
     user_service = get_user_details_service_instance()
     company_anonymization = CompanyAnonymization(user_service)
     calculator = CalculatorService(logger)
-    repository = CalculatorRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
+    repository = BaseMetricsRepository(
+        logger, session, QuerySQLBuilder(), ResponseSQL()
+    )
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
-    report = CalculatorReport(logger, calculator, profile_range, company_anonymization)
+    report = BaseMetricsReport(logger, calculator, profile_range, company_anonymization)
 
-    return ComparisonvsPeersService(logger, report, repository)
+    return ByYearReportService(logger, report, repository)
 
 
 def get_comparison_vs_peers(event: dict) -> dict:
@@ -50,7 +52,7 @@ def get_comparison_vs_peers(event: dict) -> dict:
         from_main = params.get("from_main", from_main)
 
     username = get_username_from_user_id(user_id)
-    comparison_peers = comparison_vs_peers_service.get_peers_comparison(
+    comparison_peers = comparison_vs_peers_service.get_by_year_report(
         company_id, username, year, from_main, access, **conditions
     )
 

@@ -5,14 +5,17 @@ from parameterized import parameterized
 from src.service.company_report_vs_peers.company_report_vs_peers_service import (
     CompanyReportvsPeersService,
 )
-from src.service.calculator.calculator_repository import CalculatorRepository
 from src.service.calculator.calculator_service import CalculatorService
 from src.utils.company_anonymization import CompanyAnonymization
+from src.service.base_metrics.base_metrics_repository import BaseMetricsRepository
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 growth_range = {"label": "Low growth", "max_value": 0, "min_value": 10}
+repository_path = (
+    "src.service.base_metrics.base_metrics_repository.BaseMetricsRepository"
+)
 
 
 def get_range_response(*args, **kwargs):
@@ -23,6 +26,14 @@ def get_range_response(*args, **kwargs):
         return [growth_range]
 
 
+def get_range_value(*args, **kwargs):
+    profile_type = args[1]
+    if profile_type == "size profile":
+        return size_range.get("label")
+    elif profile_type == "growth profile":
+        return growth_range.get("label")
+
+
 class TestCompanyReportvsPeers(TestCase):
     def setUp(self):
         self.mock_session = Mock()
@@ -31,8 +42,8 @@ class TestCompanyReportvsPeers(TestCase):
         self.company_anonymization = CompanyAnonymization(object)
         self.mock_profile_range = Mock()
         self.calculator = CalculatorService(logger)
-        self.repository = CalculatorRepository(
-            self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
+        self.repository = BaseMetricsRepository(
+            logger, self.mock_session, self.mock_query_builder, self.mock_response_sql
         )
         self.report_service_instance = CompanyReportvsPeersService(
             logger,
@@ -78,66 +89,29 @@ class TestCompanyReportvsPeers(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    @parameterized.expand(
-        [
-            [
-                31,
-                "size profile",
-                {"label": "$30-<50 million", "max_value": 50, "min_value": 30},
-            ],
-            [None, "size profile", {}],
-            [
-                5,
-                "growth profile",
-                {"label": "Low growth", "max_value": 0, "min_value": 10},
-            ],
-        ]
-    )
-    def test_get_metric_range(self, value, type, ranges):
-        self.mock_profile_range.get_profile_ranges.return_value = [ranges]
-
-        range = self.report_service_instance.get_metric_range(value, type)
-
-        self.assertEqual(range, ranges.get("label", "NA"))
-
-    def test_get_metric_range_fail(self):
-        self.mock_profile_range.get_profile_ranges.side_effect = Exception("error")
-
-        range = self.report_service_instance.get_metric_range(34, "size profile")
-
-        self.assertEqual(range, "NA")
-
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
-    )
-    def test_get_profiles(self, mock_get_most_recents_revenue):
+    def test_get_profiles_should_return_vallid_range(self):
         expected_profile = {
             "size_cohort": self.company["size_cohort"],
             "margin_group": self.company["margin_group"],
         }
-        revenues = [{"value": 40}, {"value": 37.5}]
-        mock_get_most_recents_revenue.return_value = revenues
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
+        self.mock_profile_range.get_range_from_value.side_effect = get_range_value
 
         profile = self.report_service_instance.get_profiles(self.scenarios)
 
         self.assertEqual(profile, expected_profile)
 
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
-    )
-    def test_get_description(self, mock_get_most_recents_revenue):
+    def test_get_description_should_return_metrics_with_no_empty_company(self):
         company = self.company.copy()
         company.update(self.scenarios)
-        revenues = [{"value": 40}, {"value": 37.5}]
-        mock_get_most_recents_revenue.return_value = revenues
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
+        self.mock_profile_range.get_range_from_value.side_effect = get_range_value
 
         description = self.report_service_instance.get_description(company)
 
         self.assertEqual(description, self.company)
 
-    def test_get_description_with_empty_company(self):
+    def test_get_description_should_return_empty_dict_with_empty_company(self):
         company = dict()
 
         description = self.report_service_instance.get_description(company)
@@ -145,7 +119,7 @@ class TestCompanyReportvsPeers(TestCase):
         self.assertEqual(description, company)
         self.mock_profile_range.get_profile_ranges.assert_not_called()
 
-    def test_get_financial_profile(self):
+    def test_get_financial_profile_should_return_dict_with_metrics(self):
         company = self.company.copy()
         company.update(self.scenarios)
         self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
@@ -176,37 +150,33 @@ class TestCompanyReportvsPeers(TestCase):
 
         self.assertEqual(uses_has_permissions, permitted)
 
-    @mock.patch(
-        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
-    )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
-    )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
-    )
-    def test_get_company_report(
+    @mock.patch(f"{repository_path}.get_actuals_values")
+    @mock.patch(f"{repository_path}.get_budget_values")
+    @mock.patch(f"{repository_path}.get_prior_year_revenue_values")
+    def test_get_company_data_should_return_data(
         self,
-        mock_get_most_recents_revenue,
-        mock_get_metric_by_scenario,
-        mock_set_company_permissions,
+        mock_get_prior_year_revenue_values,
+        mock_get_budget_values,
+        mock_get_actuals_values,
     ):
         company = self.company.copy()
         company.update(self.scenarios)
-        revenues = [{"value": 40}, {"value": 37.5}]
-        mock_get_most_recents_revenue.return_value = revenues
-        self.mock_base_metric_results({company["id"]: company})
-        self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
+        mock_get_actuals_values.return_value = {
+            self.company["id"]: {"actuals_revenue": 10}
+        }
+        mock_get_budget_values.return_value = {
+            self.company["id"]: {"budget_revenue": 15}
+        }
+        mock_get_prior_year_revenue_values.return_value = {
+            "01223-test": {"prior_actuals_revenue": 12}
+        }
 
-        report = self.report_service_instance.get_company_report(
-            "0123456", "user@email.com", 2020, True
-        )
+        report = self.report_service_instance.get_company_data(self.company["id"], 2020)
 
         self.assertEqual(
-            report, {"description": self.company, "financial_profile": self.metrics}
+            report, {self.company["id"]: {"actuals_revenue": 10, "budget_revenue": 15}}
         )
-        mock_get_metric_by_scenario.assert_called()
-        mock_set_company_permissions.assert_called()
+        mock_get_actuals_values.assert_called()
 
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
@@ -233,13 +203,11 @@ class TestCompanyReportvsPeers(TestCase):
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
-    )
-    def test_get_company_report_fail(
-        self, mock_get_metric_by_scenario, mock_set_company_permissions
+    @mock.patch.object(CompanyReportvsPeersService, "get_company_data")
+    def test_get_company_report_raise_exception_when_fails_getting_data(
+        self, mock_get_company_data, mock_set_company_permissions
     ):
-        mock_get_metric_by_scenario.side_effect = Exception("error")
+        mock_get_company_data.side_effect = Exception("error")
 
         with self.assertRaises(Exception) as context:
             self.report_service_instance.get_company_report(
@@ -247,39 +215,35 @@ class TestCompanyReportvsPeers(TestCase):
             )
 
         self.assertEqual(str(context.exception), "error")
-        mock_get_metric_by_scenario.assert_called()
+        mock_get_company_data.assert_called()
         mock_set_company_permissions.assert_called()
 
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
-    )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_most_recents_revenue"
-    )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_company_description"
-    )
+    @mock.patch.object(CompanyReportvsPeersService, "get_company_data")
+    @mock.patch.object(CompanyReportvsPeersService, "get_profiles")
     def test_get_company_report_with_empty_metric_data(
         self,
-        mock_get_company_description,
-        mock_get_most_recents_revenue,
-        mock_get_metric_by_scenario,
+        mock_get_profiles,
+        mock_get_company_data,
         mock_set_company_permissions,
     ):
-        self.mock_base_metric_results(dict())
         self.company_anonymization.companies = ["0123456"]
-        revenues = [{"value": 40}, {"value": 37.5}]
-        mock_get_company_description.return_value = self.company
-        mock_get_most_recents_revenue.return_value = revenues
-        self.mock_profile_range.get_profile_ranges.side_effect = get_range_response
+        company = self.company.copy()
+        company.update(self.scenarios)
+        mock_get_company_data.return_value = {self.company["id"]: company}
+        mock_get_profiles.return_value = dict()
+        expected_company_description = {
+            param: value
+            for param, value in self.company.items()
+            if param not in ["size_cohort", "margin_group"]
+        }
 
         report = self.report_service_instance.get_company_report(
             "0123456", "user@email.com", 2020, False
         )
 
-        self.assertEqual(report.get("description"), self.company)
-        mock_get_metric_by_scenario.assert_called()
+        self.assertEqual(report.get("description"), expected_company_description)
+        mock_get_company_data.assert_called()
         mock_set_company_permissions.assert_called()
