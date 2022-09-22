@@ -513,6 +513,7 @@ resource "aws_lambda_function" "get_users_lambda_function" {
       ACCESS_KEY = var.aws_access_key_id
       SECRET_KEY = var.aws_secret_access_key
       USER_POOL_ID = var.user_pool_id
+      ENVIRONMENT = var.environment
     }
   }
 }

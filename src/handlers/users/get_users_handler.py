@@ -12,7 +12,7 @@ def handler(event, _):
         users_service = get_users_service_instance(event, logger)
         limit = 10
         token = ""
-        group = "demo_customer_group"
+        group = f"{os.environ.get('ENVIRONMENT')}_customer_group"
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             limit = int(params.get("limit", limit))
