@@ -222,3 +222,6 @@ class BaseMetricsReport:
             company.get("actuals_new_bookings"),
             company.get("prior_actuals_new_bookings"),
         )
+        company["debt_ebitda"] = self.calculator.calculate_debt_ebitda(
+            company.get("actuals_long_term_debt"), actuals_ebitda
+        )

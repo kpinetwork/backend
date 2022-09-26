@@ -36,6 +36,10 @@ class MetricNames(StrEnum):
     LOSSES_AND_DOWNGRADES = "Losses and downgrades"
     UPSELLS = "Upsells"
     NEW_BOOKINGS = "New bookings"
+    CASH_AND_EQUIVALENTS = "Cash & Equivalents"
+    LONG_TERM_DEBT = "Long term debt"
+    EQUITY_INVESTED = "Equity invested"
+    CASH_FLOW_OPERATIONS = "Cash flow from operations"
 
 
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]
@@ -52,4 +56,5 @@ COMPARISON_METRICS = [
     "sales_and_marketing",
     "general_and_admin",
     "research_and_development",
+    "debt_ebitda",
 ]
