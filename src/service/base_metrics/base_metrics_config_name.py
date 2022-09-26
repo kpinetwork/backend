@@ -16,4 +16,8 @@ METRICS_CONFIG_NAME = {
     MetricNames.LOSSES_AND_DOWNGRADES: "losses_and_downgrades",
     MetricNames.UPSELLS: "upsells",
     MetricNames.NEW_BOOKINGS: "new_bookings",
+    MetricNames.CASH_AND_EQUIVALENTS: "cash_and_equivalents",
+    MetricNames.LONG_TERM_DEBT: "long_term_debt",
+    MetricNames.EQUITY_INVESTED: "equity_invested",
+    MetricNames.CASH_FLOW_OPERATIONS: "cash_flow_operations",
 }

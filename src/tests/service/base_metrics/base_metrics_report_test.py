@@ -53,6 +53,7 @@ class TestBaseMetricsReport(TestCase):
             "gross_retention": -569,
             "net_retention": -500,
             "new_bookings_growth": 11,
+            "debt_ebitda": -0.20,
         }
 
         self.scenarios = {
@@ -74,6 +75,7 @@ class TestBaseMetricsReport(TestCase):
             "actuals_losses_and_downgrades": 87,
             "actuals_upsells": 9,
             "actuals_new_bookings": 8,
+            "actuals_long_term_debt": 3,
             "prior_actuals_new_bookings": 76,
             "prior_actuals_run_rate_revenue": 13,
         }

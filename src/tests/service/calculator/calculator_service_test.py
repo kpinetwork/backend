@@ -312,3 +312,17 @@ class TestCalculatorService(TestCase):
         )
 
         self.assertEqual(result, expected_value)
+
+    @parameterized.expand(
+        [
+            [10, 12, 0.83],
+            [5, 8, 0.62],
+            [None, 5.9, "NA"],
+            [25, 0, "NA"],
+        ]
+    )
+    def test_calculate_debt_ebitda(self, long_term_debt, ebitda, expected_value):
+
+        result = self.calculator.calculate_debt_ebitda(long_term_debt, ebitda)
+
+        self.assertEqual(result, expected_value)

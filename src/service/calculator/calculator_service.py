@@ -253,3 +253,11 @@ class CalculatorService:
         except Exception as error:
             self.logger.info(error)
             return "NA"
+
+    def calculate_debt_ebitda(self, long_term_debt: float, ebitda: float):
+        try:
+            debt_ebitda = long_term_debt / ebitda
+            return float(round(debt_ebitda, 2))
+        except Exception as error:
+            self.logger.info(error)
+            return "NA"
