@@ -1,4 +1,5 @@
 from collections import defaultdict
+from base_metrics_config_name import METRICS_CONFIG_NAME
 
 
 class ByMetricReport:
@@ -32,24 +33,8 @@ class ByMetricReport:
         return metrics
 
     def get_base_metrics(self) -> list:
-        base_metrics = [
-            "revenue",
-            "ebitda",
-            "cost_of_goods",
-            "sales_marketing",
-            "general_admin",
-            "research_development",
-            "gross_profit",
-            "customer_lifetime_value",
-            "customer_acquition_costs",
-            "customer_annual_value",
-            "other_operating_expenses",
-            "run_rate_revenue",
-            "headcount",
-            "losses_and_downgrades",
-            "upsells",
-            "new_bookings",
-        ]
+        base_metrics = ["gross_profit"]
+        base_metrics.extend(METRICS_CONFIG_NAME.values())
 
         return self.build_base_metrics(base_metrics)
 

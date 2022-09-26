@@ -374,6 +374,7 @@ functions:
     - ./src/handlers/by_metric_report/get_by_metric_report_handler.py
     - ./src/service/by_metric_report/by_metric_report.py
     - ./src/service/by_metric_report/metric_report_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
