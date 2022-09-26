@@ -288,7 +288,6 @@ class EditModifyService:
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.__build_companies_rows(results, rows)
         except Exception as error:
             self.logger.info(error)
@@ -335,7 +334,6 @@ class EditModifyService:
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(results)
         except Exception as error:
             self.logger.info(error)

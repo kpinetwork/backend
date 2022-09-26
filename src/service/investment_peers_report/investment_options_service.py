@@ -27,7 +27,6 @@ class InvestmentOptionsService:
                 .get_query()
             )
             records = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(records)
         except Exception as error:
             self.logger.info(error)
@@ -45,7 +44,6 @@ class InvestmentOptionsService:
                 .get_query()
             )
             records = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(records)
         except Exception as error:
             self.logger.info(error)

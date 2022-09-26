@@ -45,6 +45,7 @@ class DeleteScenariosService:
             self.session.commit()
             return True
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False
 
@@ -74,6 +75,7 @@ class DeleteScenariosService:
             self.session.commit()
             return True
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False
 
