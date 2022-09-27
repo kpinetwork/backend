@@ -144,7 +144,7 @@ class DynamicReport:
             self.calendar_report.report.set_company_permissions(username)
             profiles = self.calendar_report.report.get_profiles_ranges()
             self.add_metrics(data, headers, profiles)
-            self.anonymize_data(metrics, data, access, profiles)
+            self.anonymize_data(metrics, data, profiles, access)
             data = self.calendar_report.report.filter_by_conditions(data, **conditions)
 
             if not from_main and is_valid_company:
