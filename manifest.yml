@@ -81,10 +81,12 @@ functions:
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_http_headers.py
+    - ./src/utils/app_names.py
 
   get_company_report_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
@@ -99,7 +101,8 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
@@ -107,13 +110,14 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_http_headers.py
+    - ./src/utils/app_names.py
 
   get_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/comparison_vs_peers/get_comparison_vs_peers_handler.py
     - ./src/handlers/comparison_vs_peers/get_peers_data.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/service/by_year_report/by_year_report_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -122,22 +126,24 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_report.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
-    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_http_headers.py
+    - ./src/utils/app_names.py
 
   download_comparison_vs_peers_handler:
     requirements: ./src/handlers/company/requirements.txt
     include:
     - ./src/handlers/comparison_vs_peers/download_comparison_vs_peers_handler.py
     - ./src/handlers/comparison_vs_peers/get_peers_data.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/service/by_year_report/by_year_report_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -146,15 +152,17 @@ functions:
     - ./src/utils/company_anonymization.py
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_report.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/calculator/calculator_service.py
-    - ./src/service/calculator/calculator_report.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
     - ./casbin_configuration/model.conf
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_http_headers.py
+    - ./src/utils/app_names.py
     
   add_user_to_customer_group_handler:
     requirements: ./src/handlers/post_confirmation_trigger/requirements.txt
@@ -387,6 +395,7 @@ functions:
     - ./src/handlers/by_metric_report/get_by_metric_report_handler.py
     - ./src/service/by_metric_report/by_metric_report.py
     - ./src/service/by_metric_report/metric_report_repository.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -411,9 +420,7 @@ functions:
     - ./src/service/dynamic_report/dynamic_report.py
     - ./src/service/by_metric_report/by_metric_report.py
     - ./src/service/by_metric_report/metric_report_repository.py
-    - ./src/service/investment_peers_report/investment_year_report.py
-    - ./src/service/investment_peers_report/investment_repository.py
-    - ./src/service/comparison_vs_peers/comparison_vs_peers_service.py
+    - ./src/service/by_year_report/by_year_report_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
@@ -423,8 +430,9 @@ functions:
     - ./src/utils/response_user.py
     - ./src/utils/profile_range.py
     - ./src/service/calculator/calculator_service.py
-    - ./src/service/calculator/calculator_repository.py
-    - ./src/service/calculator/calculator_report.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
+    - ./src/service/base_metrics/base_metrics_report.py
+    - ./src/service/base_metrics/base_metrics_repository.py
     - ./src/service/user_details/get_user_details_service.py
     - ./src/service/user_details/user_details_service.py
     - ./casbin_configuration/policy_manager.py
@@ -525,6 +533,7 @@ functions:
     - ./src/service/investment_date_report/investment_date_repository.py
     - ./src/service/by_metric_report/metric_report_repository.py
     - ./src/service/by_metric_report/by_metric_report.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
     - ./src/service/calculator/calculator_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py

@@ -1,17 +1,39 @@
 from statistics import mean
+from calculator_service import CalculatorService
+from profile_range import ProfileRange
+from base_metrics_repository import BaseMetricsRepository
+from app_names import MetricNames
 
 
 class UniverseOverviewService:
-    def __init__(self, logger, calculator, repository, profile_range) -> None:
+    def __init__(
+        self,
+        logger,
+        calculator: CalculatorService,
+        repository: BaseMetricsRepository,
+        profile_range: ProfileRange,
+    ) -> None:
         self.logger = logger
         self.calculator = calculator
-        self.repository = repository
         self.profile_range = profile_range
+        self.repository = repository
 
     def get_metrics_by_year(self, year: str, **conditions) -> dict:
-        return self.repository.get_base_metrics(
-            year, False, None, True, True, True, **conditions
+        filters = self.repository.add_company_filters(**conditions)
+        metrics = [MetricNames.REVENUE, MetricNames.EBITDA]
+        data = self.repository.get_actuals_values(year, filters, metrics)
+        budget_values = self.repository.get_budget_values(
+            year, [year - 1, year, year + 1], filters, metrics
         )
+        prior_values = self.repository.get_prior_year_revenue_values(year, filters)
+
+        companies = set([*data]).union(set([*budget_values]))
+
+        for company_id in companies:
+            data[company_id].update(budget_values.get(company_id, dict()))
+            data[company_id].update(prior_values.get(company_id, dict()))
+
+        return data
 
     def add_actuals_metrics(
         self,
@@ -19,6 +41,7 @@ class UniverseOverviewService:
         actuals_revenue: float,
         prior_revenue: float,
         company: dict,
+        profile_ranges: dict,
     ) -> None:
         growth = self.calculator.calculate_growth_rate(
             actuals_revenue, prior_revenue, False
@@ -30,8 +53,12 @@ class UniverseOverviewService:
         company["rule_of_40"] = self.calculator.calculate_rule_of_40(
             actuals_revenue, prior_revenue, actuals_ebitda, False
         )
-        company["size_cohort"] = self.get_profile_range(actuals_revenue, "size profile")
-        company["margin_group"] = self.get_profile_range(growth, "growth profile")
+        company["size_cohort"] = self.profile_range.get_range_from_value(
+            actuals_revenue, ranges=profile_ranges.get("revenue")
+        )
+        company["margin_group"] = self.profile_range.get_range_from_value(
+            growth, ranges=profile_ranges.get("growth")
+        )
 
     def add_budget_metrics(
         self,
@@ -62,23 +89,15 @@ class UniverseOverviewService:
             actuals_ebitda, budget_ebitda, False
         )
 
-    def get_profile_range(self, metric: float, profile: str) -> str:
-        if not self.calculator.is_valid_number(metric):
-            return "NA"
-        try:
-            ranges = self.profile_range.get_profile_ranges(profile)
-            metric_ranges = list(
-                filter(
-                    lambda range: self.profile_range.verify_range(range, metric),
-                    ranges,
-                )
-            )
-            return metric_ranges[0].get("label")
-        except Exception as error:
-            self.logger.info(error)
-            return "NA"
+    def get_revenue_profiles_ranges(self) -> dict:
+        return {
+            "growth": self.profile_range.get_profile_ranges("growth profile"),
+            "revenue": self.profile_range.get_profile_ranges("size profile"),
+        }
 
     def add_calculated_metrics_to_companies(self, data: list) -> None:
+        profile_ranges = self.get_revenue_profiles_ranges()
+
         for company in data:
             actuals_ebitda = company.get("actuals_ebitda")
             actuals_revenue = company.get("actuals_revenue")
@@ -88,7 +107,7 @@ class UniverseOverviewService:
             budget_prior_revenue = company.get("prior_budget_revenue")
 
             self.add_actuals_metrics(
-                actuals_ebitda, actuals_revenue, prior_revenue, company
+                actuals_ebitda, actuals_revenue, prior_revenue, company, profile_ranges
             )
             self.add_budget_metrics(
                 budget_ebitda, budget_revenue, budget_prior_revenue, company

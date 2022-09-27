@@ -1,8 +1,7 @@
 from app_names import COMPARISON_METRICS
 from by_metric_report import ByMetricReport
-from investment_year_report import InvestmentYearReport
-from comparison_vs_peers_service import ComparisonvsPeersService
-from calculator_repository import CalculatorRepository
+from by_year_report_service import ByYearReportService
+from base_metrics_repository import BaseMetricsRepository
 from profile_range import ProfileRange
 
 
@@ -11,14 +10,12 @@ class DynamicReport:
         self,
         logger,
         metric_report: ByMetricReport,
-        investment_report: InvestmentYearReport,
-        calendar_report: ComparisonvsPeersService,
-        by_year_repository: CalculatorRepository,
+        calendar_report: ByYearReportService,
+        by_year_repository: BaseMetricsRepository,
         profile_range: ProfileRange,
     ) -> None:
         self.logger = logger
         self.metric_report = metric_report
-        self.investment_report = investment_report
         self.calendar_report = calendar_report
         self.by_year_repository = by_year_repository
         self.profile_range = profile_range
@@ -30,25 +27,20 @@ class DynamicReport:
         **conditions,
     ) -> dict:
         filters = self.by_year_repository.add_company_filters(**conditions)
-        metric_options = self.by_year_repository.get_base_metrics_options(
-            year=year,
-            need_next_year=False,
-            need_actuals_prior_year=True,
-            need_budget_prior_year=False,
-        )
-        data = []
-        for metric in metric_options:
-            base_metric = self.by_year_repository.get_metric_by_scenario(
-                metric.get("scenario"),
-                metric.get("metric"),
-                metric.get("alias"),
-                company_id,
-                filters,
-                True,
-            )
-            data.extend(base_metric)
 
-        return self.by_year_repository.process_base_data(data)
+        data = self.by_year_repository.get_actuals_values(year, filters)
+        budget_values = self.by_year_repository.get_budget_values(year, [year], filters)
+        prior_actuals_values = self.by_year_repository.get_prior_year_revenue_values(
+            year, filters
+        )
+
+        companies = set([*data]).union([*budget_values])
+
+        for company_id in companies:
+            data[company_id].update(budget_values.get(company_id, dict()))
+            data[company_id].update(prior_actuals_values.get(company_id, dict()))
+
+        return data
 
     def remove_fields(self, company_data: dict, headers: list) -> None:
         company_data.pop("prior_actuals_revenue", None)
@@ -113,15 +105,10 @@ class DynamicReport:
                 company_data.get("id")
             )
 
-    def anonymize_data(self, metrics: list, data: dict, access: bool = False) -> None:
+    def anonymize_data(
+        self, metrics: list, data: dict, profiles: dict, access: bool = False
+    ) -> None:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
-        profiles = {
-            "revenue": self.profile_range.get_profile_ranges("size profile"),
-            "growth": self.profile_range.get_profile_ranges("growth profile"),
-            "revenue_per_employee": self.profile_range.get_profile_ranges(
-                "revenue per employee"
-            ),
-        }
         metrics_for_ranges = self.get_metrics_for_dynamic_ranges(metrics)
         ranges = self.get_dynamic_ranges(metrics_for_ranges, data)
 
@@ -131,10 +118,10 @@ class DynamicReport:
                     metrics_for_ranges, ranges, profiles, data[company_id]
                 )
 
-    def add_metrics(self, data: dict, headers: list) -> list:
+    def add_metrics(self, data: dict, headers: list, profiles: dict) -> list:
         for company_id in data:
             company_data = data[company_id]
-            self.calendar_report.report.calculate_metrics(company_data)
+            self.calendar_report.report.calculate_metrics(company_data, profiles)
             self.replace_base_input_values(company_data, headers)
 
     def get_year_report(
@@ -155,8 +142,9 @@ class DynamicReport:
                 metrics = COMPARISON_METRICS.copy()
             headers.extend(metrics)
             self.calendar_report.report.set_company_permissions(username)
-            self.add_metrics(data, headers)
-            self.anonymize_data(metrics, data, access)
+            profiles = self.calendar_report.report.get_profiles_ranges()
+            self.add_metrics(data, headers, profiles)
+            self.anonymize_data(metrics, data, profiles, access)
             data = self.calendar_report.report.filter_by_conditions(data, **conditions)
 
             if not from_main and is_valid_company:
@@ -188,30 +176,12 @@ class DynamicReport:
             company_id, username, data, from_main, access, metrics, **conditions
         )
 
-    def get_dynamic_investment_year_report(
-        self,
-        company_id: str,
-        invest_year: int,
-        username: str,
-        from_main: bool,
-        metrics: list,
-        access: bool,
-        **conditions,
-    ) -> dict:
-        data = self.investment_report.repository.get_base_metrics(
-            invest_year, **conditions
-        )
-        return self.get_year_report(
-            company_id, username, data, from_main, access, metrics, **conditions
-        )
-
     def get_dynamic_report(
         self,
         company_id: str,
         username: str,
         metrics: list,
         calendar_year: int,
-        investment_year: int,
         from_main: bool,
         access: bool,
         **conditions,
@@ -225,16 +195,6 @@ class DynamicReport:
                     from_main,
                     access,
                     metrics,
-                    **conditions,
-                )
-            if investment_year is not None:
-                return self.get_dynamic_investment_year_report(
-                    company_id,
-                    investment_year,
-                    username,
-                    from_main,
-                    metrics,
-                    access,
                     **conditions,
                 )
 

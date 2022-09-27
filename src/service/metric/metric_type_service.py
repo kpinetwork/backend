@@ -21,7 +21,7 @@ class MetricTypesService:
                     }
                 )
                 .add_sql_order_by_condition(
-                    ["sort_value"], self.query_builder.Order.ASC
+                    ["group_sort_value", "sort_value"], self.query_builder.Order.ASC
                 )
                 .build()
                 .get_query()

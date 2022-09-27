@@ -6,7 +6,7 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
-from calculator_repository import CalculatorRepository
+from base_metrics_repository import BaseMetricsRepository
 from calculator_service import CalculatorService
 from profile_range import ProfileRange
 from verify_user_permissions import (
@@ -28,7 +28,9 @@ def get_company_report_instance():
     user_service = get_user_details_service_instance()
     company_anonymization = CompanyAnonymization(user_service)
     calculator = CalculatorService(logger)
-    repository = CalculatorRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
+    repository = BaseMetricsRepository(
+        logger, session, QuerySQLBuilder(), ResponseSQL()
+    )
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
 
     return CompanyReportvsPeersService(

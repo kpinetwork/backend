@@ -1,46 +1,51 @@
+from calculator_service import CalculatorService
+from profile_range import ProfileRange
+from company_anonymization import CompanyAnonymization
+from base_metrics_repository import BaseMetricsRepository
+from app_names import MetricNames, TableNames
+
+
 class CompanyReportvsPeersService:
     def __init__(
-        self, logger, calculator, repository, profile_range, company_anonymization
+        self,
+        logger,
+        calculator: CalculatorService,
+        repository: BaseMetricsRepository,
+        profile_range: ProfileRange,
+        company_anonymization: CompanyAnonymization,
     ) -> None:
         self.logger = logger
         self.calculator = calculator
-        self.repository = repository
         self.profile_range = profile_range
         self.company_anonymization = company_anonymization
+        self.repository = repository
 
-    def get_metric_range(self, metric: float, profile_type: str) -> str:
-        if not self.calculator.is_valid_number(metric):
-            return "NA"
-        try:
-            ranges = self.profile_range.get_profile_ranges(profile_type)
-            metric_ranges = list(
-                filter(
-                    lambda range: self.profile_range.verify_range(range, metric),
-                    ranges,
-                )
-            )
-            return metric_ranges[0].get("label")
-        except Exception as error:
-            self.logger.info(error)
-            return "NA"
+    def get_company_data(self, company_id, year: int) -> dict:
+        filters = {f"{TableNames.COMPANY}.id": f"'{company_id}'"}
+        metrics = [MetricNames.REVENUE, MetricNames.EBITDA]
+        data = self.repository.get_actuals_values(year, filters, metrics)
+        budget_values = self.repository.get_budget_values(
+            year, [year, year + 1], filters, metrics
+        )
+        prior_values = self.repository.get_prior_year_revenue_values(year, filters)
+
+        companies = set([*data]).union(set([*budget_values]))
+
+        for company_id in companies:
+            data[company_id].update(budget_values.get(company_id, dict()))
+            data[company_id].update(prior_values.get(company_id, dict()))
+
+        return data
 
     def get_profiles(self, company: dict) -> dict:
-        actuals_revenue, prior_revenue = tuple(
-            self.get_most_recent_revenues_value(company)
-        )
+        actuals_revenue = company.get("actuals_revenue")
+        prior_revenue = company.get("prior_actuals_revenue")
 
         growth = self.calculator.calculate_growth_rate(actuals_revenue, prior_revenue)
         revenue = self.calculator.calculate_base_metric(actuals_revenue)
-        size_range = self.get_metric_range(revenue, "size profile")
-        growth_range = self.get_metric_range(growth, "growth profile")
+        size_range = self.profile_range.get_range_from_value(revenue, "size profile")
+        growth_range = self.profile_range.get_range_from_value(growth, "growth profile")
         return {"size_cohort": size_range, "margin_group": growth_range}
-
-    def get_most_recent_revenues_value(self, company: dict) -> list:
-        company_id = company.get("id")
-        result = self.repository.get_most_recents_revenue(company_id)
-        result.extend([{}, {}])
-        revenues = result[:2]
-        return [revenue.get("value", "NA") for revenue in revenues]
 
     def get_description(self, company: dict) -> dict:
         params = ["id", "name", "sector", "vertical", "inves_profile_name"]
@@ -49,8 +54,7 @@ class CompanyReportvsPeersService:
         if not company:
             return description
 
-        for param in params:
-            description[param] = company.get(param)
+        description = {param: company.get(param) for param in params}
 
         profiles = self.get_profiles(company)
         description.update(profiles)
@@ -107,17 +111,9 @@ class CompanyReportvsPeersService:
             if not user_has_permissions:
                 return dict()
 
-            data = self.repository.get_base_metrics(
-                year=year,
-                need_all=True,
-                company_id=company_id,
-                need_actuals_prior_year=True,
-                need_next_year=True,
-            )
+            data = self.get_company_data(company_id, year)
 
             company = data.get(company_id, dict())
-            if not company:
-                company = self.repository.get_company_description(company_id)
 
             return {
                 "description": self.get_description(company),
