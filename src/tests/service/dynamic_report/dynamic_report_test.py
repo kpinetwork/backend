@@ -214,7 +214,7 @@ class TestDynamicReport(TestCase):
         self.company_anonymization.companies = ["2"]
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
-        self.report_instance.anonymize_data(metrics, data, False)
+        self.report_instance.anonymize_data(metrics, data, self.profile_ranges, False)
 
         mock_anonymize_company.assert_called()
 

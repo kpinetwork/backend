@@ -505,6 +505,7 @@ functions:
     - ./src/service/investment_date_report/investment_date_repository.py
     - ./src/service/by_metric_report/metric_report_repository.py
     - ./src/service/by_metric_report/by_metric_report.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
     - ./src/service/calculator/calculator_service.py
     - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
