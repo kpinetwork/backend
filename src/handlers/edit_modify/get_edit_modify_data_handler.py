@@ -8,21 +8,13 @@ from response_sql import ResponseSQL
 from commons_functions import get_edit_modify_condition_params
 from connection import create_db_engine, create_db_session
 from verify_user_permissions import verify_user_access, get_user_id_from_event
+from app_http_headers import AppHttpHeaders
 
-
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-
-def get_headers() -> dict:
-    return {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,PUT",
-    }
 
 
 def get_service():
@@ -53,12 +45,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(data),
-            "headers": get_headers(),
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": get_headers(),
+            "headers": headers.get_headers(),
         }

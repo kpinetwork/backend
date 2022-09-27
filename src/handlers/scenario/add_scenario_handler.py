@@ -7,7 +7,9 @@ from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from verify_user_permissions import verify_user_access, get_user_id_from_event
 from base_exception import AppError
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,POST")
 engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
@@ -26,15 +28,6 @@ def get_arguments(event: dict) -> dict:
     body = get_body(event)
     args = ["scenario", "year", "metric", "value"]
     return {field: body[field] for field in body if field in args}
-
-
-def get_headers() -> dict:
-    return {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "OPTIONS,POST",
-    }
 
 
 def get_service() -> object:
@@ -62,12 +55,12 @@ def handler(event, _):
             "body": json.dumps(
                 {"company_id": company_id, "scenario": scenario, "added": True}
             ),
-            "headers": get_headers(),
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": get_headers(),
+            "headers": headers.get_headers(),
         }

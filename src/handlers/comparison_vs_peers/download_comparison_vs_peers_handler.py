@@ -3,6 +3,9 @@ from io import TextIOWrapper
 import json
 import csv
 from get_peers_data import get_comparison_vs_peers
+from app_http_headers import AppHttpHeaders
+
+headers = AppHttpHeaders("application/octet-stream", "OPTIONS,GET")
 
 header = [
     "name",
@@ -82,17 +85,12 @@ def handler(event, _):
             "statusCode": 200,
             "body": file_data,
             "isBase64Encoded": False,
-            "headers": {
-                "Content-Type": "application/octet-stream",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

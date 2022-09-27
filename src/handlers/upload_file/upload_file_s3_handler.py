@@ -4,7 +4,9 @@ import boto3
 import logging
 import datetime
 from base_exception import AppError
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,POST")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -72,19 +74,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps({"uploaded": True, "filename": filename}),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {
-                "Content-Type": "application/json",
-            },
+            "headers": headers.get_headers(),
         }
