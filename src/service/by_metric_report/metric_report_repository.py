@@ -33,7 +33,6 @@ class MetricReportRepository:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return [
                 year["year"]
                 for year in self.response_sql.process_query_list_results(result)
@@ -89,7 +88,6 @@ class MetricReportRepository:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(result)
         except Exception as error:
             self.logger.info(error)
@@ -412,7 +410,6 @@ class MetricReportRepository:
             )
 
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(result)
 
         except Exception as error:
