@@ -229,7 +229,7 @@ class TestByMetricReport(TestCase):
         )
         self.assertEqual(data, expected_debt_ebitda)
 
-    def test_process_debt_ebitda_when_metric_value_is_none(self):
+    def test_process_debt_ebitda_when_there_is_no_metric_value(self):
         records = self.records.copy()
         records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
         self.mock_repository.get_metric_records.return_value = records
