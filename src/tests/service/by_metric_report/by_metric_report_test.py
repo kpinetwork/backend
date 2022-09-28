@@ -209,6 +209,44 @@ class TestByMetricReport(TestCase):
 
         self.assertEqual(data, expected_growth)
 
+    def test_process_debt_ebitda(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_debt_ebitda = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: 3.0, 2020: 4.0},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: 6.0},
+            },
+        }
+
+        data = self.report_instance.process_debt_ebitda(
+            "debt_ebitda", [2019, 2020, 2021]
+        )
+        self.assertEqual(data, expected_debt_ebitda)
+
+    def test_process_debt_ebitda_when_metric_value_is_none(self):
+        records = self.records.copy()
+        records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
+        self.mock_repository.get_metric_records.return_value = records
+        expected_debt_ebitda = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA"},
+            }
+        }
+
+        data = self.report_instance.process_debt_ebitda(
+            "debt_ebitda", [2019, 2020, 2021]
+        )
+
+        self.assertEqual(data, expected_debt_ebitda)
+
     def test_process_rule_of_40(self):
         expected_data = {
             "1": {
@@ -364,6 +402,20 @@ class TestByMetricReport(TestCase):
 
         data = self.report_instance.get_records(
             "actuals_revenue", [2019, 2020, 2021], dict()
+        )
+
+        self.assertEqual(data, expected_data)
+
+    def test_get_records_with_debt_ebitda(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        self.mock_repository.get_functions_metric.return_value = {"debt_ebitda": {}}
+        expected_data = {
+            "1": {"id": "1", "name": "Test", "metrics": {2019: 3.0, 2020: 4.0}},
+            "2": {"id": "2", "name": "Company", "metrics": {2019: 6.0}},
+        }
+
+        data = self.report_instance.get_records(
+            "debt_ebitda", [2019, 2020, 2021], dict()
         )
 
         self.assertEqual(data, expected_data)
