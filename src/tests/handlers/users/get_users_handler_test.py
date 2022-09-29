@@ -13,7 +13,7 @@ class TestGetUsersHandler(TestCase):
     def test_get_users_handler_success_should_return_200_response(
         self, mock_get_users_instance
     ):
-        expected_out = [{"username": "user@email.com", "email": "", "roles": ["admin"]}]
+        expected_out = [{"username": "", "email": "user@email.com", "roles": []}]
         mock_get_users_instance.return_value = self.mock_users_instance
         self.mock_users_instance.get_users.return_value = expected_out
 

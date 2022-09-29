@@ -42,8 +42,13 @@ class ResponseUser:
             if "google" not in group.get("GroupName", "").lower()
         ]
 
+    def get_email_from_attributes(self, attributes):
+        for attribute in attributes:
+            if attribute.get("Name") == "email":
+                return attribute
+
     def proccess_user(self, user: dict) -> dict:
-        email_object = user["Attributes"][0]
+        email_object = self.get_email_from_attributes(user["Attributes"])
         return {
             "username": user.get("Username"),
             "email": email_object.get("Value"),
