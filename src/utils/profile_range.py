@@ -29,7 +29,6 @@ class ProfileRange:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(result)
         except Exception as error:
             self.logger.info(error)

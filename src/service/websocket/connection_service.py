@@ -29,6 +29,7 @@ class WebsocketConnectionService:
 
             return True
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False
 
@@ -46,5 +47,6 @@ class WebsocketConnectionService:
 
             return True
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             return False

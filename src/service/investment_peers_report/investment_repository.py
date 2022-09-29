@@ -139,7 +139,6 @@ class InvestmentRepository:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.get_investments_dict(
                 self.response_sql.process_query_list_results(result)
             )
@@ -204,7 +203,6 @@ class InvestmentRepository:
             )
 
             records = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(records)
         except Exception as error:
             self.logger.info(error)
