@@ -26,7 +26,7 @@ class DynamicReport:
         company_id: str = None,
         **conditions,
     ) -> dict:
-        filters = self.by_year_repository.add_company_filters(**conditions)
+        filters = self.by_year_repository.add_filters(**conditions)
 
         data = self.by_year_repository.get_actuals_values(year, filters)
         budget_values = self.by_year_repository.get_budget_values(year, [year], filters)
