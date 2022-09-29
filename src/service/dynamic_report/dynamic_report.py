@@ -23,7 +23,6 @@ class DynamicReport:
     def get_base_metrics(
         self,
         year: int,
-        company_id: str = None,
         **conditions,
     ) -> dict:
         filters = self.by_year_repository.add_company_filters(**conditions)
@@ -171,7 +170,7 @@ class DynamicReport:
         metrics: list,
         **conditions,
     ) -> dict:
-        data = self.get_base_metrics(year=year, company_id=company_id, **conditions)
+        data = self.get_base_metrics(year=year, **conditions)
         return self.get_year_report(
             company_id, username, data, from_main, access, metrics, **conditions
         )
