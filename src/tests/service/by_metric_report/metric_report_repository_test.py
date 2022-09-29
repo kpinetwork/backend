@@ -197,6 +197,20 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
+    def test_get_debt_ebitda_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_debt_ebitda(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_debt_ebitda_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_debt_ebitda(dict())
+
+        self.assertEqual(metrics, [])
+
     def test_get_gross_retention_return_list_on_success(self):
         self.mock_response_list_query_sql(self.records)
 

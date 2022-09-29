@@ -33,7 +33,6 @@ class MetricReportRepository:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return [
                 year["year"]
                 for year in self.response_sql.process_query_list_results(result)
@@ -89,7 +88,6 @@ class MetricReportRepository:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(result)
         except Exception as error:
             self.logger.info(error)
@@ -281,6 +279,22 @@ class MetricReportRepository:
             self.logger.info(error)
             return []
 
+    def get_debt_ebitda(self, filters: dict) -> list:
+        try:
+            where_conditions = {
+                f"{self.scenario_table_label}.type": f"'{ScenarioNames.ACTUALS}'",
+                f"{TableNames.METRIC}.name": "'Long term debt'",
+            }
+            where_conditions.update(filters)
+            subquery = self.__get_subquery_metric("Ebitda", ScenarioNames.ACTUALS)
+            select_value = [
+                f"({TableNames.METRIC}.value / ({subquery})) as value",
+            ]
+            return self.__get_no_base_metrics(where_conditions, select_value)
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
     def get_gross_retention(self, filters: dict) -> list:
         try:
             where_conditions = {
@@ -396,7 +410,6 @@ class MetricReportRepository:
             )
 
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_list_results(result)
 
         except Exception as error:
@@ -440,6 +453,10 @@ class MetricReportRepository:
             "losses_and_downgrades": "Losses and downgrades",
             "upsells": "Upsells",
             "new_bookings": "New bookings",
+            "cash_and_equivalents": "Cash & Equivalents",
+            "long_term_debt": "Long term debt",
+            "equity_invested": "Equity invested",
+            "cash_flow_operations": "Cash flow from operations",
         }
 
     def __get_base_functions_metric(
@@ -528,6 +545,10 @@ class MetricReportRepository:
             },
             "opex_as_revenue": {
                 "function": self.get_opex_as_revenue,
+                "arguments": self.__get_arguments(filters),
+            },
+            "debt_ebitda": {
+                "function": self.get_debt_ebitda,
                 "arguments": self.__get_arguments(filters),
             },
         }
