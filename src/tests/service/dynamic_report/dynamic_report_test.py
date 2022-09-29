@@ -113,9 +113,7 @@ class TestDynamicReport(TestCase):
         company.update(self.scenarios.copy())
         mock_process_scenario_values.return_value = {self.company["id"]: company}
 
-        metrics = self.report_instance.get_base_metrics(
-            2020, self.company["id"], sector=[]
-        )
+        metrics = self.report_instance.get_base_metrics(2020, sector=[])
 
         self.assertEqual(metrics, {self.company["id"]: company})
 
