@@ -29,6 +29,7 @@ header = [
     "gross_retention",
     "net_retention",
     "new_bookings_growth",
+    "debt_ebitda",
 ]
 
 file_path = os.environ.get("FILE_PATH")
