@@ -11,7 +11,9 @@ from verify_user_permissions import (
     get_username_from_user_id,
 )
 from get_user_details_service import get_user_details_service_instance
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 query_builder = QuerySQLBuilder()
@@ -43,17 +45,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(companies, default=str),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

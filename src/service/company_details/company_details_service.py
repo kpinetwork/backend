@@ -202,7 +202,8 @@ class CompanyDetails:
                         case_query,
                         f"{TableNames.SCENARIO}.type",
                         "year",
-                        "sort_value",
+                        f"{TableNames.METRIC_SORT}.group_sort_value",
+                        f"{TableNames.METRIC_SORT}.sort_value",
                     ],
                     self.query_builder.Order.ASC,
                 )

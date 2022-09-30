@@ -1,5 +1,8 @@
 import json
 from get_peers_data import get_comparison_vs_peers
+from app_http_headers import AppHttpHeaders
+
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 
 
 def handler(event, _):
@@ -9,17 +12,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(comparison_peers),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

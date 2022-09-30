@@ -2,7 +2,9 @@ import json
 import os
 import logging
 from get_users_service_instance import get_users_service_instance
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -12,27 +14,26 @@ def handler(event, _):
         users_service = get_users_service_instance(event, logger)
         limit = 10
         token = ""
+        group = f"{os.environ.get('ENVIRONMENT')}_customer_group"
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             limit = int(params.get("limit", limit))
             token = params.get("token", token)
+            group = params.get("group", group)
 
-        users = users_service.get_users(os.environ.get("USER_POOL_ID"), limit, token)
+        users = users_service.get_users(
+            os.environ.get("USER_POOL_ID"), limit, token, group
+        )
 
         return {
             "statusCode": 200,
             "body": json.dumps(users, default=str),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

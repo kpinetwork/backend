@@ -1,6 +1,6 @@
 from unittest import TestCase
 import logging
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from parameterized import parameterized
 from src.service.universe_overview.universe_overview_service import (
     UniverseOverviewService,
@@ -59,23 +59,11 @@ class TestUniverseOverview(TestCase):
             {"growth": "NA", "ebitda_margin": 40.5, "rule_of_40": "NA"},
         ]
 
-    def test_get_profile_range_with_no_valid_number(self):
-        metric = "NA"
-
-        range = self.overview_instance.get_profile_range("hello", "size_profile")
-
-        self.assertEqual(range, metric)
-
-    def test_get_profile_range_with_error_should_return_NA(self):
-        metric = "NA"
-        self.mock_profile_range.get_profile_ranges.side_effect = Exception("Error")
-
-        range = self.overview_instance.get_profile_range(30, "growth profile")
-
-        self.assertEqual(range, metric)
-
     def test_add_calculated_metrics_to_companies(self):
         self.mock_profile_range.get_profile_ranges.return_value = [size_range]
+        self.mock_profile_range.get_range_from_value.return_value = size_range.get(
+            "label"
+        )
         scenarios = self.scenarios.copy()
         company = self.scenarios.copy()
         metrics = self.metrics.copy()
@@ -87,6 +75,7 @@ class TestUniverseOverview(TestCase):
         for key, value in scenarios.items():
             if self.calculator.is_valid_number(value):
                 scenarios[key] = round(value, 2)
+
         self.assertEqual([scenarios], [company])
 
     @parameterized.expand([["growth", 27.5], ["ebitda_margin", 30.33]])
@@ -107,7 +96,7 @@ class TestUniverseOverview(TestCase):
 
         self.assertEqual(average, 0)
 
-    def test_get_kpi_averages(self):
+    def test_get_kpi_averages_return_valid_values_with_no_empty_data(self):
         expected_averages = [
             {"growth": 27.5},
             {"ebitda_margin": 30.33},
@@ -279,11 +268,17 @@ class TestUniverseOverview(TestCase):
 
         self.assertEqual(filters_by_conditions, data)
 
-    def test_get_universe_overview_success(self):
+    @patch.object(UniverseOverviewService, "get_metrics_by_year")
+    def test_get_universe_overview_success_should_return_valid_data(
+        self, mock_get_metrics_by_year
+    ):
+        self.mock_profile_range.get_profile_ranges.return_value = [size_range]
+        self.mock_profile_range.get_range_from_value.return_value = size_range.get(
+            "label"
+        )
         company = self.scenarios.copy()
         data = {self.company["id"]: company}
-        self.mock_profile_range.get_profile_ranges.return_value = [size_range]
-        self.mock_repository.get_base_metrics.return_value = data
+        mock_get_metrics_by_year.return_value = data
         expected_overview = {
             "kpi_average": [
                 {"growth": 60.0},
@@ -314,14 +309,32 @@ class TestUniverseOverview(TestCase):
             },
         }
 
-        universe_overview = self.overview_instance.get_universe_overview("2020")
+        universe_overview = self.overview_instance.get_universe_overview(2020)
 
         self.assertEqual(universe_overview, expected_overview)
 
-    def test_get_universe_overview_fail(self):
-        self.mock_repository.get_base_metrics.side_effect = Exception("error")
+    def test_get_universe_overview_should_raise_exception_when_fails(self):
+        self.mock_repository.get_actuals_values.side_effect = Exception("error")
 
         with self.assertRaises(Exception) as context:
-            self.overview_instance.get_universe_overview("2020")
+            self.overview_instance.get_universe_overview(2020)
 
         self.assertEqual(str(context.exception), "error")
+
+    def test_get_metrics_by_year_should_return_a_dict_merged(self):
+        self.mock_repository.get_actuals_values.return_value = {
+            self.company["id"]: {"actuals_revenue": 20}
+        }
+        self.mock_repository.get_budget_values.return_value = {
+            self.company["id"]: {"budget_revenue": 22}
+        }
+        self.mock_repository.get_prior_year_revenue_values.return_value = {
+            "012245": {"prior_actuals_revenue": 12}
+        }
+        expected_base_data = {
+            self.company["id"]: {"actuals_revenue": 20, "budget_revenue": 22}
+        }
+
+        data = self.overview_instance.get_metrics_by_year(2020, sector=[])
+
+        self.assertEqual(data, expected_base_data)

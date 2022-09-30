@@ -1,20 +1,16 @@
-from unittest import TestCase, mock
+from unittest import TestCase
 import logging
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from src.utils.app_names import COMPARISON_METRICS
-from src.service.investment_peers_report.investment_year_report import (
-    InvestmentYearReport,
-)
 from src.service.calculator.calculator_service import CalculatorService
-from src.service.calculator.calculator_report import CalculatorReport
 from src.utils.company_anonymization import CompanyAnonymization
 from src.service.dynamic_report.dynamic_report import DynamicReport
 
 from src.service.by_metric_report.by_metric_report import ByMetricReport
 
-from src.service.comparison_vs_peers.comparison_vs_peers_service import (
-    ComparisonvsPeersService,
-)
+from src.service.by_year_report.by_year_report_service import ByYearReportService
+from src.service.base_metrics.base_metrics_report import BaseMetricsReport
+from src.service.base_metrics.base_metrics_repository import BaseMetricsRepository
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -31,8 +27,11 @@ class TestDynamicReport(TestCase):
         self.user_service = self.company_anonymization.user_details_service
         self.mock_profile_range = Mock()
         self.calculator = CalculatorService(logger)
-        self.calculator_report = CalculatorReport(
+        self.base_metrics_report = BaseMetricsReport(
             logger, self.calculator, self.mock_profile_range, self.company_anonymization
+        )
+        self.base_metrics_repository = BaseMetricsRepository(
+            logger, self.mock_session, self.mock_query_builder, self.mock_response_sql
         )
         self.metric_report = ByMetricReport(
             logger,
@@ -41,19 +40,14 @@ class TestDynamicReport(TestCase):
             self.mock_profile_range,
             self.company_anonymization,
         )
-        self.investment_report = InvestmentYearReport(
-            logger, self.calculator_report, self.mock_repository
+        self.calendar_report = ByYearReportService(
+            logger, self.base_metrics_report, self.base_metrics_repository
         )
-        self.calendar_report = ComparisonvsPeersService(
-            logger, self.calculator_report, self.mock_repository
-        )
-        self.mock_by_year_repository = Mock()
         self.report_instance = DynamicReport(
             logger,
             self.metric_report,
-            self.investment_report,
             self.calendar_report,
-            self.mock_by_year_repository,
+            self.base_metrics_repository,
             self.mock_profile_range,
         )
         self.company = {
@@ -101,25 +95,27 @@ class TestDynamicReport(TestCase):
         }
 
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
+        self.profile_ranges = {
+            "revenue": [self.range],
+            "growth": [self.range],
+            "revenue_per_employee": [self.range],
+        }
 
     def mock_base_metric_results(self, response):
         attrs = {"proccess_base_metrics_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_base_metrics_should_return_dict_with_values(self):
+    @patch.object(BaseMetricsRepository, "process_scenario_values")
+    def test_get_base_metrics_should_return_dict_with_values(
+        self, mock_process_scenario_values
+    ):
         company = self.company.copy()
         company.update(self.scenarios.copy())
-        self.mock_by_year_repository.get_base_metrics_options.return_value = [
-            {"scenario": "Actuals", "metric": "Revenue", "alias": "actuals_revenue"}
-        ]
-        self.mock_by_year_repository.get_metric_by_scenario.return_value = []
-        self.mock_by_year_repository.process_base_data.return_value = company
+        mock_process_scenario_values.return_value = {self.company["id"]: company}
 
-        metrics = self.report_instance.get_base_metrics(
-            2020, self.company["id"], sector=[]
-        )
+        metrics = self.report_instance.get_base_metrics(2020, sector=[])
 
-        self.assertEqual(metrics, company)
+        self.assertEqual(metrics, {self.company["id"]: company})
 
     def test_remove_fields_should_change_dict(self):
         company = self.company.copy()
@@ -209,16 +205,14 @@ class TestDynamicReport(TestCase):
             {"growth": self.range.get("label"), "id": "1234", "name": "1234-xxxx"},
         )
 
-    @mock.patch(
-        "src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_company"
-    )
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_company")
     def test_anonymize_data(self, mock_anonymize_company):
         metrics = ["gross_profit"]
         data = {"1": {"revenue": 34}}
         self.company_anonymization.companies = ["2"]
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
-        self.report_instance.anonymize_data(metrics, data, False)
+        self.report_instance.anonymize_data(metrics, data, self.profile_ranges, False)
 
         mock_anonymize_company.assert_called()
 
@@ -233,14 +227,12 @@ class TestDynamicReport(TestCase):
             }
         }
 
-        self.report_instance.add_metrics(data, metrics)
+        self.report_instance.add_metrics(data, metrics, self.profile_ranges)
 
         self.assertEqual(data, {"1": {"name": "Test Company", "gross_profit": "NA"}})
 
-    @mock.patch("src.service.dynamic_report.dynamic_report.DynamicReport.add_metrics")
-    @mock.patch(
-        "src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_data"
-    )
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.add_metrics")
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_data")
     def test_get_year_report_should_return_data(
         self, mock_anonymize_data, mock_add_metrics
     ):
@@ -312,12 +304,8 @@ class TestDynamicReport(TestCase):
 
         self.assertEqual(str(context.exception), "error")
 
-    @mock.patch(
-        "src.service.dynamic_report.dynamic_report.DynamicReport.get_year_report"
-    )
-    @mock.patch(
-        "src.service.dynamic_report.dynamic_report.DynamicReport.get_base_metrics"
-    )
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.get_year_report")
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.get_base_metrics")
     def test_get_dynamic_report_with_calendar_year(
         self, mock_get_base_metrics, mock_get_year_report
     ):
@@ -331,31 +319,11 @@ class TestDynamicReport(TestCase):
         mock_get_year_report.return_value = expected_peers
 
         report = self.report_instance.get_dynamic_report(
-            "1", "user@test.com", ["actuals_revenue"], 2020, None, True, True
+            "1", "user@test.com", ["actuals_revenue"], 2020, True, True
         )
 
         self.assertEqual(report, expected_peers)
         mock_get_base_metrics.assert_called()
-        mock_get_year_report.assert_called()
-
-    @mock.patch(
-        "src.service.dynamic_report.dynamic_report.DynamicReport.get_year_report"
-    )
-    def test_get_dynamic_report_with_investment_year(self, mock_get_year_report):
-        expected_peers = {
-            "headers": ["name", "actuals_revenue"],
-            "company_comparison_data": {},
-            "peers_comparison_data": [
-                {"id": "1", "name": "Test company", "actuals_revenue": 34}
-            ],
-        }
-        mock_get_year_report.return_value = expected_peers
-
-        report = self.report_instance.get_dynamic_report(
-            "1", "user@test.com", ["actuals_revenue"], None, 1, True, True
-        )
-
-        self.assertEqual(report, expected_peers)
         mock_get_year_report.assert_called()
 
     def test_get_dynamic_report_without_year(self):
@@ -366,12 +334,12 @@ class TestDynamicReport(TestCase):
         }
 
         report = self.report_instance.get_dynamic_report(
-            "1", "user@test.com", ["actuals_revenue"], None, None, True, True
+            "1", "user@test.com", ["actuals_revenue"], None, True, True
         )
 
         self.assertEqual(report, expected_peers)
 
-    @mock.patch(
+    @patch(
         "src.service.dynamic_report.dynamic_report.DynamicReport.get_dynamic_calendar_year_report"
     )
     def test_get_dynamic_report_should_raise_error_when_report_fails(
@@ -381,7 +349,7 @@ class TestDynamicReport(TestCase):
 
         with self.assertRaises(Exception) as context:
             self.report_instance.get_dynamic_report(
-                "1", "user@test.com", ["actuals_revenue"], 2020, None, True, True
+                "1", "user@test.com", ["actuals_revenue"], 2020, True, True
             )
 
         self.assertEqual(str(context.exception), "error")

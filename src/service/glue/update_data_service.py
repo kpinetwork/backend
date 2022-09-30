@@ -24,6 +24,7 @@ class UpdateDataService:
             self.session.commit()
 
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             raise error
 

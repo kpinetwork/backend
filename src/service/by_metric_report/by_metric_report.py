@@ -1,4 +1,5 @@
 from collections import defaultdict
+from base_metrics_config_name import METRICS_CONFIG_NAME
 
 
 class ByMetricReport:
@@ -32,24 +33,8 @@ class ByMetricReport:
         return metrics
 
     def get_base_metrics(self) -> list:
-        base_metrics = [
-            "revenue",
-            "ebitda",
-            "cost_of_goods",
-            "sales_marketing",
-            "general_admin",
-            "research_development",
-            "gross_profit",
-            "customer_lifetime_value",
-            "customer_acquition_costs",
-            "customer_annual_value",
-            "other_operating_expenses",
-            "run_rate_revenue",
-            "headcount",
-            "losses_and_downgrades",
-            "upsells",
-            "new_bookings",
-        ]
+        base_metrics = ["gross_profit"]
+        base_metrics.extend(METRICS_CONFIG_NAME.values())
 
         return self.build_base_metrics(base_metrics)
 
@@ -193,6 +178,20 @@ class ByMetricReport:
             data[id] = company
         return data
 
+    def process_debt_ebitda(self, metric: str, filters) -> dict:
+        records = self.process_standard_metrics(
+            self.repository.get_metric_records(metric, filters), False
+        )
+        for id in records.keys():
+            metrics = records.get(id).get("metrics")
+            for year in metrics.keys():
+                value = metrics.get(year)
+                if value is None:
+                    metrics.update({year: "NA"})
+                if value != "NA" and value is not None:
+                    metrics.update({year: float(round(value, 2))})
+        return records
+
     def process_rule_of_40(self, data_growth: dict, data_margin: dict) -> dict:
         companies = set([*data_growth] + [*data_margin])
         default_metrics = {"metrics": {}}
@@ -274,6 +273,8 @@ class ByMetricReport:
         standard = self.get_standard_metrics()
         if metric in self.get_ratio_metrics().keys():
             return self.process_ratio_metrics(metric, filters)
+        if metric == "debt_ebitda":
+            return self.process_debt_ebitda(metric, filters)
         if metric in standard:
             records = self.repository.get_metric_records(metric, filters)
             return self.process_standard_metrics(records)

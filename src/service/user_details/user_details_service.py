@@ -98,8 +98,6 @@ class UserDetailsService:
             )
 
             result = self.session.execute(query).fetchall()
-            self.session.commit()
-
             permissions = self.response_sql.process_query_list_results(result)
             return sorted(
                 permissions, key=lambda permission: permission.get("name", "").lower()

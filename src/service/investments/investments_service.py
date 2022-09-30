@@ -33,7 +33,6 @@ class InvestmentsService:
                     .get_query()
                 )
                 result = self.session.execute(query).fetchall()
-                self.session.commit()
                 return self.response_sql.process_query_list_results(result)
             return []
 
@@ -70,6 +69,7 @@ class InvestmentsService:
             return dict()
 
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             raise error
 

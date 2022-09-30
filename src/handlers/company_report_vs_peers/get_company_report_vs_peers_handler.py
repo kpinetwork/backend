@@ -6,7 +6,7 @@ from connection import create_db_engine, create_db_session
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
-from calculator_repository import CalculatorRepository
+from base_metrics_repository import BaseMetricsRepository
 from calculator_service import CalculatorService
 from profile_range import ProfileRange
 from verify_user_permissions import (
@@ -15,7 +15,9 @@ from verify_user_permissions import (
     get_username_from_user_id,
 )
 from get_user_details_service import get_user_details_service_instance
+from app_http_headers import AppHttpHeaders
 
+headers = AppHttpHeaders("application/json", "OPTIONS,GET")
 engine = create_db_engine()
 session = create_db_session(engine)
 logger = logging.getLogger()
@@ -26,7 +28,9 @@ def get_company_report_instance():
     user_service = get_user_details_service_instance()
     company_anonymization = CompanyAnonymization(user_service)
     calculator = CalculatorService(logger)
-    repository = CalculatorRepository(session, QuerySQLBuilder(), ResponseSQL(), logger)
+    repository = BaseMetricsRepository(
+        logger, session, QuerySQLBuilder(), ResponseSQL()
+    )
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
 
     return CompanyReportvsPeersService(
@@ -54,17 +58,12 @@ def handler(event, _):
         return {
             "statusCode": 200,
             "body": json.dumps(company_report),
-            "headers": {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "OPTIONS,POST,GET",
-            },
+            "headers": headers.get_headers(),
         }
 
     except Exception as error:
         return {
             "statusCode": 400,
             "body": json.dumps({"error": str(error)}),
-            "headers": {"Content-Type": "application/json"},
+            "headers": headers.get_headers(),
         }

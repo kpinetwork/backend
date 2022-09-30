@@ -38,8 +38,6 @@ class CompanyService:
                 )
 
                 result = self.session.execute(query).fetchall()
-                self.session.commit()
-
                 return self.response_sql.process_query_result(result)
             return dict()
 
@@ -60,7 +58,6 @@ class CompanyService:
                 .get_query()
             )
             result = self.session.execute(query).fetchall()
-            self.session.commit()
             return self.response_sql.process_query_result(result)
 
         except Exception as error:
@@ -88,7 +85,6 @@ class CompanyService:
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
-            self.session.commit()
             companies = self.response_sql.process_query_list_results(results)
             total_companies = self.get_total_number_of_companies(public=False).get(
                 "count"
@@ -124,7 +120,6 @@ class CompanyService:
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
-            self.session.commit()
             companies = self.response_sql.process_query_list_results(results)
             companies_to_return = []
             total_companies = self.get_total_number_of_companies(public=True).get(
@@ -168,5 +163,6 @@ class CompanyService:
             return True
 
         except Exception as error:
+            self.session.rollback()
             self.logger.info(error)
             raise error
