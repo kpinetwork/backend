@@ -169,6 +169,11 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.get_metric_types_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+    "apigw_get_all_tags_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.get_all_tags_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 
