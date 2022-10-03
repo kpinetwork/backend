@@ -35,6 +35,7 @@ def handler(event, _):
         conditions = dict()
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
+            params.pop("tag", None)
             conditions = get_condition_params(params)
             year = int(params.get("year", year))
 

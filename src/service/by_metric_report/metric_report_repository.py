@@ -17,7 +17,7 @@ class MetricReportRepository:
                 values = [
                     f"'{element}'" for element in v if element and element.strip()
                 ]
-                filters[f"{TableNames.COMPANY}.{k}"] = values
+                filters[k] = values
         return filters
 
     def get_years(self) -> list:

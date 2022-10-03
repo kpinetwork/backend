@@ -47,7 +47,7 @@ class ByYearReportService:
         return rule_of_40
 
     def get_report_base_data(self, year: str, **conditions) -> dict:
-        filters = self.repository.add_company_filters(**conditions)
+        filters = self.repository.add_filters(**conditions)
         data = self.repository.get_actuals_values(year, filters)
         budget_records = self.repository.get_budget_values(
             year, [year], filters, metrics=[MetricNames.REVENUE, MetricNames.EBITDA]
