@@ -119,7 +119,7 @@ class MetricReportRepository:
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_list_results(result)
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             return []
 
     def __get_subquery_metric(
@@ -441,6 +441,7 @@ class MetricReportRepository:
 
     def get_most_recents_revenue(self, filters: dict) -> list:
         try:
+            filters.pop(f"{TableNames.TAG}.name", None)
             columns = [f"{TableNames.COMPANY}.id", "revenue.*"]
             select_query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
