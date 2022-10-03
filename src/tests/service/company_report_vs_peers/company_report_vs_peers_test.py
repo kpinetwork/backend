@@ -181,12 +181,7 @@ class TestCompanyReportvsPeers(TestCase):
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
-    @mock.patch(
-        "src.service.calculator.calculator_repository.CalculatorRepository.get_metric_by_scenario"
-    )
-    def test_get_company_report_without_permissions(
-        self, mock_get_metric_by_scenario, mock_set_company_permissions
-    ):
+    def test_get_company_report_without_permissions(self, mock_set_company_permissions):
         company = self.company.copy()
         company.update(self.scenarios)
         self.mock_base_metric_results({company["id"]: company})
@@ -197,7 +192,6 @@ class TestCompanyReportvsPeers(TestCase):
         )
 
         self.assertEqual(report, dict())
-        mock_get_metric_by_scenario.assert_not_called()
         mock_set_company_permissions.assert_called()
 
     @mock.patch(
