@@ -2,6 +2,9 @@
     "pathParameters": {
         "username": "user@email.com"
     },
+    "queryStringParameters": {
+        "group":"demo_customer_group"
+    },
     "requestContext": {
         "authorizer": {
             "principalId": "user_id"

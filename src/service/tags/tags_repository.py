@@ -11,7 +11,7 @@ class TagsRepository:
     def get_total_number_of_tags(self) -> dict:
         try:
             query = (
-                self.query_builder.add_table_name(TableNames.TAGS)
+                self.query_builder.add_table_name(TableNames.TAG)
                 .add_select_conditions(["COUNT(*)"])
                 .build()
                 .get_query()
@@ -27,26 +27,26 @@ class TagsRepository:
     def get_tags_with_companies(self, offset=0, max_count=None) -> list:
         try:
             query = (
-                self.query_builder.add_table_name(TableNames.TAGS)
+                self.query_builder.add_table_name(TableNames.TAG)
                 .add_select_conditions(
                     [
-                        f"{TableNames.TAGS}.*",
+                        f"{TableNames.TAG}.*",
                         f"{TableNames.COMPANY}.id as company_id",
                         f"{TableNames.COMPANY}.name as company_name",
                     ]
                 )
                 .add_join_clause(
                     {
-                        f"{TableNames.COMPANY_TAGS}": {
-                            "from": f"{TableNames.TAGS}.id",
-                            "to": f"{TableNames.COMPANY_TAGS}.tag_id",
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
                         }
                     }
                 )
                 .add_join_clause(
                     {
                         f"{TableNames.COMPANY}": {
-                            "from": f"{TableNames.COMPANY_TAGS}.company_id",
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
                             "to": f"{TableNames.COMPANY}.id",
                         }
                     }
@@ -67,7 +67,7 @@ class TagsRepository:
     def get_tags(self, offset=0, max_count=None) -> list:
         try:
             query = (
-                self.query_builder.add_table_name(TableNames.TAGS)
+                self.query_builder.add_table_name(TableNames.TAG)
                 .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)

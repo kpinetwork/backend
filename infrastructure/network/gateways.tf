@@ -438,6 +438,7 @@ resource "aws_api_gateway_method" "get_users_method" {
   request_parameters = {
     "method.request.querystring.token" = false
     "method.request.querystring.limit" = false
+    "method.request.querystring.group" = true
   }
 }
 

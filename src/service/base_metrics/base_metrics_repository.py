@@ -20,14 +20,14 @@ class BaseMetricsRepository:
         self.logger = logger
         self.fields = ["id", "name", "sector", "vertical", "inves_profile_name"]
 
-    def add_company_filters(self, **kwargs) -> dict:
+    def add_filters(self, **kwargs) -> dict:
         filters = dict()
         for k, v in kwargs.items():
             if k != "size_cohort" and k != "margin_group":
                 values = [
                     f"'{element}'" for element in v if element and element.strip()
                 ]
-                filters[f"{TableNames.COMPANY}.{k}"] = values
+                filters[k] = values
         return filters
 
     def __get_scenario_name_with_year(self, scenario: str, years: list) -> list:
@@ -81,7 +81,11 @@ class BaseMetricsRepository:
                 filters.update(
                     {f"{TableNames.METRIC}.name": self.__get_sql_value_names(metrics)}
                 )
-
+            tag_join_type = (
+                self.query_builder.JoinType.JOIN
+                if filters.get("tag")
+                else self.query_builder.JoinType.LEFT
+            )
             from_count = len(scenario) + 2
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
@@ -96,10 +100,28 @@ class BaseMetricsRepository:
                 )
                 .add_join_clause(
                     {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
                         f"{TableNames.SCENARIO}": {
                             "from": f"{TableNames.SCENARIO}.company_id",
                             "to": f"{TableNames.COMPANY}.id",
-                        }
+                        },
                     }
                 )
                 .add_join_clause(
@@ -126,7 +148,7 @@ class BaseMetricsRepository:
             scenario_results = self.session.execute(query).fetchall()
             return self.response_sql.process_query_list_results(scenario_results)
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             raise error
 
     def process_scenario_values(

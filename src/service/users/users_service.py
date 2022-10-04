@@ -4,14 +4,16 @@ class UsersService:
         self.client = client
         self.response_user = response_user
 
-    def get_users_params(self, user_pool_id: str, limit: int, token: str) -> dict:
+    def get_users_params(
+        self, user_pool_id: str, limit: int, token: str, group: str
+    ) -> dict:
         params = {
             "UserPoolId": user_pool_id,
-            "AttributesToGet": ["email"],
             "Limit": limit,
+            "GroupName": group,
         }
         if token and token.strip():
-            params["PaginationToken"] = token
+            params["NextToken"] = token
         return params
 
     def get_roles_params(self, user_pool_id) -> dict:
@@ -28,14 +30,12 @@ class UsersService:
             filter_groups = self.response_user.process_user_roles(groups)
             user.update({"roles": filter_groups})
 
-    def get_users(self, user_pool_id: str, limit: int = 10, token: str = None) -> dict:
-        params = self.get_users_params(user_pool_id, limit, token)
-        response = self.client.list_users(**params)
+    def get_users(self, user_pool_id: str, limit: int, token: str, group: str) -> dict:
+        params = self.get_users_params(user_pool_id, limit, token, group)
+        response = self.client.list_users_in_group(**params)
         users = self.response_user.proccess_users(response.get("Users", []))
-
-        self.set_users_groups(users, user_pool_id)
         sort = sorted(users, key=lambda user: user.get("email"))
-        return {"users": sort, "token": response.get("PaginationToken")}
+        return {"users": sort, "token": response.get("NextToken"), "group": group}
 
     def get_groups(self, user_pool_id) -> list:
         params = self.get_roles_params(user_pool_id)

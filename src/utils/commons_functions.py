@@ -1,3 +1,6 @@
+from app_names import TableNames
+
+
 def remove_white_spaces(string: str):
     from re import sub
 
@@ -24,11 +27,10 @@ def get_conditions(query_params: dict, attributes: dict) -> dict:
 
 def get_company_attr() -> dict:
     return {
-        "sector": "sector",
-        "vertical": "vertical",
-        "investor_profile": "inves_profile_name",
+        "investor_profile": f"{TableNames.COMPANY}.inves_profile_name",
         "growth_profile": "margin_group",
         "size": "size_cohort",
+        "tag": f"{TableNames.TAG}.name",
     }
 
 

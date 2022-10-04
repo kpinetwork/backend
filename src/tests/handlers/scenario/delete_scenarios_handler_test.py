@@ -1,4 +1,3 @@
-# test delete scenarios handler test
 import json
 from src.tests.data.data_reader import read
 from unittest import TestCase, mock

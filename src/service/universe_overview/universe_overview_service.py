@@ -19,7 +19,7 @@ class UniverseOverviewService:
         self.repository = repository
 
     def get_metrics_by_year(self, year: str, **conditions) -> dict:
-        filters = self.repository.add_company_filters(**conditions)
+        filters = self.repository.add_filters(**conditions)
         metrics = [MetricNames.REVENUE, MetricNames.EBITDA]
         data = self.repository.get_actuals_values(year, filters, metrics)
         budget_values = self.repository.get_budget_values(

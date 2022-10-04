@@ -70,6 +70,7 @@ def handler(event, _):
         metrics = []
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
+            params.pop("tag", None)
             conditions = get_condition_params(params)
             company_id = event.get("queryStringParameters").get("company_id")
             from_main = params.get("from_main", from_main)

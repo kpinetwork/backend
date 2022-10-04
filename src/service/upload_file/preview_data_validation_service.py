@@ -128,7 +128,6 @@ class PreviewDataValidationService:
                 .get_query()
             )
             results = self.session.execute(query).fetchall()
-            self.session.commit()
             companies = (
                 self.response_sql.process_companies_data_with_financial_information(
                     results

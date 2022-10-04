@@ -25,14 +25,21 @@ class TestMetricReportRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_add_company_filters_with_data(self):
-        expected_out = {"company.sector": ["'Application'"]}
+    def test_add_company_filters_with_data_should_return_dict_with_valid_sql_values(
+        self,
+    ):
+        condition_name, condition_value = (
+            "company.inves_profile_name",
+            "Family office",
+        )
+        expected_out = {condition_name: [f"'{condition_value}'"]}
+        conditions = {condition_name: [condition_value]}
 
-        filters_out = self.repository.add_company_filters(sector=["Application"])
+        filters_out = self.repository.add_company_filters(**conditions)
 
         self.assertEqual(filters_out, expected_out)
 
-    def test_get_years_success(self):
+    def test_get_years_should_return_valid_year_dict_list_when_successful_db_call(self):
         expected_years = [2020, 2021, 2022]
         self.mock_response_list_query_sql(
             [{"year": 2020}, {"year": 2021}, {"year": 2022}]
@@ -42,56 +49,62 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(years, expected_years)
 
-    def test_get_years_fail(self):
+    def test_get_years_should_return_empty_list_when_db_call_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
         years = self.repository.get_years()
 
         self.assertEqual(years, [])
 
-    def test_get_base_metric_success(self):
+    def test_get_base_metric_should_return_base_metrics_list_when_successful_call(self):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_base_metric("Revenue", "Actuals", dict())
 
         self.assertEqual(metrics, self.records)
 
-    def test_get_base_metric_fail(self):
+    def test_get_base_metric_should_return_empty_list_when_call_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_base_metric("Revenue", "Actuals", dict())
 
         self.assertEqual(metrics, [])
 
-    def test_get_actuals_vs_budget_metric_success(self):
+    def test_get_actuals_vs_budget_should_return_metric_dict_list_when_successful_call(
+        self,
+    ):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_actuals_vs_budget_metric("Ebitda", dict())
 
         self.assertEqual(metrics, self.records)
 
-    def test_get_actuals_vs_budget_metric_fail(self):
+    def test_get_actuals_vs_budget_metric_should_return_empty_list_when_exception_raised(
+        self,
+    ):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_actuals_vs_budget_metric("Ebitda", dict())
 
         self.assertEqual(metrics, [])
 
-    def test_get_ebitda_margin_success(self):
+    def test_get_ebitda_margin_should_return_metric_dict_list_when_successful_call(
+        self,
+    ):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_ebitda_margin_metric(dict())
 
         self.assertEqual(metrics, self.records)
 
-    def test_get_ebitda_margin_fail(self):
+    def test_get_ebitda_margin_should_return_empty_list_when_exception_raised(self):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_ebitda_margin_metric(dict())
 
         self.assertEqual(metrics, [])
 
-    def test_get_most_recent_revenue_success(self):
+    def test_get_most_recent_revenue_should_return_dict_list_when_successful_call(self):
         expected_metrics = [
             {"id": "1", "name": "Actuals-2021", "value": 30},
             {"id": "1", "name": "Actuals-2020", "value": 20},
@@ -102,7 +115,9 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, expected_metrics)
 
-    def test_get_most_recent_revenue_fail(self):
+    def test_get_most_recent_revenue_should_return_empty_list_when_exception_raised(
+        self,
+    ):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_most_recents_revenue(dict())
@@ -120,7 +135,9 @@ class TestMetricReportRepository(TestCase):
             ],
         ]
     )
-    def test_get_arguments(self, metric, scenario, expected_arguments):
+    def test_get_arguments_should_return_dynamic_args_with_different_input(
+        self, metric, scenario, expected_arguments
+    ):
 
         arguments = self.repository._MetricReportRepository__get_arguments(
             {}, metric, scenario
@@ -194,6 +211,20 @@ class TestMetricReportRepository(TestCase):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_opex_as_revenue(dict())
+
+        self.assertEqual(metrics, [])
+
+    def test_get_debt_ebitda_return_list_on_success(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_debt_ebitda(dict())
+
+        self.assertEqual(metrics, self.records)
+
+    def test_get_debt_ebitda_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_debt_ebitda(dict())
 
         self.assertEqual(metrics, [])
 
