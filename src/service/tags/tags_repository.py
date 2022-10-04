@@ -21,8 +21,48 @@ class TagsRepository:
             return self.response_sql.process_query_result(result)
 
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             raise error
+
+    def get_tags_with_companies(self, offset=0, max_count=None) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.TAGS)
+                .add_select_conditions(
+                    [
+                        f"{TableNames.TAGS}.*",
+                        f"{TableNames.COMPANY}.id as company_id",
+                        f"{TableNames.COMPANY}.name as company_name",
+                    ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAGS}": {
+                            "from": f"{TableNames.TAGS}.id",
+                            "to": f"{TableNames.COMPANY_TAGS}.tag_id",
+                        }
+                    }
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY}": {
+                            "from": f"{TableNames.COMPANY_TAGS}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    }
+                )
+                .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
+                .add_sql_offset_condition(offset)
+                .add_sql_limit_condition(max_count)
+                .build()
+                .get_query()
+            )
+
+            results = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_list_results(results)
+        except Exception as error:
+            self.logger.error(error)
+            return []
 
     def get_tags(self, offset=0, max_count=None) -> list:
         try:
