@@ -1,3 +1,4 @@
+from base_exception import AppError
 from tags_repository import TagsRepository
 
 
@@ -18,3 +19,40 @@ class TagsService:
         except Exception as error:
             self.logger.info(error)
             return []
+
+    def update_tags_from_tag_panel(self, tags_data: dict) -> bool:
+        is_empty = not any(
+            filter(
+                lambda tag: tag.get("name")
+                or tag.get("companies_to_delete")
+                or tag.get("companies_to_add"),
+                tags_data.values(),
+            )
+        )
+        if is_empty:
+            raise AppError("There isn't data to modify")
+
+        return self.repository.update_tags(tags_data)
+
+    def update_company_tags(self, company_tags_data: dict) -> bool:
+        is_empty = not (
+            company_tags_data.get("company_id")
+            and (
+                company_tags_data.get("tags_to_delete")
+                or company_tags_data.get("tags_to_add")
+            )
+        )
+        if is_empty:
+            raise AppError("There isn't data to modify")
+
+        return self.repository.update_company_tags(
+            company_tags_data.get("company_id"),
+            company_tags_data.get("tags_to_add"),
+            company_tags_data.get("tags_to_delete"),
+        )
+
+    def update_tags(self, tags_body: dict) -> bool:
+        if "tags" in tags_body:
+            return self.update_tags_from_tag_panel(tags_body.get("tags"))
+
+        return self.update_company_tags(tags_body.get("company"))

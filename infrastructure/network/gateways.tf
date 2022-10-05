@@ -565,6 +565,14 @@ resource "aws_api_gateway_method" "get_all_tags_method" {
   }
 }
 
+resource "aws_api_gateway_method" "update_tags_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags.id
+  http_method   = "PUT"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
 # Provides an HTTP Method Integration for an API Gateway Integration.
@@ -843,6 +851,15 @@ resource "aws_api_gateway_integration" "tags_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_all_tags_lambda_function
+}
+
+resource "aws_api_gateway_integration" "update_tags_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags.id
+  http_method             = aws_api_gateway_method.update_tags_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.update_tags_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
