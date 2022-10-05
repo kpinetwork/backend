@@ -341,23 +341,6 @@ resource "aws_api_gateway_method" "download_comparison_vs_peers_method" {
   }
 }
 
-resource "aws_api_gateway_method" "get_investment_year_report_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.investment_report_id.id
-  http_method   = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
-
-  request_parameters = {
-    "method.request.querystring.vertical" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.investor_profile" = false
-    "method.request.querystring.growth_profile" = false
-    "method.request.querystring.size" = false
-    "method.request.querystring.invest_year" = false
-    "method.request.querystring.from_main" = false
-  }
-}
 resource "aws_api_gateway_method" "get_investment_date_report_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.investment_date_report.id
@@ -375,14 +358,6 @@ resource "aws_api_gateway_method" "get_investment_date_report_method" {
     "method.request.querystring.growth_profile" = false
     "method.request.querystring.size" = false
   }
-}
-
-resource "aws_api_gateway_method" "get_investment_year_options_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.invest_year_options.id
-  http_method   = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_by_metric_report_method" {
@@ -413,7 +388,6 @@ resource "aws_api_gateway_method" "dynamic_report_method" {
   request_parameters = {
     "method.request.querystring.metrics" = false
     "method.request.querystring.calendar_year" = false
-    "method.request.querystring.investment_year" = false
     "method.request.querystring.vertical" = false
     "method.request.querystring.sector" = false
     "method.request.querystring.investor_profile" = false
@@ -649,14 +623,6 @@ resource "aws_api_gateway_integration" "download_comparison_vs_peers_integration
   uri                     = var.lambdas_functions_arn.download_comparison_vs_peers_lambda_function
 }
 
-resource "aws_api_gateway_integration" "investment_report_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.investment_report_id.id
-  http_method             = aws_api_gateway_method.get_investment_year_report_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_investment_year_report_lambda_function
-}
 resource "aws_api_gateway_integration" "investment_date_report_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.investment_date_report.id
@@ -664,15 +630,6 @@ resource "aws_api_gateway_integration" "investment_date_report_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_investment_date_report_lambda_function
-}
-
-resource "aws_api_gateway_integration" "invest_year_options_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.invest_year_options.id
-  http_method             = aws_api_gateway_method.get_investment_year_options_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_investment_year_options_lambda_function
 }
 
 resource "aws_api_gateway_integration" "by_metric_report_integration" {
