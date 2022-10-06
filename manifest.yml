@@ -558,7 +558,9 @@ functions:
     - ./src/service/tags/tags_service.py
     - ./src/service/tags/tags_repository.py
     - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
     - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
     - ./src/utils/response_sql.py
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py

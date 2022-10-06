@@ -24,17 +24,31 @@ class TagsRepository:
             self.logger.error(error)
             raise error
 
+    def __get_subquery_tag(self, offset, max_count) -> str:
+        return (
+            self.query_builder.add_table_name(TableNames.TAG)
+            .add_select_conditions([f"{TableNames.TAG}.id"])
+            .add_sql_order_by_condition(["id"], self.query_builder.Order.ASC)
+            .add_sql_offset_condition(offset)
+            .add_sql_limit_condition(max_count)
+            .build()
+            .get_query()
+        )
+
     def get_tags_with_companies(self, offset=0, max_count=None) -> list:
         try:
+            select_options = [
+                f"{TableNames.TAG}.*",
+                f"{TableNames.COMPANY}.id as company_id",
+                f"{TableNames.COMPANY}.name as company_name",
+            ]
+            subquery = self.__get_subquery_tag(offset, max_count)
+            where_conditions = {
+                f"{TableNames.TAG}.id": [f"{subquery}"],
+            }
             query = (
                 self.query_builder.add_table_name(TableNames.TAG)
-                .add_select_conditions(
-                    [
-                        f"{TableNames.TAG}.*",
-                        f"{TableNames.COMPANY}.id as company_id",
-                        f"{TableNames.COMPANY}.name as company_name",
-                    ]
-                )
+                .add_select_conditions(select_options)
                 .add_join_clause(
                     {
                         f"{TableNames.COMPANY_TAG}": {
@@ -51,9 +65,8 @@ class TagsRepository:
                         }
                     }
                 )
+                .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
-                .add_sql_offset_condition(offset)
-                .add_sql_limit_condition(max_count)
                 .build()
                 .get_query()
             )

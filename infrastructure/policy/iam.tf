@@ -2129,6 +2129,25 @@ resource "aws_iam_role" "get_all_tags_lambda_exec_role" {
 EOF
 }
 
+resource "aws_iam_role_policy" "get_all_tags_cognito_policy" {
+  name        = "${var.environment}_get_all_tags_cognito_policy"
+  role        = aws_iam_role.get_all_tags_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
 resource "aws_iam_role_policy_attachment" "get_all_tags_lambda_logs" {
   role       = aws_iam_role.get_all_tags_lambda_exec_role.name
   policy_arn = var.aws_iam_policy_logs_arn

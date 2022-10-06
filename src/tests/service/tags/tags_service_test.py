@@ -15,9 +15,10 @@ class TestTagsService(TestCase):
             "company_id": "1",
             "company_name": "Test Company",
         }
+        self.short_tag = {"id": "123", "name": "Tag Name"}
         self.total_tags = {"count": 1}
-        self.tags_and_companies = {
-            "123": {
+        self.all_tags = [
+            {
                 "id": "123",
                 "name": "Tag Name",
                 "companies": [
@@ -25,17 +26,12 @@ class TestTagsService(TestCase):
                     {"id": "2", "name": "Company Name"},
                 ],
             }
-        }
-        self.all_tags = {
-            "total": self.total_tags.get("count"),
-            "tags": [self.tag],
-        }
+        ]
         self.mock_session = Mock()
         self.mock_query_builder = Mock()
         self.mock_response_sql = Mock()
-        self.tags_service_instance = TagsService(
-            self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
-        )
+        self.mock_repository = Mock()
+        self.tags_service_instance = TagsService(logger, self.mock_repository)
 
     def mock_response_query_sql(self, response):
         attrs = {"process_query_result.return_value": response}
@@ -45,10 +41,10 @@ class TestTagsService(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_companies_by_tags_should_return_the_response_when_the_list_of_records_is_passed(
+    def test_get_companies_by_tags_returns_the_tags_and_companies_when_the_query_response_is_passed(
         self,
     ):
-        expected_data = self.tags_and_companies
+        expected_data = self.all_tags
         data = [
             self.tag,
             {
@@ -64,27 +60,44 @@ class TestTagsService(TestCase):
         self.assertEqual(get_companies_by_tag, expected_data)
 
     @mock.patch("src.service.tags.tags_service.TagsService.get_companies_by_tag")
-    def test_get_all_tags_return_results_when_queries_are_succesful(
+    def test_get_all_tags_should_return_the_count_and_tags_data_if_user_has_access(
         self, mock_get_companies_by_tag
     ):
         expected_data = {
             "total": self.total_tags.get("count"),
-            "tags": self.tags_and_companies,
+            "tags": self.all_tags,
         }
 
-        self.mock_response_query_sql(self.total_tags)
-        self.mock_response_list_query_sql([self.tag])
-        mock_get_companies_by_tag.return_value = self.tags_and_companies
+        self.mock_repository.get_total_number_of_tags.return_value = self.total_tags
+        self.mock_repository.get_tags_with_companies.return_value = [self.tag]
+        mock_get_companies_by_tag.return_value = self.all_tags
 
-        get_all_tags = self.tags_service_instance.get_all_tags()
+        get_all_tags = self.tags_service_instance.get_all_tags(True)
 
         self.assertEqual(get_all_tags, expected_data)
 
-    def test_get_all_tags_should_return_error_when_queries_fails(self):
-        self.tags_service_instance.session.execute.side_effect = Exception("error")
+    @mock.patch("src.service.tags.tags_service.TagsService.get_companies_by_tag")
+    def test_get_all_tags_should_return_the_count_and_tags_data_if_user_does_not_have_access(
+        self, mock_get_companies_by_tag
+    ):
+        expected_data = {
+            "total": self.total_tags.get("count"),
+            "tags": [self.short_tag],
+        }
+
+        self.mock_repository.get_total_number_of_tags.return_value = self.total_tags
+        self.mock_repository.get_tags.return_value = [self.short_tag]
+        mock_get_companies_by_tag.return_value = self.all_tags
+
+        get_all_tags = self.tags_service_instance.get_all_tags(False)
+
+        self.assertEqual(get_all_tags, expected_data)
+
+    def test_get_all_tags_should_raise_an_exception_when_queries_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
         with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.tags_service_instance.get_all_tags())
+            exception = self.assertRaises(self.tags_service_instance.get_all_tags(True))
 
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
-            self.tags_service_instance.session.execute.assert_called_once()
+            self.mock_session.execute.assert_called_once()
