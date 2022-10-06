@@ -1,16 +1,20 @@
 from base_exception import AppError
 from app_names import TableNames, ScenarioNames, MetricNames
+from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 
 
 class MetricReportRepository:
-    def __init__(self, session, query_builder, response_sql, logger):
+    def __init__(
+        self, session, query_builder: QuerySQLBuilder, response_sql: ResponseSQL, logger
+    ):
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
         self.scenario_table_label = "scenario"
 
-    def add_company_filters(self, **kwargs) -> dict:
+    def add_filters(self, **kwargs) -> dict:
         filters = dict()
         for k, v in kwargs.items():
             if k != "size_cohort" and k != "margin_group":
@@ -49,6 +53,13 @@ class MetricReportRepository:
             }
             from_count = int(len(scenario) + 2)
             where_conditions.update(filters)
+
+            tag_join_type = (
+                self.query_builder.JoinType.JOIN
+                if filters.get("tag")
+                else self.query_builder.JoinType.LEFT
+            )
+
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
@@ -58,6 +69,24 @@ class MetricReportRepository:
                         f"substring({TableNames.SCENARIO}.name from {from_count})::int as year",
                         f"{TableNames.METRIC}.value",
                     ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                        }
+                    },
+                    tag_join_type,
                 )
                 .add_join_clause(
                     {
@@ -90,7 +119,7 @@ class MetricReportRepository:
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_list_results(result)
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             return []
 
     def __get_subquery_metric(
@@ -138,9 +167,34 @@ class MetricReportRepository:
                 f"substring(scenario.name from {from_count})::int as year",
             ]
             select_options.extend(select_value_condition)
+
+            tag_join_type = (
+                self.query_builder.JoinType.JOIN
+                if where_conditions.get("tag")
+                else self.query_builder.JoinType.LEFT
+            )
+
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(select_options)
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                        }
+                    },
+                    tag_join_type,
+                )
                 .add_join_clause(
                     {
                         f"{TableNames.SCENARIO}": {
@@ -387,6 +441,7 @@ class MetricReportRepository:
 
     def get_most_recents_revenue(self, filters: dict) -> list:
         try:
+            filters.pop(f"{TableNames.TAG}.name", None)
             columns = [f"{TableNames.COMPANY}.id", "revenue.*"]
             select_query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)

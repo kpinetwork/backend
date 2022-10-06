@@ -353,42 +353,6 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_http_headers.py
 
-  get_investment_year_report_handler:
-    requirements: ./src/handlers/investment_year_report/requirements.txt
-    include:
-    - ./src/handlers/investment_year_report/get_investment_year_report_handler.py
-    - ./src/service/calculator/calculator_report.py
-    - ./src/service/investment_peers_report/investment_repository.py
-    - ./src/service/investment_peers_report/investment_year_report.py
-    - ./src/utils/commons_functions.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py
-    - ./src/utils/verify_user_permissions.py
-    - ./src/utils/company_anonymization.py
-    - ./src/utils/response_user.py
-    - ./src/utils/profile_range.py
-    - ./src/service/calculator/calculator_repository.py
-    - ./src/service/calculator/calculator_service.py
-    - ./src/service/user_details/get_user_details_service.py
-    - ./src/service/user_details/user_details_service.py
-    - ./casbin_configuration/policy_manager.py
-    - ./casbin_configuration/model.conf
-    - ./src/exceptions/base_exception.py
-    - ./src/utils/app_names.py
-    - ./src/utils/app_http_headers.py
-
-  get_investment_year_options_handler:
-    requirements: ./src/handlers/investment_year_report/requirements.txt
-    include:
-    - ./src/handlers/investment_year_report/get_investment_year_options_handler.py
-    - ./src/service/investment_peers_report/investment_options_service.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py
-    - ./src/exceptions/base_exception.py
-    - ./src/utils/app_http_headers.py
-
   get_by_metric_report_handler:
     requirements: ./src/handlers/by_metric_report/requirements.txt
     include:

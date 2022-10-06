@@ -109,7 +109,7 @@ class TestInvestmentDateReport(TestCase):
 
         companies_dict = {"1": 2021}
 
-        self.mock_metric_repository.add_company_filters.return_value = dict()
+        self.mock_metric_repository.add_filters.return_value = dict()
         years = [2019, 2020, 2021, 2022, 2023, 2024]
         valid_metrics = {
             2019: "NA",
