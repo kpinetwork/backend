@@ -60,7 +60,7 @@ class TestTagsService(TestCase):
         self.assertEqual(get_companies_by_tag, expected_data)
 
     @mock.patch("src.service.tags.tags_service.TagsService.get_companies_by_tag")
-    def test_get_all_tags_if_user_has_access_should_return_the_count_and_tags_data(
+    def test_get_all_tags_if_user_has_access_should_return_the_count_and_tags_with_companies_data(
         self, mock_get_companies_by_tag
     ):
         expected_data = {
@@ -93,6 +93,7 @@ class TestTagsService(TestCase):
 
     def test_get_all_tags_when_queries_fails_should_raise_an_exception(self):
         self.mock_session.execute.side_effect = Exception("error")
+
         with self.assertRaises(Exception) as context:
             self.tags_service_instance.get_all_tags(True)
 

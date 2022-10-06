@@ -2,6 +2,7 @@ from unittest import TestCase
 import logging
 from unittest.mock import Mock
 from src.service.tags.tags_repository import TagsRepository
+from src.utils.query_builder import QuerySQLBuilder
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,10 +23,10 @@ class TestTagsRepository(TestCase):
             "tags": [self.tag],
         }
         self.mock_session = Mock()
-        self.mock_query_builder = Mock()
+        self.query_builder = QuerySQLBuilder()
         self.mock_response_sql = Mock()
         self.repository = TagsRepository(
-            self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
+            self.mock_session, self.query_builder, self.mock_response_sql, logger
         )
 
     def mock_response_query_sql(self, response):
@@ -46,7 +47,7 @@ class TestTagsRepository(TestCase):
         self.assertEqual(get_total_number_of_tags, self.total_tags)
         self.repository.session.execute.assert_called_once()
 
-    def test_get_total_number_of_tags_when_the_query_is_succesful_throws_an_exception(
+    def test_get_total_number_of_tags_when_the_query_fails_throws_an_exception(
         self,
     ):
         self.repository.session.execute.side_effect = Exception("error")
@@ -68,6 +69,7 @@ class TestTagsRepository(TestCase):
 
     def test_get_tags_with_companies_when_the_query_fails_throws_an_exception(self):
         self.repository.session.execute.side_effect = Exception("error")
+
         with self.assertRaises(Exception) as context:
             self.repository.get_tags_with_companies()
 
@@ -85,6 +87,7 @@ class TestTagsRepository(TestCase):
 
     def test_get_tags_when_the_query_fails_throws_an_exception(self):
         self.repository.session.execute.side_effect = Exception("error")
+
         with self.assertRaises(Exception) as context:
             self.repository.get_tags()
 

@@ -8,7 +8,7 @@ from src.handlers.tags.get_all_tags_handler import handler
 class TestGetAllTagsHandler(TestCase):
     def setUp(self):
         self.tags = read("sample_response_tags.json")
-        self.event = read("sample_event.json")
+        self.event = read("sample_event_tags.json")
 
     @mock.patch("tags_service.TagsService.get_all_tags")
     @mock.patch.object(service_handler, "verify_user_access")
