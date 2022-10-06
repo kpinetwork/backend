@@ -1,8 +1,12 @@
 from app_names import TableNames
+from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 
 
 class TagsRepository:
-    def __init__(self, session, query_builder, response_sql, logger) -> None:
+    def __init__(
+        self, session, query_builder: QuerySQLBuilder, response_sql: ResponseSQL, logger
+    ) -> None:
         self.logger = logger
         self.session = session
         self.query_builder = query_builder
@@ -19,7 +23,6 @@ class TagsRepository:
 
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_result(result)
-
         except Exception as error:
             self.logger.error(error)
             raise error

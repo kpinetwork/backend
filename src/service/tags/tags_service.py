@@ -1,5 +1,9 @@
+from collections import defaultdict
+from tags_repository import TagsRepository
+
+
 class TagsService:
-    def __init__(self, logger, repository) -> None:
+    def __init__(self, logger, repository: TagsRepository) -> None:
         self.logger = logger
         self.repository = repository
 
@@ -7,7 +11,7 @@ class TagsService:
         return {"total": total_tags, "tags": tags}
 
     def get_companies_by_tag(self, tags: list) -> list:
-        records = dict()
+        records = defaultdict(dict)
         for tag in tags:
             companies = []
             tag_id = tag["id"]
@@ -16,8 +20,8 @@ class TagsService:
             if tag_id in records:
                 companies = records[tag_id]["companies"]
             companies.append(company_data)
-            tag_data["companies"] = companies
-            records[tag_id] = tag_data
+            records[tag_id].update(tag_data)
+            records[tag_id]["companies"] = companies
         return list(records.values())
 
     def get_all_tags(self, access: bool, offset=0, max_count=None) -> dict:

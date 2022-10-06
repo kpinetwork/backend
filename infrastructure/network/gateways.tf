@@ -793,7 +793,7 @@ resource "aws_api_gateway_integration" "get_metric_types_integration" {
   uri                     = var.lambdas_functions_arn.get_metric_types_lambda_function
 }
 
-resource "aws_api_gateway_integration" "tags_integration" {
+resource "aws_api_gateway_integration" "get_all_tags_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.tags.id
   http_method             = aws_api_gateway_method.get_all_tags_method.http_method

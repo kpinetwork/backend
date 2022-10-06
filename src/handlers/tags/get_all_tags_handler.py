@@ -39,7 +39,7 @@ def handler(event, _):
 
         return {
             "statusCode": 200,
-            "body": json.dumps(tags, default=str),
+            "body": json.dumps(tags),
             "headers": headers.get_headers(),
         }
 
