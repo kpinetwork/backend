@@ -1,6 +1,8 @@
-from unittest import TestCase, mock
 import logging
+
 from unittest.mock import Mock
+from unittest import TestCase, mock
+
 from src.service.tags.tags_service import TagsService
 
 logger = logging.getLogger()

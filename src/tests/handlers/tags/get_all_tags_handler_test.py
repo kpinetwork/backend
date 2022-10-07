@@ -1,6 +1,8 @@
 import json
-from src.tests.data.data_reader import read
+
 from unittest import TestCase, mock
+
+from src.tests.data.data_reader import read
 import src.handlers.tags.get_all_tags_handler as service_handler
 from src.handlers.tags.get_all_tags_handler import handler
 

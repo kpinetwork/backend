@@ -27,7 +27,7 @@ class TagsRepository:
             .get_query()
         )
 
-    def get_total_number_of_tags(self, access) -> dict:
+    def get_total_number_of_tags(self, access: bool) -> dict:
         try:
             query = self.get_total_number_of_tags_query(access)
 
@@ -37,7 +37,7 @@ class TagsRepository:
             self.logger.error(error)
             raise error
 
-    def __get_subquery_tag(self, offset, max_count) -> str:
+    def __get_subquery_tag(self, offset: int, max_count: int) -> str:
         return (
             self.query_builder.add_table_name(TableNames.TAG)
             .add_select_conditions([f"{TableNames.TAG}.id"])
@@ -48,7 +48,7 @@ class TagsRepository:
             .get_query()
         )
 
-    def get_tags_with_companies(self, offset=0, max_count=None) -> list:
+    def get_tags_with_companies(self, offset: int = 0, max_count: int = None) -> list:
         try:
             select_options = [
                 f"{TableNames.TAG}.*",
@@ -90,7 +90,7 @@ class TagsRepository:
             self.logger.error(error)
             return []
 
-    def get_tags(self, offset=0, max_count=None) -> list:
+    def get_tags(self, offset: int = 0, max_count: int = None) -> list:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.TAG)

@@ -24,7 +24,9 @@ class TagsService:
             records[tag_id]["companies"] = companies
         return list(records.values())
 
-    def get_all_tags(self, access: bool, offset=0, max_count=None) -> dict:
+    def get_all_tags(
+        self, access: bool, offset: int = 0, max_count: int = None
+    ) -> dict:
         try:
             total_tags = self.repository.get_total_number_of_tags(access).get("count")
 
@@ -42,4 +44,4 @@ class TagsService:
 
         except Exception as error:
             self.logger.error(error)
-            return {}
+            return dict()

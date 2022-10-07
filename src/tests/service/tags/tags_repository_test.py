@@ -1,6 +1,8 @@
-from unittest import TestCase
 import logging
+
+from unittest import TestCase
 from unittest.mock import Mock
+
 from src.service.tags.tags_repository import TagsRepository
 from src.utils.query_builder import QuerySQLBuilder
 
