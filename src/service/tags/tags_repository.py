@@ -12,14 +12,24 @@ class TagsRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
 
-    def get_total_number_of_tags(self) -> dict:
-        try:
-            query = (
+    def get_total_number_of_tags_query(self, access: bool) -> str:
+        if not access:
+            return (
                 self.query_builder.add_table_name(TableNames.TAG)
                 .add_select_conditions(["COUNT(*)"])
                 .build()
                 .get_query()
             )
+        return (
+            self.query_builder.add_table_name(TableNames.COMPANY_TAG)
+            .add_select_conditions([f"COUNT(distinct {TableNames.COMPANY_TAG}.tag_id)"])
+            .build()
+            .get_query()
+        )
+
+    def get_total_number_of_tags(self, access) -> dict:
+        try:
+            query = self.get_total_number_of_tags_query(access)
 
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_result(result)

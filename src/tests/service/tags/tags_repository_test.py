@@ -37,12 +37,22 @@ class TestTagsRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_total_number_of_tags_when_the_query_is_succesful_returns_the_count_of_tags(
+    def test_get_total_number_of_tags_when_is_success_and_user_is_admin_returns_the_count_of_tags(
         self,
     ):
         self.mock_response_query_sql(self.total_tags)
 
-        get_total_number_of_tags = self.repository.get_total_number_of_tags()
+        get_total_number_of_tags = self.repository.get_total_number_of_tags(True)
+
+        self.assertEqual(get_total_number_of_tags, self.total_tags)
+        self.repository.session.execute.assert_called_once()
+
+    def test_get_total_number_of_tags_when_is_success_user_is_customer_returns_the_count_of_tags(
+        self,
+    ):
+        self.mock_response_query_sql(self.total_tags)
+
+        get_total_number_of_tags = self.repository.get_total_number_of_tags(False)
 
         self.assertEqual(get_total_number_of_tags, self.total_tags)
         self.repository.session.execute.assert_called_once()
@@ -53,7 +63,7 @@ class TestTagsRepository(TestCase):
         self.repository.session.execute.side_effect = Exception("error")
 
         with self.assertRaises(Exception) as context:
-            self.repository.get_total_number_of_tags()
+            self.repository.get_total_number_of_tags(True)
 
             self.assertTrue("error" in context.exception)
             self.repository.session.execute.assert_called_once()

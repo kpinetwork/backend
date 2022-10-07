@@ -26,11 +26,11 @@ class TagsService:
 
     def get_all_tags(self, access: bool, offset=0, max_count=None) -> dict:
         try:
-            total_tags = self.repository.get_total_number_of_tags().get("count")
+            total_tags = self.repository.get_total_number_of_tags(access).get("count")
 
             if not access:
                 return self.get_all_tags_response(
-                    total_tags, self.repository.get_tags()
+                    total_tags, self.repository.get_tags(offset, max_count)
                 )
 
             return self.get_all_tags_response(
