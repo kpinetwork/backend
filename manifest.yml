@@ -566,7 +566,22 @@ functions:
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
 
-    
+  delete_tags_handler:
+    requirements: ./src/handlers/tags/requirements.txt
+    include:
+    - ./src/handlers/tags/delete_tags_handler.py
+    - ./src/service/tags/tags_service.py
+    - ./src/service/tags/tags_repository.py
+    - ./src/utils/response_user.py
+    - ./casbin_configuration/policy_manager.py
+    - ./casbin_configuration/model.conf
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
 
 layers:
   layer_libraries:

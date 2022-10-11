@@ -101,3 +101,20 @@ class TestTagsService(TestCase):
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.mock_session.execute.assert_called_once()
+
+    def test_delete_tags_with_empty_list_should_raise_exception(self):
+        tag_ids = []
+        error_message = "No tags to delete"
+
+        with self.assertRaises(Exception) as context:
+            self.tags_service_instance.delete_tags(tag_ids)
+
+        self.assertEqual(str(context.exception), error_message)
+
+    def test_delete_tags_with_valid_ids_and_should_delete_tags(self):
+        tag_ids = ["tag_id_1"]
+
+        deleted = self.tags_service_instance.delete_tags(tag_ids)
+
+        self.assertTrue(deleted)
+        self.mock_repository.delete_tags.assert_called_once()

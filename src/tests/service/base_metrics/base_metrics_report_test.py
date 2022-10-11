@@ -1,3 +1,4 @@
+import src.tests.config_imports  # noqa
 from unittest import TestCase
 import logging
 from unittest.mock import Mock

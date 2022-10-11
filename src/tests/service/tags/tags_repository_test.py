@@ -92,3 +92,20 @@ class TestTagsRepository(TestCase):
             self.assertTrue("error" in context.exception)
             self.assertEqual(exception, Exception)
             self.repository.session.execute.assert_called_once()
+
+    def test_delete_tags_with_no_empty_list_should_execute_query(self):
+        tag_ids = ["tag_id_1", "tag_id_2"]
+
+        deleted = self.repository.delete_tags(tag_ids)
+
+        self.assertTrue(deleted)
+        self.mock_session.execute.assert_called_once()
+
+    def test_delete_tags_with_empty_list_should_call_rollback(self):
+        tag_ids = []
+        self.mock_session.execute.side_effect = Exception("error")
+
+        deleted = self.repository.delete_tags(tag_ids)
+
+        self.assertFalse(deleted)
+        self.mock_session.rollback.assert_called_once()

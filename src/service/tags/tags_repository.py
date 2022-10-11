@@ -93,3 +93,33 @@ class TagsRepository:
         except Exception as error:
             self.logger.info(error)
             return []
+
+    def __get_str_sql_list(self, records: list) -> list:
+        return [
+            f"'{record}'"
+            for record in records
+            if record and isinstance(record, str) and record.strip()
+        ]
+
+    def __get_queries_to_delete_tag(self, tag_ids: list) -> str:
+        return """
+        DELETE FROM {company_tag_table}
+        WHERE {company_tag_table}.tag_id IN ({tag_ids});
+        DELETE FROM {tag_table}
+        WHERE {tag_table}.id IN ({tag_ids});
+        """.format(
+            company_tag_table=TableNames.COMPANY_TAG,
+            tag_table=TableNames.TAG,
+            tag_ids=",".join(self.__get_str_sql_list(tag_ids)),
+        )
+
+    def delete_tags(self, tag_ids: list) -> bool:
+        try:
+            query = self.__get_queries_to_delete_tag(tag_ids)
+            self.session.execute(query)
+            self.session.commit()
+            return True
+        except Exception as error:
+            self.session.rollback()
+            self.logger.error(error)
+            return False

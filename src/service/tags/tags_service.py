@@ -1,3 +1,6 @@
+from base_exception import AppError
+
+
 class TagsService:
     def __init__(self, logger, repository) -> None:
         self.logger = logger
@@ -39,3 +42,11 @@ class TagsService:
         except Exception as error:
             self.logger.error(error)
             return {}
+
+    def delete_tags(self, tag_ids: list) -> bool:
+        try:
+            if not tag_ids:
+                raise AppError("No tags to delete")
+            return self.repository.delete_tags(tag_ids)
+        except AppError as error:
+            raise error

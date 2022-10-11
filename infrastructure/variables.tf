@@ -70,6 +70,7 @@ variable "lambdas_names" {
     "delete_company_lambda_function": "delete_company_lambda_function"
     "get_metric_types_lambda_function": "get_metric_types_lambda_function"
     "get_all_tags_lambda_function": "get_all_tags_lambda_function"
+    "delete_tags_lambda_function": "delete_tags_lambda_function"
   }
 }
 
