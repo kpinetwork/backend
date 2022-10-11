@@ -24,7 +24,7 @@ tags_repository = TagsRepository(session, query_builder, response_sql, logger)
 tags_service = TagsService(logger, tags_repository)
 
 
-def get_max_count(max_count: str) -> int:
+def get_max_count(max_count: str):
     try:
         return int(max_count)
     except Exception:
