@@ -15,7 +15,6 @@ class TableNames(StrEnum):
     METRIC_SORT = "metric_sort"
     TAG = "tag"
     COMPANY_TAG = "company_tag"
-    TAGS = "tag"
 
 
 class ScenarioNames(StrEnum):

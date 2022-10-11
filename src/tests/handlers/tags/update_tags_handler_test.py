@@ -5,7 +5,7 @@ from src.handlers.tags.update_tags_handler import handler
 import src.handlers.tags.update_tags_handler as update_handler
 
 
-class TestGetAllTagsandler(TestCase):
+class TestUpdateTagsHandler(TestCase):
     def setUp(self):
         self.event = read("sample_event_update_tag.json")
 

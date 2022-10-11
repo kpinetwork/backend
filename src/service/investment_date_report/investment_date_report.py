@@ -51,7 +51,7 @@ class InvestmentDateReport:
         self, metric: str, years: list, access: bool, companies: dict, **conditions
     ) -> list:
         companies_data = dict()
-        filters = self.metric_repository.add_company_filters(**conditions)
+        filters = self.metric_repository.add_filters(**conditions)
         data = self.by_metric_report.get_records(metric, years, filters)
 
         profiles, sizes = self.by_metric_report.get_profiles(filters)
