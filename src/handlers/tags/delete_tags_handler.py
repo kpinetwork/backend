@@ -13,8 +13,6 @@ from verify_user_permissions import verify_user_access, get_user_id_from_event
 headers = AppHttpHeaders("application/json", "OPTIONS,PUT")
 engine = create_db_engine()
 session = create_db_session(engine)
-query_builder = QuerySQLBuilder()
-response_sql = ResponseSQL()
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -28,6 +26,8 @@ def get_body(event: dict) -> dict:
 
 
 def get_tags_service():
+    query_builder = QuerySQLBuilder()
+    response_sql = ResponseSQL()
     repository = TagsRepository(session, query_builder, response_sql, logger)
     return TagsService(logger, repository)
 

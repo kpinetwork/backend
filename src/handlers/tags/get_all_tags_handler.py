@@ -1,5 +1,7 @@
 import json
 import logging
+from typing import Union
+
 from tags_service import TagsService
 from tags_repository import TagsRepository
 from connection import create_db_engine, create_db_session
@@ -23,6 +25,13 @@ tags_repository = TagsRepository(session, query_builder, response_sql, logger)
 tags_service = TagsService(logger, tags_repository)
 
 
+def get_max_count(max_count: str) -> Union[int, None]:
+    try:
+        return int(max_count)
+    except Exception:
+        return None
+
+
 def handler(event, _):
     try:
         user_id = get_user_id_from_event(event)
@@ -33,13 +42,13 @@ def handler(event, _):
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
             offset = int(params.get("offset", offset))
-            max_count = int(params.get("limit", 20))
+            max_count = get_max_count(params.get("limit"))
 
         tags = tags_service.get_all_tags(access, offset, max_count)
 
         return {
             "statusCode": 200,
-            "body": json.dumps(tags, default=str),
+            "body": json.dumps(tags),
             "headers": headers.get_headers(),
         }
 

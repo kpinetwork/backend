@@ -39,7 +39,7 @@ class TestBaseMetricsRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_add_company_filters_with_data_should_return_dict_with_sql_valid_values(
+    def test_add_filters_with_data_should_return_dict_with_sql_valid_values(
         self,
     ):
         condition_name, condition_value = (

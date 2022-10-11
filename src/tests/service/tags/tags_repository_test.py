@@ -1,7 +1,9 @@
-from unittest import TestCase
 import logging
+from unittest import TestCase
 from unittest.mock import Mock
+
 from src.service.tags.tags_repository import TagsRepository
+from src.utils.query_builder import QuerySQLBuilder
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,10 +24,10 @@ class TestTagsRepository(TestCase):
             "tags": [self.tag],
         }
         self.mock_session = Mock()
-        self.mock_query_builder = Mock()
+        self.query_builder = QuerySQLBuilder()
         self.mock_response_sql = Mock()
         self.repository = TagsRepository(
-            self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
+            self.mock_session, self.query_builder, self.mock_response_sql, logger
         )
 
     def mock_response_query_sql(self, response):
@@ -36,62 +38,64 @@ class TestTagsRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_total_number_of_tags_returns_the_count_of_tags_when_the_query_is_succesful(
+    def test_get_total_number_of_tags_when_query_execution_is_success_returns_the_count_of_tags(
         self,
     ):
         self.mock_response_query_sql(self.total_tags)
 
-        get_total_number_of_tags = self.repository.get_total_number_of_tags()
+        total_number_of_tags = self.repository.get_total_number_of_tags()
 
-        self.assertEqual(get_total_number_of_tags, self.total_tags)
-        self.repository.session.execute.assert_called_once()
+        self.assertEqual(total_number_of_tags, self.total_tags)
+        self.mock_session.execute.assert_called_once()
 
-    def test_get_total_number_of_tags_throws_an_exception_when_the_query_is_succesful(
+    def test_get_total_number_of_tags_when_the_query_execution_fails_throws_an_exception(
         self,
     ):
-        self.repository.session.execute.side_effect = Exception("error")
+        self.mock_session.execute.side_effect = Exception("error")
+
         with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.repository.get_total_number_of_tags())
+            self.repository.get_total_number_of_tags()
 
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.repository.session.execute.assert_called_once()
+        self.assertEqual(str(context.exception), "error")
+        self.mock_session.execute.assert_called_once()
 
-    def test_get_tags_with_companies_returns_tags_and_companies_data_when_the_query_is_succesful(
+    def test_get_tags_with_companies_if_the_query_execution_is_success_returns_tags_companies_data(
         self,
     ):
         self.mock_response_list_query_sql(self.tag)
 
-        get_tags = self.repository.get_tags_with_companies()
+        get_tags_response = self.repository.get_tags_with_companies()
 
-        self.assertEqual(get_tags, self.tag)
+        self.assertEqual(get_tags_response, self.tag)
+        self.mock_session.execute.assert_called_once()
 
-    def test_get_tags_with_companies_throws_an_exception_when_the_query_fails(self):
-        self.repository.session.execute.side_effect = Exception("error")
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.repository.get_tags_with_companies())
+    def test_get_tags_with_companies_when_the_query_execution_fails_return_empty_list(
+        self,
+    ):
+        self.mock_session.execute.side_effect = Exception("error")
 
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.repository.session.execute.assert_called_once()
+        get_tags_response = self.repository.get_tags_with_companies()
 
-    def test_get_tags_returns_the_tags_data_when_the_query_is_succesful(
+        self.assertEqual(get_tags_response, [])
+        self.mock_session.execute.assert_called_once()
+
+    def test_get_tags_when_the_query_execution_is_succesful_returns_the_tags_data(
         self,
     ):
         self.mock_response_list_query_sql(self.short_tag)
 
-        get_tags = self.repository.get_tags()
+        get_tags_response = self.repository.get_tags()
 
-        self.assertEqual(get_tags, self.short_tag)
+        self.assertEqual(get_tags_response, self.short_tag)
+        self.mock_session.execute.assert_called_once()
 
-    def test_get_tags_throws_an_exception_when_the_query_fails(self):
-        self.repository.session.execute.side_effect = Exception("error")
-        with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.repository.get_tags())
+    def test_get_tags_when_the_query_execution_fails_return_empty_list(self):
+        self.mock_session.execute.side_effect = Exception("error")
 
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.repository.session.execute.assert_called_once()
+        get_tags_response = self.repository.get_tags()
+
+        self.assertEqual(get_tags_response, [])
+        self.mock_session.execute.assert_called_once()
 
     def test_delete_tags_with_no_empty_list_should_execute_query(self):
         tag_ids = ["tag_id_1", "tag_id_2"]

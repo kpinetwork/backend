@@ -1,8 +1,12 @@
 from app_names import TableNames
+from query_builder import QuerySQLBuilder
+from response_sql import ResponseSQL
 
 
 class TagsRepository:
-    def __init__(self, session, query_builder, response_sql, logger) -> None:
+    def __init__(
+        self, session, query_builder: QuerySQLBuilder, response_sql: ResponseSQL, logger
+    ) -> None:
         self.logger = logger
         self.session = session
         self.query_builder = query_builder
@@ -16,26 +20,24 @@ class TagsRepository:
                 .build()
                 .get_query()
             )
-
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_result(result)
-
         except Exception as error:
             self.logger.error(error)
             raise error
 
-    def __get_subquery_tag(self, offset, max_count) -> str:
+    def __get_subquery_tag(self, offset: int, max_count: int) -> str:
         return (
             self.query_builder.add_table_name(TableNames.TAG)
             .add_select_conditions([f"{TableNames.TAG}.id"])
-            .add_sql_order_by_condition(["id"], self.query_builder.Order.ASC)
+            .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
             .add_sql_offset_condition(offset)
             .add_sql_limit_condition(max_count)
             .build()
             .get_query()
         )
 
-    def get_tags_with_companies(self, offset=0, max_count=None) -> list:
+    def get_tags_with_companies(self, offset: int = 0, max_count: int = None) -> list:
         try:
             select_options = [
                 f"{TableNames.TAG}.*",
@@ -55,7 +57,8 @@ class TagsRepository:
                             "from": f"{TableNames.TAG}.id",
                             "to": f"{TableNames.COMPANY_TAG}.tag_id",
                         }
-                    }
+                    },
+                    self.query_builder.JoinType.LEFT,
                 )
                 .add_join_clause(
                     {
@@ -63,7 +66,8 @@ class TagsRepository:
                             "from": f"{TableNames.COMPANY_TAG}.company_id",
                             "to": f"{TableNames.COMPANY}.id",
                         }
-                    }
+                    },
+                    self.query_builder.JoinType.LEFT,
                 )
                 .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
@@ -77,7 +81,7 @@ class TagsRepository:
             self.logger.error(error)
             return []
 
-    def get_tags(self, offset=0, max_count=None) -> list:
+    def get_tags(self, offset: int = 0, max_count: int = None) -> list:
         try:
             query = (
                 self.query_builder.add_table_name(TableNames.TAG)

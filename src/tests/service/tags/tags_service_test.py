@@ -1,6 +1,7 @@
-from unittest import TestCase, mock
 import logging
 from unittest.mock import Mock
+from unittest import TestCase
+
 from src.service.tags.tags_service import TagsService
 
 logger = logging.getLogger()
@@ -17,34 +18,43 @@ class TestTagsService(TestCase):
         }
         self.short_tag = {"id": "123", "name": "Tag Name"}
         self.total_tags = {"count": 1}
-        self.all_tags = [
-            {
-                "id": "123",
-                "name": "Tag Name",
-                "companies": [
-                    {"id": "1", "name": "Test Company"},
-                    {"id": "2", "name": "Company Name"},
-                ],
-            }
-        ]
-        self.mock_session = Mock()
-        self.mock_query_builder = Mock()
-        self.mock_response_sql = Mock()
+        self.tag_with_companies = {
+            "id": "123",
+            "name": "Tag Name",
+            "companies": [
+                {"id": "1", "name": "Test Company"},
+            ],
+        }
         self.mock_repository = Mock()
         self.tags_service_instance = TagsService(logger, self.mock_repository)
 
-    def mock_response_query_sql(self, response):
-        attrs = {"process_query_result.return_value": response}
-        self.mock_response_sql.configure_mock(**attrs)
-
-    def mock_response_list_query_sql(self, response):
-        attrs = {"process_query_list_results.return_value": response}
-        self.mock_response_sql.configure_mock(**attrs)
-
-    def test_get_companies_by_tags_returns_the_tags_and_companies_when_the_query_response_is_passed(
+    def test_get_companies_by_tags_if_tags_without_companies_is_passed_returns_tags_and_companies(
         self,
     ):
-        expected_data = self.all_tags
+        tag_data = {
+            "id": "234",
+            "name": "Tag Test Name",
+        }
+        tag_data_with_companies_list = tag_data.copy()
+        tag_data_with_companies_list["companies"] = []
+        expected_tags_data = [self.tag_with_companies, tag_data_with_companies_list]
+        data = [
+            self.tag,
+            tag_data,
+        ]
+
+        get_companies_by_tag_response = self.tags_service_instance.get_companies_by_tag(
+            data
+        )
+
+        self.assertEqual(get_companies_by_tag_response, expected_tags_data)
+
+    def test_get_companies_by_tags_if_tags_with_companies_is_passed_returns_tags_and_companies_data(
+        self,
+    ):
+        tag_data = self.tag_with_companies.copy()
+        tag_data["companies"].append({"id": "2", "name": "Company Name"})
+        expected_tags_data = [tag_data]
         data = [
             self.tag,
             {
@@ -55,52 +65,52 @@ class TestTagsService(TestCase):
             },
         ]
 
-        get_companies_by_tag = self.tags_service_instance.get_companies_by_tag(data)
+        get_companies_by_tag_response = self.tags_service_instance.get_companies_by_tag(
+            data
+        )
 
-        self.assertEqual(get_companies_by_tag, expected_data)
+        self.assertEqual(get_companies_by_tag_response, expected_tags_data)
 
-    @mock.patch("src.service.tags.tags_service.TagsService.get_companies_by_tag")
-    def test_get_all_tags_should_return_the_count_and_tags_data_if_user_has_access(
-        self, mock_get_companies_by_tag
+    def test_get_all_tags_if_user_has_access_should_return_the_count_and_tags_with_companies_data(
+        self,
     ):
-        expected_data = {
+        expected_tags_dict = {
             "total": self.total_tags.get("count"),
-            "tags": self.all_tags,
+            "tags": [self.tag_with_companies],
         }
-
         self.mock_repository.get_total_number_of_tags.return_value = self.total_tags
         self.mock_repository.get_tags_with_companies.return_value = [self.tag]
-        mock_get_companies_by_tag.return_value = self.all_tags
 
-        get_all_tags = self.tags_service_instance.get_all_tags(True)
+        get_all_tags_response = self.tags_service_instance.get_all_tags(True)
 
-        self.assertEqual(get_all_tags, expected_data)
+        self.assertEqual(get_all_tags_response, expected_tags_dict)
+        self.mock_repository.get_total_number_of_tags.assert_called_once()
+        self.mock_repository.get_tags_with_companies.assert_called_once()
 
-    @mock.patch("src.service.tags.tags_service.TagsService.get_companies_by_tag")
-    def test_get_all_tags_should_return_the_count_and_tags_data_if_user_does_not_have_access(
-        self, mock_get_companies_by_tag
+    def test_get_all_tags_if_user_does_not_have_access_should_return_the_count_and_tags_data(
+        self,
     ):
-        expected_data = {
+        expected_tags_dict = {
             "total": self.total_tags.get("count"),
             "tags": [self.short_tag],
         }
-
         self.mock_repository.get_total_number_of_tags.return_value = self.total_tags
         self.mock_repository.get_tags.return_value = [self.short_tag]
-        mock_get_companies_by_tag.return_value = self.all_tags
 
-        get_all_tags = self.tags_service_instance.get_all_tags(False)
+        get_all_tags_response = self.tags_service_instance.get_all_tags(False)
 
-        self.assertEqual(get_all_tags, expected_data)
+        self.assertEqual(get_all_tags_response, expected_tags_dict)
+        self.mock_repository.get_total_number_of_tags.assert_called_once()
+        self.mock_repository.get_tags.assert_called_once()
 
-    def test_get_all_tags_should_raise_an_exception_when_queries_fails(self):
-        self.mock_session.execute.side_effect = Exception("error")
+    def test_get_all_tags_when_query_execution_fails_should_raise_an_exception(self):
+        self.mock_repository.get_total_number_of_tags.side_effect = Exception("error")
+
         with self.assertRaises(Exception) as context:
-            exception = self.assertRaises(self.tags_service_instance.get_all_tags(True))
+            self.tags_service_instance.get_all_tags(True)
 
-            self.assertTrue("error" in context.exception)
-            self.assertEqual(exception, Exception)
-            self.mock_session.execute.assert_called_once()
+        self.assertEqual(str(context.exception), "Can't get tags")
+        self.mock_repository.get_total_number_of_tags.assert_called_once()
 
     def test_delete_tags_with_empty_list_should_raise_exception(self):
         tag_ids = []

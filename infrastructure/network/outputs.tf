@@ -46,16 +46,7 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.download_comparison_vs_peers_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
-    "apigw_get_investment_year_report_lambda_function": {
-      resource_path: aws_api_gateway_resource.investment_report_id.path,
-      http_method: aws_api_gateway_method.get_investment_year_report_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
-    "apigw_get_investment_year_options_lambda_function": {
-      resource_path: aws_api_gateway_resource.invest_year_options.path,
-      http_method: aws_api_gateway_method.get_investment_year_options_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
+    
     "apigw_get_investment_date_report_lambda_function": {
       resource_path: aws_api_gateway_resource.investment_date_report.path,
       http_method: aws_api_gateway_method.get_investment_date_report_method.http_method,

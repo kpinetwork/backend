@@ -535,7 +535,7 @@ class TestByMetricReport(TestCase):
     def test_get_by_metric_records(
         self, mock_verify_anonimization, mock_get_profiles, mock_get_records
     ):
-        self.mock_repository.add_company_filters.return_value = dict()
+        self.mock_repository.add_filters.return_value = dict()
         data = {
             "1": {"id": "1", "name": "Test", "metrics": {2020: 1, 2021: 2}},
             "2": {"id": "2", "name": "Company", "metrics": {2020: 4, 2021: -1}},

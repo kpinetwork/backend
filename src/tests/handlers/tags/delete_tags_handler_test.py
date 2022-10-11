@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 
 from src.tests.data.data_reader import read
 from src.handlers.tags.delete_tags_handler import handler
-import src.handlers.tags.delete_tags_handler as update_handler
+import src.handlers.tags.delete_tags_handler as delete_handler
 
 
 class TestDeleteTagsHandler(TestCase):
@@ -11,7 +11,7 @@ class TestDeleteTagsHandler(TestCase):
         self.event = read("sample_event_delete_tags.json")
 
     @mock.patch("tags_service.TagsService.delete_tags")
-    @mock.patch.object(update_handler, "verify_user_access")
+    @mock.patch.object(delete_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_delete_tags_handler_with_user_access_and_call_successful_should_return_200_response(
@@ -35,7 +35,7 @@ class TestDeleteTagsHandler(TestCase):
         self.assertEqual(response.get("body"), json.dumps({"deleted": True}))
 
     @mock.patch("tags_service.TagsService.delete_tags")
-    @mock.patch.object(update_handler, "verify_user_access")
+    @mock.patch.object(delete_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_delete_tags_handler_without_user_access_should_return_error_400_response(
@@ -59,7 +59,7 @@ class TestDeleteTagsHandler(TestCase):
         self.assertEqual(response.get("body"), json.dumps({"error": error_message}))
 
     @mock.patch("tags_service.TagsService.delete_tags")
-    @mock.patch.object(update_handler, "verify_user_access")
+    @mock.patch.object(delete_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
     def test_delete_tags_handler_without_valid_body_should_return_error_400_response(
