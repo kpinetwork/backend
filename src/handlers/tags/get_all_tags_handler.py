@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import Union
 
 from tags_service import TagsService
 from tags_repository import TagsRepository
@@ -24,7 +25,7 @@ tags_repository = TagsRepository(session, query_builder, response_sql, logger)
 tags_service = TagsService(logger, tags_repository)
 
 
-def get_max_count(max_count: str):
+def get_max_count(max_count: str) -> Union[int, None]:
     try:
         return int(max_count)
     except Exception:
