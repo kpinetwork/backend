@@ -30,7 +30,7 @@ class TagsRepository:
         return (
             self.query_builder.add_table_name(TableNames.TAG)
             .add_select_conditions([f"{TableNames.TAG}.id"])
-            .add_sql_order_by_condition(["id"], self.query_builder.Order.ASC)
+            .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
             .add_sql_offset_condition(offset)
             .add_sql_limit_condition(max_count)
             .build()
