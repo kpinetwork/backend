@@ -2062,7 +2062,7 @@ resource "aws_iam_role_policy_attachment" "get_all_tags_lambda_vpc" {
 }
 
 resource "aws_lambda_permission" "apigw_get_all_tags_lambda" {
-  statement_id  = "AllowExecutionFromAPIGatewayRuleOf40"
+  statement_id  = "AllowExecutionFromAPIGatewayGetAllTags"
   action        = "lambda:InvokeFunction"
   function_name = "${var.environment}_${var.lambdas_names.get_all_tags_lambda_function}"
   principal     = "apigateway.amazonaws.com"

@@ -95,7 +95,7 @@ class TagsRepository:
             results = self.session.execute(query).fetchall()
             return self.response_sql.process_query_list_results(results)
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             return []
 
     def __get_str_sql_list(self, records: list) -> list:
