@@ -37,6 +37,7 @@ output "lambdas_exec_roles_arn" {
       "edit_modify_data_exec_role_arn": aws_iam_role.edit_modify_data_lambda_exec_role.arn
       "get_edit_modify_data_exec_role_arn": aws_iam_role.get_edit_modify_data_lambda_exec_role.arn
       "get_metric_types_exec_role_arn": aws_iam_role.get_metric_types_lambda_exec_role.arn
+      "get_all_tags_exec_role_arn": aws_iam_role.get_all_tags_lambda_exec_role.arn
   }
 }
 
