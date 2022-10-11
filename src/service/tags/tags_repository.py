@@ -12,25 +12,14 @@ class TagsRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
 
-    def get_total_number_of_tags_query(self, access: bool) -> str:
-        if not access:
-            return (
+    def get_total_number_of_tags(self) -> dict:
+        try:
+            query = (
                 self.query_builder.add_table_name(TableNames.TAG)
                 .add_select_conditions(["COUNT(*)"])
                 .build()
                 .get_query()
             )
-        return (
-            self.query_builder.add_table_name(TableNames.COMPANY_TAG)
-            .add_select_conditions([f"COUNT(distinct {TableNames.COMPANY_TAG}.tag_id)"])
-            .build()
-            .get_query()
-        )
-
-    def get_total_number_of_tags(self, access: bool) -> dict:
-        try:
-            query = self.get_total_number_of_tags_query(access)
-
             result = self.session.execute(query).fetchall()
             return self.response_sql.process_query_result(result)
         except Exception as error:
@@ -68,7 +57,8 @@ class TagsRepository:
                             "from": f"{TableNames.TAG}.id",
                             "to": f"{TableNames.COMPANY_TAG}.tag_id",
                         }
-                    }
+                    },
+                    self.query_builder.JoinType.LEFT,
                 )
                 .add_join_clause(
                     {
@@ -76,7 +66,8 @@ class TagsRepository:
                             "from": f"{TableNames.COMPANY_TAG}.company_id",
                             "to": f"{TableNames.COMPANY}.id",
                         }
-                    }
+                    },
+                    self.query_builder.JoinType.LEFT,
                 )
                 .add_sql_where_equal_condition(where_conditions)
                 .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
@@ -104,5 +95,5 @@ class TagsRepository:
             results = self.session.execute(query).fetchall()
             return self.response_sql.process_query_list_results(results)
         except Exception as error:
-            self.logger.info(error)
+            self.logger.error(error)
             return []

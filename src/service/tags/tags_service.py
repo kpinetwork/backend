@@ -1,5 +1,7 @@
 from collections import defaultdict
+
 from tags_repository import TagsRepository
+from base_exception import AppError
 
 
 class TagsService:
@@ -15,11 +17,11 @@ class TagsService:
         for tag in tags:
             companies = []
             tag_id = tag["id"]
-            company_data = {"id": tag["company_id"], "name": tag["company_name"]}
             tag_data = {"id": tag_id, "name": tag["name"]}
             if tag_id in records:
                 companies = records[tag_id]["companies"]
-            companies.append(company_data)
+            if tag.get("company_id") and tag.get("company_name"):
+                companies.append({"id": tag["company_id"], "name": tag["company_name"]})
             records[tag_id].update(tag_data)
             records[tag_id]["companies"] = companies
         return list(records.values())
@@ -28,7 +30,7 @@ class TagsService:
         self, access: bool, offset: int = 0, max_count: int = None
     ) -> dict:
         try:
-            total_tags = self.repository.get_total_number_of_tags(access).get("count")
+            total_tags = self.repository.get_total_number_of_tags().get("count")
 
             if not access:
                 return self.get_all_tags_response(
@@ -44,4 +46,4 @@ class TagsService:
 
         except Exception as error:
             self.logger.error(error)
-            return dict()
+            raise AppError("Can't get tags")
