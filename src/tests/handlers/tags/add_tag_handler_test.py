@@ -61,7 +61,7 @@ class TestAddTagHandler(TestCase):
     @mock.patch.object(add_tag_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
-    def test_add_tag_handler_without_valid_body_should_should_return_error_400_response(
+    def test_add_tag_handler_without_valid_body_should_return_error_400_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,
