@@ -154,7 +154,9 @@ class TagsRepository:
                 queries.extend(
                     list(
                         map(
-                            lambda company_id: function_to_exec(tag_id, company_id),
+                            lambda company_id, tag=tag_id: function_to_exec(
+                                tag, company_id
+                            ),
                             tag_data.get(field),
                         )
                     )
