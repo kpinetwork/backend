@@ -47,3 +47,10 @@ class TagsService:
         except Exception as error:
             self.logger.error(error)
             raise AppError("Can't get tags")
+
+    def get_tags_by_company(self, company_id: str) -> list:
+        try:
+            return self.repository.get_tags_by_company(company_id)
+        except Exception as error:
+            self.logger.error(error)
+            raise AppError("Can't get tags")

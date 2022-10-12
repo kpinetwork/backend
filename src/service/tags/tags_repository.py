@@ -97,3 +97,37 @@ class TagsRepository:
         except Exception as error:
             self.logger.error(error)
             return []
+
+    def get_tags_by_company(self, company_id: str) -> list:
+        try:
+            if not company_id and not company_id.strip():
+                return []
+
+            query = (
+                self.query_builder.add_table_name(TableNames.TAG)
+                .add_select_conditions(
+                    [
+                        f"{TableNames.TAG}.id",
+                        f"{TableNames.TAG}.name",
+                    ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.tag_id",
+                            "to": f"{TableNames.TAG}.id",
+                        }
+                    }
+                )
+                .add_sql_order_by_condition(["name"], self.query_builder.Order.ASC)
+                .add_sql_where_equal_condition(
+                    {f"{TableNames.COMPANY_TAG}.company_id": f"'{company_id}'"}
+                )
+                .build()
+                .get_query()
+            )
+            results = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_list_results(results)
+        except Exception as error:
+            self.logger.error(error)
+            return []

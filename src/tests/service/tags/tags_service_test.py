@@ -111,3 +111,21 @@ class TestTagsService(TestCase):
 
         self.assertEqual(str(context.exception), "Can't get tags")
         self.mock_repository.get_total_number_of_tags.assert_called_once()
+
+    def test_get_tags_by_company_should_return_list_of_tags(self):
+        self.mock_repository.get_tags_by_company.return_value = [self.short_tag]
+
+        tags = self.tags_service_instance.get_tags_by_company("123")
+
+        self.assertEqual(tags, [self.short_tag])
+
+    def test_get_tags_by_company_when_query_execution_fails_should_raised_an_exception(
+        self,
+    ):
+        self.mock_repository.get_tags_by_company.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.tags_service_instance.get_tags_by_company("123")
+
+        self.assertEqual(str(context.exception), "Can't get tags")
+        self.mock_repository.get_tags_by_company.assert_called_once()

@@ -96,3 +96,32 @@ class TestTagsRepository(TestCase):
 
         self.assertEqual(get_tags_response, [])
         self.mock_session.execute.assert_called_once()
+
+    def test_get_tags_by_company_when_company_id_is_valid_should_return_list_of_tags(
+        self,
+    ):
+        self.mock_response_list_query_sql([self.short_tag])
+        company_id = "123"
+
+        tags = self.repository.get_tags_by_company(company_id)
+
+        self.assertEqual(tags, [self.short_tag])
+
+    def test_get_tags_by_company_when_company_id_is_not_valid_should_return_empty_list(
+        self,
+    ):
+        company_id = ""
+
+        tags = self.repository.get_tags_by_company(company_id)
+
+        self.assertEqual(tags, [])
+
+    def test_get_tags_by_company_when_the_query_execution_fails_should_return_empty_list(
+        self,
+    ):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        tags = self.repository.get_tags_by_company("123")
+
+        self.assertEqual(tags, [])
+        self.mock_session.execute.assert_called_once()
