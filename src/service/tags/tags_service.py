@@ -49,9 +49,6 @@ class TagsService:
             raise AppError("Can't get tags")
 
     def delete_tags(self, tag_ids: list) -> bool:
-        try:
-            if not tag_ids:
-                raise AppError("No tags to delete")
-            return self.repository.delete_tags(tag_ids)
-        except AppError as error:
-            raise error
+        if not tag_ids:
+            raise AppError("No tags to delete")
+        return self.repository.delete_tags(tag_ids)
