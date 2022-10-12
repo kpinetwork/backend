@@ -1,3 +1,5 @@
+import uuid
+
 from app_names import TableNames
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
@@ -97,3 +99,57 @@ class TagsRepository:
         except Exception as error:
             self.logger.error(error)
             return []
+
+    def add_company_tag_query(self, tag_id: str, companies: list) -> str:
+        query = ""
+        for company_id in companies:
+            if company_id and company_id.strip():
+                company_tag_id = str(uuid.uuid4())
+                query += """
+                    INSERT INTO {table}
+                    VALUES ('{id}', '{tag_id}', '{company_id}');
+                """.format(
+                    table=TableNames.COMPANY_TAG,
+                    id=company_tag_id,
+                    tag_id=tag_id,
+                    company_id=company_id,
+                )
+        return query
+
+    def add_tag_query(self, tag_id: str, tag_name: str) -> str:
+        return """
+            INSERT INTO {table_name}
+            VALUES('{id}', '{name}');
+            """.format(
+            table_name=TableNames.TAG, id=tag_id, name=tag_name
+        )
+
+    def add_tag(self, tag: dict) -> dict:
+        try:
+            tag_id = str(uuid.uuid4())
+            tag_name = tag.get("name")
+            companies = tag.get("companies", [])
+            query = self.add_tag_query(tag_id, tag_name)
+
+            if companies and len(companies) > 0:
+                company_tag_query = self.add_company_tag_query(tag_id, companies)
+                query = """
+                {tag}
+                {company_tag}
+                """.format(
+                    tag=query, company_tag=company_tag_query
+                )
+
+            self.session.execute(query)
+            self.session.commit()
+
+            return {
+                "id": tag_id,
+                "name": tag_name,
+                "companies": companies,
+            }
+
+        except Exception as error:
+            self.session.rollback()
+            self.logger.error(error)
+            raise error

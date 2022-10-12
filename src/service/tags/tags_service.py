@@ -47,3 +47,10 @@ class TagsService:
         except Exception as error:
             self.logger.error(error)
             raise AppError("Can't get tags")
+
+    def add_tag(self, tag: dict) -> dict:
+        try:
+            return self.repository.add_tag(tag)
+        except Exception as error:
+            self.logger.error(error)
+            raise AppError(f"Cannot add new tag: {error}")

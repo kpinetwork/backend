@@ -1,0 +1,8 @@
+{
+    "tag": {
+      "id": "1234",
+      "name": "Sample tag",
+      "companies": ["id1", "id2"]
+    },
+    "added": true
+  }

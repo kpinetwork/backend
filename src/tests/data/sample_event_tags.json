@@ -7,5 +7,7 @@
         "authorizer": {
             "principalId": "user_id"
         }
-    }
+    },
+    "body": 
+        "{\"name\": \"Sample tag\", \"companies\": [\"id1\", \"id2\"]}"
 }
