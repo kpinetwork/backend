@@ -3,6 +3,7 @@ import uuid
 from app_names import TableNames
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
+from base_exception import AppError
 
 
 class TagsRepository:
@@ -100,7 +101,7 @@ class TagsRepository:
             self.logger.error(error)
             return []
 
-    def add_company_tag_query(self, tag_id: str, companies: list) -> str:
+    def __get_company_tag_queries(self, tag_id: str, companies: list) -> str:
         query = ""
         for company_id in companies:
             if company_id and company_id.strip():
@@ -116,7 +117,7 @@ class TagsRepository:
                 )
         return query
 
-    def add_tag_query(self, tag_id: str, tag_name: str) -> str:
+    def __get_tag_query(self, tag_id: str, tag_name: str) -> str:
         return """
             INSERT INTO {table_name}
             VALUES('{id}', '{name}');
@@ -129,10 +130,13 @@ class TagsRepository:
             tag_id = str(uuid.uuid4())
             tag_name = tag.get("name")
             companies = tag.get("companies", [])
-            query = self.add_tag_query(tag_id, tag_name)
+
+            if tag_name is None or not tag_name.strip():
+                raise AppError("Invalid tag name")
+            query = self.__get_tag_query(tag_id, tag_name)
 
             if companies and len(companies) > 0:
-                company_tag_query = self.add_company_tag_query(tag_id, companies)
+                company_tag_query = self.__get_company_tag_queries(tag_id, companies)
                 query = """
                 {tag}
                 {company_tag}

@@ -30,9 +30,7 @@ class TestAddTagHandler(TestCase):
         mock_create_db_engine.assert_not_called()
         mock_create_db_session.assert_not_called()
         self.assertEqual(response.get("statusCode"), 201)
-        self.assertEqual(
-            response["body"], json.dumps({"tag": self.tag, "added": True}, default=str)
-        )
+        self.assertEqual(response["body"], json.dumps({"tag": self.tag, "added": True}))
 
     @mock.patch("tags_service.TagsService.add_tag")
     @mock.patch.object(add_tag_handler, "verify_user_access")

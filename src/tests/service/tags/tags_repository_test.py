@@ -118,6 +118,16 @@ class TestTagsRepository(TestCase):
 
         self.assertEqual(added_tag.get("name"), self.tag.get("name"))
         self.assertEqual(added_tag.get("companies"), tag_response.get("companies"))
+        self.mock_session.execute.assert_called_once()
+
+    def test_add_tag_with_invalid_tag_name_should_raise_exception(self):
+        self.mock_session.execute.side_effect = Exception("Invalid tag name")
+
+        with self.assertRaises(Exception) as context:
+            self.repository.add_tag({"name": ""})
+
+        self.assertEqual(str(context.exception), "Invalid tag name")
+        self.mock_session.rollback.assert_called()
 
     def test_add_tag_with_invalid_transaction_exec_should_raise_exception(self):
         self.mock_session.execute.side_effect = Exception("error with query exec")
