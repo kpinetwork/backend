@@ -100,9 +100,6 @@ class TagsRepository:
 
     def get_tags_by_company(self, company_id: str) -> list:
         try:
-            if not company_id and not company_id.strip():
-                return []
-
             query = (
                 self.query_builder.add_table_name(TableNames.TAG)
                 .add_select_conditions(

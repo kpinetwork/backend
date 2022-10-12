@@ -50,7 +50,9 @@ class TagsService:
 
     def get_tags_by_company(self, company_id: str) -> list:
         try:
+            if not company_id and not company_id.strip():
+                raise AppError("Invalid company ID")
             return self.repository.get_tags_by_company(company_id)
         except Exception as error:
             self.logger.error(error)
-            raise AppError("Can't get tags")
+            raise AppError(f"Can't get tags: {error}")

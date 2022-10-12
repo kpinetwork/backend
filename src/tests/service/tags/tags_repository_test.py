@@ -107,15 +107,6 @@ class TestTagsRepository(TestCase):
 
         self.assertEqual(tags, [self.short_tag])
 
-    def test_get_tags_by_company_when_company_id_is_not_valid_should_return_empty_list(
-        self,
-    ):
-        company_id = ""
-
-        tags = self.repository.get_tags_by_company(company_id)
-
-        self.assertEqual(tags, [])
-
     def test_get_tags_by_company_when_the_query_execution_fails_should_return_empty_list(
         self,
     ):
