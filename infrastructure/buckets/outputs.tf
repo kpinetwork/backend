@@ -222,6 +222,11 @@ output "object_references" {
       bucket : aws_s3_bucket_object.get_all_tags_function_object.bucket
     }
 
+    "get_tags_by_company_function_bucket" : {
+      etag : aws_s3_bucket_object.get_tags_by_company_function_object.etag,
+      key : aws_s3_bucket_object.get_tags_by_company_function_object.key,
+      bucket : aws_s3_bucket_object.get_tags_by_company_function_object.bucket
+    }
     "add_tag_function_bucket" : {
       etag : aws_s3_bucket_object.add_tag_function_object.etag,
       key : aws_s3_bucket_object.add_tag_function_object.key,

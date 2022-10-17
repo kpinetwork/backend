@@ -205,6 +205,12 @@ resource "aws_api_gateway_resource" "tags" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
+resource "aws_api_gateway_resource" "tags_by_company" {
+  path_part   = "tags"
+  parent_id   = aws_api_gateway_resource.company_details.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
 # Provides a HTTP Method for an API Gateway Resource.
@@ -539,6 +545,14 @@ resource "aws_api_gateway_method" "get_all_tags_method" {
   }
 }
 
+resource "aws_api_gateway_method" "get_tags_by_company_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags_by_company.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
 resource "aws_api_gateway_method" "add_tag_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.tags.id
@@ -808,6 +822,15 @@ resource "aws_api_gateway_integration" "get_all_tags_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_all_tags_lambda_function
+}
+
+resource "aws_api_gateway_integration" "get_tags_by_company_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags_by_company.id
+  http_method             = aws_api_gateway_method.get_tags_by_company_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_tags_by_company_lambda_function
 }
 
 resource "aws_api_gateway_integration" "add_tag_integration" {
