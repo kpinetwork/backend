@@ -112,6 +112,56 @@ class TestTagsService(TestCase):
         self.assertEqual(str(context.exception), "Can't get tags")
         self.mock_repository.get_total_number_of_tags.assert_called_once()
 
+    def test_get_tags_by_company_should_return_list_of_tags(self):
+        self.mock_repository.get_tags_by_company.return_value = [self.short_tag]
+
+        tags = self.tags_service_instance.get_tags_by_company("123")
+
+        self.assertEqual(tags, [self.short_tag])
+
+    def test_get_tags_by_company_when_company_id_is_invalid_should_raised_an_exception(
+        self,
+    ):
+        self.mock_repository.get_tags_by_company.side_effect = Exception(
+            "Invalid company ID"
+        )
+
+        with self.assertRaises(Exception) as context:
+            self.tags_service_instance.get_tags_by_company("")
+
+        self.assertEqual(str(context.exception), "Can't get tags: Invalid company ID")
+        self.mock_repository.get_tags_by_company.assert_not_called()
+
+    def test_get_tags_by_company_when_query_execution_fails_should_raised_an_exception(
+        self,
+    ):
+        self.mock_repository.get_tags_by_company.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.tags_service_instance.get_tags_by_company("123")
+
+        self.assertEqual(str(context.exception), "Can't get tags: error")
+        self.mock_repository.get_tags_by_company.assert_called_once()
+
+    def test_add_tag_sucess_should_return_added_tag(self):
+        tag_expected = self.tag.copy()
+        tag_expected.update({"companies": ["123"]})
+        self.mock_repository.add_tag.return_value = tag_expected
+
+        tag = self.tags_service_instance.add_tag(self.tag)
+
+        self.assertEqual(tag.get("name"), tag_expected.get("name"))
+        self.assertEqual(tag.get("companies"), tag_expected.get("companies"))
+
+    def test_add_tag_when_query_execution_fails_should_raise_an_exception(self):
+        self.mock_repository.add_tag.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.tags_service_instance.add_tag(self.tag)
+
+        self.assertEqual(str(context.exception), "Cannot add new tag: error")
+        self.mock_repository.add_tag.assert_called_once()
+
     def test_delete_tags_with_empty_list_should_raise_exception(self):
         tag_ids = []
         error_message = "No tags to delete"

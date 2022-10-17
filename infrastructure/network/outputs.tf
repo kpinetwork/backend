@@ -166,6 +166,18 @@ output "api_gateway_references" {
       api_id: aws_api_gateway_rest_api.api.id
     }
 
+    "apigw_get_tags_by_company_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags_by_company.path,
+      http_method: aws_api_gateway_method.get_tags_by_company_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+  
+     "apigw_add_tag_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.add_tag_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
     "apigw_delete_tags_lambda_function": {
       resource_path: aws_api_gateway_resource.tags.path,
       http_method: aws_api_gateway_method.delete_tags_method.http_method,

@@ -530,6 +530,36 @@ functions:
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
 
+  get_tags_by_company_handler:
+    requirements: ./src/handlers/tags/requirements.txt
+    include:
+    - ./src/handlers/tags/get_tags_by_company_handler.py
+    - ./src/service/tags/tags_service.py
+    - ./src/service/tags/tags_repository.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_user.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
+  
+  add_tag_handler:
+    requirements: ./src/handlers/tags/requirements.txt
+    include:
+    - ./src/handlers/tags/add_tag_handler.py
+    - ./src/service/tags/tags_service.py
+    - ./src/service/tags/tags_repository.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py 
+
   delete_tags_handler:
     requirements: ./src/handlers/tags/requirements.txt
     include:
@@ -547,6 +577,7 @@ functions:
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
 
+    
 layers:
   layer_libraries:
     image: lambci/lambda:build-python3.8
