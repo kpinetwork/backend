@@ -40,6 +40,7 @@ output "lambdas_exec_roles_arn" {
       "get_all_tags_exec_role_arn": aws_iam_role.get_all_tags_lambda_exec_role.arn
       "get_tags_by_company_exec_role_arn": aws_iam_role.get_tags_by_company_lambda_exec_role.arn
       "add_tag_exec_role_arn": aws_iam_role.add_tag_lambda_exec_role.arn
+      "delete_tags_exec_role_arn": aws_iam_role.delete_tags_lambda_exec_role.arn
   }
 }
 

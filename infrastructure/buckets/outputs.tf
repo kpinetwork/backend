@@ -232,5 +232,11 @@ output "object_references" {
       key : aws_s3_bucket_object.add_tag_function_object.key,
       bucket : aws_s3_bucket_object.add_tag_function_object.bucket
     }
+
+    "delete_tags_function_bucket" : {
+      etag : aws_s3_bucket_object.delete_tags_function_object.etag,
+      key : aws_s3_bucket_object.delete_tags_function_object.key,
+      bucket : aws_s3_bucket_object.delete_tags_function_object.bucket
+    }
   }
 }

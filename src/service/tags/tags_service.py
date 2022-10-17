@@ -63,3 +63,8 @@ class TagsService:
         except Exception as error:
             self.logger.error(error)
             raise AppError(f"Cannot add new tag: {error}")
+
+    def delete_tags(self, tag_ids: list) -> bool:
+        if not tag_ids:
+            raise AppError("No tags to delete")
+        return self.repository.delete_tags(tag_ids)
