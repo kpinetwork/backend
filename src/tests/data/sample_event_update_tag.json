@@ -1,0 +1,20 @@
+{
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "body": {
+        "tags": {
+            "tag_1": {
+                "companies_to_delete": ["company_1"],
+                "companies_to_add": ["company_2"]
+            }
+        },
+        "company": {
+            "company_id": "company_1",
+            "tags_to_delete": ["tag_1"],
+            "tags_to_add": ["tag_3"]
+        }
+    }
+}
