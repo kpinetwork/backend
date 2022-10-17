@@ -544,6 +544,21 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
+  
+  add_tag_handler:
+    requirements: ./src/handlers/tags/requirements.txt
+    include:
+    - ./src/handlers/tags/add_tag_handler.py
+    - ./src/service/tags/tags_service.py
+    - ./src/service/tags/tags_repository.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py 
 
 layers:
   layer_libraries:

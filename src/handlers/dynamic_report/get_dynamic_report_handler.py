@@ -84,7 +84,6 @@ def handler(event, _):
 
         if event.get("queryStringParameters"):
             params = event.get("queryStringParameters")
-            params.pop("tag", None)
             conditions = get_condition_params(params)
             from_main = params.get("from_main", from_main)
             metrics = get_list_param(params.get("metrics"))

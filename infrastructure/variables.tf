@@ -71,6 +71,7 @@ variable "lambdas_names" {
     "get_metric_types_lambda_function": "get_metric_types_lambda_function"
     "get_all_tags_lambda_function": "get_all_tags_lambda_function"
     "get_tags_by_company_lambda_function": "get_tags_by_company_lambda_function"
+    "add_tag_lambda_function": "add_tag_lambda_function"
   }
 }
 

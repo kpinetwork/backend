@@ -284,3 +284,10 @@ resource "aws_s3_bucket_object" "get_tags_by_company_function_object" {
   source = "${path.module}/../../dist/get_tags_by_company_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_tags_by_company_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "add_tag_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/add_tag_handler.zip"
+  source = "${path.module}/../../dist/add_tag_handler.zip"
+  etag = filemd5("${path.module}/../../dist/add_tag_handler.zip")
+}
