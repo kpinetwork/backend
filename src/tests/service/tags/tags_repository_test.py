@@ -96,3 +96,45 @@ class TestTagsRepository(TestCase):
 
         self.assertEqual(get_tags_response, [])
         self.mock_session.execute.assert_called_once()
+
+    def test_add_tag_success_without_associated_companies_should_return_added_tag(
+        self,
+    ):
+        tag_response = self.tag.copy()
+        tag_response["companies"] = []
+
+        added_tag = self.repository.add_tag({"name": self.tag.get("name")})
+
+        self.assertEqual(added_tag.get("name"), self.tag.get("name"))
+        self.assertEqual(added_tag.get("companies"), [])
+
+    def test_add_tag_success_with_associated_companies_should_return_added_tag(
+        self,
+    ):
+        tag_response = self.tag.copy()
+        tag_response["companies"] = ["123"]
+
+        added_tag = self.repository.add_tag(tag_response)
+
+        self.assertEqual(added_tag.get("name"), self.tag.get("name"))
+        self.assertEqual(added_tag.get("companies"), tag_response.get("companies"))
+        self.mock_session.execute.assert_called_once()
+
+    def test_add_tag_with_invalid_tag_name_should_raise_exception(self):
+        self.mock_session.execute.side_effect = Exception("Invalid tag name")
+
+        with self.assertRaises(Exception) as context:
+            self.repository.add_tag({"name": ""})
+
+        self.assertEqual(str(context.exception), "Invalid tag name")
+        self.mock_session.rollback.assert_called()
+
+    def test_add_tag_with_invalid_transaction_exec_should_raise_exception(self):
+        self.mock_session.execute.side_effect = Exception("error with query exec")
+
+        with self.assertRaises(Exception) as context:
+            self.repository.add_tag({"name": self.tag.get("name")})
+
+        self.assertEqual(str(context.exception), "error with query exec")
+        self.mock_session.execute.assert_called_once()
+        self.mock_session.rollback.assert_called()
