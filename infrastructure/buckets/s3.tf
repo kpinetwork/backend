@@ -278,9 +278,30 @@ resource "aws_s3_bucket_object" "get_all_tags_function_object" {
   etag = filemd5("${path.module}/../../dist/get_all_tags_handler.zip")
 }
 
+resource "aws_s3_bucket_object" "get_tags_by_company_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_tags_by_company_handler.zip"
+  source = "${path.module}/../../dist/get_tags_by_company_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_tags_by_company_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "add_tag_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/add_tag_handler.zip"
+  source = "${path.module}/../../dist/add_tag_handler.zip"
+  etag = filemd5("${path.module}/../../dist/add_tag_handler.zip")
+}
+
 resource "aws_s3_bucket_object" "update_tags_function_object" {
   bucket = var.bucket_name
   key = "${var.lambda_resource_name}/${var.environment}/update_tags_handler.zip"
   source = "${path.module}/../../dist/update_tags_handler.zip"
   etag = filemd5("${path.module}/../../dist/update_tags_handler.zip")
+}
+
+resource "aws_s3_bucket_object" "delete_tags_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/delete_tags_handler.zip"
+  source = "${path.module}/../../dist/delete_tags_handler.zip"
+  etag = filemd5("${path.module}/../../dist/delete_tags_handler.zip")
 }

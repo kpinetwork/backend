@@ -1,0 +1,8 @@
+{
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "body": ["tag_id_1", "tag_id_2"]
+}
