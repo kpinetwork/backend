@@ -1,4 +1,5 @@
 from collections import defaultdict
+from typing import Union
 
 from tags_repository import TagsRepository
 from base_exception import AppError
@@ -9,10 +10,10 @@ class TagsService:
         self.logger = logger
         self.repository = repository
 
-    def get_all_tags_response(self, total_tags: int, tags: list) -> dict:
+    def get_all_tags_response(self, total_tags: int, tags: Union[list, dict]) -> dict:
         return {"total": total_tags, "tags": tags}
 
-    def get_companies_by_tag(self, tags: list) -> list:
+    def get_companies_by_tag(self, tags: list) -> dict:
         records = defaultdict(dict)
         for tag in tags:
             companies = []
@@ -24,7 +25,7 @@ class TagsService:
                 companies.append({"id": tag["company_id"], "name": tag["company_name"]})
             records[tag_id].update(tag_data)
             records[tag_id]["companies"] = companies
-        return list(records.values())
+        return records
 
     def get_all_tags(
         self, access: bool, offset: int = 0, max_count: int = None

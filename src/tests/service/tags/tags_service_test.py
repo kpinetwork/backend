@@ -37,7 +37,10 @@ class TestTagsService(TestCase):
         }
         tag_data_with_companies_list = tag_data.copy()
         tag_data_with_companies_list["companies"] = []
-        expected_tags_data = [self.tag_with_companies, tag_data_with_companies_list]
+        expected_tags_data = {
+            self.tag_with_companies["id"]: self.tag_with_companies,
+            tag_data_with_companies_list["id"]: tag_data_with_companies_list,
+        }
         data = [
             self.tag,
             tag_data,
@@ -54,7 +57,7 @@ class TestTagsService(TestCase):
     ):
         tag_data = self.tag_with_companies.copy()
         tag_data["companies"].append({"id": "2", "name": "Company Name"})
-        expected_tags_data = [tag_data]
+        expected_tags_data = {tag_data["id"]: tag_data}
         data = [
             self.tag,
             {
@@ -76,7 +79,7 @@ class TestTagsService(TestCase):
     ):
         expected_tags_dict = {
             "total": self.total_tags.get("count"),
-            "tags": [self.tag_with_companies],
+            "tags": {self.tag_with_companies["id"]: self.tag_with_companies},
         }
         self.mock_repository.get_total_number_of_tags.return_value = self.total_tags
         self.mock_repository.get_tags_with_companies.return_value = [self.tag]
