@@ -33,10 +33,10 @@ def handler(event, _):
         if not access:
             raise AppError("No permissions to load tags")
 
-        if not event.get("pathParameters").get("company_id", None):
+        if not event.get("pathParameters").get("id", None):
             raise AppError("No data provided")
 
-        company_id = event.get("pathParameters").get("company_id")
+        company_id = event.get("pathParameters").get("id")
         tags = tags_service.get_tags_by_company(company_id)
 
         return {
