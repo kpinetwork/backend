@@ -74,11 +74,19 @@ jobs:
         run: |
           terraform plan -no-color
         continue-on-error: true
+      - name: Process output
+        id: process-plan
+        run: |
+          content=`echo '${{ steps.plan-prod.outputs.stdout }}' | grep -v "Refreshing state"`
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=plan::${content:0:65000}"
       - name: Update Pull Request for Prod Env
         uses: actions/github-script@0.9.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan-prod.outputs.stdout }}"
+          PLAN: "terraform\n${{ steps.process-plan.outputs.plan }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
