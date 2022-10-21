@@ -43,7 +43,7 @@ class DynamicReport:
 
     def remove_fields(self, company_data: dict, headers: list) -> None:
         company_data.pop("prior_actuals_revenue", None)
-        header = ["id"]
+        header = ["id", "size_cohort", "margin_group"]
         header.extend(headers)
         to_delete = set(company_data.keys()).difference(header)
         for field in to_delete:
