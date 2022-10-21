@@ -216,7 +216,9 @@ class TestDynamicReport(TestCase):
 
         mock_anonymize_company.assert_called()
 
-    def test_add_metrics(self):
+    def test_add_metrics_should_overwrite_data_dict_with_metrics_when_is_successful(
+        self,
+    ):
         metrics = ["gross_profit", "id", "name"]
         data = {
             "1": {
@@ -226,10 +228,19 @@ class TestDynamicReport(TestCase):
                 "prior_actuals_revenue": 34,
             }
         }
+        expected_data = {
+            "1": {
+                "name": "Test Company",
+                "gross_profit": "NA",
+                "margin_group": "$30-<50 million",
+                "size_cohort": "$30-<50 million",
+            }
+        }
+        self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
 
         self.report_instance.add_metrics(data, metrics, self.profile_ranges)
 
-        self.assertEqual(data, {"1": {"name": "Test Company", "gross_profit": "NA"}})
+        self.assertEqual(data, expected_data)
 
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.add_metrics")
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_data")

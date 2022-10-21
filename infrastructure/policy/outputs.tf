@@ -10,9 +10,7 @@ output "lambdas_exec_roles_arn" {
       "get_company_report_vs_peers_exec_role_arn": aws_iam_role.get_company_report_vs_peers_lambda_exec_role.arn
       "get_comparison_vs_peers_exec_role_arn": aws_iam_role.get_comparison_vs_peers_lambda_exec_role.arn
       "download_comparison_vs_peers_exec_role_arn": aws_iam_role.download_comparison_vs_peers_lambda_exec_role.arn
-      "get_investment_year_report_exec_role_arn": aws_iam_role.get_investment_year_report_lambda_exec_role.arn
       "get_investment_date_report_exec_role_arn": aws_iam_role.get_investment_date_report_lambda_exec_role.arn
-      "get_investment_year_options_exec_role_arn": aws_iam_role.get_investment_year_options_lambda_exec_role.arn
       "get_by_metric_report_exec_role_arn": aws_iam_role.get_by_metric_report_lambda_exec_role.arn
       "get_dynamic_report_exec_role_arn": aws_iam_role.get_dynamic_report_lambda_exec_role.arn
       "add_user_to_customer_group_exec_role_arn": aws_iam_role.add_user_to_customer_group_lambda_exec_role.arn
@@ -39,6 +37,11 @@ output "lambdas_exec_roles_arn" {
       "edit_modify_data_exec_role_arn": aws_iam_role.edit_modify_data_lambda_exec_role.arn
       "get_edit_modify_data_exec_role_arn": aws_iam_role.get_edit_modify_data_lambda_exec_role.arn
       "get_metric_types_exec_role_arn": aws_iam_role.get_metric_types_lambda_exec_role.arn
+      "get_all_tags_exec_role_arn": aws_iam_role.get_all_tags_lambda_exec_role.arn
+      "get_tags_by_company_exec_role_arn": aws_iam_role.get_tags_by_company_lambda_exec_role.arn
+      "add_tag_exec_role_arn": aws_iam_role.add_tag_lambda_exec_role.arn
+      "update_tags_exec_role_arn": aws_iam_role.update_tags_lambda_exec_role.arn
+      "delete_tags_exec_role_arn": aws_iam_role.delete_tags_lambda_exec_role.arn
   }
 }
 

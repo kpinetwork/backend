@@ -46,16 +46,7 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.download_comparison_vs_peers_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
-    "apigw_get_investment_year_report_lambda_function": {
-      resource_path: aws_api_gateway_resource.investment_report_id.path,
-      http_method: aws_api_gateway_method.get_investment_year_report_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
-    "apigw_get_investment_year_options_lambda_function": {
-      resource_path: aws_api_gateway_resource.invest_year_options.path,
-      http_method: aws_api_gateway_method.get_investment_year_options_method.http_method,
-      api_id: aws_api_gateway_rest_api.api.id
-    }
+    
     "apigw_get_investment_date_report_lambda_function": {
       resource_path: aws_api_gateway_resource.investment_date_report.path,
       http_method: aws_api_gateway_method.get_investment_date_report_method.http_method,
@@ -167,6 +158,35 @@ output "api_gateway_references" {
     "apigw_get_metric_types_lambda_function": {
       resource_path: aws_api_gateway_resource.metric_types.path,
       http_method: aws_api_gateway_method.get_metric_types_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+    "apigw_get_all_tags_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.get_all_tags_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_get_tags_by_company_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags_by_company.path,
+      http_method: aws_api_gateway_method.get_tags_by_company_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+  
+     "apigw_add_tag_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.add_tag_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_update_tags_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.update_tags_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
+
+    "apigw_delete_tags_lambda_function": {
+      resource_path: aws_api_gateway_resource.tags.path,
+      http_method: aws_api_gateway_method.delete_tags_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
   }

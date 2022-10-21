@@ -282,73 +282,6 @@ resource "aws_lambda_function" "download_comparison_vs_peers_lambda_function" {
   }
 }
 
-resource "aws_lambda_function" "get_investment_year_report_lambda_function" {
-  role = var.lambdas_exec_roles_arn.get_investment_year_report_exec_role_arn
-  handler = "get_investment_year_report_handler.handler"
-  runtime = var.runtime
-  s3_bucket = var.object_bucket_references.get_investment_year_report_function_bucket.bucket
-  s3_key = var.object_bucket_references.get_investment_year_report_function_bucket.key
-  function_name = "${var.environment}_${var.lambdas_names.get_investment_year_report_lambda_function}"
-  source_code_hash = base64sha256(var.object_bucket_references.get_investment_year_report_function_bucket.etag)
-  memory_size = 128
-  timeout = 100
-
-  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
-
-  vpc_config {
-    subnet_ids         = [element(var.private_subnet_ids, 0)]
-    security_group_ids = [var.security_group_id]
-  }
-
-  depends_on = [
-    aws_lambda_layer_version.db_lambda_layer
-  ]
-
-  environment {
-    variables = {
-      ACCESS_KEY   = var.aws_access_key_id
-      SECRET_KEY   = var.aws_secret_access_key
-      USER_POOL_ID = var.user_pool_id
-      DB_HOST      = var.db_host
-      DB_NAME      = var.db_name
-      DB_USERNAME  = var.db_username
-      DB_PASSWORD  = var.db_password
-    }
-  }
-}
-
-resource "aws_lambda_function" "get_investment_year_options_lambda_function" {
-  role = var.lambdas_exec_roles_arn.get_investment_year_options_exec_role_arn
-  handler = "get_investment_year_options_handler.handler"
-  runtime = var.runtime
-  s3_bucket = var.object_bucket_references.get_investment_year_options_function_bucket.bucket
-  s3_key = var.object_bucket_references.get_investment_year_options_function_bucket.key
-  function_name = "${var.environment}_${var.lambdas_names.get_investment_year_options_lambda_function}"
-  source_code_hash = base64sha256(var.object_bucket_references.get_investment_year_options_function_bucket.etag)
-  memory_size = 128
-  timeout = 100
-
-  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
-
-  vpc_config {
-    subnet_ids         = [element(var.private_subnet_ids, 0)]
-    security_group_ids = [var.security_group_id]
-  }
-
-  depends_on = [
-    aws_lambda_layer_version.db_lambda_layer
-  ]
-
-  environment {
-    variables = {
-      DB_HOST      = var.db_host
-      DB_NAME      = var.db_name
-      DB_USERNAME  = var.db_username
-      DB_PASSWORD  = var.db_password
-    }
-  }
-}
-
 resource "aws_lambda_function" "get_by_metric_report_lambda_function" {
   role = var.lambdas_exec_roles_arn.get_by_metric_report_exec_role_arn
   handler = "get_by_metric_report_handler.handler"
@@ -1168,6 +1101,7 @@ resource "aws_lambda_function" "get_metric_types_lambda_function" {
     }
   }
 }
+
 resource "aws_lambda_function" "get_investment_date_report_lambda_function" {
   role = var.lambdas_exec_roles_arn.get_investment_date_report_exec_role_arn
   handler = "get_investment_date_report_handler.handler"
@@ -1176,6 +1110,175 @@ resource "aws_lambda_function" "get_investment_date_report_lambda_function" {
   s3_key = var.object_bucket_references.get_investment_date_report_function_bucket.key
   function_name = "${var.environment}_${var.lambdas_names.get_investment_date_report_lambda_function}"
   source_code_hash = base64sha256(var.object_bucket_references.get_investment_date_report_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
+    }
+  }
+}
+resource "aws_lambda_function" "get_all_tags_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.get_all_tags_exec_role_arn
+  handler          = "get_all_tags_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.get_all_tags_function_bucket.bucket
+  s3_key           = var.object_bucket_references.get_all_tags_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.get_all_tags_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_all_tags_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "get_tags_by_company_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.get_tags_by_company_exec_role_arn
+  handler          = "get_tags_by_company_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.get_tags_by_company_function_bucket.bucket
+  s3_key           = var.object_bucket_references.get_tags_by_company_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.get_tags_by_company_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.get_tags_by_company_function_bucket.etag)
+    timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "add_tag_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.add_tag_exec_role_arn
+  handler          = "add_tag_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.add_tag_function_bucket.bucket
+  s3_key           = var.object_bucket_references.add_tag_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.add_tag_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.add_tag_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "update_tags_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.update_tags_exec_role_arn
+  handler          = "update_tags_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.update_tags_function_bucket.bucket
+  s3_key           = var.object_bucket_references.update_tags_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.update_tags_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.update_tags_function_bucket.etag)
+  timeout = 100
+
+  layers = [aws_lambda_layer_version.db_lambda_layer.arn]
+
+  vpc_config {
+    subnet_ids         = [element(var.private_subnet_ids, 0)]
+    security_group_ids = [var.security_group_id]
+  }
+
+  depends_on = [
+    aws_lambda_layer_version.db_lambda_layer
+  ]
+
+  environment {
+    variables = {
+      ACCESS_KEY   = var.aws_access_key_id
+      SECRET_KEY   = var.aws_secret_access_key
+      USER_POOL_ID = var.user_pool_id
+      DB_HOST      = var.db_host
+      DB_NAME      = var.db_name
+      DB_USERNAME  = var.db_username
+      DB_PASSWORD  = var.db_password
+    }
+  }
+}
+
+resource "aws_lambda_function" "delete_tags_lambda_function" {
+  role             = var.lambdas_exec_roles_arn.delete_tags_exec_role_arn
+  handler          = "delete_tags_handler.handler"
+  runtime          = var.runtime
+  s3_bucket        = var.object_bucket_references.delete_tags_function_bucket.bucket
+  s3_key           = var.object_bucket_references.delete_tags_function_bucket.key
+  function_name    = "${var.environment}_${var.lambdas_names.delete_tags_lambda_function}"
+  source_code_hash = base64sha256(var.object_bucket_references.delete_tags_function_bucket.etag)
   timeout = 100
 
   layers = [aws_lambda_layer_version.db_lambda_layer.arn]

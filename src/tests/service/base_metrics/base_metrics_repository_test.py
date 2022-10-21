@@ -39,10 +39,17 @@ class TestBaseMetricsRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_add_company_filters_with_data(self):
-        expected_out = {"company.sector": ["'Application'"]}
+    def test_add_filters_with_data_should_return_dict_with_sql_valid_values(
+        self,
+    ):
+        condition_name, condition_value = (
+            "company.inves_profile_name",
+            "Family office",
+        )
+        expected_out = {condition_name: [f"'{condition_value}'"]}
+        conditions = {condition_name: [condition_value]}
 
-        filters_out = self.repository.add_company_filters(sector=["Application"])
+        filters_out = self.repository.add_filters(**conditions)
 
         self.assertEqual(filters_out, expected_out)
 

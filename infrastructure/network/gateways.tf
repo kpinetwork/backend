@@ -199,6 +199,17 @@ resource "aws_api_gateway_resource" "investment_date_report" {
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
+resource "aws_api_gateway_resource" "tags" {
+  path_part   = "tags"
+  parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "tags_by_company" {
+  path_part   = "tags"
+  parent_id   = aws_api_gateway_resource.company_details.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
@@ -341,23 +352,6 @@ resource "aws_api_gateway_method" "download_comparison_vs_peers_method" {
   }
 }
 
-resource "aws_api_gateway_method" "get_investment_year_report_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.investment_report_id.id
-  http_method   = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
-
-  request_parameters = {
-    "method.request.querystring.vertical" = false
-    "method.request.querystring.sector" = false
-    "method.request.querystring.investor_profile" = false
-    "method.request.querystring.growth_profile" = false
-    "method.request.querystring.size" = false
-    "method.request.querystring.invest_year" = false
-    "method.request.querystring.from_main" = false
-  }
-}
 resource "aws_api_gateway_method" "get_investment_date_report_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.investment_date_report.id
@@ -375,14 +369,6 @@ resource "aws_api_gateway_method" "get_investment_date_report_method" {
     "method.request.querystring.growth_profile" = false
     "method.request.querystring.size" = false
   }
-}
-
-resource "aws_api_gateway_method" "get_investment_year_options_method" {
-  rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.invest_year_options.id
-  http_method   = "GET"
-  authorization = "CUSTOM"
-  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
 
 resource "aws_api_gateway_method" "get_by_metric_report_method" {
@@ -413,7 +399,6 @@ resource "aws_api_gateway_method" "dynamic_report_method" {
   request_parameters = {
     "method.request.querystring.metrics" = false
     "method.request.querystring.calendar_year" = false
-    "method.request.querystring.investment_year" = false
     "method.request.querystring.vertical" = false
     "method.request.querystring.sector" = false
     "method.request.querystring.investor_profile" = false
@@ -547,6 +532,50 @@ resource "aws_api_gateway_method" "get_metric_types_method" {
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
+resource "aws_api_gateway_method" "get_all_tags_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+  
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
+resource "aws_api_gateway_method" "get_tags_by_company_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags_by_company.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "add_tag_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags.id
+  http_method   = "POST"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "update_tags_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags.id
+  http_method   = "PUT"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
+
+resource "aws_api_gateway_method" "delete_tags_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.tags.id
+  http_method   = "DELETE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
@@ -649,14 +678,6 @@ resource "aws_api_gateway_integration" "download_comparison_vs_peers_integration
   uri                     = var.lambdas_functions_arn.download_comparison_vs_peers_lambda_function
 }
 
-resource "aws_api_gateway_integration" "investment_report_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.investment_report_id.id
-  http_method             = aws_api_gateway_method.get_investment_year_report_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_investment_year_report_lambda_function
-}
 resource "aws_api_gateway_integration" "investment_date_report_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.investment_date_report.id
@@ -664,15 +685,6 @@ resource "aws_api_gateway_integration" "investment_date_report_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_investment_date_report_lambda_function
-}
-
-resource "aws_api_gateway_integration" "invest_year_options_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.invest_year_options.id
-  http_method             = aws_api_gateway_method.get_investment_year_options_method.http_method
-  integration_http_method = "POST"
-  type                    = "AWS_PROXY"
-  uri                     = var.lambdas_functions_arn.get_investment_year_options_lambda_function
 }
 
 resource "aws_api_gateway_integration" "by_metric_report_integration" {
@@ -817,6 +829,51 @@ resource "aws_api_gateway_integration" "get_metric_types_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_metric_types_lambda_function
+}
+
+resource "aws_api_gateway_integration" "get_all_tags_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags.id
+  http_method             = aws_api_gateway_method.get_all_tags_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_all_tags_lambda_function
+}
+
+resource "aws_api_gateway_integration" "get_tags_by_company_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags_by_company.id
+  http_method             = aws_api_gateway_method.get_tags_by_company_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_tags_by_company_lambda_function
+}
+
+resource "aws_api_gateway_integration" "add_tag_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags.id
+  http_method             = aws_api_gateway_method.add_tag_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.add_tag_lambda_function
+}
+
+resource "aws_api_gateway_integration" "update_tags_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags.id
+  http_method             = aws_api_gateway_method.update_tags_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.update_tags_lambda_function
+}
+
+resource "aws_api_gateway_integration" "delete_tags_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.tags.id
+  http_method             = aws_api_gateway_method.delete_tags_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.delete_tags_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

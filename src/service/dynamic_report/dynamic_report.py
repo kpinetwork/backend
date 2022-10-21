@@ -25,7 +25,7 @@ class DynamicReport:
         year: int,
         **conditions,
     ) -> dict:
-        filters = self.by_year_repository.add_company_filters(**conditions)
+        filters = self.by_year_repository.add_filters(**conditions)
 
         data = self.by_year_repository.get_actuals_values(year, filters)
         budget_values = self.by_year_repository.get_budget_values(year, [year], filters)
@@ -43,7 +43,7 @@ class DynamicReport:
 
     def remove_fields(self, company_data: dict, headers: list) -> None:
         company_data.pop("prior_actuals_revenue", None)
-        header = ["id"]
+        header = ["id", "size_cohort", "margin_group"]
         header.extend(headers)
         to_delete = set(company_data.keys()).difference(header)
         for field in to_delete:

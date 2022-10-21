@@ -1,15 +1,19 @@
 from collections import defaultdict
 from base_metrics_config_name import METRICS_CONFIG_NAME
+from calculator_service import CalculatorService
+from metric_report_repository import MetricReportRepository
+from profile_range import ProfileRange
+from company_anonymization import CompanyAnonymization
 
 
 class ByMetricReport:
     def __init__(
         self,
         logger,
-        calculator,
-        repository,
-        profile_range,
-        company_anonymization,
+        calculator: CalculatorService,
+        repository: MetricReportRepository,
+        profile_range: ProfileRange,
+        company_anonymization: CompanyAnonymization,
     ) -> None:
         self.ranges = []
         self.logger = logger
@@ -341,7 +345,7 @@ class ByMetricReport:
         self, metric: str, years: list, access: bool, **conditions
     ) -> dict:
         companies = dict()
-        filters = self.repository.add_company_filters(**conditions)
+        filters = self.repository.add_filters(**conditions)
         data = self.get_records(metric, years, filters)
 
         profiles, sizes = self.get_profiles(filters)

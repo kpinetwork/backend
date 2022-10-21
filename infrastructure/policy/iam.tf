@@ -527,103 +527,6 @@ resource "aws_lambda_permission" "apigw_download_comparison_vs_peers_lambda" {
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# INVESTMENT REPORT
-# ----------------------------------------------------------------------------------------------------------------------
-resource "aws_iam_role" "get_investment_year_report_lambda_exec_role" {
-  name               = "${var.environment}_get_investment_year_report_lambda_exec_role"
-  path               = "/"
-  description        = "Allows Lambda Function to call AWS services on your behalf."
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role" "get_investment_year_options_lambda_exec_role" {
-  name               = "${var.environment}_get_investment_year_options_lambda_exec_role"
-  path               = "/"
-  description        = "Allows Lambda Function to call AWS services on your behalf."
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-
-resource "aws_iam_role_policy" "get_investment_year_report_cognito_policy" {
-  name        = "${var.environment}_get_investment_year_report_cognito_policy"
-  role        = aws_iam_role.get_investment_year_report_lambda_exec_role.id
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": [
-        "cognito-idp:AdminListGroupsForUser",
-        "cognito-idp:AdminGetUser"
-      ],
-      "Effect": "Allow",
-      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy_attachment" "get_investment_year_report_lambda_logs" {
-  role       = aws_iam_role.get_investment_year_report_lambda_exec_role.name
-  policy_arn = var.aws_iam_policy_logs_arn
-}
-resource "aws_iam_role_policy_attachment" "get_investment_year_options_lambda_logs" {
-  role       = aws_iam_role.get_investment_year_options_lambda_exec_role.name
-  policy_arn = var.aws_iam_policy_logs_arn
-}
-
-resource "aws_iam_role_policy_attachment" "get_investment_year_report_lambda_vpc" {
-  role       = aws_iam_role.get_investment_year_report_lambda_exec_role.name
-  policy_arn = var.aws_iam_policy_network_arn
-}
-resource "aws_iam_role_policy_attachment" "get_investment_year_options_lambda_vpc" {
-  role       = aws_iam_role.get_investment_year_options_lambda_exec_role.name
-  policy_arn = var.aws_iam_policy_network_arn
-}
-
-resource "aws_lambda_permission" "apigw_get_investment_year_report_lambda" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = "${var.environment}_${var.lambdas_names.get_investment_year_report_lambda_function}"
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_investment_year_report_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_investment_year_report_lambda_function.http_method}${var.api_gateway_references.apigw_get_investment_year_report_lambda_function.resource_path}"
-}
-resource "aws_lambda_permission" "apigw_get_investment_year_options_lambda" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = "${var.environment}_${var.lambdas_names.get_investment_year_options_lambda_function}"
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_investment_year_options_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_investment_year_options_lambda_function.http_method}${var.api_gateway_references.apigw_get_investment_year_options_lambda_function.resource_path}"
-}
-
-# ----------------------------------------------------------------------------------------------------------------------
 # INVESTMENT DATE REPORT
 # ----------------------------------------------------------------------------------------------------------------------
 resource "aws_iam_role" "get_investment_date_report_lambda_exec_role" {
@@ -2105,4 +2008,301 @@ resource "aws_lambda_permission" "apigw_get_metric_types_lambda" {
   function_name = "${var.environment}_${var.lambdas_names.get_metric_types_lambda_function}"
   principal     = "apigateway.amazonaws.com"
   source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_metric_types_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_metric_types_lambda_function.http_method}${var.api_gateway_references.apigw_get_metric_types_lambda_function.resource_path}"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM ROLE TAGS
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "get_all_tags_lambda_exec_role" {
+  name               = "${var.environment}_get_all_tags_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "get_tags_by_company_lambda_exec_role" {
+  name               = "${var.environment}_get_tags_by_company_lambda_exec_role"
+   path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role" "add_tag_lambda_exec_role" {
+  name               = "${var.environment}_add_tag_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "get_all_tags_cognito_policy" {
+  name        = "${var.environment}_get_all_tags_cognito_policy"
+  role        = aws_iam_role.get_all_tags_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "get_tags_by_company_cognito_policy" {
+  name        = "${var.environment}_get_tags_by_company_cognito_policy"
+  role        = aws_iam_role.get_tags_by_company_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "add_tag_cognito_policy" {
+  name        = "${var.environment}_add_tag_cognito_policy"
+  role        = aws_iam_role.add_tag_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "get_all_tags_lambda_logs" {
+  role       = aws_iam_role.get_all_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_tags_by_company_lambda_logs" {
+  role       = aws_iam_role.get_tags_by_company_lambda_exec_role.name
+    policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_tag_lambda_logs" {
+  role       = aws_iam_role.add_tag_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_all_tags_lambda_vpc" {
+  role       = aws_iam_role.get_all_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_iam_role_policy_attachment" "get_tags_by_company_lambda_vpc" {
+  role       = aws_iam_role.get_tags_by_company_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_iam_role_policy_attachment" "add_tag_lambda_vpc" {
+  role       = aws_iam_role.add_tag_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_get_all_tags_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetAllTags"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_all_tags_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_all_tags_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_all_tags_lambda_function.http_method}${var.api_gateway_references.apigw_get_all_tags_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_get_tags_by_company_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayGetTagsByCompany"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.get_tags_by_company_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_get_tags_by_company_lambda_function.api_id}/*/${var.api_gateway_references.apigw_get_tags_by_company_lambda_function.http_method}${var.api_gateway_references.apigw_get_tags_by_company_lambda_function.resource_path}"
+}
+
+resource "aws_lambda_permission" "apigw_add_tag_lambda" {
+  statement_id  = "AllowExecutionFromAPIGatewayAddTag"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.add_tag_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_add_tag_lambda_function.api_id}/*/${var.api_gateway_references.apigw_add_tag_lambda_function.http_method}${var.api_gateway_references.apigw_add_tag_lambda_function.resource_path}"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM ROLE UPDATE TAGS
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "update_tags_lambda_exec_role" {
+  name               = "${var.environment}_update_tags_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "update_tags_cognito_policy" {
+  name        = "${var.environment}_update_tags_cognito_policy"
+  role        = aws_iam_role.update_tags_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "update_tags_lambda_logs" {
+  role       = aws_iam_role.update_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "update_tags_lambda_vpc" {
+  role       = aws_iam_role.update_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_update_tags_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.update_tags_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_update_tags_lambda_function.api_id}/*/${var.api_gateway_references.apigw_update_tags_lambda_function.http_method}${var.api_gateway_references.apigw_update_tags_lambda_function.resource_path}"
+}
+
+# ----------------------------------------------------------------------------------------------------------------------
+# AWS IAM ROLE DELETE TAGS
+# ----------------------------------------------------------------------------------------------------------------------
+resource "aws_iam_role" "delete_tags_lambda_exec_role" {
+  name               = "${var.environment}_delete_tags_lambda_exec_role"
+  path               = "/"
+  description        = "Allows Lambda Function to call AWS services on your behalf."
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "delete_tags_cognito_policy" {
+  name        = "${var.environment}_delete_tags_cognito_policy"
+  role        = aws_iam_role.delete_tags_lambda_exec_role.id
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "cognito-idp:AdminListGroupsForUser",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:cognito-idp:${var.region}:${var.account_id}:userpool/${var.user_pool_id}"
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy_attachment" "delete_tags_lambda_logs" {
+  role       = aws_iam_role.delete_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_logs_arn
+}
+
+resource "aws_iam_role_policy_attachment" "delete_tags_lambda_vpc" {
+  role       = aws_iam_role.delete_tags_lambda_exec_role.name
+  policy_arn = var.aws_iam_policy_network_arn
+}
+
+resource "aws_lambda_permission" "apigw_delete_tags_lambda" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = "${var.environment}_${var.lambdas_names.delete_tags_lambda_function}"
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "arn:aws:execute-api:${var.region}:${var.account_id}:${var.api_gateway_references.apigw_delete_tags_lambda_function.api_id}/*/${var.api_gateway_references.apigw_delete_tags_lambda_function.http_method}${var.api_gateway_references.apigw_delete_tags_lambda_function.resource_path}"
 }

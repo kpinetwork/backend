@@ -6,6 +6,8 @@
 
 ## Types of changes
 <!--- What types of changes does your code introduce? Put an `x` in all the boxes that apply: -->
+- [ ] Code refactor
+- [ ] Infrastructure
 - [ ] Hotfix (Bug detected)
 - [ ] Feature (Issue from an Active Sprint)
 
@@ -15,5 +17,5 @@
 - [ ] Unit Test.
 - [ ] Coverage.
 
-<!--- Only apply if you need explain details about your pull request -->
+<!--- Only apply if you need to explain details about your pull request -->
 ## Solution

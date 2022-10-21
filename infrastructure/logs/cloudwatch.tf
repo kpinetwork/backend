@@ -53,16 +53,6 @@ resource "aws_cloudwatch_log_group" "download_comparison_vs_peers_lambda_functio
   retention_in_days = var.retention_days
 }
 
-resource "aws_cloudwatch_log_group" "get_investment_year_report_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_investment_year_report_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
-resource "aws_cloudwatch_log_group" "get_investment_year_options_lambda_function" {
-  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_investment_year_options_lambda_function}"
-  retention_in_days = var.retention_days
-}
-
 resource "aws_cloudwatch_log_group" "get_by_metric_report_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_by_metric_report_lambda_function}"
   retention_in_days = var.retention_days
@@ -196,5 +186,29 @@ resource "aws_cloudwatch_log_group" "get_metric_types_lambda_function" {
 }
 resource "aws_cloudwatch_log_group" "get_investment_date_report_lambda_function" {
   name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_investment_date_report_lambda_function}"
+  retention_in_days = var.retention_days
+}
+resource "aws_cloudwatch_log_group" "get_all_tags_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_all_tags_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "get_tags_by_company_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.get_tags_by_company_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "add_tag_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.add_tag_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "update_tags_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.update_tags_lambda_function}"
+  retention_in_days = var.retention_days
+}
+
+resource "aws_cloudwatch_log_group" "delete_tags_lambda_function" {
+  name = "${var.prefix_lambda_cloudwatch_log_group}${var.environment}_${var.lambdas_names.delete_tags_lambda_function}"
   retention_in_days = var.retention_days
 }
