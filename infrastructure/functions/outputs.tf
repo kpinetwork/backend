@@ -40,6 +40,7 @@ output "lambdas_invoke_arns" {
     "add_tag_lambda_function": aws_lambda_function.add_tag_lambda_function.invoke_arn
     "update_tags_lambda_function": aws_lambda_function.update_tags_lambda_function.invoke_arn
     "delete_tags_lambda_function": aws_lambda_function.delete_tags_lambda_function.invoke_arn
+    "get_all_ranges_lambda_function": aws_lambda_function.get_all_ranges_lambda_function.invoke_arn
   }
 }
 
