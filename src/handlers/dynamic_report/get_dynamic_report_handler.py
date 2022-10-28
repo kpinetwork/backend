@@ -56,7 +56,9 @@ def get_dynamic_report_service():
     metric_report = get_metric_report_service(
         calculator, profile_range, company_anonymization
     )
-    calendar_report = ByYearReportService(logger, base_metric_report, repository)
+    calendar_report = ByYearReportService(
+        logger, base_metric_report, repository, profile_range
+    )
 
     return DynamicReport(
         logger,
