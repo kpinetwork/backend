@@ -1,0 +1,18 @@
+{
+    "total":2,
+    "ranges": [{
+        "key": "metric_name",
+        "name": "",
+        "ranges": [
+            {"id": "1", "label": "$100-<$200k", "min_value": 100, "max_value": 200, "type": "metric_name"}
+        ]
+    },
+    {
+        "key": "revenue_per_employee",
+        "name": "Revenue per employee",
+        "ranges": [
+            {"id": "2", "label": "$200-<$300k", "min_value": 200, "max_value": 300, "type": "revenue_per_employee"}
+        ]
+    }
+    ]
+}
