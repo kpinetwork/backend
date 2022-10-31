@@ -34,7 +34,7 @@ class TestRangesRepository(TestCase):
         attrs = {"process_query_list_results.return_value": response}
         self.mock_response_sql.configure_mock(**attrs)
 
-    def test_get_total_number_of_ranges_when_query_execution_success_return_the_count_of_ranges(
+    def test_get_total_number_of_ranges_when_query_execution_success_should_return_the_ranges_count(
         self,
     ):
         self.mock_response_query_sql(self.total_ranges)
@@ -55,7 +55,7 @@ class TestRangesRepository(TestCase):
         self.assertEqual(str(context.exception), "error")
         self.mock_session.execute.assert_called_once()
 
-    def test_get_ranges_when_the_query_execution_success_return_the_ranges_data(
+    def test_get_ranges_when_the_query_execution_success_should_return_the_ranges_data(
         self,
     ):
         self.mock_response_list_query_sql(self.range)
@@ -65,7 +65,7 @@ class TestRangesRepository(TestCase):
         self.assertEqual(get_ranges_response, self.range)
         self.mock_session.execute.assert_called_once()
 
-    def test_get_ranges_when_the_query_execution_fails_return_empty_list(self):
+    def test_get_ranges_when_the_query_execution_fails_should_return_empty_list(self):
         self.mock_session.execute.side_effect = Exception("error")
 
         get_ranges_response = self.repository.get_ranges()

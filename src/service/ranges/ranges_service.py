@@ -27,15 +27,15 @@ class RangesService:
         for range in ranges:
             ranges_by_metric = []
             range_key = range["type"]
-            range_name = metric_range_names[range_key]
-            range_data = {"key": range_key, "name": range_name}
             if range_key in records:
                 ranges_by_metric = records[range_key]["ranges"]
             range["min_value"] = self.__get_number(range["min_value"])
             range["max_value"] = self.__get_number(range["max_value"])
             range.pop("type")
             ranges_by_metric.append(range)
-            records[range_key].update(range_data)
+            records[range_key].update(
+                {"key": range_key, "name": metric_range_names[range_key]}
+            )
             records[range_key]["ranges"] = ranges_by_metric
         return list(records.values())
 

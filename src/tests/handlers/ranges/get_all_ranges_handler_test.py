@@ -11,7 +11,7 @@ class TestGetAllRangesHandler(TestCase):
         self.ranges = read("sample_response_ranges.json")
         self.event = read("sample_event_ranges.json")
 
-    def test_get_max_count_when_limit_is_valid_string_number_return_string_value_as_int(
+    def test_get_max_count_when_limit_is_valid_string_number_should_return_string_value_as_int(
         self,
     ):
 
@@ -19,7 +19,9 @@ class TestGetAllRangesHandler(TestCase):
 
         self.assertEqual(max_count_result, 10)
 
-    def test_get_max_count_when_limit_is_not_valid_string_number_return_none(self):
+    def test_get_max_count_when_limit_is_not_valid_string_number_should_return_none(
+        self,
+    ):
 
         max_count_result = get_max_count("test")
 
@@ -29,7 +31,7 @@ class TestGetAllRangesHandler(TestCase):
     @mock.patch.object(service_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
-    def test_get_all_ranges_handler_when_it_success_should_return_200_response(
+    def test_get_all_ranges_handler_when_it_is_success_should_return_200_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,

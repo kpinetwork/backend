@@ -211,7 +211,7 @@ resource "aws_api_gateway_resource" "tags_by_company" {
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 resource "aws_api_gateway_resource" "ranges" {
-  path_part   = "ranges"
+  path_part   = "metric_ranges"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
