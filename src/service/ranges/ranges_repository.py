@@ -37,7 +37,9 @@ class RangesRepository:
                 .add_sql_where_equal_condition(
                     {f"not {TableNames.RANGE}.type": f"'{'growth'}'"}
                 )
-                .add_sql_order_by_condition(["type"], self.query_builder.Order.ASC)
+                .add_sql_order_by_condition(
+                    ["type, max_value"], self.query_builder.Order.ASC
+                )
                 .add_sql_offset_condition(offset)
                 .add_sql_limit_condition(max_count)
                 .build()
