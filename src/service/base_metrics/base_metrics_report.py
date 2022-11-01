@@ -1,6 +1,7 @@
 from profile_range import ProfileRange
 from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
+from app_names import ANONYMIZABLE_METRICS
 
 
 class BaseMetricsReport:
@@ -50,79 +51,17 @@ class BaseMetricsReport:
             ),
         )
 
-    def get_gross_profit(self, companies: dict) -> list:
-        return [companies[company_id].get("gross_profit") for company_id in companies]
-
     def get_profiles_ranges(self) -> dict:
         return {
-            "growth": self.profile_range.get_profile_ranges("growth profile"),
-            "revenue": self.profile_range.get_profile_ranges("size profile"),
-            "revenue_per_employee": self.profile_range.get_profile_ranges(
-                "revenue per employee"
-            ),
+            metric: self.profile_range.get_profile_ranges(metric)
+            for metric in ANONYMIZABLE_METRICS
         }
-
-    def get_dynamic_ranges(self, records: list) -> list:
-        return self.profile_range.build_ranges_from_values(records)
-
-    def replace_gross_profit(self, company: dict, gross_profit_records: list) -> None:
-        _ranges = self.get_dynamic_ranges(gross_profit_records)
-        company["gross_profit"] = self.profile_range.get_range_from_value(
-            company["gross_profit"], ranges=_ranges
-        )
-
-    def replace_metric_by_defined_ranges(
-        self, company: dict, metric: str, ranges_type: str, ranges: list
-    ) -> None:
-        value = company.get(metric)
-        value_range = self.profile_range.get_range_from_value(
-            value, profile=ranges_type, ranges=ranges
-        )
-        company[metric] = value_range
 
     def anonymize_name(self, company: dict) -> None:
         anonymized_name = self.company_anonymization.anonymize_company_name(
             company.get("id")
         )
         company["name"] = anonymized_name
-
-    def anonymize_revenues_and_gross_profit(
-        self,
-        company: dict,
-        allowed_companies: list,
-        gross_profit_records: list,
-        profile_ranges: dict,
-    ) -> None:
-        if company.get("id") not in allowed_companies:
-            self.replace_metric_by_defined_ranges(
-                company, "revenue", "size profile", profile_ranges.get("revenue", [])
-            )
-            self.replace_metric_by_defined_ranges(
-                company,
-                "revenue_per_employee",
-                "revenue per employee",
-                profile_ranges.get("revenue_per_employee", []),
-            )
-            self.replace_gross_profit(company, gross_profit_records)
-
-    def anonymized_companies_metrics(
-        self,
-        access: bool,
-        companies: dict,
-        allowed_companies: list,
-        profile_ranges: dict,
-    ) -> None:
-        gross_profit_records = self.get_gross_profit(companies)
-
-        for company_id in companies:
-            company_data = companies[company_id]
-            if not access and company_id not in allowed_companies:
-                self.anonymize_revenues_and_gross_profit(
-                    company_data,
-                    allowed_companies,
-                    gross_profit_records,
-                    profile_ranges,
-                )
 
     def get_rule_of_40(self, company: dict, company_revenue: int) -> dict:
         no_data = "NA"

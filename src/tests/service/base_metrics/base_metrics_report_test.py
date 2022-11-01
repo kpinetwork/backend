@@ -162,36 +162,6 @@ class TestBaseMetricsReport(TestCase):
 
         self.assertEqual(companies_ordered, expected_companies)
 
-    def test_get_profiles_ranges_should_return_dict_with_profiles(self):
-        expected_fields = ["growth", "revenue", "revenue_per_employee"]
-
-        profile_ranges = self.report_instance.get_profiles_ranges()
-
-        self.assertEqual([*profile_ranges], expected_fields)
-
-    @parameterized.expand(
-        [
-            [
-                31,
-                {"label": "$30-<50 million", "max_value": 50, "min_value": 30},
-                "$30-<50 million",
-            ],
-            [None, {"label": "100+", "max_value": None, "min_value": 100}, "NA"],
-            [50, {}, "NA"],
-        ]
-    )
-    def test_replace_metric_by_defined_ranges(self, revenue, ranges, label):
-        company = self.company.copy()
-        company["revenue"] = revenue
-        self.mock_profile_range.get_profile_ranges.return_value = [ranges]
-        self.mock_profile_range.get_range_from_value.return_value = label
-
-        self.report_instance.replace_metric_by_defined_ranges(
-            company, "revenue", "size profile", ranges
-        )
-
-        self.assertEqual(company.get("revenue"), label)
-
     def test_anonymize_name_should_replace_name(self):
         company = {"id": "01234", "name": "Test A"}
         self.mock_company_anonymization.anonymize_company_name.return_value = (
@@ -201,28 +171,6 @@ class TestBaseMetricsReport(TestCase):
         self.report_instance.anonymize_name(company)
 
         self.assertEqual(company, {"id": company["id"], "name": "0123-xxxx"})
-
-    def test_anonymized_companies_metrics_should_change_metric_values(self):
-        label = self.range["label"]
-        company = self.company.copy()
-        company.update({"revenue": 31, "growth": 40, "gross_profit": 32})
-        self.mock_profile_range.get_profile_ranges.return_value = [self.range]
-        self.mock_profile_range.get_range_from_value.return_value = label
-        expected_company = company.copy()
-        expected_company.update(
-            {
-                "revenue": label,
-                "growth": 40,
-                "gross_profit": label,
-                "revenue_per_employee": label,
-            }
-        )
-
-        self.report_instance.anonymized_companies_metrics(
-            False, {company["id"]: company}, [], self.profile_ranges
-        )
-
-        self.assertEqual(company, expected_company)
 
     def test_get_rule_of_40_should_return_dict_with_specific_metrics(self):
         company = self.company.copy()

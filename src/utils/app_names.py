@@ -63,3 +63,5 @@ COMPARISON_METRICS = [
     "research_and_development",
     "debt_ebitda",
 ]
+
+ANONYMIZABLE_METRICS = ["revenue", "revenue_per_employee", "gross_profit"]

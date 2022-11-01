@@ -41,7 +41,10 @@ class TestDynamicReport(TestCase):
             self.company_anonymization,
         )
         self.calendar_report = ByYearReportService(
-            logger, self.base_metrics_report, self.base_metrics_repository
+            logger,
+            self.base_metrics_report,
+            self.base_metrics_repository,
+            self.mock_profile_range,
         )
         self.report_instance = DynamicReport(
             logger,
@@ -216,7 +219,7 @@ class TestDynamicReport(TestCase):
 
         mock_anonymize_company.assert_called()
 
-    def test_add_metrics_should_overwrite_data_dict_with_metrics_when_is_successful(
+    def test_add_metrics_when_is_successful_should_overwrite_data_dict_with_metrics(
         self,
     ):
         metrics = ["gross_profit", "id", "name"]
@@ -317,7 +320,7 @@ class TestDynamicReport(TestCase):
 
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.get_year_report")
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.get_base_metrics")
-    def test_get_dynamic_report_with_calendar_year(
+    def test_get_dynamic_report_with_calendar_year_should_return_report(
         self, mock_get_base_metrics, mock_get_year_report
     ):
         expected_peers = {
@@ -337,7 +340,7 @@ class TestDynamicReport(TestCase):
         mock_get_base_metrics.assert_called()
         mock_get_year_report.assert_called()
 
-    def test_get_dynamic_report_without_year(self):
+    def test_get_dynamic_report_without_year_should_return_empty_values(self):
         expected_peers = {
             "headers": [],
             "company_comparison_data": {},
@@ -353,7 +356,7 @@ class TestDynamicReport(TestCase):
     @patch(
         "src.service.dynamic_report.dynamic_report.DynamicReport.get_dynamic_calendar_year_report"
     )
-    def test_get_dynamic_report_should_raise_error_when_report_fails(
+    def test_get_dynamic_report_when_report_fails_should_raise_error(
         self, mock_get_dynamic_calendar_year_report
     ):
         mock_get_dynamic_calendar_year_report.side_effect = Exception("error")
