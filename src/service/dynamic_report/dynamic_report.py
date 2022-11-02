@@ -84,7 +84,7 @@ class DynamicReport:
     def anonymize_data(self, metrics: list, data: dict, profiles: dict) -> None:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
         anonymizable_metrics = [
-            metric for metric in METRICS_CONFIG_NAME if metric != "headcount"
+            metric for metric in METRICS_CONFIG_NAME.values() if metric != "headcount"
         ]
 
         for company_id in data:

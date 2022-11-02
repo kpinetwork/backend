@@ -53,7 +53,7 @@ class BaseMetricsReport:
 
     def get_profiles_ranges(self) -> dict:
         anonymizable_metrics = [
-            metric for metric in METRICS_CONFIG_NAME if metric != "headcount"
+            metric for metric in METRICS_CONFIG_NAME.values() if metric != "headcount"
         ]
         return {
             metric: self.profile_range.get_profile_ranges(metric)
