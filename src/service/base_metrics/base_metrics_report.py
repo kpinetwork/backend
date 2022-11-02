@@ -103,7 +103,7 @@ class BaseMetricsReport:
             actuals_revenue, prior_actuals_revenue
         )
         company["margin_group"] = self.profile_range.get_range_from_value(
-            growth, profile="growth profile", ranges=profile_ranges.get("growth", [])
+            growth, profile="growth", ranges=profile_ranges.get("growth", [])
         )
         company["gross_profit"] = self.calculator.calculate_gross_profit(
             revenue, company.get("actuals_cost_of_goods")

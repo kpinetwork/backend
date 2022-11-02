@@ -1,7 +1,7 @@
 from base_metrics_repository import BaseMetricsRepository
 from base_metrics_config_name import METRICS_CONFIG_NAME
 from base_metrics_report import BaseMetricsReport
-from app_names import MetricNames, ANONYMIZABLE_METRICS
+from app_names import MetricNames, CALCULATED_ANONYMIZABLE_METRICS
 from profile_range import ProfileRange
 
 
@@ -61,7 +61,7 @@ class ByYearReportService:
         company: dict,
         profile_ranges: dict,
     ) -> None:
-        for metric in ANONYMIZABLE_METRICS:
+        for metric in CALCULATED_ANONYMIZABLE_METRICS:
             self._replace_metric_by_defined_ranges(
                 company, metric, profile_ranges.get(metric, [])
             )
