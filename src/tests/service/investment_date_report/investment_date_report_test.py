@@ -8,6 +8,7 @@ from src.service.investment_date_report.investment_date_report import (
     InvestmentDateReport,
 )
 
+
 logger = logging.getLogger()
 logger.setLevel(logging.ERROR)
 size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
@@ -185,15 +186,35 @@ class TestInvestmentDateReport(TestCase):
 
         self.assertEqual(companies_data, expected_companies_metrics_data)
 
-    def test_anonymize_companies_data_without_user_company_permissions_should_change_metric_values(
+    def get_company_data_with_different_metric(self, metric_name: str) -> dict:
+        return {
+            "id": "1",
+            "name": "Test",
+            "metrics": [
+                {
+                    "metric_name": metric_name,
+                    2019: "NA",
+                    2020: -8,
+                    2021: 145,
+                    2022: "NA",
+                    2023: "NA",
+                    2024: "NA",
+                }
+            ],
+        }
+
+    def test_anonymize_companies_data_with_input_metric_should_change_metric_values(
         self,
     ):
-        companies_data = {"1": self.company_data.copy()}
+        companies_data = {
+            "1": self.get_company_data_with_different_metric("actuals_revenue")
+        }
         self.company_anonymization.companies = []
         self.mock_profile_range.get_profile_ranges.return_value = self.sizes
         self.mock_metric_report.anonymized_name.side_effect = (
             lambda company_id: company_id[0:4] + "-xxxx"
         )
+        self.mock_metric_report.clear_metric_name.return_value = "revenue"
         self.mock_metric_report.anonymized_metric.side_effect = anonymized_metric
         expected_anonymized_companies_data = {
             "1": {
@@ -207,13 +228,50 @@ class TestInvestmentDateReport(TestCase):
                         2022: "NA",
                         2023: "NA",
                         2024: "NA",
-                        "metric_name": "growth",
+                        "metric_name": "actuals_revenue",
                     }
                 ],
             }
         }
 
-        self.report_instance.anonymize_companies_data(companies_data, ["growth"])
+        self.report_instance.anonymize_companies_data(
+            companies_data, ["actuals_revenue"]
+        )
+
+        self.assertEqual(companies_data, expected_anonymized_companies_data)
+
+    def test_anonymize_companies_data_with_calculated_metric_should_not_change_metric_values(
+        self,
+    ):
+        companies_data = {
+            "1": self.get_company_data_with_different_metric("ebitda_margin")
+        }
+        self.company_anonymization.companies = []
+        self.mock_profile_range.get_profile_ranges.return_value = self.sizes
+        self.mock_metric_report.anonymized_name.side_effect = (
+            lambda company_id: company_id[0:4] + "-xxxx"
+        )
+        self.mock_metric_report.clear_metric_name.return_value = "ebitda_margin"
+        self.mock_metric_report.anonymized_metric.side_effect = anonymized_metric
+        expected_anonymized_companies_data = {
+            "1": {
+                "id": "1",
+                "name": "1-xxxx",
+                "metrics": [
+                    {
+                        2019: "NA",
+                        2020: -8,
+                        2021: 145,
+                        2022: "NA",
+                        2023: "NA",
+                        2024: "NA",
+                        "metric_name": "ebitda_margin",
+                    }
+                ],
+            }
+        }
+
+        self.report_instance.anonymize_companies_data(companies_data, ["ebitda_margin"])
 
         self.assertEqual(companies_data, expected_anonymized_companies_data)
 
@@ -398,13 +456,14 @@ class TestInvestmentDateReport(TestCase):
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
     )
-    def test_get_peers_by_investment_date_report_without_user_permissions_call_anonymize_func(
+    def test_get_peers_by_report_without_permissions_and_metric_to_anonymize_call_anonymize_func(
         self,
         mock_set_company_permissions,
         mock_anonymize_companies_data,
         mock_get_companies_data,
     ):
         mock_get_companies_data.return_value = {}
+        self.mock_metric_report.clear_metric_name.return_value = "revenue"
 
         self.report_instance.get_peers_by_investment_date_report(
             None, "user@test.com", ["actuals_revenue"], True, False

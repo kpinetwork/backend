@@ -6,6 +6,7 @@ from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
 from metric_report_repository import MetricReportRepository
 from investment_date_repository import InvestmentDateReportRepository
+from base_metrics_config_name import METRICS_TO_ANONYMIZE
 
 
 class InvestmentDateReport:
@@ -134,6 +135,8 @@ class InvestmentDateReport:
             )
             standard_name = self.by_metric_report.clear_metric_name(metric)
             metric_data = metric_data[0]
+            if standard_name not in METRICS_TO_ANONYMIZE:
+                return [metric_data]
             metric_data.pop(name_field, None)
             metric_anonymized = self.by_metric_report.anonymized_metric(
                 metric_data, metric_ranges.get(standard_name, [])
@@ -172,6 +175,14 @@ class InvestmentDateReport:
                     companies_data[company_id], metric_ranges, metrics
                 )
 
+    def __needs_to_anonymize_metrics(self, metrics: list) -> bool:
+        return any(
+            [
+                self.by_metric_report.clear_metric_name(metric) in METRICS_TO_ANONYMIZE
+                for metric in metrics
+            ]
+        )
+
     def get_peers_by_investment_date_report(
         self,
         company_id: str,
@@ -187,8 +198,7 @@ class InvestmentDateReport:
             self.company_anonymization.set_company_permissions(username)
 
             data = self.get_companies_data(metrics, **conditions)
-
-            if not access:
+            if not access and self.__needs_to_anonymize_metrics(metrics):
                 self.anonymize_companies_data(data, metrics)
 
             if not from_main and is_valid_company:

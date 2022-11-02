@@ -21,3 +21,12 @@ METRICS_CONFIG_NAME = {
     MetricNames.EQUITY_INVESTED: "equity_invested",
     MetricNames.CASH_FLOW_OPERATIONS: "cash_flow_operations",
 }
+
+
+def get_metrics_to_anonymize():
+    anonymized_metrics = list(METRICS_CONFIG_NAME.values())
+    anonymized_metrics.extend(["gross_profit", "revenue_per_employee"])
+    return anonymized_metrics
+
+
+METRICS_TO_ANONYMIZE = get_metrics_to_anonymize()

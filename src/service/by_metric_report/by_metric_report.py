@@ -6,7 +6,7 @@ from profile_range import ProfileRange
 from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
 from metric_report_repository import MetricReportRepository
-from base_metrics_config_name import METRICS_CONFIG_NAME
+from base_metrics_config_name import METRICS_CONFIG_NAME, METRICS_TO_ANONYMIZE
 
 
 class ByMetricReport:
@@ -376,7 +376,7 @@ class ByMetricReport:
             self.company_anonymization.set_company_permissions(username)
             years = self.repository.get_years()
             data = self.get_by_metric_records(metric, years, **conditions)
-            if not access:
+            if not access and self.clear_metric_name(metric) in METRICS_TO_ANONYMIZE:
                 self.anonymize_companies_values(metric, data)
 
             if not from_main and is_valid_company:
