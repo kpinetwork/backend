@@ -1,7 +1,7 @@
 from profile_range import ProfileRange
 from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
-from app_names import ANONYMIZABLE_METRICS
+from base_metrics_config_name import METRICS_CONFIG_NAME
 
 
 class BaseMetricsReport:
@@ -52,9 +52,12 @@ class BaseMetricsReport:
         )
 
     def get_profiles_ranges(self) -> dict:
+        anonymizable_metrics = [
+            metric for metric in METRICS_CONFIG_NAME if metric != "headcount"
+        ]
         return {
             metric: self.profile_range.get_profile_ranges(metric)
-            for metric in ANONYMIZABLE_METRICS
+            for metric in anonymizable_metrics
         }
 
     def anonymize_name(self, company: dict) -> None:

@@ -64,27 +64,8 @@ COMPARISON_METRICS = [
     "debt_ebitda",
 ]
 
-ANONYMIZABLE_METRICS = [
+YEAR_REPORT_ANONYMIZABLE_METRICS = [
     "revenue",
     "revenue_per_employee",
     "gross_profit",
-    "cost_of_goods",
-    "sales_marketing",
-    "research_development",
-    "general_admin",
-    "other_operating_expenses",
-    "ebitda",
-    "run_rate_revenue",
-    "customer_lifetime_value",
-    "customer_acquition_costs",
-    "customer_annual_value",
-    "losses_and_downgrades",
-    "upsells",
-    "new_bookings",
-    "cash_and_equivalents",
-    "long_term_debt",
-    "equity_invested",
-    "cash_flow_operations",
 ]
-
-CALCULATED_ANONYMIZABLE_METRICS = ["revenue", "revenue_per_employee", "gross_profit"]

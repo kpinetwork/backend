@@ -1,8 +1,9 @@
-from app_names import COMPARISON_METRICS, ANONYMIZABLE_METRICS, ScenarioNames
+from app_names import COMPARISON_METRICS, ScenarioNames
 from by_metric_report import ByMetricReport
 from by_year_report_service import ByYearReportService
 from base_metrics_repository import BaseMetricsRepository
 from profile_range import ProfileRange
+from base_metrics_config_name import METRICS_CONFIG_NAME
 
 
 class DynamicReport:
@@ -63,12 +64,16 @@ class DynamicReport:
         self.remove_fields(company_data, headers)
 
     def anonymize_company(
-        self, metrics: list, profiles: dict, company_data: dict
+        self,
+        metrics: list,
+        anonymizable_metrics: list,
+        profiles: dict,
+        company_data: dict,
     ) -> None:
         for metric in metrics:
             value = company_data.get(metric)
             metric_name = self.__remove_scenario_type_in_metric(metric)
-            if metric_name in ANONYMIZABLE_METRICS:
+            if metric_name in anonymizable_metrics:
                 company_data[metric] = self.profile_range.get_range_from_value(
                     value, ranges=profiles.get(metric_name, [])
                 )
@@ -78,10 +83,15 @@ class DynamicReport:
 
     def anonymize_data(self, metrics: list, data: dict, profiles: dict) -> None:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
+        anonymizable_metrics = [
+            metric for metric in METRICS_CONFIG_NAME if metric != "headcount"
+        ]
 
         for company_id in data:
             if company_id not in allowed_companies:
-                self.anonymize_company(metrics, profiles, data[company_id])
+                self.anonymize_company(
+                    metrics, anonymizable_metrics, profiles, data[company_id]
+                )
 
     def add_metrics(self, data: dict, headers: list, profiles: dict) -> list:
         for company_id in data:

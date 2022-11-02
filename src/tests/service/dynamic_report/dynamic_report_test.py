@@ -148,7 +148,9 @@ class TestDynamicReport(TestCase):
         }
         self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
 
-        self.report_instance.anonymize_company(metrics, profiles, company_data)
+        self.report_instance.anonymize_company(
+            metrics, ["revenue", "gross_profit"], profiles, company_data
+        )
 
         self.assertEqual(
             company_data,
