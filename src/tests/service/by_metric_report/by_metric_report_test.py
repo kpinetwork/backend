@@ -667,3 +667,30 @@ class TestByMetricReport(TestCase):
         )
         mock_set_company_permissions.assert_called()
         mock_get_by_metric_records.assert_called()
+
+    @mock.patch(
+        "src.service.by_metric_report.by_metric_report.ByMetricReport.get_by_metric_records"
+    )
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    @mock.patch(
+        "src.service.by_metric_report.by_metric_report.ByMetricReport.anonymize_companies_values"
+    )
+    def test_get_by_metric_peers_without_permission_and_with_headcount_shouldnt_call_anonymization(
+        self,
+        mock_anonymize_companies_values,
+        mock_set_company_permissions,
+        mock_get_by_metric_records,
+    ):
+        data = {}
+        years = [2020, 2021]
+        self.mock_repository.get_years.return_value = years
+        mock_get_by_metric_records.return_value = data.copy()
+
+        self.report_instance.get_by_metric_peers(
+            "1", "user@test.com", "actuals_headcount", False, False
+        )
+
+        mock_set_company_permissions.assert_called()
+        mock_anonymize_companies_values.assert_not_called()

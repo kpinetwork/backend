@@ -7,6 +7,7 @@ from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
 from metric_report_repository import MetricReportRepository
 from base_metrics_config_name import METRICS_CONFIG_NAME, METRICS_TO_ANONYMIZE
+from app_names import MetricNames
 
 
 class ByMetricReport:
@@ -43,10 +44,6 @@ class ByMetricReport:
         base_metrics = ["gross_profit"]
         base_metrics.extend(METRICS_CONFIG_NAME.values())
 
-        return self.build_base_metrics(base_metrics)
-
-    def get_unrestricted_base_metrics(self) -> list:
-        base_metrics = ["headcount"]
         return self.build_base_metrics(base_metrics)
 
     def get_growth_metrics(self, metric: str, company: dict, years: list) -> dict:
@@ -361,6 +358,13 @@ class ByMetricReport:
             ),
         )
 
+    def need_to_be_anonymized(self, metric: str) -> bool:
+        metric = self.clear_metric_name(metric)
+        return (
+            metric != METRICS_CONFIG_NAME.get(MetricNames.HEADCOUNT)
+            and metric in METRICS_TO_ANONYMIZE.values()
+        )
+
     def get_by_metric_peers(
         self,
         company_id: str,
@@ -376,10 +380,7 @@ class ByMetricReport:
             self.company_anonymization.set_company_permissions(username)
             years = self.repository.get_years()
             data = self.get_by_metric_records(metric, years, **conditions)
-            if (
-                not access
-                and self.clear_metric_name(metric) in METRICS_TO_ANONYMIZE.values()
-            ):
+            if not access and self.need_to_be_anonymized(metric):
                 self.anonymize_companies_values(metric, data)
 
             if not from_main and is_valid_company:
