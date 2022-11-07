@@ -34,6 +34,9 @@ class TestRangesService(TestCase):
                 "type": "revenue",
             },
         ]
+        self.metric_ranges = [
+            {"id": "1", "label": "$100-<$200k", "min_value": 100, "max_value": 200}
+        ]
         self.total_ranges = {"count": 3}
         self.ranges_by_metric = [
             {
@@ -107,9 +110,9 @@ class TestRangesService(TestCase):
     def test_get_ranges_by_metric_when_metric_name_is_valid_should_return_list_with_ranges(
         self,
     ):
-        self.mock_repository.get_ranges_by_metric.return_value = self.ranges
+        self.mock_repository.get_ranges_by_metric.return_value = self.metric_ranges
 
         ranges = self.ranges_service_instance.get_ranges_by_metric("revenue")
 
         self.mock_repository.get_ranges_by_metric.assert_called()
-        self.assertEqual(ranges, self.ranges)
+        self.assertEqual(ranges, self.metric_ranges)

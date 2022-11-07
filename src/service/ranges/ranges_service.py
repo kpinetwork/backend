@@ -56,11 +56,24 @@ class RangesService:
     def __is_valid_metric_name(self, metric: str) -> bool:
         return metric and metric.strip()
 
+    def __build_metric_ranges(self, ranges: list) -> None:
+        return [
+            {
+                "id": range["id"],
+                "label": range["label"],
+                "min_value": self.__get_number(range["min_value"]),
+                "max_value": self.__get_number(range["max_value"]),
+            }
+            for range in ranges
+        ]
+
     def get_ranges_by_metric(self, metric: str) -> list:
         try:
             if not self.__is_valid_metric_name(metric):
                 raise AppError("Invalid metric")
-            return self.repository.get_ranges_by_metric(metric)
+            return self.__build_metric_ranges(
+                self.repository.get_ranges_by_metric(metric)
+            )
         except Exception as error:
             self.logger.error(error)
             raise error
