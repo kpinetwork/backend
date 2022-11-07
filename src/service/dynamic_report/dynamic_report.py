@@ -1,4 +1,4 @@
-from app_names import COMPARISON_METRICS, ScenarioNames
+from app_names import COMPARISON_METRICS, ScenarioNames, MetricNames
 from by_metric_report import ByMetricReport
 from by_year_report_service import ByYearReportService
 from base_metrics_repository import BaseMetricsRepository
@@ -23,7 +23,10 @@ class DynamicReport:
 
     def __remove_scenario_type_in_metric(self, metric: str) -> str:
         for scenario in [name.value.lower() for name in ScenarioNames]:
-            return metric.replace(f"{scenario}_", "") if scenario in metric else metric
+            metric = (
+                metric.replace(f"{scenario}_", "") if scenario in metric else metric
+            )
+        return metric
 
     def get_base_metrics(
         self,
@@ -84,7 +87,9 @@ class DynamicReport:
     def anonymize_data(self, metrics: list, data: dict, profiles: dict) -> None:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
         anonymizable_metrics = [
-            metric for metric in METRICS_CONFIG_NAME.values() if metric != "headcount"
+            metric
+            for metric in METRICS_CONFIG_NAME.values()
+            if metric != METRICS_CONFIG_NAME.get(MetricNames.HEADCOUNT)
         ]
 
         for company_id in data:

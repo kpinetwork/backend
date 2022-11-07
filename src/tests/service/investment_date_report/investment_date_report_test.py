@@ -215,6 +215,7 @@ class TestInvestmentDateReport(TestCase):
             lambda company_id: company_id[0:4] + "-xxxx"
         )
         self.mock_metric_report.clear_metric_name.return_value = "revenue"
+        self.mock_metric_report.need_to_be_anonymized.return_value = True
         self.mock_metric_report.anonymized_metric.side_effect = anonymized_metric
         expected_anonymized_companies_data = {
             "1": {
@@ -252,6 +253,7 @@ class TestInvestmentDateReport(TestCase):
             lambda company_id: company_id[0:4] + "-xxxx"
         )
         self.mock_metric_report.clear_metric_name.return_value = "ebitda_margin"
+        self.mock_metric_report.need_to_be_anonymized.return_value = False
         self.mock_metric_report.anonymized_metric.side_effect = anonymized_metric
         expected_anonymized_companies_data = {
             "1": {
