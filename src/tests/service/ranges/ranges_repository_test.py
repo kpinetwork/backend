@@ -58,11 +58,11 @@ class TestRangesRepository(TestCase):
     def test_get_ranges_when_the_query_execution_success_should_return_the_ranges_data(
         self,
     ):
-        self.mock_response_list_query_sql(self.range)
+        self.mock_response_list_query_sql([self.range])
 
         get_ranges_response = self.repository.get_ranges()
 
-        self.assertEqual(get_ranges_response, self.range)
+        self.assertEqual(get_ranges_response, [self.range])
         self.mock_session.execute.assert_called_once()
 
     def test_get_ranges_when_the_query_execution_fails_should_return_empty_list(self):
@@ -71,4 +71,24 @@ class TestRangesRepository(TestCase):
         get_ranges_response = self.repository.get_ranges()
 
         self.assertEqual(get_ranges_response, [])
+        self.mock_session.execute.assert_called_once()
+
+    def test_get_ranges_by_metric_when_query_execution_success_should_return_ranges_list(
+        self,
+    ):
+        self.mock_response_list_query_sql([self.range])
+
+        ranges_by_metric = self.repository.get_ranges_by_metric("revenue")
+
+        self.assertEqual(ranges_by_metric, [self.range])
+        self.mock_session.execute.assert_called_once()
+
+    def test_get_ranges_by_metric_when_query_execution_fails_should_return_empty_list(
+        self,
+    ):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        ranges_by_metric = self.repository.get_ranges_by_metric("revenue")
+
+        self.assertEqual(ranges_by_metric, [])
         self.mock_session.execute.assert_called_once()

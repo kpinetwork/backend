@@ -246,10 +246,16 @@ output "object_references" {
       key : aws_s3_bucket_object.delete_tags_function_object.key,
       bucket : aws_s3_bucket_object.delete_tags_function_object.bucket
     }
+
     "get_all_ranges_function_bucket" : {
       etag : aws_s3_bucket_object.get_all_ranges_function_object.etag,
       key : aws_s3_bucket_object.get_all_ranges_function_object.key,
       bucket : aws_s3_bucket_object.get_all_ranges_function_object.bucket
+    }
+
+    "get_ranges_by_metric_function_bucket": {
+      etag : aws_s3_bucket_object.get_ranges_by_metric_function_object.etag,
+      key : aws_s3_bucket_object.get_ranges_by_metric_function_object.key,
     }
   }
 }
