@@ -136,33 +136,21 @@ class TestDynamicReport(TestCase):
 
         self.assertEqual(data, {"actuals_revenue": 123})
 
-    def test_get_dynamic_ranges_should_return_ranges_dict(self):
-        metrics = ["actuals_ebitda"]
-        data = {"1": {"actuals_ebitda": 13}, "2": {"actuals_ebitda": 20}}
-        expected_ranges = [
-            {"label": "< 13 million", "min_value": None, "max_value": 30},
-            {"label": "13 - 30 million", "min_value": 13, "max_value": 30},
-            {"label": "30 million+", "min_value": 30, "max_value": None},
-        ]
-        self.mock_profile_range.build_ranges_from_values.return_value = expected_ranges
-
-        dynamic_ranges = self.report_instance.get_dynamic_ranges(metrics, data)
-
-        self.assertEqual(dynamic_ranges, {"actuals_ebitda": expected_ranges})
-
-    def test_anonymize_company_should_change_revenue_value(self):
-        metrics = ["actuals_revenue", "gross_profit"]
+    def test_anonymize_company_should_anonymize_company_name_and_metrics(self):
+        metrics = ["actuals_revenue", "gross_profit", "actuals_headcount"]
         profiles = {"revenue": self.range}
-        ranges = {"gross_profit": [self.range]}
         company_data = {
             "actuals_revenue": 34,
             "id": "1234",
             "name": "Test company",
             "gross_profit": 30,
+            "actuals_headcount": 2,
         }
         self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
 
-        self.report_instance.anonymize_company(metrics, ranges, profiles, company_data)
+        self.report_instance.anonymize_company(
+            metrics, ["revenue", "gross_profit"], profiles, company_data
+        )
 
         self.assertEqual(
             company_data,
@@ -171,51 +159,20 @@ class TestDynamicReport(TestCase):
                 "id": "1234",
                 "name": "1234-xxxx",
                 "gross_profit": self.range.get("label"),
+                "actuals_headcount": 2,
             },
-        )
-
-    def test_anonymize_company_should_change_revenue_per_employee_value(self):
-        metrics = ["revenue_per_employee"]
-        profiles = {"revenue_per_employee": self.range}
-        company_data = {
-            "revenue_per_employee": 34,
-            "id": "1234",
-            "name": "Test company",
-        }
-        self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
-
-        self.report_instance.anonymize_company(metrics, {}, profiles, company_data)
-
-        self.assertEqual(
-            company_data,
-            {
-                "revenue_per_employee": self.range.get("label"),
-                "id": "1234",
-                "name": "1234-xxxx",
-            },
-        )
-
-    def test_anonymize_company_should_change_growth_value(self):
-        metrics = ["growth"]
-        profiles = {"growth": self.range}
-        company_data = {"growth": 34, "id": "1234", "name": "Test company"}
-        self.mock_profile_range.get_range_from_value.return_value = self.range["label"]
-
-        self.report_instance.anonymize_company(metrics, {}, profiles, company_data)
-
-        self.assertEqual(
-            company_data,
-            {"growth": self.range.get("label"), "id": "1234", "name": "1234-xxxx"},
         )
 
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_company")
-    def test_anonymize_data(self, mock_anonymize_company):
+    def test_anonymize_data_if_company_is_not_allowed_should_anonymize_company(
+        self, mock_anonymize_company
+    ):
         metrics = ["gross_profit"]
         data = {"1": {"revenue": 34}}
         self.company_anonymization.companies = ["2"]
         self.mock_profile_range.get_profile_ranges.return_value = [self.range]
 
-        self.report_instance.anonymize_data(metrics, data, self.profile_ranges, False)
+        self.report_instance.anonymize_data(metrics, data, self.profile_ranges)
 
         mock_anonymize_company.assert_called()
 
@@ -247,7 +204,7 @@ class TestDynamicReport(TestCase):
 
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.add_metrics")
     @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_data")
-    def test_get_year_report_should_return_data(
+    def test_get_year_report_when_user_has_access_should_return_unrestricted_data(
         self, mock_anonymize_data, mock_add_metrics
     ):
         metrics = ["gross_profit", "id", "name"]
@@ -272,7 +229,7 @@ class TestDynamicReport(TestCase):
             sector=["Computer Hardware"],
         )
 
-        mock_anonymize_data.assert_called()
+        mock_anonymize_data.assert_not_called()
         mock_add_metrics.assert_called()
         self.assertEqual(
             peers,
@@ -283,6 +240,49 @@ class TestDynamicReport(TestCase):
                     "sector": "Something",
                     "prior_actuals_revenue": 34,
                     "gross_profit": 34,
+                },
+                "peers_comparison_data": [],
+            },
+        )
+
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.add_metrics")
+    @patch("src.service.dynamic_report.dynamic_report.DynamicReport.anonymize_data")
+    def test_get_year_report_when_user_has_not_access_should_return_anonymized_data(
+        self, mock_anonymize_data, mock_add_metrics
+    ):
+        metrics = ["gross_profit", "id", "name"]
+        data = {
+            "1": {
+                "name": "Test Company",
+                "sector": "Something",
+                "prior_actuals_revenue": 34,
+                "gross_profit": size_range.get("label"),
+            }
+        }
+        self.company_anonymization.companies = ["1"]
+        self.user_service.get_user_company_permissions.return_value = []
+
+        peers = self.report_instance.get_year_report(
+            "1",
+            "user@test.com",
+            data,
+            False,
+            False,
+            metrics,
+            sector=["Computer Hardware"],
+        )
+
+        mock_anonymize_data.assert_called()
+        mock_add_metrics.assert_called()
+        self.assertEqual(
+            peers,
+            {
+                "headers": ["name", "gross_profit", "id", "name"],
+                "company_comparison_data": {
+                    "name": "Test Company",
+                    "sector": "Something",
+                    "prior_actuals_revenue": 34,
+                    "gross_profit": size_range.get("label"),
                 },
                 "peers_comparison_data": [],
             },

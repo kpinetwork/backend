@@ -1,7 +1,7 @@
 from base_metrics_repository import BaseMetricsRepository
 from base_metrics_config_name import METRICS_CONFIG_NAME
 from base_metrics_report import BaseMetricsReport
-from app_names import MetricNames, ANONYMIZABLE_METRICS
+from app_names import MetricNames, YEAR_REPORT_ANONYMIZABLE_METRICS
 from profile_range import ProfileRange
 
 
@@ -54,14 +54,14 @@ class ByYearReportService:
         value_range = self.profile_range.get_range_from_value(
             value, profile=metric, ranges=ranges
         )
-        company[metric] = value_range if value_range else "NA"
+        company[metric] = value_range
 
     def _anonymize_metrics_by_company(
         self,
         company: dict,
         profile_ranges: dict,
     ) -> None:
-        for metric in ANONYMIZABLE_METRICS:
+        for metric in YEAR_REPORT_ANONYMIZABLE_METRICS:
             self._replace_metric_by_defined_ranges(
                 company, metric, profile_ranges.get(metric, [])
             )

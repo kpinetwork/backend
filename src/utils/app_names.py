@@ -64,4 +64,8 @@ COMPARISON_METRICS = [
     "debt_ebitda",
 ]
 
-ANONYMIZABLE_METRICS = ["revenue", "revenue_per_employee", "gross_profit"]
+YEAR_REPORT_ANONYMIZABLE_METRICS = [
+    "revenue",
+    "revenue_per_employee",
+    "gross_profit",
+]
