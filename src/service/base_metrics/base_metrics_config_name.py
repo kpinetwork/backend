@@ -20,9 +20,6 @@ METRICS_CONFIG_NAME = {
     MetricNames.LONG_TERM_DEBT: "long_term_debt",
     MetricNames.EQUITY_INVESTED: "equity_invested",
     MetricNames.CASH_FLOW_OPERATIONS: "cash_flow_operations",
-    MetricNames.GROSS_PROFIT: "gross_profit",
-    MetricNames.GROWTH_RATE: "growth",
-    MetricNames.REVENUE_PER_EMPLOYEE: "revenue_per_employee",
 }
 
 

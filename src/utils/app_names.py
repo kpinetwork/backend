@@ -42,9 +42,6 @@ class MetricNames(StrEnum):
     LONG_TERM_DEBT = "Long term debt"
     EQUITY_INVESTED = "Equity invested"
     CASH_FLOW_OPERATIONS = "Cash flow from operations"
-    GROSS_PROFIT = "Gross Profit"
-    GROWTH_RATE = "Growth rate"
-    REVENUE_PER_EMPLOYEE = "Revenue per employee"
 
 
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]
