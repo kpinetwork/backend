@@ -376,7 +376,10 @@ class ByMetricReport:
             self.company_anonymization.set_company_permissions(username)
             years = self.repository.get_years()
             data = self.get_by_metric_records(metric, years, **conditions)
-            if not access and self.clear_metric_name(metric) in METRICS_TO_ANONYMIZE:
+            if (
+                not access
+                and self.clear_metric_name(metric) in METRICS_TO_ANONYMIZE.values()
+            ):
                 self.anonymize_companies_values(metric, data)
 
             if not from_main and is_valid_company:

@@ -44,6 +44,12 @@ class MetricNames(StrEnum):
     CASH_FLOW_OPERATIONS = "Cash flow from operations"
 
 
+class CalculatedAnonymizeMetrics(StrEnum):
+    GROWTH = "Growth"
+    GROSS_PROFIT = "Gross profit"
+    REVENUE_PER_EMPLOYEE = "Revenue per employee"
+
+
 BASE_HEADERS = ["Unique ID", "Name", "Sector", "Vertical", "Investor Profile"]
 
 COMPARISON_METRICS = [

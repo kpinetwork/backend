@@ -135,7 +135,7 @@ class InvestmentDateReport:
             )
             standard_name = self.by_metric_report.clear_metric_name(metric)
             metric_data = metric_data[0]
-            if standard_name not in METRICS_TO_ANONYMIZE:
+            if standard_name not in METRICS_TO_ANONYMIZE.values():
                 return [metric_data]
             metric_data.pop(name_field, None)
             metric_anonymized = self.by_metric_report.anonymized_metric(
@@ -178,7 +178,8 @@ class InvestmentDateReport:
     def __needs_to_anonymize_metrics(self, metrics: list) -> bool:
         return any(
             [
-                self.by_metric_report.clear_metric_name(metric) in METRICS_TO_ANONYMIZE
+                self.by_metric_report.clear_metric_name(metric)
+                in METRICS_TO_ANONYMIZE.values()
                 for metric in metrics
             ]
         )
