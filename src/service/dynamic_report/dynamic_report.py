@@ -23,7 +23,10 @@ class DynamicReport:
 
     def __remove_scenario_type_in_metric(self, metric: str) -> str:
         for scenario in [name.value.lower() for name in ScenarioNames]:
-            return metric.replace(f"{scenario}_", "") if scenario in metric else metric
+            metric = (
+                metric.replace(f"{scenario}_", "") if scenario in metric else metric
+            )
+        return metric
 
     def get_base_metrics(
         self,
