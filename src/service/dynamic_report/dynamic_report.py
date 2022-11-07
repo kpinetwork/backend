@@ -3,7 +3,7 @@ from by_metric_report import ByMetricReport
 from by_year_report_service import ByYearReportService
 from base_metrics_repository import BaseMetricsRepository
 from profile_range import ProfileRange
-from base_metrics_config_name import METRICS_CONFIG_NAME
+from base_metrics_config_name import METRICS_TO_ANONYMIZE
 
 
 class DynamicReport:
@@ -88,8 +88,8 @@ class DynamicReport:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
         anonymizable_metrics = [
             metric
-            for metric in METRICS_CONFIG_NAME.values()
-            if metric != METRICS_CONFIG_NAME.get(MetricNames.HEADCOUNT)
+            for metric in METRICS_TO_ANONYMIZE.values()
+            if metric != METRICS_TO_ANONYMIZE.get(MetricNames.HEADCOUNT)
         ]
 
         for company_id in data:

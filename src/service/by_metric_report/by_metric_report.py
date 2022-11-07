@@ -362,7 +362,7 @@ class ByMetricReport:
         metric = self.clear_metric_name(metric)
         return (
             metric != METRICS_CONFIG_NAME.get(MetricNames.HEADCOUNT)
-            and metric in METRICS_TO_ANONYMIZE
+            and metric in METRICS_TO_ANONYMIZE.values()
         )
 
     def get_by_metric_peers(

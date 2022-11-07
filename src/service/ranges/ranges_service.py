@@ -4,7 +4,7 @@ from typing import Union
 
 from ranges_repository import RangesRepository
 from base_exception import AppError
-from base_metrics_config_name import METRICS_CONFIG_NAME
+from base_metrics_config_name import METRICS_TO_ANONYMIZE
 
 
 class RangesService:
@@ -23,7 +23,7 @@ class RangesService:
 
     def get_ranges_by_metric(self, ranges: list) -> list:
         records = defaultdict(dict)
-        metric_range_names = {v: k for k, v in METRICS_CONFIG_NAME.items()}
+        metric_range_names = {v: k for k, v in METRICS_TO_ANONYMIZE.items()}
         for range in ranges:
             ranges_by_metric = []
             range_key = range["type"]

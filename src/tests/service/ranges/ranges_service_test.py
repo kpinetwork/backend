@@ -24,7 +24,7 @@ class TestRangesService(TestCase):
                 "label": "$200-<$300k",
                 "min_value": 200,
                 "max_value": 300,
-                "type": "revenue_per_employee",
+                "type": "ebitda",
             },
             {
                 "id": "3",
@@ -55,8 +55,8 @@ class TestRangesService(TestCase):
                 ],
             },
             {
-                "key": "revenue_per_employee",
-                "name": MetricNames.REVENUE_PER_EMPLOYEE,
+                "key": "ebitda",
+                "name": MetricNames.EBITDA,
                 "ranges": [
                     {
                         "id": "2",

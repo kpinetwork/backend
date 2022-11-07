@@ -244,15 +244,13 @@ class TestInvestmentDateReport(TestCase):
     def test_anonymize_companies_data_with_calculated_metric_should_not_change_metric_values(
         self,
     ):
-        companies_data = {
-            "1": self.get_company_data_with_different_metric("ebitda_margin")
-        }
+        companies_data = {"1": self.get_company_data_with_different_metric("growth")}
         self.company_anonymization.companies = []
         self.mock_profile_range.get_profile_ranges.return_value = self.sizes
         self.mock_metric_report.anonymized_name.side_effect = (
             lambda company_id: company_id[0:4] + "-xxxx"
         )
-        self.mock_metric_report.clear_metric_name.return_value = "ebitda_margin"
+        self.mock_metric_report.clear_metric_name.return_value = "growth"
         self.mock_metric_report.need_to_be_anonymized.return_value = False
         self.mock_metric_report.anonymized_metric.side_effect = anonymized_metric
         expected_anonymized_companies_data = {
@@ -267,13 +265,13 @@ class TestInvestmentDateReport(TestCase):
                         2022: "NA",
                         2023: "NA",
                         2024: "NA",
-                        "metric_name": "ebitda_margin",
+                        "metric_name": "growth",
                     }
                 ],
             }
         }
 
-        self.report_instance.anonymize_companies_data(companies_data, ["ebitda_margin"])
+        self.report_instance.anonymize_companies_data(companies_data, ["growth"])
 
         self.assertEqual(companies_data, expected_anonymized_companies_data)
 
