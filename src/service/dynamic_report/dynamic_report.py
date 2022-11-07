@@ -1,8 +1,9 @@
-from app_names import COMPARISON_METRICS
+from app_names import COMPARISON_METRICS, ScenarioNames, MetricNames
 from by_metric_report import ByMetricReport
 from by_year_report_service import ByYearReportService
 from base_metrics_repository import BaseMetricsRepository
 from profile_range import ProfileRange
+from base_metrics_config_name import METRICS_TO_ANONYMIZE
 
 
 class DynamicReport:
@@ -19,6 +20,13 @@ class DynamicReport:
         self.calendar_report = calendar_report
         self.by_year_repository = by_year_repository
         self.profile_range = profile_range
+
+    def __remove_scenario_type_in_metric(self, metric: str) -> str:
+        for scenario in [name.value.lower() for name in ScenarioNames]:
+            metric = (
+                metric.replace(f"{scenario}_", "") if scenario in metric else metric
+            )
+        return metric
 
     def get_base_metrics(
         self,
@@ -58,63 +66,36 @@ class DynamicReport:
                 )
         self.remove_fields(company_data, headers)
 
-    def get_metrics_for_dynamic_ranges(self, metrics: list) -> list:
-        restricted_base_metrics = list(
-            set(self.metric_report.get_base_metrics())
-            - set(self.metric_report.get_unrestricted_base_metrics())
-        )
-        restricted_base_metrics.extend(
-            ["gross_profit", "revenue", "growth", "revenue_per_employee"]
-        )
-        return list(set(restricted_base_metrics) & set(metrics))
-
-    def get_dynamic_range(self, metric: str, data: dict) -> list:
-        values = [data[company_id].get(metric) for company_id in data]
-        return self.profile_range.build_ranges_from_values(values)
-
-    def get_dynamic_ranges(self, metrics: list, data: dict) -> dict:
-        dyanmic_ranges = dict()
-        for metric in metrics:
-            dyanmic_ranges[metric] = self.get_dynamic_range(metric, data)
-
-        return dyanmic_ranges
-
     def anonymize_company(
-        self, metrics: list, ranges: dict, profiles: dict, company_data: dict
+        self,
+        metrics: list,
+        anonymizable_metrics: list,
+        profiles: dict,
+        company_data: dict,
     ) -> None:
         for metric in metrics:
             value = company_data.get(metric)
-            if metric == "actuals_revenue" or metric == "budget_revenue":
+            metric_name = self.__remove_scenario_type_in_metric(metric)
+            if metric_name in anonymizable_metrics:
                 company_data[metric] = self.profile_range.get_range_from_value(
-                    value, ranges=profiles.get("revenue", [])
-                )
-            elif metric == "revenue_per_employee":
-                company_data[metric] = self.profile_range.get_range_from_value(
-                    value, ranges=profiles.get("revenue_per_employee", [])
-                )
-            elif metric == "growth":
-                company_data[metric] = self.profile_range.get_range_from_value(
-                    value, ranges=profiles.get("growth", [])
-                )
-            else:
-                company_data[metric] = self.profile_range.get_range_from_value(
-                    value, ranges=ranges.get(metric, [])
+                    value, ranges=profiles.get(metric_name, [])
                 )
             company_data["name"] = self.metric_report.anonymized_name(
                 company_data.get("id")
             )
 
-    def anonymize_data(
-        self, metrics: list, data: dict, profiles: dict, access: bool = False
-    ) -> None:
+    def anonymize_data(self, metrics: list, data: dict, profiles: dict) -> None:
         allowed_companies = self.calendar_report.report.get_allowed_companies()
-        metrics_for_ranges = self.get_metrics_for_dynamic_ranges(metrics)
-        ranges = self.get_dynamic_ranges(metrics_for_ranges, data)
+        anonymizable_metrics = [
+            metric
+            for metric in METRICS_TO_ANONYMIZE.values()
+            if metric != METRICS_TO_ANONYMIZE.get(MetricNames.HEADCOUNT)
+        ]
 
         for company_id in data:
-            if not access and company_id not in allowed_companies:
+            if company_id not in allowed_companies:
                 self.anonymize_company(
-                    metrics_for_ranges, ranges, profiles, data[company_id]
+                    metrics, anonymizable_metrics, profiles, data[company_id]
                 )
 
     def add_metrics(self, data: dict, headers: list, profiles: dict) -> list:
@@ -143,7 +124,8 @@ class DynamicReport:
             self.calendar_report.report.set_company_permissions(username)
             profiles = self.calendar_report.report.get_profiles_ranges()
             self.add_metrics(data, headers, profiles)
-            self.anonymize_data(metrics, data, profiles, access)
+            if not access:
+                self.anonymize_data(metrics, data, profiles)
             data = self.calendar_report.report.filter_by_conditions(data, **conditions)
 
             if not from_main and is_valid_company:

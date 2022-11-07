@@ -1,16 +1,22 @@
 from base_metrics_repository import BaseMetricsRepository
 from base_metrics_config_name import METRICS_CONFIG_NAME
 from base_metrics_report import BaseMetricsReport
-from app_names import MetricNames
+from app_names import MetricNames, YEAR_REPORT_ANONYMIZABLE_METRICS
+from profile_range import ProfileRange
 
 
 class ByYearReportService:
     def __init__(
-        self, logger, report: BaseMetricsReport, repository: BaseMetricsRepository
+        self,
+        logger,
+        report: BaseMetricsReport,
+        repository: BaseMetricsRepository,
+        profile_range: ProfileRange,
     ) -> None:
         self.logger = logger
         self.report = report
         self.repository = repository
+        self.profile_range = profile_range
 
     def remove_base_metrics(self, company: dict) -> None:
 
@@ -26,6 +32,39 @@ class ByYearReportService:
 
         for metric in base_metrics:
             company.pop(metric, None)
+
+    def anonymized_companies_metrics(
+        self,
+        companies: dict,
+        allowed_companies: list,
+        profile_ranges: dict,
+    ) -> None:
+        for company_id in companies:
+            company_data = companies[company_id]
+            if company_id not in allowed_companies:
+                self._anonymize_metrics_by_company(
+                    company_data,
+                    profile_ranges,
+                )
+
+    def _replace_metric_by_defined_ranges(
+        self, company: dict, metric: str, ranges: list
+    ) -> None:
+        value = company.get(metric)
+        value_range = self.profile_range.get_range_from_value(
+            value, profile=metric, ranges=ranges
+        )
+        company[metric] = value_range
+
+    def _anonymize_metrics_by_company(
+        self,
+        company: dict,
+        profile_ranges: dict,
+    ) -> None:
+        for metric in YEAR_REPORT_ANONYMIZABLE_METRICS:
+            self._replace_metric_by_defined_ranges(
+                company, metric, profile_ranges.get(metric, [])
+            )
 
     def get_comparison_vs_data(
         self, access: bool, data: dict, allowed_companies: list, profile_ranges: dict
@@ -80,9 +119,11 @@ class ByYearReportService:
             rule_of_40 = self.get_comparison_vs_data(
                 access, data, allowed_companies, profile_ranges
             )
-            self.report.anonymized_companies_metrics(
-                access, data, allowed_companies, profile_ranges
-            )
+
+            if not access:
+                self.anonymized_companies_metrics(
+                    data, allowed_companies, profile_ranges
+                )
 
             data = self.report.filter_by_conditions(data, **conditions)
 

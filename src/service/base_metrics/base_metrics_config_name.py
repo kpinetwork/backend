@@ -1,4 +1,4 @@
-from app_names import MetricNames
+from app_names import MetricNames, CalculatedAnonymizeMetrics
 
 METRICS_CONFIG_NAME = {
     MetricNames.REVENUE: "revenue",
@@ -21,3 +21,18 @@ METRICS_CONFIG_NAME = {
     MetricNames.EQUITY_INVESTED: "equity_invested",
     MetricNames.CASH_FLOW_OPERATIONS: "cash_flow_operations",
 }
+
+
+CALCULATED_METRICS_TO_ANONYMIZE = {
+    CalculatedAnonymizeMetrics.GROSS_PROFIT: "gross_profit",
+    CalculatedAnonymizeMetrics.REVENUE_PER_EMPLOYEE: "revenue_per_employee",
+}
+
+
+def get_all_metrics_to_anonymize():
+    all_metrics = METRICS_CONFIG_NAME.copy()
+    all_metrics.update(CALCULATED_METRICS_TO_ANONYMIZE.copy())
+    return all_metrics
+
+
+METRICS_TO_ANONYMIZE = get_all_metrics_to_anonymize()

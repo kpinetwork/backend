@@ -1,0 +1,14 @@
+{
+    "queryStringParameters": {
+        "limit": 1,
+        "offset": 1
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "pathParameters": {
+        "id": "yec4b0212-m385-4828-814p-0e6b21d98f87"
+    }
+}

@@ -33,7 +33,7 @@ def get_comparison_vs_peers_service():
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
     report = BaseMetricsReport(logger, calculator, profile_range, company_anonymization)
 
-    return ByYearReportService(logger, report, repository)
+    return ByYearReportService(logger, report, repository, profile_range)
 
 
 def get_comparison_vs_peers(event: dict) -> dict:

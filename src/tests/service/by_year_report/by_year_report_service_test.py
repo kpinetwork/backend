@@ -18,8 +18,12 @@ class TestByYearReport(TestCase):
         self.company_anonymization = CompanyAnonymization(object)
         self.mock_base_metrics_reports = Mock()
         self.mock_repository = Mock()
+        self.mock_profile_range = Mock()
         self.report_instance = ByYearReportService(
-            logger, self.mock_base_metrics_reports, self.mock_repository
+            logger,
+            self.mock_base_metrics_reports,
+            self.mock_repository,
+            self.mock_profile_range,
         )
 
         self.company = {
@@ -85,6 +89,7 @@ class TestByYearReport(TestCase):
             "revenue": [size_range],
             "growth": [size_range],
             "revenue_per_employee": [size_range],
+            "gross_profit": [size_range],
         }
 
     def test_remove_base_metrics_should_remove_all_input_metrics(self):
@@ -110,7 +115,7 @@ class TestByYearReport(TestCase):
         self.assertEqual(rule_of_40, [self.rule_of_40])
         self.mock_base_metrics_reports.get_rule_of_40.assert_called_once()
 
-    def test_get_comparison_vs_data_should_return_data_anonimized_whith_no_user_permissions(
+    def test_get_comparison_vs_data_whithout_user_permissions_should_return_data_anonymized(
         self,
     ):
         data = self.scenarios.copy()
@@ -127,10 +132,7 @@ class TestByYearReport(TestCase):
         self.mock_base_metrics_reports.get_rule_of_40.assert_called_once()
         self.mock_base_metrics_reports.anonymize_name.called_once()
 
-    def get_scenario_values(self, scenario: str, metric: str):
-        return {"metric": metric, "scenario": scenario, "year": 2020, "value": 20}
-
-    def test_get_report_base_data_should_return_merged_dict_when_success(self):
+    def test_get_report_base_data_when_success_should_return_merged_dict(self):
         self.mock_repository.get_actuals_values.return_value = {
             self.company["id"]: {"actuals_revenue": 20}
         }
@@ -150,7 +152,7 @@ class TestByYearReport(TestCase):
 
     @patch(f"{service_path}.get_report_base_data")
     @patch(f"{service_path}.get_comparison_vs_data")
-    def test_get_by_year_report_should_return_only_peers_when_comes_from_main(
+    def test_get_by_year_report_when_comes_from_main_should_return_only_peers(
         self, mock_get_comparison_vs_data, mock_get_report_base_data
     ):
         data = self.company.copy()
@@ -181,7 +183,42 @@ class TestByYearReport(TestCase):
 
     @patch(f"{service_path}.get_report_base_data")
     @patch(f"{service_path}.get_comparison_vs_data")
-    def test_get_by_year_report_should_return_only_company_when_comes_from_company(
+    def test_get_by_year_report_when_comes_from_company_should_return_only_company(
+        self, mock_get_comparison_vs_data, mock_get_report_base_data
+    ):
+        data = self.company.copy()
+        label = self.range["label"]
+        data.update(self.metrics)
+        peer_data = {self.company["id"]: data}
+        mock_get_report_base_data.return_value = peer_data
+        self.mock_base_metrics_reports.get_profiles_ranges.return_value = (
+            self.profile_ranges
+        )
+        self.mock_base_metrics_reports.get_allowed_companies.return_value = []
+        mock_get_comparison_vs_data.return_value = []
+        self.mock_profile_range.get_profile_ranges.return_value = [self.range]
+        self.mock_profile_range.get_range_from_value.return_value = label
+        self.mock_base_metrics_reports.filter_by_conditions.return_value = peer_data
+        self.mock_base_metrics_reports.get_peers_sorted.side_effect = lambda x: list(
+            x.values()
+        )
+
+        report_data = self.report_instance.get_by_year_report(
+            self.company["id"], "user@test.com", 2020, False, False, sector=[]
+        )
+
+        self.assertEqual(
+            report_data,
+            {
+                "company_comparison_data": data,
+                "peers_comparison_data": [],
+                "rule_of_40": [],
+            },
+        )
+
+    @patch(f"{service_path}.get_report_base_data")
+    @patch(f"{service_path}.get_comparison_vs_data")
+    def test_get_by_year_report_when_user_does_not_have_access_should_return_anonymized_data(
         self, mock_get_comparison_vs_data, mock_get_report_base_data
     ):
         data = self.company.copy()
@@ -210,7 +247,7 @@ class TestByYearReport(TestCase):
             },
         )
 
-    def test_get_by_year_report_should_raise_exception_when_fails(self):
+    def test_get_by_year_report_when_fails_should_raise_exception(self):
         error_message = "Cannot get permissions"
         self.mock_base_metrics_reports.set_company_permissions.side_effect = Exception(
             error_message

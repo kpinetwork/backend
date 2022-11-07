@@ -1,5 +1,6 @@
 from base_exception import AppError
 from app_names import TableNames, ScenarioNames, MetricNames
+from base_metrics_config_name import METRICS_CONFIG_NAME
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
 
@@ -492,29 +493,12 @@ class MetricReportRepository:
         return arguments
 
     def __get_metric_names_config(self) -> dict:
-        return {
-            "revenue": "Revenue",
-            "ebitda": "Ebitda",
-            "cost_of_goods": "Cost of goods",
-            "sales_marketing": "Sales & marketing",
-            "general_admin": "General & administration",
-            "research_development": "Research & development",
-            "customer_lifetime_value": "CLV",
-            "customer_acquition_costs": "CAC",
-            "customer_annual_value": "CAV",
-            "other_operating_expenses": "Other operating expenses",
-            "run_rate_revenue": "Run rate revenue",
-            "headcount": "Headcount",
-            "losses_and_downgrades": "Losses and downgrades",
-            "upsells": "Upsells",
-            "new_bookings": "New bookings",
-            "cash_and_equivalents": "Cash & Equivalents",
-            "long_term_debt": "Long term debt",
-            "equity_invested": "Equity invested",
-            "cash_flow_operations": "Cash flow from operations",
-        }
+        return dict(
+            (metric_alias, metric_name)
+            for metric_name, metric_alias in METRICS_CONFIG_NAME.items()
+        )
 
-    def __get_base_functions_metric(
+    def get_base_functions_metric(
         self, filters: dict, scenario_type: ScenarioNames
     ) -> dict:
         metric_names = self.__get_metric_names_config()
@@ -608,10 +592,10 @@ class MetricReportRepository:
             },
         }
         metric_config.update(
-            self.__get_base_functions_metric(filters, ScenarioNames.ACTUALS)
+            self.get_base_functions_metric(filters, ScenarioNames.ACTUALS)
         )
         metric_config.update(
-            self.__get_base_functions_metric(filters, ScenarioNames.BUDGET)
+            self.get_base_functions_metric(filters, ScenarioNames.BUDGET)
         )
         metric_config.update(self.__get_gross_profit_functions_metric(filters))
         metric_config.update(self.__get_actuals_vs_budget_functions_metric(filters))

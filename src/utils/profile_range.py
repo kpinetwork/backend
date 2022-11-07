@@ -50,7 +50,7 @@ class ProfileRange:
         profile: str = "size profile",
         ranges: list = None,
     ) -> None:
-        if not ranges:
+        if ranges is None:
             ranges = self.get_profile_ranges(profile)
         if not self.is_valid_number(value):
             return "NA"

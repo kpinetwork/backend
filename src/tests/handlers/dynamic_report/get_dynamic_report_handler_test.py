@@ -1,7 +1,8 @@
 import json
+from unittest import TestCase, mock
+
 from src.tests.data.data_reader import read
 import src.handlers.dynamic_report.get_dynamic_report_handler as get_dynamic_report_handler
-from unittest import TestCase, mock
 from src.handlers.dynamic_report.get_dynamic_report_handler import handler
 
 
@@ -17,7 +18,7 @@ class TestDynamicReportHandler(TestCase):
     @mock.patch.object(get_dynamic_report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
-    def test_get_dynamic_report_handler_success_should_return_200_response(
+    def test_get_dynamic_report_handler_when_is_successful_should_return_200_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,
@@ -47,7 +48,7 @@ class TestDynamicReportHandler(TestCase):
     @mock.patch.object(get_dynamic_report_handler, "verify_user_access")
     @mock.patch("connection.create_db_engine")
     @mock.patch("connection.create_db_session")
-    def test_get_dynamic_report_handler_fail_should_return_error_400_response(
+    def test_get_dynamic_report_handler_when_fails_should_return_error_400_response(
         self,
         mock_create_db_session,
         mock_create_db_engine,

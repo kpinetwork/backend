@@ -305,3 +305,9 @@ resource "aws_s3_bucket_object" "delete_tags_function_object" {
   source = "${path.module}/../../dist/delete_tags_handler.zip"
   etag = filemd5("${path.module}/../../dist/delete_tags_handler.zip")
 }
+resource "aws_s3_bucket_object" "get_all_ranges_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_all_ranges_handler.zip"
+  source = "${path.module}/../../dist/get_all_ranges_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_all_ranges_handler.zip")
+}
