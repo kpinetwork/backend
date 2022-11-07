@@ -24,3 +24,12 @@ METRICS_CONFIG_NAME = {
     MetricNames.GROWTH_RATE: "growth",
     MetricNames.REVENUE_PER_EMPLOYEE: "revenue_per_employee",
 }
+
+
+def get_metrics_to_anonymize():
+    anonymized_metrics = list(METRICS_CONFIG_NAME.values())
+    anonymized_metrics.extend(["gross_profit", "revenue_per_employee"])
+    return anonymized_metrics
+
+
+METRICS_TO_ANONYMIZE = get_metrics_to_anonymize()

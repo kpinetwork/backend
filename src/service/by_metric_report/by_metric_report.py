@@ -1,9 +1,12 @@
+import re
 from collections import defaultdict
-from base_metrics_config_name import METRICS_CONFIG_NAME
-from calculator_service import CalculatorService
-from metric_report_repository import MetricReportRepository
+
+from app_names import ScenarioNames
 from profile_range import ProfileRange
+from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
+from metric_report_repository import MetricReportRepository
+from base_metrics_config_name import METRICS_CONFIG_NAME, METRICS_TO_ANONYMIZE
 
 
 class ByMetricReport:
@@ -45,10 +48,6 @@ class ByMetricReport:
     def get_unrestricted_base_metrics(self) -> list:
         base_metrics = ["headcount"]
         return self.build_base_metrics(base_metrics)
-
-    def get_dynamic_ranges(self, records: list) -> list:
-        values = [record["value"] for record in records]
-        return self.profile_range.build_ranges_from_values(values)
 
     def get_growth_metrics(self, metric: str, company: dict, years: list) -> dict:
         metrics = dict()
@@ -109,7 +108,6 @@ class ByMetricReport:
 
     def process_standard_metrics(self, records: list, rounded: bool = True) -> dict:
         data = defaultdict(dict)
-        self.ranges = self.get_dynamic_ranges(records)
 
         for record in records:
             company_id = record["id"]
@@ -212,36 +210,44 @@ class ByMetricReport:
             data_rule[id] = {"id": id, "name": name, "metrics": metrics}
         return data_rule
 
-    def get_revenues_values(self, revenues: list) -> dict:
+    def __get_revenues_values(self, revenues: list) -> dict:
         data = defaultdict(list)
         for record in revenues:
             scenario = [{"scenario": record["name"], "value": record["value"]}]
             data[record["id"]].extend(scenario)
         return data
 
-    def get_profiles(self, filters: dict) -> tuple:
-        revenues = self.get_revenues_values(
+    def __get_actuals_and_prior_revenues(self, revenues_values: list) -> tuple:
+        revenues_values.extend([{}, {}])
+        return tuple([record.get("value") for record in revenues_values[:2]])
+
+    def __get_company_profiles(
+        self, actuals: int, prior: int, sizes: list, growths: list
+    ) -> dict:
+        return {
+            "size_cohort": self.profile_range.get_range_from_value(
+                actuals, ranges=sizes
+            ),
+            "margin_group": self.profile_range.get_range_from_value(
+                self.calculator.calculate_growth_rate(actuals, prior, False),
+                ranges=growths,
+            ),
+        }
+
+    def get_profiles(self, filters: dict) -> dict:
+        revenues = self.__get_revenues_values(
             self.repository.get_most_recents_revenue(filters)
         )
-        sizes = self.profile_range.get_profile_ranges("size profile")
-        growths = self.profile_range.get_profile_ranges("growth profile")
+        sizes = self.profile_range.get_profile_ranges("revenue")
+        growths = self.profile_range.get_profile_ranges("growth")
 
-        data = defaultdict(dict)
+        companies_profiles_data = defaultdict(dict)
         for company in revenues:
-            revenues[company].extend([{}, {}])
-            actuals, prior = tuple(
-                [record.get("value") for record in revenues[company][:2]]
+            actuals, prior = self.__get_actuals_and_prior_revenues(revenues[company])
+            companies_profiles_data[company] = self.__get_company_profiles(
+                actuals, prior, sizes, growths
             )
-            data[company] = {
-                "size_cohort": self.profile_range.get_range_from_value(
-                    actuals, ranges=sizes
-                ),
-                "margin_group": self.profile_range.get_range_from_value(
-                    self.calculator.calculate_growth_rate(actuals, prior, False),
-                    ranges=growths,
-                ),
-            }
-        return (data, sizes)
+        return companies_profiles_data
 
     def get_retention_records(self, metric: str, years: list, filters: dict) -> dict:
         run_rate_revenue = self.repository.get_metric_records(
@@ -305,59 +311,44 @@ class ByMetricReport:
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
 
-    def anonymized_metric(self, metrics: dict, ranges: str):
+    def anonymized_metric(self, metrics: dict, ranges: list) -> dict:
         return {
-            year: self.profile_range.get_range_from_value(metrics[year], ranges=ranges)
+            year: self.profile_range.get_range_from_value(
+                metrics.get(year), ranges=ranges
+            )
             for year in metrics
         }
 
-    def anonymized_value(self, metric: str, metrics: dict, sizes: list) -> dict:
-        if metric == "revenue_per_employee":
-            revenue_per_employee_ranges = self.profile_range.get_profile_ranges(
-                "revenue per employee"
-            )
-            return self.anonymized_metric(metrics, revenue_per_employee_ranges)
+    def anonymize_company(self, company: dict, ranges: list) -> None:
+        company["name"] = self.anonymized_name(company.get("id"))
+        company["metrics"] = self.anonymized_metric(company.get("metrics", {}), ranges)
 
-        _ranges = sizes if "revenue" in metric else self.ranges
-        if (
-            metric not in self.get_base_metrics()
-            or metric in self.get_unrestricted_base_metrics()
-        ):
-            return metrics
+    def clear_metric_name(self, metric: str) -> str:
+        return re.sub(
+            f"{ScenarioNames.ACTUALS.lower()}_|{ScenarioNames.BUDGET.lower()}_",
+            "",
+            metric,
+        )
 
-        return self.anonymized_metric(metrics, _ranges)
+    def anonymize_companies_values(self, metric: str, data: dict) -> None:
+        metric = self.clear_metric_name(metric)
 
-    def verify_anonimization(
-        self,
-        access: bool,
-        metric: str,
-        company: dict,
-        sizes: list,
-        allowed_companies: list,
-    ) -> None:
-        if not access and company.get("id") not in allowed_companies:
-            company["name"] = self.anonymized_name(company.get("id"))
-            company["metrics"] = self.anonymized_value(
-                metric, company["metrics"], sizes
-            )
+        metric_ranges = self.profile_range.get_profile_ranges(metric)
+        for company_id in data:
+            if company_id not in self.company_anonymization.companies:
+                self.anonymize_company(data[company_id], metric_ranges)
 
-    def get_by_metric_records(
-        self, metric: str, years: list, access: bool, **conditions
-    ) -> dict:
+    def get_by_metric_records(self, metric: str, years: list, **conditions) -> dict:
         companies = dict()
         filters = self.repository.add_filters(**conditions)
         data = self.get_records(metric, years, filters)
 
-        profiles, sizes = self.get_profiles(filters)
+        companies_profiles = self.get_profiles(filters)
 
         for id in data:
-            company = data[id]
-            if self.is_in_range(profiles.get(id), **conditions):
-                self.verify_anonimization(
-                    access, metric, company, sizes, self.company_anonymization.companies
-                )
-                data[id]["metrics"].update(self.get_na_year_records(company, years))
-                companies[id] = company
+            if self.is_in_range(companies_profiles.get(id), **conditions):
+                data[id]["metrics"].update(self.get_na_year_records(data[id], years))
+                companies[id] = data[id]
 
         return companies
 
@@ -384,7 +375,9 @@ class ByMetricReport:
             is_valid_company = company_id and company_id.strip()
             self.company_anonymization.set_company_permissions(username)
             years = self.repository.get_years()
-            data = self.get_by_metric_records(metric, years, access, **conditions)
+            data = self.get_by_metric_records(metric, years, **conditions)
+            if not access and self.clear_metric_name(metric) in METRICS_TO_ANONYMIZE:
+                self.anonymize_companies_values(metric, data)
 
             if not from_main and is_valid_company:
                 company = data.pop(company_id, dict())
