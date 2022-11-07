@@ -56,7 +56,7 @@ class RangesService:
     def __is_valid_metric_name(self, metric: str) -> bool:
         return metric and metric.strip()
 
-    def __build_metric_ranges(self, ranges: list) -> None:
+    def __build_metric_ranges(self, ranges: list) -> list:
         return [
             {
                 "id": range["id"],

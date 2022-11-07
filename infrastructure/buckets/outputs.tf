@@ -256,6 +256,7 @@ output "object_references" {
     "get_ranges_by_metric_function_bucket": {
       etag : aws_s3_bucket_object.get_ranges_by_metric_function_object.etag,
       key : aws_s3_bucket_object.get_ranges_by_metric_function_object.key,
+      bucket : aws_s3_bucket_object.get_ranges_by_metric_function_object.bucket
     }
   }
 }
