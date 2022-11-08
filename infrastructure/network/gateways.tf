@@ -210,9 +210,16 @@ resource "aws_api_gateway_resource" "tags_by_company" {
   parent_id   = aws_api_gateway_resource.company_details.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
+
 resource "aws_api_gateway_resource" "ranges" {
   path_part   = "metric_ranges"
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
+
+resource "aws_api_gateway_resource" "ranges_by_metric" {
+  path_part   = "{metric}"
+  parent_id   = aws_api_gateway_resource.ranges.id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
@@ -581,9 +588,23 @@ resource "aws_api_gateway_method" "delete_tags_method" {
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
 }
+
 resource "aws_api_gateway_method" "get_all_ranges_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
   resource_id   = aws_api_gateway_resource.ranges.id
+  http_method   = "GET"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+  
+  request_parameters = {
+    "method.request.querystring.offset" = false
+    "method.request.querystring.limit" = false
+  }
+}
+
+resource "aws_api_gateway_method" "get_ranges_by_metric_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.ranges_by_metric.id
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
@@ -892,6 +913,7 @@ resource "aws_api_gateway_integration" "delete_tags_integration" {
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.delete_tags_lambda_function
 }
+
 resource "aws_api_gateway_integration" "get_all_ranges_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
   resource_id             = aws_api_gateway_resource.ranges.id
@@ -899,6 +921,15 @@ resource "aws_api_gateway_integration" "get_all_ranges_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_all_ranges_lambda_function
+}
+
+resource "aws_api_gateway_integration" "get_ranges_by_metric_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.ranges_by_metric.id
+  http_method             = aws_api_gateway_method.get_ranges_by_metric_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.get_ranges_by_metric_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

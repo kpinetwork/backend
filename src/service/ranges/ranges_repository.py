@@ -51,3 +51,27 @@ class RangesRepository:
         except Exception as error:
             self.logger.error(error)
             return []
+
+    def get_ranges_by_metric(self, metric: str) -> list:
+        try:
+            query = (
+                self.query_builder.add_table_name(TableNames.RANGE)
+                .add_select_conditions()
+                .add_sql_where_equal_condition(
+                    {
+                        f"not {TableNames.RANGE}.type": f"'{'growth'}'",
+                        f"{TableNames.RANGE}.type": f"'{metric}'",
+                    }
+                )
+                .add_sql_order_by_condition(
+                    ["type, max_value"], self.query_builder.Order.ASC
+                )
+                .build()
+                .get_query()
+            )
+
+            results = self.session.execute(query).fetchall()
+            return self.response_sql.process_query_list_results(results)
+        except Exception as error:
+            self.logger.error(error)
+            return []

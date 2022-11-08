@@ -1,11 +1,10 @@
 {
-    "queryStringParameters": {
-        "limit": 1,
-        "offset": 1
-    },
     "requestContext": {
         "authorizer": {
             "principalId": "user_id"
         }
+    },
+    "pathParameters": {
+        "metric": "revenue"
     }
 }
