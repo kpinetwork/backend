@@ -15,46 +15,90 @@ class RangesRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
 
-    def __get_first_range_label(self, max_value: float, label: str) -> dict:
+    def __get_first_range_label(self, max_value: float, label: str) -> str:
         return f"<${round(max_value)} {label}"
 
-    def __get_last_range_label(self, min_value: float, label: str) -> dict:
+    def __get_last_range_label(self, min_value: float, label: str) -> str:
         return f"${round(min_value)} {label}+"
 
-    def __get_range_label(self, min_value: float, max_value: float, label: str) -> dict:
+    def __get_range_label(self, min_value: float, max_value: float, label: str) -> str:
         return f"${round(min_value)}-<${round(max_value)} {label}"
+
+    def __get_query_to_add_first_range(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        return """
+            INSERT INTO {value_range}
+            (id, label, max_value, type)
+            VALUES ('{record_id}', '{label}', '{max_value}', '{type}')
+            """.format(
+            value_range=TableNames.RANGE,
+            record_id=str(uuid4()),
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            max_value=range.get("max_value"),
+            type=metric_key,
+        )
+
+    def __get_query_to_add_last_range(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        return """
+            INSERT INTO {value_range}
+            (id, label, min_value, type)
+            VALUES ('{record_id}', '{label}', '{min_value}', '{type}')
+            """.format(
+            value_range=TableNames.RANGE,
+            record_id=str(uuid4()),
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            min_value=range.get("min_value"),
+            type=metric_key,
+        )
+
+    def __get_query_to_modify_first_range(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        return """
+            UPDATE {value_range}
+            SET label= '{label}', max_value='{max_value}', type= '{type}'
+            WHERE id = '{record_id}'
+            """.format(
+            value_range=TableNames.RANGE,
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            max_value=range.get("max_value"),
+            type=metric_key,
+            record_id=range.get("id"),
+        )
+
+    def __get_query_to_modify_last_range(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        return """
+            UPDATE {value_range}
+            SET label= '{label}', min_value='{min_value}', type= '{type}'
+            WHERE id = '{record_id}'
+            """.format(
+            value_range=TableNames.RANGE,
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            min_value=range.get("min_value"),
+            type=metric_key,
+            record_id=range.get("id"),
+        )
 
     def __get_query_to_add_ranges_to_metric(
         self, range: dict, metric_key: str, label: str
     ) -> str:
         if range.get("min_value") is None:
-            return """
-            INSERT INTO {value_range}
-            (id, label, max_value, type)
-            VALUES ('{record_id}', '{label}', '{max_value}', '{type}')
-            """.format(
-                value_range=TableNames.RANGE,
-                record_id=str(uuid4()),
-                label=self.get_range_label(
-                    range.get("min_value"), range.get("max_value"), label
-                ),
-                max_value=range.get("max_value"),
-                type=metric_key,
-            )
+            self.__get_query_to_add_first_range(range, metric_key, label)
         if range.get("max_value") is None:
-            return """
-            INSERT INTO {value_range}
-            (id, label, min_value, type)
-            VALUES ('{record_id}', '{label}', '{min_value}', '{type}')
-            """.format(
-                value_range=TableNames.RANGE,
-                record_id=str(uuid4()),
-                label=self.get_range_label(
-                    range.get("min_value"), range.get("max_value"), label
-                ),
-                min_value=range.get("min_value"),
-                type=metric_key,
-            )
+            self.__get_query_to_add_last_range(range, metric_key, label)
         return """
         INSERT INTO {value_range}
         VALUES ('{record_id}', '{label}', '{min_value}', '{max_value}', '{type}')
@@ -73,33 +117,9 @@ class RangesRepository:
         self, range: dict, metric_key: str, label: str
     ) -> str:
         if range.get("min_value") is None:
-            return """
-            UPDATE {value_range}
-            SET label= '{label}', max_value='{max_value}', type= '{type}'
-            WHERE id = '{record_id}'
-            """.format(
-                value_range=TableNames.RANGE,
-                label=self.get_range_label(
-                    range.get("min_value"), range.get("max_value"), label
-                ),
-                max_value=range.get("max_value"),
-                type=metric_key,
-                record_id=range.get("id"),
-            )
+            self.__get_query_to_modify_first_range(range, metric_key, label)
         if range.get("max_value") is None:
-            return """
-            UPDATE {value_range}
-            SET label= '{label}', min_value='{min_value}', type= '{type}'
-            WHERE id = '{record_id}'
-            """.format(
-                value_range=TableNames.RANGE,
-                label=self.get_range_label(
-                    range.get("min_value"), range.get("max_value"), label
-                ),
-                min_value=range.get("min_value"),
-                type=metric_key,
-                record_id=range.get("id"),
-            )
+            self.__get_query_to_modify_last_range(range, metric_key, label)
         return """
         UPDATE {value_range}
         SET label= '{label}', min_value= '{min_value}', max_value='{max_value}', type= '{type}'
