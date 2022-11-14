@@ -155,7 +155,7 @@ class RangesRepository:
             raise AppError("Invalid format to update metric_ranges")
 
     def __get_queries_delete_metric_ranges(
-        self, key: str, ranges: list, function_to_exec
+        self, ranges: list, function_to_exec
     ) -> list:
         try:
             if not ranges:
@@ -261,7 +261,6 @@ class RangesRepository:
             )
             queries.extend(
                 self.__get_queries_delete_metric_ranges(
-                    metric_key,
                     ranges_to_delete,
                     self.__get_query_to_delete_ranges_to_metric,
                 )

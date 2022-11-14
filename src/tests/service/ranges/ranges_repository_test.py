@@ -111,7 +111,7 @@ class TestRangesRepository(TestCase):
 
         queries_list = (
             self.repository._RangesRepository__get_queries_delete_metric_ranges(
-                "key", [], lambda x, y: x + y
+                [], lambda x, y: x + y
             )
         )
 
