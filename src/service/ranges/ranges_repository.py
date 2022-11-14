@@ -1,6 +1,9 @@
+from uuid import uuid4
+
 from app_names import TableNames
 from query_builder import QuerySQLBuilder
 from response_sql import ResponseSQL
+from base_exception import AppError
 
 
 class RangesRepository:
@@ -11,6 +14,143 @@ class RangesRepository:
         self.session = session
         self.query_builder = query_builder
         self.response_sql = response_sql
+
+    def __get_first_range_label(self, max_value: float, label: str) -> dict:
+        return f"<${round(max_value)} {label}"
+
+    def __get_last_range_label(self, min_value: float, label: str) -> dict:
+        return f"${round(min_value)} {label}+"
+
+    def __get_range_label(self, min_value: float, max_value: float, label: str) -> dict:
+        return f"${round(min_value)}-<${round(max_value)} {label}"
+
+    def __get_query_to_add_ranges_to_metric(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        if range.get("min_value") is None:
+            return """
+            INSERT INTO {value_range}
+            (id, label, max_value, type)
+            VALUES ('{record_id}', '{label}', '{max_value}', '{type}')
+            """.format(
+                value_range=TableNames.RANGE,
+                record_id=str(uuid4()),
+                label=self.get_range_label(
+                    range.get("min_value"), range.get("max_value"), label
+                ),
+                max_value=range.get("max_value"),
+                type=metric_key,
+            )
+        if range.get("max_value") is None:
+            return """
+            INSERT INTO {value_range}
+            (id, label, min_value, type)
+            VALUES ('{record_id}', '{label}', '{min_value}', '{type}')
+            """.format(
+                value_range=TableNames.RANGE,
+                record_id=str(uuid4()),
+                label=self.get_range_label(
+                    range.get("min_value"), range.get("max_value"), label
+                ),
+                min_value=range.get("min_value"),
+                type=metric_key,
+            )
+        return """
+        INSERT INTO {value_range}
+        VALUES ('{record_id}', '{label}', '{min_value}', '{max_value}', '{type}')
+        """.format(
+            value_range=TableNames.RANGE,
+            record_id=str(uuid4()),
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            min_value=range.get("min_value"),
+            max_value=range.get("max_value"),
+            type=metric_key,
+        )
+
+    def __get_query_to_update_ranges_to_metric(
+        self, range: dict, metric_key: str, label: str
+    ) -> str:
+        if range.get("min_value") is None:
+            return """
+            UPDATE {value_range}
+            SET label= '{label}', max_value='{max_value}', type= '{type}'
+            WHERE id = '{record_id}'
+            """.format(
+                value_range=TableNames.RANGE,
+                label=self.get_range_label(
+                    range.get("min_value"), range.get("max_value"), label
+                ),
+                max_value=range.get("max_value"),
+                type=metric_key,
+                record_id=range.get("id"),
+            )
+        if range.get("max_value") is None:
+            return """
+            UPDATE {value_range}
+            SET label= '{label}', min_value='{min_value}', type= '{type}'
+            WHERE id = '{record_id}'
+            """.format(
+                value_range=TableNames.RANGE,
+                label=self.get_range_label(
+                    range.get("min_value"), range.get("max_value"), label
+                ),
+                min_value=range.get("min_value"),
+                type=metric_key,
+                record_id=range.get("id"),
+            )
+        return """
+        UPDATE {value_range}
+        SET label= '{label}', min_value= '{min_value}', max_value='{max_value}', type= '{type}'
+        WHERE id = '{record_id}'
+        """.format(
+            value_range=TableNames.RANGE,
+            label=self.get_range_label(
+                range.get("min_value"), range.get("max_value"), label
+            ),
+            min_value=range.get("min_value"),
+            max_value=range.get("max_value"),
+            type=metric_key,
+            record_id=range.get("id"),
+        )
+
+    def __get_query_to_delete_ranges_to_metric(self, range_id: str) -> str:
+        return """
+        DELETE FROM {value_range}
+        WHERE id = '{record_id}'
+        """.format(
+            value_range=TableNames.RANGE, record_id=range_id
+        )
+
+    def __get_queries_modify_metric_ranges(
+        self, key: str, ranges: list, function_to_exec, label: str
+    ) -> list:
+        try:
+            if not ranges:
+                return []
+            return [function_to_exec(range_data, key, label) for range_data in ranges]
+        except Exception as error:
+            self.logger.error(error)
+            raise AppError("Invalid format to update metric_ranges")
+
+    def __get_queries_delete_metric_ranges(
+        self, key: str, ranges: list, function_to_exec
+    ) -> list:
+        try:
+            if not ranges:
+                return []
+            return [function_to_exec(range_id) for range_id in ranges]
+        except Exception as error:
+            self.logger.error(error)
+            raise AppError("Invalid format to delete metric_ranges")
+
+    def get_range_label(self, min_value: float, max_value: float, label: str) -> str:
+        if min_value is None:
+            return self.__get_first_range_label(max_value, label)
+        if max_value is None:
+            return self.__get_last_range_label(min_value, label)
+        return self.__get_range_label(min_value, max_value, label)
 
     def get_total_number_of_ranges(self) -> dict:
         try:
@@ -75,3 +215,44 @@ class RangesRepository:
         except Exception as error:
             self.logger.error(error)
             return []
+
+    def modify_metric_ranges(
+        self,
+        metric_key: str,
+        label: str,
+        ranges_to_add: list,
+        ranges_to_delete: list,
+        ranges_to_update: list,
+    ) -> bool:
+        try:
+            queries = self.__get_queries_modify_metric_ranges(
+                metric_key,
+                ranges_to_add,
+                self.__get_query_to_add_ranges_to_metric,
+                label,
+            )
+            queries.extend(
+                self.__get_queries_modify_metric_ranges(
+                    metric_key,
+                    ranges_to_update,
+                    self.__get_query_to_update_ranges_to_metric,
+                    label,
+                )
+            )
+            queries.extend(
+                self.__get_queries_delete_metric_ranges(
+                    metric_key,
+                    ranges_to_delete,
+                    self.__get_query_to_delete_ranges_to_metric,
+                )
+            )
+            query = ";".join(queries)
+            self.session.execute(query)
+            self.session.commit()
+            return True
+        except AppError as error:
+            raise error
+        except Exception as error:
+            self.session.rollback()
+            self.logger.error(error)
+            return False

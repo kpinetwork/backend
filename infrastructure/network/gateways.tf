@@ -614,6 +614,13 @@ resource "aws_api_gateway_method" "get_ranges_by_metric_method" {
     "method.request.querystring.limit" = false
   }
 }
+resource "aws_api_gateway_method" "modify_ranges_method" {
+  rest_api_id   = aws_api_gateway_rest_api.api.id
+  resource_id   = aws_api_gateway_resource.ranges.id
+  http_method   = "PUT"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY INTEGRATION
@@ -930,6 +937,14 @@ resource "aws_api_gateway_integration" "get_ranges_by_metric_integration" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = var.lambdas_functions_arn.get_ranges_by_metric_lambda_function
+}
+resource "aws_api_gateway_integration" "modify_ranges_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.api.id
+  resource_id             = aws_api_gateway_resource.ranges.id
+  http_method             = aws_api_gateway_method.modify_ranges_method.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.lambdas_functions_arn.modify_ranges_lambda_function
 }
 
 # ----------------------------------------------------------------------------------------------------------------------

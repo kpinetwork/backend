@@ -92,3 +92,123 @@ class TestRangesRepository(TestCase):
 
         self.assertEqual(ranges_by_metric, [])
         self.mock_session.execute.assert_called_once()
+
+    def test_get_queries_modify_metric_ranges_with_empty_list_should_return_empty_list(
+        self,
+    ):
+
+        queries_list = (
+            self.repository._RangesRepository__get_queries_modify_metric_ranges(
+                "key", [], lambda x, y: x + y, "million"
+            )
+        )
+
+        self.assertEqual(queries_list, [])
+
+    def test_get_queries_delete_metric_ranges_with_empty_list_should_return_empty_list(
+        self,
+    ):
+
+        queries_list = (
+            self.repository._RangesRepository__get_queries_delete_metric_ranges(
+                "key", [], lambda x, y: x + y
+            )
+        )
+
+        self.assertEqual(queries_list, [])
+
+    def test_modify_metric_ranges_with_data_and_limit_to_update_should_call_db_session_execute(
+        self,
+    ):
+        metric_ranges_data = {
+            "metric_key": "new_bookings_metric",
+            "label": "million",
+            "ranges_to_add": [{"min_value": 30, "max_value": 40}],
+            "ranges_to_delete": ["123"],
+            "ranges_to_update": [
+                {"id": "1", "min_value": None, "max_value": 30},
+                {"id": "2", "min_value": 40, "max_value": None},
+            ],
+        }
+
+        updated = self.repository.modify_metric_ranges(**metric_ranges_data)
+
+        self.assertTrue(updated)
+        self.mock_session.execute.assert_called_once()
+
+    def test_modify_metric_ranges_with_limit_ranges_to_add_should_call_db_session_execute(
+        self,
+    ):
+        metric_ranges_data = {
+            "metric_key": "new_bookings_metric",
+            "label": "million",
+            "ranges_to_add": [
+                {"min_value": 30, "max_value": 40},
+                {"min_value": None, "max_value": 30},
+                {"min_value": 40, "max_value": None},
+            ],
+            "ranges_to_delete": ["123"],
+            "ranges_to_update": [],
+        }
+
+        updated = self.repository.modify_metric_ranges(**metric_ranges_data)
+
+        self.assertTrue(updated)
+        self.mock_session.execute.assert_called_once()
+
+    def test_modify_metric_ranges_ranges_to_delete_is_wrong_should_call_db_session_execute(
+        self,
+    ):
+        metric_ranges_data = {
+            "metric_key": "new_bookings_metric",
+            "label": "million",
+            "ranges_to_add": [
+                {"min_value": 30, "max_value": 40},
+            ],
+            "ranges_to_delete": 1,
+            "ranges_to_update": [],
+        }
+
+        with self.assertRaises(Exception) as context:
+            self.repository.modify_metric_ranges(**metric_ranges_data)
+
+        self.assertEqual(
+            str(context.exception), "Invalid format to delete metric_ranges"
+        )
+        self.mock_session.execute.assert_not_called()
+
+    def test_modify_metric_ranges_with_invalid_data_format_should_raise_exception(
+        self,
+    ):
+        metric_ranges_data = {
+            "metric_key": "new_bookings_metric",
+            "label": "million",
+            "ranges_to_add": 1,
+            "ranges_to_delete": ["123"],
+            "ranges_to_update": [{"id": "1", "min_value": 20, "max_value": 30}],
+        }
+        with self.assertRaises(Exception) as context:
+            self.repository.modify_metric_ranges(**metric_ranges_data)
+
+        self.assertEqual(
+            str(context.exception), "Invalid format to update metric_ranges"
+        )
+        self.mock_session.execute.assert_not_called()
+
+    def test_modify_metric_ranges_with_invalid_transaction_exec_should_not_modify_metric_ranges(
+        self,
+    ):
+        metric_ranges_data = {
+            "metric_key": "new_bookings_metric",
+            "label": "million",
+            "ranges_to_add": [{"min_value": 30, "max_value": 40}],
+            "ranges_to_delete": ["123"],
+            "ranges_to_update": [{"id": "1", "min_value": 20, "max_value": 30}],
+        }
+        self.mock_session.execute.side_effect = Exception("error with query exec")
+
+        updated = self.repository.modify_metric_ranges(**metric_ranges_data)
+
+        self.assertFalse(updated)
+        self.mock_session.execute.assert_called_once()
+        self.mock_session.rollback.assert_called()

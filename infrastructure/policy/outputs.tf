@@ -44,6 +44,7 @@ output "lambdas_exec_roles_arn" {
       "delete_tags_exec_role_arn": aws_iam_role.delete_tags_lambda_exec_role.arn
       "get_all_ranges_exec_role_arn": aws_iam_role.get_all_ranges_lambda_exec_role.arn
       "get_ranges_by_metric_exec_role_arn": aws_iam_role.get_ranges_by_metric_lambda_exec_role.arn
+      "modify_ranges_exec_role_arn": aws_iam_role.modify_ranges_lambda_exec_role.arn
   }
 }
 
