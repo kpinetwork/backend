@@ -77,3 +77,26 @@ class RangesService:
         except Exception as error:
             self.logger.error(error)
             raise error
+
+    def modify_metric_ranges(self, metric_ranges_data: dict) -> bool:
+        is_empty = not (
+            metric_ranges_data.get("key")
+            and (
+                metric_ranges_data.get("ranges_to_add")
+                or metric_ranges_data.get("ranges_to_delete")
+                or metric_ranges_data.get("ranges_to_update")
+            )
+        )
+        if is_empty:
+            raise AppError("There isn't data to modify")
+
+        return self.repository.modify_metric_ranges(
+            metric_ranges_data.get("key"),
+            metric_ranges_data.get("label"),
+            metric_ranges_data.get("ranges_to_add"),
+            metric_ranges_data.get("ranges_to_delete"),
+            metric_ranges_data.get("ranges_to_update"),
+        )
+
+    def modify_ranges(self, metric_ranges_body: dict) -> dict:
+        return self.modify_metric_ranges(metric_ranges_body.get("metric_ranges"))

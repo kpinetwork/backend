@@ -623,6 +623,22 @@ functions:
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
     - ./src/service/base_metrics/base_metrics_config_name.py
+
+  modify_ranges_handler:
+    requirements: ./src/handlers/ranges/requirements.txt
+    include:
+    - ./src/handlers/ranges/modify_ranges_handler.py
+    - ./src/service/ranges/ranges_service.py
+    - ./src/service/ranges/ranges_repository.py
+    - ./db/utils/connection.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
+    - ./src/service/base_metrics/base_metrics_config_name.py
     
 layers:
   layer_libraries:

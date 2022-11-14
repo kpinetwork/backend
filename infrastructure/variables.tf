@@ -76,6 +76,7 @@ variable "lambdas_names" {
     "delete_tags_lambda_function": "delete_tags_lambda_function"
     "get_all_ranges_lambda_function": "get_all_ranges_lambda_function"
     "get_ranges_by_metric_lambda_function": "get_ranges_by_metric_lambda_function"
+    "modify_ranges_lambda_function": "modify_ranges_lambda_function"
   }
 }
 
