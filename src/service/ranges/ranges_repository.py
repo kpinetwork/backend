@@ -37,7 +37,7 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            max_value=range.get("max_value"),
+            max_value=int(range.get("max_value")),
             type=metric_key,
         )
 
@@ -54,7 +54,7 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            min_value=range.get("min_value"),
+            min_value=int(range.get("min_value")),
             type=metric_key,
         )
 
@@ -70,7 +70,7 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            max_value=range.get("max_value"),
+            max_value=int(range.get("max_value")),
             type=metric_key,
             record_id=range.get("id"),
         )
@@ -87,7 +87,7 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            min_value=range.get("min_value"),
+            min_value=int(range.get("min_value")),
             type=metric_key,
             record_id=range.get("id"),
         )
@@ -96,9 +96,9 @@ class RangesRepository:
         self, range: dict, metric_key: str, label: str
     ) -> str:
         if range.get("min_value") is None:
-            self.__get_query_to_add_first_range(range, metric_key, label)
+            return self.__get_query_to_add_first_range(range, metric_key, label)
         if range.get("max_value") is None:
-            self.__get_query_to_add_last_range(range, metric_key, label)
+            return self.__get_query_to_add_last_range(range, metric_key, label)
         return """
         INSERT INTO {value_range}
         VALUES ('{record_id}', '{label}', '{min_value}', '{max_value}', '{type}')
@@ -108,8 +108,8 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            min_value=range.get("min_value"),
-            max_value=range.get("max_value"),
+            min_value=int(range.get("min_value")),
+            max_value=int(range.get("max_value")),
             type=metric_key,
         )
 
@@ -117,9 +117,9 @@ class RangesRepository:
         self, range: dict, metric_key: str, label: str
     ) -> str:
         if range.get("min_value") is None:
-            self.__get_query_to_modify_first_range(range, metric_key, label)
+            return self.__get_query_to_modify_first_range(range, metric_key, label)
         if range.get("max_value") is None:
-            self.__get_query_to_modify_last_range(range, metric_key, label)
+            return self.__get_query_to_modify_last_range(range, metric_key, label)
         return """
         UPDATE {value_range}
         SET label= '{label}', min_value= '{min_value}', max_value='{max_value}', type= '{type}'
@@ -129,8 +129,8 @@ class RangesRepository:
             label=self.get_range_label(
                 range.get("min_value"), range.get("max_value"), label
             ),
-            min_value=range.get("min_value"),
-            max_value=range.get("max_value"),
+            min_value=int(range.get("min_value")),
+            max_value=int(range.get("max_value")),
             type=metric_key,
             record_id=range.get("id"),
         )
@@ -165,12 +165,12 @@ class RangesRepository:
             self.logger.error(error)
             raise AppError("Invalid format to delete metric_ranges")
 
-    def get_range_label(self, min_value: float, max_value: float, label: str) -> str:
-        if min_value is None:
-            return self.__get_first_range_label(max_value, label)
-        if max_value is None:
-            return self.__get_last_range_label(min_value, label)
-        return self.__get_range_label(min_value, max_value, label)
+    def get_range_label(self, min_value: str, max_value: str, label: str) -> str:
+        if min_value is None or min_value == "":
+            return self.__get_first_range_label(int(max_value), label)
+        if max_value is None or min_value == "":
+            return self.__get_last_range_label(int(min_value), label)
+        return self.__get_range_label(int(min_value), int(max_value), label)
 
     def get_total_number_of_ranges(self) -> dict:
         try:
