@@ -1304,7 +1304,6 @@ resource "aws_lambda_function" "delete_tags_lambda_function" {
     }
   }
 }
-
 resource "aws_lambda_function" "get_all_ranges_lambda_function" {
   role             = var.lambdas_exec_roles_arn.get_all_ranges_exec_role_arn
   handler          = "get_all_ranges_handler.handler"
