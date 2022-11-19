@@ -12,7 +12,7 @@ class RangesService:
         self.logger = logger
         self.repository = repository
 
-    def get_all_ranges_response(self, total_ranges: int, ranges: list) -> dict:
+    def __get_all_ranges_response(self, total_ranges: int, ranges: list) -> dict:
         return {"total": total_ranges, "ranges": ranges}
 
     def is_valid_number(self, number) -> bool:
@@ -21,7 +21,7 @@ class RangesService:
     def __get_number(self, number) -> Union[int, None]:
         return int(number) if self.is_valid_number(number) else None
 
-    def get_ranges_by_metric(self, ranges: list) -> list:
+    def __build_ranges_by_metric(self, ranges: list) -> list:
         records = defaultdict(dict)
         metric_range_names = {v: k for k, v in METRICS_TO_ANONYMIZE.items()}
         for range in ranges:
@@ -42,9 +42,9 @@ class RangesService:
     def get_all_ranges(self, offset: int = 0, max_count: int = None) -> dict:
         try:
             total_ranges = self.repository.get_total_number_of_ranges().get("count")
-            return self.get_all_ranges_response(
+            return self.__get_all_ranges_response(
                 total_ranges,
-                self.get_ranges_by_metric(
+                self.__build_ranges_by_metric(
                     self.repository.get_ranges(offset, max_count)
                 ),
             )
@@ -52,3 +52,51 @@ class RangesService:
         except Exception as error:
             self.logger.error(error)
             raise AppError("Can't get ranges")
+
+    def __is_valid_metric_name(self, metric: str) -> bool:
+        return metric and metric.strip()
+
+    def __build_metric_ranges(self, ranges: list) -> list:
+        return [
+            {
+                "id": range["id"],
+                "label": range["label"],
+                "min_value": self.__get_number(range["min_value"]),
+                "max_value": self.__get_number(range["max_value"]),
+            }
+            for range in ranges
+        ]
+
+    def get_ranges_by_metric(self, metric: str) -> list:
+        try:
+            if not self.__is_valid_metric_name(metric):
+                raise AppError("Invalid metric")
+            return self.__build_metric_ranges(
+                self.repository.get_ranges_by_metric(metric)
+            )
+        except Exception as error:
+            self.logger.error(error)
+            raise error
+
+    def modify_metric_ranges(self, metric_ranges_data: dict) -> bool:
+        is_empty = not (
+            metric_ranges_data.get("key")
+            and (
+                metric_ranges_data.get("ranges_to_add")
+                or metric_ranges_data.get("ranges_to_delete")
+                or metric_ranges_data.get("ranges_to_update")
+            )
+        )
+        if is_empty:
+            raise AppError("There isn't data to modify")
+
+        return self.repository.modify_metric_ranges(
+            metric_ranges_data.get("key"),
+            metric_ranges_data.get("label"),
+            metric_ranges_data.get("ranges_to_add"),
+            metric_ranges_data.get("ranges_to_delete"),
+            metric_ranges_data.get("ranges_to_update"),
+        )
+
+    def modify_ranges(self, metric_ranges_body: dict) -> dict:
+        return self.modify_metric_ranges(metric_ranges_body.get("metric_ranges"))

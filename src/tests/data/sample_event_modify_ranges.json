@@ -1,0 +1,29 @@
+{
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    },
+    "body": {
+        "metric_ranges": {
+            "key": "new_bookings_metric",
+            "name": "newest booking",
+            "ranges_to_update": [
+                {
+                    "id": "69a874a6-7d99-485c-af1f-fd14e6267248",
+                    "label": "$20-<30 million",
+                    "min_value": 20,
+                    "max_value": 30
+                }
+            ],
+            "ranges_to_add": [
+                {
+                    "label": "$30-<40 million",
+                    "min_value": 30,
+                    "max_value": 40
+                }
+            ],
+            "ranges_to_delete":["123"]
+        }
+    }
+}

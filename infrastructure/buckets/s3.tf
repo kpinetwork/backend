@@ -311,3 +311,16 @@ resource "aws_s3_bucket_object" "get_all_ranges_function_object" {
   source = "${path.module}/../../dist/get_all_ranges_handler.zip"
   etag = filemd5("${path.module}/../../dist/get_all_ranges_handler.zip")
 }
+
+resource "aws_s3_bucket_object" "get_ranges_by_metric_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_ranges_by_metric_handler.zip"
+  source = "${path.module}/../../dist/get_ranges_by_metric_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_ranges_by_metric_handler.zip")
+}
+resource "aws_s3_bucket_object" "modify_ranges_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/modify_ranges_handler.zip"
+  source = "${path.module}/../../dist/modify_ranges_handler.zip"
+  etag = filemd5("${path.module}/../../dist/modify_ranges_handler.zip")
+}

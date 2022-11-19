@@ -41,6 +41,8 @@ output "lambdas_invoke_arns" {
     "update_tags_lambda_function": aws_lambda_function.update_tags_lambda_function.invoke_arn
     "delete_tags_lambda_function": aws_lambda_function.delete_tags_lambda_function.invoke_arn
     "get_all_ranges_lambda_function": aws_lambda_function.get_all_ranges_lambda_function.invoke_arn
+    "get_ranges_by_metric_lambda_function": aws_lambda_function.get_ranges_by_metric_lambda_function.invoke_arn
+    "modify_ranges_lambda_function": aws_lambda_function.modify_ranges_lambda_function.invoke_arn
   }
 }
 
