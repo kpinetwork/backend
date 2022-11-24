@@ -8,7 +8,7 @@ resource "aws_db_subnet_group" "kpinetwork" {
 }
 
 resource "aws_db_instance" "kpinetwork_db" {
-  identifier             = local.db_name
+  identifier             = local.db_identifier
   allocated_storage      = 5
 
   instance_class         = local.db_instance[var.environment]
@@ -25,6 +25,8 @@ resource "aws_db_instance" "kpinetwork_db" {
   username               = var.db_username
   password               = var.db_password
   name                   = local.db_name
+
+  storage_encrypted      = true
 
   depends_on = [
     aws_db_subnet_group.kpinetwork
