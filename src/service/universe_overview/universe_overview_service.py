@@ -91,8 +91,8 @@ class UniverseOverviewService:
 
     def get_revenue_profiles_ranges(self) -> dict:
         return {
-            "growth": self.profile_range.get_profile_ranges("growth profile"),
-            "revenue": self.profile_range.get_profile_ranges("size profile"),
+            "growth": self.profile_range.get_profile_ranges("growth"),
+            "revenue": self.profile_range.get_profile_ranges("revenue"),
         }
 
     def add_calculated_metrics_to_companies(self, data: list) -> None:
