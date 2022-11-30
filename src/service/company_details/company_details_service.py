@@ -340,6 +340,7 @@ class CompanyDetails:
             {period_query}
             {investor_query}
             {invest_query}
+            {company_tag_query}
             DELETE FROM {company} WHERE {company}.id = '{id}';
         """.format(
             scenario_metric_query=self.__get_delete_list_query(
@@ -359,6 +360,9 @@ class CompanyDetails:
             ),
             metric_query=self.__get_delete_list_query(TableNames.METRIC, "id", metrics),
             period_query=self.__get_delete_list_query(TableNames.PERIOD, "id", periods),
+            company_tag_query=self.__get_delete_list_query(
+                TableNames.COMPANY_TAG, "company_id", [f"'{company_id}'"]
+            ),
             company=TableNames.COMPANY,
             id=company_id,
         )
