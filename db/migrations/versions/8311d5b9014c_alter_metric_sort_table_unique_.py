@@ -22,6 +22,7 @@ def upgrade():
 
     query = """
            ALTER TABLE metric_sort DROP CONSTRAINT metric_sort_sort_value_key;
+           ALTER TABLE metric_sort ADD UNIQUE (sort_value, group_sort_value);
         """
 
     session.execute(query)
