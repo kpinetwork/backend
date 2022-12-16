@@ -84,6 +84,26 @@ class TestByYearReport(TestCase):
             "ebitda_margin": self.metrics["ebitda_margin"],
             "revenue": self.metrics["revenue"],
         }
+        self.averages = {
+            "revenue": 40.0,
+            "growth": 7.0,
+            "ebitda_margin": -38.0,
+            "revenue_vs_budget": 114.0,
+            "ebitda_vs_budget": 125.0,
+            "rule_of_40": -31.0,
+            "gross_profit": -80,
+            "gross_margin": -200.0,
+            "sales_and_marketing": 125.0,
+            "general_and_admin": 150.0,
+            "research_and_development": 175.0,
+            "clv_cac_ratio": 0.9,
+            "cac_ratio": 1.38,
+            "opex_of_revenue": 620.0,
+            "revenue_per_employee": 981132,
+            "gross_retention": -569.0,
+            "net_retention": -500.0,
+            "new_bookings_growth": 11.0,
+        }
         self.range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
         self.profile_ranges = {
             "revenue": [size_range],
@@ -167,6 +187,7 @@ class TestByYearReport(TestCase):
         self.mock_base_metrics_reports.get_peers_sorted.side_effect = lambda x: list(
             x.values()
         )
+        self.mock_repository.fields = ["id", "name", "sector", "vertical"]
 
         report_data = self.report_instance.get_by_year_report(
             None, "user@test.com", 2020, True, True, sector=[]
@@ -177,19 +198,28 @@ class TestByYearReport(TestCase):
             {
                 "company_comparison_data": {},
                 "peers_comparison_data": [data],
+                "averages": self.averages,
                 "rule_of_40": [],
             },
         )
 
     @patch(f"{service_path}.get_report_base_data")
     @patch(f"{service_path}.get_comparison_vs_data")
-    def test_get_by_year_report_when_comes_from_company_should_return_only_company(
+    def test_get_by_year_report_when_comes_from_company_should_return_company(
         self, mock_get_comparison_vs_data, mock_get_report_base_data
     ):
         data = self.company.copy()
         label = self.range["label"]
         data.update(self.metrics)
         peer_data = {self.company["id"]: data}
+        averages = self.averages
+        averages.update(
+            {
+                "revenue": "$30-<50 million",
+                "gross_profit": "$30-<50 million",
+                "revenue_per_employee": "$30-<50 million",
+            }
+        )
         mock_get_report_base_data.return_value = peer_data
         self.mock_base_metrics_reports.get_profiles_ranges.return_value = (
             self.profile_ranges
@@ -202,6 +232,7 @@ class TestByYearReport(TestCase):
         self.mock_base_metrics_reports.get_peers_sorted.side_effect = lambda x: list(
             x.values()
         )
+        self.mock_repository.fields = ["id", "name", "sector", "vertical"]
 
         report_data = self.report_instance.get_by_year_report(
             self.company["id"], "user@test.com", 2020, False, False, sector=[]
@@ -212,13 +243,14 @@ class TestByYearReport(TestCase):
             {
                 "company_comparison_data": data,
                 "peers_comparison_data": [],
+                "averages": averages,
                 "rule_of_40": [],
             },
         )
 
     @patch(f"{service_path}.get_report_base_data")
     @patch(f"{service_path}.get_comparison_vs_data")
-    def test_get_by_year_report_when_user_does_not_have_access_should_return_anonymized_data(
+    def test_get_by_year_report_when_user_has_access_should_return_not_anonymized_data(
         self, mock_get_comparison_vs_data, mock_get_report_base_data
     ):
         data = self.company.copy()
@@ -233,6 +265,7 @@ class TestByYearReport(TestCase):
         self.mock_base_metrics_reports.get_peers_sorted.side_effect = lambda x: list(
             x.values()
         )
+        self.mock_repository.fields = ["id", "name", "sector", "vertical"]
 
         report_data = self.report_instance.get_by_year_report(
             self.company["id"], "user@test.com", 2020, False, True, sector=[]
@@ -243,6 +276,7 @@ class TestByYearReport(TestCase):
             {
                 "company_comparison_data": data,
                 "peers_comparison_data": [],
+                "averages": self.averages,
                 "rule_of_40": [],
             },
         )
