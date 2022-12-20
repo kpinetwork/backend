@@ -25,6 +25,25 @@ class TestCalculatorService(TestCase):
 
         self.assertEqual(valid, is_valid)
 
+    @parameterized.expand([["3.2x", 3.2], [14.3, 14.3]])
+    def test_get_valid_number(self, number, is_valid):
+
+        valid = self.calculator.get_valid_number(number)
+
+        self.assertEqual(valid, is_valid)
+
+    @parameterized.expand(
+        [
+            [[12, 34.2, 17.9, 4.3], 17],
+            [[12, 25, 35, 21], 23],
+        ]
+    )
+    def test_calculate_average(self, values, expected_average):
+
+        average = self.calculator.calculate_average(values)
+
+        self.assertEqual(average, expected_average)
+
     @parameterized.expand(
         [
             [None, 23, False, "NA"],

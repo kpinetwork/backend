@@ -1,6 +1,4 @@
-from functools import reduce
 from typing import Union
-import re
 
 from base_metrics_repository import BaseMetricsRepository
 from base_metrics_config_name import METRICS_CONFIG_NAME
@@ -103,34 +101,26 @@ class ByYearReportService:
 
         return data
 
-    def _get_valid_number(self, number: Union[float, str]) -> float:
-        if isinstance(number, str) and not number.isdigit():
-            return [float(x) for x in re.findall(r"-?\d+\.?\d*", number)][0]
-        return number
-
     def _get_company_information_fields(self):
         information_fiels = self.repository.fields
         information_fiels.extend(["size_cohort", "margin_group"])
         return information_fiels
 
-    def calculate_metric_average(self, values: list) -> float:
-        return round(reduce(lambda a, b: a + b, values) / len(values), 2)
-
-    def get_metric_average(
-        self, metric: str, metric_values: list, access: bool, ranges: list
-    ) -> Union[float, str]:
-        average = (
-            self.calculate_metric_average(metric_values)
+    def get_metric_average(self, metric_values: list) -> Union[float, str]:
+        return (
+            self.report.calculator.calculate_average(metric_values)
             if len(metric_values) > 0
             else "NA"
         )
-        if not access and metric in YEAR_REPORT_ANONYMIZABLE_METRICS:
-            average = self.profile_range.get_range_from_value(
-                average, profile=metric, ranges=ranges.get(metric, [])
-            )
-        return average
 
-    def get_metrics_averages(self, data: list, access: bool, ranges: list) -> dict:
+    def get_valid_metric_values(self, metric: str, data: list) -> list:
+        return [
+            self.report.calculator.get_valid_number(company.get(metric))
+            for company in data
+            if company.get(metric) and company.get(metric) != "NA"
+        ]
+
+    def get_metrics_averages(self, data: list) -> dict:
         averages = dict()
         all_fields = list(data)[0].keys()
         metrics = [
@@ -139,12 +129,8 @@ class ByYearReportService:
             if metric not in self._get_company_information_fields()
         ]
         for metric in metrics:
-            metric_values = [
-                self._get_valid_number(company.get(metric))
-                for company in data
-                if company.get(metric) and company.get(metric) != "NA"
-            ]
-            average = self.get_metric_average(metric, metric_values, access, ranges)
+            metric_values = self.get_valid_metric_values(metric, data)
+            average = self.get_metric_average(metric_values)
             averages.update({metric: average})
         return averages
 
@@ -170,7 +156,7 @@ class ByYearReportService:
             )
 
             data = self.report.filter_by_conditions(data, **conditions)
-            averages = self.get_metrics_averages(data.values(), access, profile_ranges)
+            averages = self.get_metrics_averages(data.values())
 
             if not access:
                 self.anonymized_companies_metrics(
