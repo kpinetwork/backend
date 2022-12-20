@@ -365,6 +365,23 @@ class ByMetricReport:
             and metric in METRICS_TO_ANONYMIZE.values()
         )
 
+    def get_averages(self, values: list, years: list) -> dict:
+        metrics = [metric.get("metrics") for metric in values]
+        averages = dict()
+        for year in years:
+            values_by_year = [
+                self.calculator.get_valid_number(metric.get(year))
+                for metric in metrics
+                if metric.get(year) and metric.get(year) != "NA"
+            ]
+            average = (
+                self.calculator.calculate_average(values_by_year)
+                if len(values_by_year) > 0
+                else "NA"
+            )
+            averages.update({year: average})
+        return averages
+
     def get_by_metric_peers(
         self,
         company_id: str,
@@ -380,6 +397,8 @@ class ByMetricReport:
             self.company_anonymization.set_company_permissions(username)
             years = self.repository.get_years()
             data = self.get_by_metric_records(metric, years, **conditions)
+            averages = self.get_averages(list(data.values()), years)
+
             if not access and self.need_to_be_anonymized(metric):
                 self.anonymize_companies_values(metric, data)
 
@@ -392,6 +411,7 @@ class ByMetricReport:
                 "years": years,
                 "company_comparison_data": company,
                 "peers_comparison_data": peers,
+                "averages": averages,
             }
         except Exception as error:
             self.logger.info(error)

@@ -1,5 +1,7 @@
 from decimal import Decimal
 from typing import Union
+from functools import reduce
+import re
 
 
 class CalculatorService:
@@ -12,8 +14,16 @@ class CalculatorService:
     def is_valid_number(self, number) -> bool:
         return number is not None and isinstance(number, (int, float, Decimal))
 
+    def get_valid_number(self, number: Union[float, str]) -> float:
+        if isinstance(number, str) and not number.isdigit():
+            return [float(x) for x in re.findall(r"-?\d+\.?\d*", number)][0]
+        return number
+
     def add_digit_to_value(self, digit: str, value: Union[float, str]) -> str:
         return f"{str(value)}{digit}"
+
+    def calculate_average(self, values: list) -> int:
+        return int(reduce(lambda a, b: a + b, values) / len(values))
 
     def calculate_growth_rate(
         self, value_recent_year: float, value_prior_year: float, rounded: bool = True

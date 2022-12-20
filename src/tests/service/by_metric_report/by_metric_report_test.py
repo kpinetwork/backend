@@ -579,6 +579,7 @@ class TestByMetricReport(TestCase):
                 "years": years,
                 "company_comparison_data": {},
                 "peers_comparison_data": [*data.values()],
+                "averages": {2020: 2, 2021: 0},
             },
         )
         mock_set_company_permissions.assert_called()
@@ -610,6 +611,7 @@ class TestByMetricReport(TestCase):
                 "years": years,
                 "company_comparison_data": data["1"],
                 "peers_comparison_data": [data["2"]],
+                "averages": {2020: 2, 2021: 0},
             },
         )
         mock_set_company_permissions.assert_called()
@@ -663,6 +665,7 @@ class TestByMetricReport(TestCase):
                 "years": years,
                 "company_comparison_data": anonymized_company,
                 "peers_comparison_data": [],
+                "averages": {2020: 1, 2021: "NA"},
             },
         )
         mock_set_company_permissions.assert_called()
