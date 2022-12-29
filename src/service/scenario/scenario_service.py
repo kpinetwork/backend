@@ -2,7 +2,7 @@ from uuid import uuid4
 from decimal import Decimal
 from datetime import datetime
 from base_exception import AppError
-from app_names import TableNames, ScenarioNames
+from app_names import TableNames, ScenarioNames, METRIC_PERIOD_NAMES
 
 
 class ScenarioService:
@@ -33,12 +33,19 @@ class ScenarioService:
             table=table, fields=",".join(names), values=",".join(values)
         )
 
-    def __insert_query_time_period(self, year: int, period_id: str) -> str:
+    def __insert_query_time_period(
+        self, year: int, period_id: str, period_name: str
+    ) -> str:
+        metric_period = {}
+        for metric in METRIC_PERIOD_NAMES:
+            if metric["period_name"] == period_name:
+                metric_period = metric
         return self.__get_insert_query(
             "time_period",
             id=period_id,
-            start_at=f"{year}-01-01",
-            end_at=f"{year}-12-31",
+            start_at=f"{year}-{metric_period['start_at']}",
+            end_at=f"{year}-{metric_period['end_at']}",
+            period_name=metric_period["period_name"],
         )
 
     def __insert_query_metric(
@@ -118,7 +125,7 @@ class ScenarioService:
             raise AppError("Company doesn't exist")
 
     def __verify_company_scenario(
-        self, company_id: str, scenario_name: str, metric: str
+        self, company_id: str, scenario_name: str, metric: str, period_name: str
     ) -> None:
         query = (
             self.query_builder.add_table_name(TableNames.SCENARIO)
@@ -138,11 +145,20 @@ class ScenarioService:
                     }
                 }
             )
+            .add_join_clause(
+                {
+                    f"{TableNames.PERIOD}": {
+                        "from": f"{TableNames.METRIC}.period_id",
+                        "to": f"{TableNames.PERIOD}.id",
+                    }
+                }
+            )
             .add_sql_where_equal_condition(
                 {
                     f"{TableNames.SCENARIO}.company_id": f"'{company_id}'",
                     f"{TableNames.SCENARIO}.name": f"'{scenario_name}'",
                     f"{TableNames.METRIC}.name": f"'{metric}'",
+                    f"{TableNames.PERIOD}.period_name": f"'{period_name}'",
                 }
             )
             .build()
@@ -169,13 +185,30 @@ class ScenarioService:
                 "The actual scenario year cannot be greater than the current year"
             )
 
+    def __verify_metric_period(self, period_name: str) -> None:
+        metric_period = {}
+        for metric in METRIC_PERIOD_NAMES:
+            if metric["period_name"] == period_name:
+                metric_period = metric
+        if metric_period == {}:
+            raise AppError("Invalid metric period")
+
     def __verify_company_data(
-        self, company_id: str, scenario: str, year: int, metric: str, value: float
+        self,
+        company_id: str,
+        scenario: str,
+        year: int,
+        period_name: str,
+        metric: str,
+        value: float,
     ) -> None:
         self.__verify_names(scenario, metric)
         self.__verify_numbers(year, value, scenario)
         self.__verify_company_id(company_id)
-        self.__verify_company_scenario(company_id, f"{scenario}-{year}", metric)
+        self.__verify_metric_period(period_name)
+        self.__verify_company_scenario(
+            company_id, f"{scenario}-{year}", metric, period_name
+        )
 
     def __get_query_for_new_scenario(
         self,
@@ -197,15 +230,23 @@ class ScenarioService:
         )
 
     def add_company_scenario(
-        self, company_id: str, scenario: str, year: int, metric: str, value: float
+        self,
+        company_id: str,
+        scenario: str,
+        year: int,
+        period_name: str,
+        metric: str,
+        value: float,
     ) -> dict:
         try:
-            self.__verify_company_data(company_id, scenario, year, metric, value)
+            self.__verify_company_data(
+                company_id, scenario, year, period_name, metric, value
+            )
             period_id = str(uuid4())
             metric_id = str(uuid4())
             scenario_id = str(uuid4())
 
-            period_query = self.__insert_query_time_period(year, period_id)
+            period_query = self.__insert_query_time_period(year, period_id, period_name)
             metric_query = self.__insert_query_metric(
                 metric_id, metric, value, period_id, company_id
             )
@@ -226,6 +267,7 @@ class ScenarioService:
                 "id": scenario_id,
                 "name": f"{scenario}-{year}",
                 "metric_id": metric_id,
+                "period_name": period_name,
             }
         except Exception as error:
             self.session.rollback()

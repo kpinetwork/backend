@@ -153,6 +153,7 @@ class CompanyDetails:
                 f"{TableNames.SCENARIO}.id as scenario_id",
                 f"{TableNames.SCENARIO}.type as scenario",
                 "extract(year from start_at)::int as year",
+                f"{TableNames.PERIOD}.period_name as period_name",
                 f"{TableNames.METRIC}.id as metric_id",
                 f"{TableNames.METRIC}.name as metric",
                 f"{TableNames.METRIC}.value",

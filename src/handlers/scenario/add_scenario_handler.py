@@ -26,7 +26,7 @@ def get_body(event: dict) -> dict:
 
 def get_arguments(event: dict) -> dict:
     body = get_body(event)
-    args = ["scenario", "year", "metric", "value"]
+    args = ["scenario", "year", "period_name", "metric", "value"]
     return {field: body[field] for field in body if field in args}
 
 
