@@ -207,7 +207,7 @@ class TestDynamicReport(TestCase):
     def test_get_year_report_when_user_has_access_should_return_unrestricted_data(
         self, mock_anonymize_data, mock_add_metrics
     ):
-        metrics = ["gross_profit", "id", "name"]
+        metrics = ["gross_profit"]
         data = {
             "1": {
                 "name": "Test Company",
@@ -216,6 +216,7 @@ class TestDynamicReport(TestCase):
                 "gross_profit": 34,
             }
         }
+        average = 34
         self.company_anonymization.companies = ["1"]
         self.user_service.get_user_company_permissions.return_value = [{"id": "1"}]
 
@@ -234,7 +235,7 @@ class TestDynamicReport(TestCase):
         self.assertEqual(
             peers,
             {
-                "headers": ["name", "gross_profit", "id", "name"],
+                "headers": ["name", "gross_profit"],
                 "company_comparison_data": {
                     "name": "Test Company",
                     "sector": "Something",
@@ -242,6 +243,7 @@ class TestDynamicReport(TestCase):
                     "gross_profit": 34,
                 },
                 "peers_comparison_data": [],
+                "averages": {"gross_profit": average},
             },
         )
 
@@ -250,7 +252,7 @@ class TestDynamicReport(TestCase):
     def test_get_year_report_when_user_has_not_access_should_return_anonymized_data(
         self, mock_anonymize_data, mock_add_metrics
     ):
-        metrics = ["gross_profit", "id", "name"]
+        metrics = ["gross_profit"]
         data = {
             "1": {
                 "name": "Test Company",
@@ -259,6 +261,7 @@ class TestDynamicReport(TestCase):
                 "gross_profit": size_range.get("label"),
             }
         }
+        average = 30
         self.company_anonymization.companies = ["1"]
         self.user_service.get_user_company_permissions.return_value = []
 
@@ -277,7 +280,7 @@ class TestDynamicReport(TestCase):
         self.assertEqual(
             peers,
             {
-                "headers": ["name", "gross_profit", "id", "name"],
+                "headers": ["name", "gross_profit"],
                 "company_comparison_data": {
                     "name": "Test Company",
                     "sector": "Something",
@@ -285,6 +288,7 @@ class TestDynamicReport(TestCase):
                     "gross_profit": size_range.get("label"),
                 },
                 "peers_comparison_data": [],
+                "averages": {"gross_profit": average},
             },
         )
 
@@ -292,6 +296,9 @@ class TestDynamicReport(TestCase):
         self.user_service.get_user_company_permissions.return_value = [{"id": "1"}]
         headers = ["name"]
         headers.extend(COMPARISON_METRICS)
+        averages = dict()
+        for metric in COMPARISON_METRICS:
+            averages.update({metric: "NA"})
 
         peers = self.report_instance.get_year_report(
             "1", "user@test.com", {}, False, True, []
@@ -303,6 +310,7 @@ class TestDynamicReport(TestCase):
                 "headers": headers,
                 "company_comparison_data": {},
                 "peers_comparison_data": [],
+                "averages": averages,
             },
         )
 
@@ -345,6 +353,7 @@ class TestDynamicReport(TestCase):
             "headers": [],
             "company_comparison_data": {},
             "peers_comparison_data": [],
+            "averages": {},
         }
 
         report = self.report_instance.get_dynamic_report(
