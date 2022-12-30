@@ -14,6 +14,7 @@ args = {
     "company_id": "123",
     "scenario": "Actuals",
     "year": 2020,
+    "period_name": "Q1",
     "metric": "Revenue",
     "value": 56.78,
 }
@@ -67,6 +68,10 @@ class TestScenarioService(TestCase):
                 get_dict_with_different_value("year", next_year),
                 f"{message} The actual scenario year cannot be greater than the current year",
             ],
+            [
+                get_dict_with_different_value("period_name", "Q5"),
+                f"{message} Invalid metric period",
+            ],
         ]
     )
     def test_add_scenario_with_invalid_values_should_fail(
@@ -89,7 +94,9 @@ class TestScenarioService(TestCase):
 
     def test_add_scenario_with_repeated_scenario_should_fail(self):
         self.get_metric_types_response(["Revenue", "Ebitda"])
-        self.mock_session.execute.return_value = DummyResponse({"name": "Actuals"})
+        self.mock_session.execute.return_value = DummyResponse(
+            {"name": "Actuals", "period_name": "Q1"}
+        )
 
         with self.assertRaises(Exception) as context:
             self.scenario_service_instance.add_company_scenario(**args)
@@ -98,7 +105,7 @@ class TestScenarioService(TestCase):
 
     @mock.patch.object(ScenarioService, "_ScenarioService__verify_company_data")
     def test_add_scenario_success_should_return_dict(self, mock_verify_company_data):
-        fields = ["id", "name", "metric_id"]
+        fields = ["id", "name", "metric_id", "period_name"]
         expected_name = f"{args['scenario']}-{args['year']}"
 
         scenario = self.scenario_service_instance.add_company_scenario(**args)

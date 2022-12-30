@@ -104,6 +104,22 @@ class DynamicReport:
             self.calendar_report.report.calculate_metrics(company_data, profiles)
             self.replace_base_input_values(company_data, headers)
 
+    def get_averages(self, values: list, metrics: list) -> dict:
+        averages = dict()
+        for metric in metrics:
+            values_by_metric = [
+                self.metric_report.calculator.get_valid_number(value.get(metric))
+                for value in values
+                if value.get(metric) and value.get(metric) != "NA"
+            ]
+            average = (
+                self.metric_report.calculator.calculate_average(values_by_metric)
+                if len(values_by_metric) > 0
+                else "NA"
+            )
+            averages.update({metric: average})
+        return averages
+
     def get_year_report(
         self,
         company_id: str,
@@ -124,9 +140,10 @@ class DynamicReport:
             self.calendar_report.report.set_company_permissions(username)
             profiles = self.calendar_report.report.get_profiles_ranges()
             self.add_metrics(data, headers, profiles)
+            data = self.calendar_report.report.filter_by_conditions(data, **conditions)
+            averages = self.get_averages(list(data.values()), metrics)
             if not access:
                 self.anonymize_data(metrics, data, profiles)
-            data = self.calendar_report.report.filter_by_conditions(data, **conditions)
 
             if not from_main and is_valid_company:
                 company = data.pop(company_id, dict())
@@ -137,6 +154,7 @@ class DynamicReport:
                 "headers": headers,
                 "company_comparison_data": company,
                 "peers_comparison_data": peers,
+                "averages": averages,
             }
         except Exception as error:
             self.logger.info(error)
@@ -183,6 +201,7 @@ class DynamicReport:
                 "headers": [],
                 "company_comparison_data": {},
                 "peers_comparison_data": [],
+                "averages": {},
             }
         except Exception as error:
             self.logger.info(error)

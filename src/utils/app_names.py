@@ -72,3 +72,11 @@ YEAR_REPORT_ANONYMIZABLE_METRICS = [
     "revenue_per_employee",
     "gross_profit",
 ]
+
+METRIC_PERIOD_NAMES = [
+    {"period_name": "Q1", "start_at": "01-01", "end_at": "03-31"},
+    {"period_name": "Q2", "start_at": "04-01", "end_at": "06-30"},
+    {"period_name": "Q3", "start_at": "07-01", "end_at": "09-30"},
+    {"period_name": "Q4", "start_at": "10-01", "end_at": "12-31"},
+    {"period_name": "Full-year", "start_at": "01-01", "end_at": "12-31"},
+]
