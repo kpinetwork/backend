@@ -1,4 +1,5 @@
 from typing import Union
+
 from base_exception import AppError
 from app_names import TableNames, ScenarioNames, METRIC_PERIOD_NAMES
 
