@@ -77,6 +77,7 @@ variable "lambdas_names" {
     "get_all_ranges_lambda_function": "get_all_ranges_lambda_function"
     "get_ranges_by_metric_lambda_function": "get_ranges_by_metric_lambda_function"
     "modify_ranges_lambda_function": "modify_ranges_lambda_function"
+    "get_full_year_total_lambda_function": "get_full_year_total_lambda_function"
   }
 }
 
