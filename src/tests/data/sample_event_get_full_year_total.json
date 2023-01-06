@@ -1,0 +1,15 @@
+{
+    "queryStringParameters": {
+        "year": 2020,
+        "scenario": "Actuals",
+        "metric": "Revenue"
+    },
+    "pathParameters": {
+        "id": "zec4b0212-m385-4828-814c-0e6b21d98f87"
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}

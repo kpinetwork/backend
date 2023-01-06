@@ -1,6 +1,6 @@
 from typing import Union
 from base_exception import AppError
-from app_names import TableNames, ScenarioNames
+from app_names import TableNames, ScenarioNames, METRIC_PERIOD_NAMES
 
 
 class CompanyDetails:
@@ -404,3 +404,91 @@ class CompanyDetails:
             self.session.rollback()
             self.logger.info(error)
             return False
+
+    def __get_period_metric_value_query(
+        self,
+        company_id: str,
+        scenario_name: str,
+        metric: str,
+        year: int,
+        period_name: str,
+    ) -> str:
+        return (
+            self.query_builder.add_table_name(TableNames.SCENARIO)
+            .add_select_conditions(
+                [
+                    f"{TableNames.METRIC}.value",
+                ]
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.SCENARIO_METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                        "to": f"{TableNames.SCENARIO}.id",
+                    }
+                }
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                        "to": f"{TableNames.METRIC}.id",
+                    }
+                }
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.PERIOD}": {
+                        "from": f"{TableNames.METRIC}.period_id",
+                        "to": f"{TableNames.PERIOD}.id",
+                    }
+                }
+            )
+            .add_sql_where_equal_condition(
+                {
+                    f"{TableNames.SCENARIO}.company_id": f"'{company_id}'",
+                    f"{TableNames.SCENARIO}.name": f"'{scenario_name}-{year}'",
+                    f"{TableNames.METRIC}.name": f"'{metric}'",
+                    f"{TableNames.PERIOD}.period_name": f"'{period_name}'",
+                }
+            )
+            .build()
+            .get_query()
+        )
+
+    def get_values_from_list(self, values: list):
+        return [float(value) for value in values if value is not None]
+
+    def get_period_metric_values(
+        self, company_id: str, scenario_name: str, metric: str, year: int
+    ) -> list:
+        period_metrics_values = []
+        for period in METRIC_PERIOD_NAMES:
+            period_name = period.get("period_name")
+            if period_name != "Full-year":
+                query = self.__get_period_metric_value_query(
+                    company_id, scenario_name, metric, year, period_name
+                )
+                period_metric_value = self.session.execute(query).scalar()
+                period_metrics_values.append(period_metric_value)
+        return self.get_values_from_list(period_metrics_values)
+
+    def get_period_metric_values_total(self, values: list) -> dict:
+        if len(values) < 4:
+            return {"total": 0}
+        total = 0
+        for value in values:
+            total += value
+        return {"total": total}
+
+    def get_full_year_total_amount(
+        self, company_id: str, scenario_name: str, metric: str, year: int
+    ) -> bool:
+        try:
+            values = self.get_period_metric_values(
+                company_id, scenario_name, metric, year
+            )
+            return self.get_period_metric_values_total(values)
+        except Exception as error:
+            self.logger.error(error)
+            raise error

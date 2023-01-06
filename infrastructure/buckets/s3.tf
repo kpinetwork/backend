@@ -324,3 +324,9 @@ resource "aws_s3_bucket_object" "modify_ranges_function_object" {
   source = "${path.module}/../../dist/modify_ranges_handler.zip"
   etag = filemd5("${path.module}/../../dist/modify_ranges_handler.zip")
 }
+resource "aws_s3_bucket_object" "get_full_year_total_function_object" {
+  bucket = var.bucket_name
+  key = "${var.lambda_resource_name}/${var.environment}/get_full_year_total_handler.zip"
+  source = "${path.module}/../../dist/get_full_year_total_handler.zip"
+  etag = filemd5("${path.module}/../../dist/get_full_year_total_handler.zip")
+}

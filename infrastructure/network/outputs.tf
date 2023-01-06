@@ -205,6 +205,11 @@ output "api_gateway_references" {
       http_method: aws_api_gateway_method.modify_ranges_method.http_method,
       api_id: aws_api_gateway_rest_api.api.id
     }
+    "apigw_get_full_year_total_lambda_function": {
+      resource_path: aws_api_gateway_resource.full_year.path,
+      http_method: aws_api_gateway_method.get_full_year_total_method.http_method,
+      api_id: aws_api_gateway_rest_api.api.id
+    }
   }
 }
 

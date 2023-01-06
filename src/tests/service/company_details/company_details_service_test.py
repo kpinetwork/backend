@@ -345,3 +345,63 @@ class TestCompanyDetailsService(TestCase):
 
         self.assertTrue(deleted)
         mock_verify_company_exist.assert_called()
+
+    def test_get_values_from_list_when_is_called_return_the_new_list(self):
+        values = [20.0, None, 10.0]
+
+        response = self.details_service_instance.get_values_from_list(values)
+
+        self.assertEqual(response, [20.0, 10.0])
+
+    @mock.patch(f"{company_service_class}.get_values_from_list")
+    def test_get_period_metric_values_when_is_called_should_return_the_list_of_values(
+        self, mock_get_values_from_list
+    ):
+        values = [20.0, 10.0, 10.0, 25.0]
+        mock_get_values_from_list.return_value = values
+
+        response = self.details_service_instance.get_period_metric_values(
+            "zec4b0212-m385-4828-814c-0e6b21d98f87", "Actuals", "Revenue", 2021
+        )
+
+        self.assertEqual(response, values)
+
+    @mock.patch(f"{company_service_class}.get_period_metric_values")
+    def test_get_full_year_total_when_metric_has_all_quarters_should_return_the_result(
+        self, mock_get_period_metric_values
+    ):
+        mock_get_period_metric_values.return_value = [20.0, 10.0, 30.0, 10.0]
+
+        full_year_total_response = (
+            self.details_service_instance.get_full_year_total_amount(
+                "zec4b0212-m385-4828-814c-0e6b21d98f87", "Actuals", "Revenue", 2021
+            )
+        )
+
+        self.assertEqual(full_year_total_response, {"total": 70.0})
+        mock_get_period_metric_values.assert_called()
+
+    @mock.patch(f"{company_service_class}.get_period_metric_values")
+    def test_get_full_year_total_when_metric_does_not_has_all_quarters_should_return_zero(
+        self, mock_get_period_metric_values
+    ):
+        mock_get_period_metric_values.return_value = [20.0, 10.0, 30.0]
+
+        full_year_total_response = (
+            self.details_service_instance.get_full_year_total_amount(
+                "zec4b0212-m385-4828-814c-0e6b21d98f87", "Actuals", "Revenue", 2021
+            )
+        )
+
+        self.assertEqual(full_year_total_response, {"total": 0})
+        mock_get_period_metric_values.assert_called()
+
+    def test_get_full_year_total_when_call_fails_should_raise_an_exception(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.details_service_instance.get_full_year_total_amount(
+                "zec4b0212-m385-4828-814c-0e6b21d98f87", "Actuals", "Revenue", 2021
+            )
+
+        self.assertEqual(str(context.exception), "error")
