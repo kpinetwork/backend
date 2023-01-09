@@ -23,11 +23,20 @@ logger.setLevel(logging.WARNING)
 glueContext = GlueContext(SparkContext.getOrCreate())
 spark = SparkSession.builder.getOrCreate()
 
+periods = {
+    "Q1": {"start_at": "01-01", "end_at": "03-31"},
+    "Q2": {"start_at": "04-01", "end_at": "06-30"},
+    "Q3": {"start_at": "07-01", "end_at": "09-30"},
+    "Q4": {"start_at": "10-01", "end_at": "12-31"},
+    "Full-year": {"start_at": "01-01", "end_at": "12-31"},
+}
+
 time_period_schema = StructType(
     [
         StructField("id", StringType(), False),
         StructField("start_at", StringType(), False),
         StructField("end_at", StringType(), False),
+        StructField("period_name", StringType(), False),
     ]
 )
 
@@ -234,6 +243,12 @@ def get_row_value(row, column):
     return None
 
 
+def get_row_value_with_default(row, column):
+    if column in row:
+        return row[column]
+    return ""
+
+
 def is_valid_value(value):
     return value is not None and value.strip()
 
@@ -269,8 +284,8 @@ def get_company_description(row, env):
     else:
         company_id = str(uuid.uuid4())
     name = get_row_value(row, "Name")
-    sector = get_row_value(row, "Sector")
-    vertical = get_row_value(row, "Vertical")
+    sector = get_row_value_with_default(row, "Sector")
+    vertical = get_row_value_with_default(row, "Vertical")
     inves_profile = get_row_value(row, "Investor profile")
 
     return [
@@ -283,8 +298,8 @@ def get_company_description(row, env):
     ]
 
 
-def get_time_period(start, end):
-    return [str(uuid.uuid4()), start, end]
+def get_time_period(start, end, period_name):
+    return [str(uuid.uuid4()), start, end, period_name]
 
 
 def get_scenario(name, scenario_type, period, company):
@@ -307,16 +322,17 @@ def get_existing_metric(row, name, value, company):
     ]
 
 
-def get_time_period_str(year):
-    start = "{}-01-01".format(year)
-    end = "{}-12-31".format(year)
+def get_time_period_str(year, period_name):
+    period_range = periods.get(period_name)
+    start = "{}-{}".format(year, period_range.get("start_at"))
+    end = "{}-{}".format(year, period_range.get("end_at"))
     return (start, end)
 
 
-def get_scenario_data(year, scenario_type, company, scenarios, periods):
+def get_scenario_data(year, scenario_type, company, scenarios, periods, period_name):
 
     scenario_name = "{}-{}".format(scenario_type, year)
-    start_time, end_time = get_time_period_str(year)
+    start_time, end_time = get_time_period_str(year, period_name)
     time_period = []
     scenario = []
 
@@ -329,7 +345,7 @@ def get_scenario_data(year, scenario_type, company, scenarios, periods):
         time_period.append(scenario[4])
 
     else:
-        time_period = get_time_period(start_time, end_time)
+        time_period = get_time_period(start_time, end_time, period_name)
         periods.append(time_period)
 
         scenario = get_scenario(
@@ -356,21 +372,31 @@ def get_updating_metric_data(row, metric_name, company_id, value):
 
 
 def get_financial_data(
-    row, metric_limits, scenarios_index, header, years_row, metric_row, company, env
+    row,
+    year_limits,
+    scenarios_index,
+    metrics_index,
+    header,
+    years_row,
+    periods_row,
+    metric_row,
+    company,
+    env,
 ):
 
     periods, scenarios, metrics, scenario_metrics, currencies = [], [], [], [], []
     scenario_type = ""
+    for year_limit in year_limits:
+        start_year, end_year = year_limit
+        year = get_name(years_row, start_year)
+        if start_year in scenarios_index:
+            scenario_type = get_name(header, start_year)
+        if start_year in metrics_index:
+            metric_name = get_name(metric_row, start_year)
 
-    for limits in metric_limits:
-        start, end = limits
-        metric_name = get_name(metric_row, start)
-        if start in scenarios_index:
-            scenario_type = get_name(header, start)
-
-        for index in range(start, end):
+        for index in range(start_year, end_year):
             metric_value = row[index]
-            year = years_row[index]
+            period_name = periods_row[index]
             value = get_metric_value(metric_value)
 
             if is_valid_value(metric_value) and value is not None:
@@ -381,7 +407,7 @@ def get_financial_data(
 
                 if metric_exists is None:
                     time_period, scenario = get_scenario_data(
-                        year, scenario_type, company, scenarios, periods
+                        year, scenario_type, company, scenarios, periods, period_name
                     )
 
                     metric, currency, scenario_metric = get_metric_data(
@@ -400,7 +426,15 @@ def get_financial_data(
 
 
 def get_company_financial_data(
-    row, metric_limits, scenarios_index, header, years_row, metric_row, env
+    row,
+    year_limits,
+    scenarios_index,
+    metrics_index,
+    header,
+    years_row,
+    periods_row,
+    metric_row,
+    env,
 ):
 
     companies = []
@@ -409,7 +443,16 @@ def get_company_financial_data(
     companies.append(company)
 
     periods, scenarios, metrics, scenario_metrics, currencies = get_financial_data(
-        row, metric_limits, scenarios_index, header, years_row, metric_row, company, env
+        row,
+        year_limits,
+        scenarios_index,
+        metrics_index,
+        header,
+        years_row,
+        periods_row,
+        metric_row,
+        company,
+        env,
     )
 
     return (companies, periods, scenarios, metrics, scenario_metrics, currencies)
@@ -424,10 +467,11 @@ def get_schemas_data_from_dataframe(headers, data, env):
     data_scenario_metrics = []
 
     metric_row = data[0]
-    metric_limits = get_limits(get_index_limits(metric_row), len(headers))
+    year_row = data[1]
+    year_limits = get_limits(get_index_limits(year_row), len(headers))
     scenarios_index = get_index_limits(headers)
-
-    for index in range(2, len(data)):
+    metrics_index = get_index_limits(metric_row)
+    for index in range(3, len(data)):
         if not is_valid_value(data[index][0]):
             (
                 _companies,
@@ -438,10 +482,12 @@ def get_schemas_data_from_dataframe(headers, data, env):
                 _currencies,
             ) = get_company_financial_data(
                 data[index],
-                metric_limits,
+                year_limits,
                 scenarios_index,
+                metrics_index,
                 headers,
                 data[1],
+                data[2],
                 metric_row,
                 env,
             )
@@ -471,10 +517,12 @@ def get_existing_schemas_data_from_dataframe(headers, data, env):
     data_scenario_metrics = []
 
     metric_row = data[0]
-    metric_limits = get_limits(get_index_limits(metric_row), len(headers))
+    year_row = data[1]
+    year_limits = get_limits(get_index_limits(year_row), len(headers))
+    metrics_index = get_index_limits(metric_row)
     scenarios_index = get_index_limits(headers)
 
-    for index in range(2, len(data)):
+    for index in range(3, len(data)):
         ids = existing_ids_from_database(env, "company")
         if is_valid_value(data[index][0]) and data[index][0] in ids:
             (
@@ -486,10 +534,12 @@ def get_existing_schemas_data_from_dataframe(headers, data, env):
                 _currencies,
             ) = get_company_financial_data(
                 data[index],
-                metric_limits,
+                year_limits,
                 scenarios_index,
+                metrics_index,
                 headers,
-                data[1],
+                year_row,
+                data[2],
                 metric_row,
                 env,
             )
