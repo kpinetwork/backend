@@ -35,7 +35,7 @@ def handler(event, _):
         if not access:
             raise AppError("No permissions to get the total")
 
-        company_id = event.get("pathParameters").get("id")
+        company_id = event.get("pathParameters").get("company_id")
         company_service = get_company_details_service()
         params = event.get("queryStringParameters")
         if params:
