@@ -336,22 +336,11 @@ def get_scenario_data(year, scenario_type, company, scenarios, periods, period_n
     time_period = []
     scenario = []
 
-    scenario_created = list(
-        filter(lambda scenario: scenario[1] == scenario_name, scenarios)
-    )
+    time_period = get_time_period(start_time, end_time, period_name)
+    periods.append(time_period)
 
-    if len(scenario_created) > 0:
-        scenario = scenario_created[0]
-        time_period.append(scenario[4])
-
-    else:
-        time_period = get_time_period(start_time, end_time, period_name)
-        periods.append(time_period)
-
-        scenario = get_scenario(
-            scenario_name, scenario_type, time_period[0], company[0]
-        )
-        scenarios.append(scenario)
+    scenario = get_scenario(scenario_name, scenario_type, time_period[0], company[0])
+    scenarios.append(scenario)
 
     return (time_period, scenario)
 
