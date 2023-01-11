@@ -136,7 +136,7 @@ def create_temp_table(dynamic_frame, table_name):
     return dynamic_frame.toDF().createOrReplaceTempView(table_name)
 
 
-def existing_metric_from_file(env, company_id, scenario_name, metric_name):
+def existing_metric_from_file(env, company_id, scenario_name, metric_name, period_name):
     resultant_metric_id = None
     database = "kpinetworkdb"
     if env == "demo":
@@ -148,9 +148,16 @@ def existing_metric_from_file(env, company_id, scenario_name, metric_name):
     dynamic_scenario_frame = create_temp_table(
         dynamic_scenario_frame, "financial_scenario_table"
     )
+    dynamic_t_frame = read_table_from_database(env, database, "time_period")
+    dynamic_t_frame = create_temp_table(dynamic_t_frame, "time_period_table")
     scenario_dataframe = spark.sql(
-        "SELECT id FROM financial_scenario_table WHERE company_id = '{}' AND name = '{}'".format(
-            company_id, scenario_name
+        """
+        SELECT financial_scenario_table.id FROM financial_scenario_table
+        JOIN time_period_table ON time_period_table.id = financial_scenario_table.period_id
+        WHERE financial_scenario_table.company_id = '{}' AND financial_scenario_table.name = '{}'
+        AND time_period_table.period_name = '{}'
+        """.format(
+            company_id, scenario_name, period_name
         )
     )
     result_scenario_dataframe = scenario_dataframe.collect()
@@ -179,8 +186,13 @@ def existing_metric_from_file(env, company_id, scenario_name, metric_name):
         dynamic_m_frame = read_table_from_database(env, database, "metric")
         dynamic_m_frame = create_temp_table(dynamic_m_frame, "metric_table")
         metrics_dataframe = spark.sql(
-            "SELECT * FROM metric_table WHERE id = '{}' AND name = '{}'".format(
-                metric_id, metric_name
+            """
+            SELECT * FROM metric_table
+            JOIN time_period_table ON time_period_table.id = metric_table.period_id
+            WHERE metric_table.id = '{}' AND metric_table.name = '{}'
+            AND time_period_table.period_name = '{}'
+            """.format(
+                metric_id, metric_name, period_name
             )
         )
         result_metrics_dataframe = metrics_dataframe.collect()
@@ -391,7 +403,7 @@ def get_financial_data(
             if is_valid_value(metric_value) and value is not None:
                 metric_and_year = scenario_type + "-" + year
                 metric_exists = existing_metric_from_file(
-                    env, company[0], metric_and_year, metric_name
+                    env, company[0], metric_and_year, metric_name, period_name
                 )
 
                 if metric_exists is None:
