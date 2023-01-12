@@ -206,6 +206,7 @@ class CompanyDetails:
                         "year",
                         f"{TableNames.METRIC_SORT}.group_sort_value",
                         f"{TableNames.METRIC_SORT}.sort_value",
+                        f"{TableNames.PERIOD}.period_name",
                     ],
                     self.query_builder.Order.ASC,
                 )

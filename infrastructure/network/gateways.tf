@@ -227,6 +227,11 @@ resource "aws_api_gateway_resource" "full_year" {
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
+resource "aws_api_gateway_resource" "full_year_by_company" {
+  path_part   = "{company_id}"
+  parent_id   = aws_api_gateway_resource.full_year.id
+  rest_api_id = aws_api_gateway_rest_api.api.id
+}
 
 # ----------------------------------------------------------------------------------------------------------------------
 # API GATEWAY METHOD
@@ -628,10 +633,15 @@ resource "aws_api_gateway_method" "modify_ranges_method" {
 }
 resource "aws_api_gateway_method" "get_full_year_total_method" {
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.full_year.id
+  resource_id   = aws_api_gateway_resource.full_year_by_company.id
   http_method   = "GET"
   authorization = "CUSTOM"
   authorizer_id = aws_api_gateway_authorizer.kpi_authorizer.id
+  request_parameters = {
+    "method.request.querystring.scenario" = false
+    "method.request.querystring.metric" = false
+    "method.request.querystring.year" = false
+  }
 }
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -960,7 +970,7 @@ resource "aws_api_gateway_integration" "modify_ranges_integration" {
 }
 resource "aws_api_gateway_integration" "get_full_year_total_integration" {
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.full_year.id
+  resource_id             = aws_api_gateway_resource.full_year_by_company.id
   http_method             = aws_api_gateway_method.get_full_year_total_method.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
