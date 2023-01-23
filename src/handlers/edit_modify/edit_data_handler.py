@@ -5,6 +5,7 @@ from response_sql import ResponseSQL
 from edit_service import EditModifyService
 from scenario_service import ScenarioService
 from metric_type_service import MetricTypesService
+from edit_modify_repository import EditModifyRepository
 from base_exception import AppError, AuthError
 from connection import create_db_engine, create_db_session
 from verify_user_permissions import verify_user_access, get_user_id_from_event
@@ -32,9 +33,10 @@ def get_service():
     scenario_service = ScenarioService(
         session, QuerySQLBuilder(), metric_service, logger
     )
-    return EditModifyService(
-        session, QuerySQLBuilder(), scenario_service, object(), object(), logger
+    edit_modify_repository = EditModifyRepository(
+        session, QuerySQLBuilder(), ResponseSQL(), metric_service, logger
     )
+    return EditModifyService(edit_modify_repository, scenario_service, object(), logger)
 
 
 def handler(event, _):

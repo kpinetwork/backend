@@ -449,6 +449,7 @@ functions:
     include:
     - ./src/handlers/edit_modify/edit_data_handler.py
     - ./src/service/edit_modify/edit_service.py
+    - ./src/service/edit_modify/edit_modify_repository.py
     - ./src/service/scenario/scenario_service.py
     - ./src/service/metric/metric_type_service.py
     - ./src/utils/verify_user_permissions.py
@@ -465,6 +466,7 @@ functions:
     include:
     - ./src/handlers/edit_modify/get_edit_modify_data_handler.py
     - ./src/service/edit_modify/edit_service.py
+    - ./src/service/edit_modify/edit_modify_repository.py
     - ./src/service/scenario/scenario_service.py
     - ./src/service/metric/metric_type_service.py
     - ./src/utils/verify_user_permissions.py
