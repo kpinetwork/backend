@@ -52,9 +52,6 @@ class MetricReportRepository:
             self.logger.info(error)
             return []
 
-    def __get_sql_value_names(self, values: list) -> list:
-        return [f"'{value}'" for value in values]
-
     def __get_case_of_time_periods(self) -> str:
         return """
         CASE

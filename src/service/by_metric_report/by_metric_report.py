@@ -109,7 +109,7 @@ class ByMetricReport:
         ):
             return True
 
-    def __get_procceced_standard_metrics(self, records: list) -> list:
+    def __get_processed_standard_metrics(self, records: list) -> list:
         data = []
         for record in records:
             company_id = record["id"]
@@ -128,7 +128,7 @@ class ByMetricReport:
     def process_standard_metrics(self, records: list, rounded: bool = True) -> dict:
         data = defaultdict(dict)
 
-        items = self.__get_procceced_standard_metrics(records)
+        items = self.__get_processed_standard_metrics(records)
         for item in items:
             company_id = item["id"]
             value = self.calculate_base_metric(item["total"], rounded)
