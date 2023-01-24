@@ -14,6 +14,7 @@ class MetricReportRepository:
         self.response_sql = response_sql
         self.logger = logger
         self.scenario_table_label = "scenario"
+        self.id_general_table_label = "first_full_year.id"
 
     def add_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -110,7 +111,7 @@ class MetricReportRepository:
             )
             .add_sql_where_equal_condition(
                 {
-                    f"{TableNames.SCENARIO}.company_id": "first_full_year.id",
+                    f"{TableNames.SCENARIO}.company_id": f"{self.id_general_table_label}",
                     f"{TableNames.SCENARIO}.name": f"concat('{scenario}-', {substring})",
                     f"{TableNames.METRIC}.name": f"'{metric}'",
                 }
@@ -325,7 +326,7 @@ class MetricReportRepository:
         return query
 
     def __get_calculated_metric_subquery(
-        self, metric: str, scenario: str, where_conditions: dict
+        self, scenario: str, where_conditions: dict
     ) -> str:
         from_count = len(scenario) + 2
         query = (
@@ -395,11 +396,10 @@ class MetricReportRepository:
         select_value_condition: list,
         metric: str,
         scenario: str,
-        from_count: int = 9,
     ) -> list:
         try:
             columns = [
-                "first_full_year.id",
+                f"{self.id_general_table_label}",
                 "first_full_year.name",
                 "first_full_year.year as year",
                 "first_full_year.period",
@@ -407,9 +407,7 @@ class MetricReportRepository:
             ]
             select_options = columns.copy()
             select_options.extend(select_value_condition)
-            table = self.__get_calculated_metric_subquery(
-                metric, scenario, where_conditions
-            )
+            table = self.__get_calculated_metric_subquery(scenario, where_conditions)
             query = (
                 self.query_builder.add_table_name(
                     f"( {self.__add_period_name_where_condition(table)} ) as first_full_year"
@@ -420,7 +418,7 @@ class MetricReportRepository:
                 )
                 .add_sql_group_by_condition(
                     [
-                        "first_full_year.id",
+                        f"{self.id_general_table_label}",
                         "first_full_year.name",
                         "first_full_year.year",
                         "first_full_year.period",
@@ -477,7 +475,6 @@ class MetricReportRepository:
                 select_value,
                 "Revenue",
                 scenario,
-                from_count=int(len(scenario) + 2),
             )
         except Exception as error:
             self.logger.info(error)
