@@ -103,14 +103,37 @@ class ByMetricReport:
         metric_value = self.calculator.calculate_base_metric(value)
         return metric_value if rounded else value
 
+    def __is_valid_metric_record(self, data: dict) -> bool:
+        if (data["period"] == "Full-year" and data["count_periods"] == 1) or (
+            data["period"] == "Quarters" and data["count_periods"] == 4
+        ):
+            return True
+
+    def __get_procceced_standard_metrics(self, records: list) -> list:
+        data = []
+        for record in records:
+            company_id = record["id"]
+            is_valid = self.__is_valid_metric_record(record)
+            existing_record = any(
+                item
+                for item in data
+                if item["id"] == company_id
+                and item["year"] == record["year"]
+                and item["period"] == "Full-year"
+            )
+            if not existing_record and is_valid:
+                data.append(record)
+        return data
+
     def process_standard_metrics(self, records: list, rounded: bool = True) -> dict:
         data = defaultdict(dict)
 
-        for record in records:
-            company_id = record["id"]
-            value = self.calculate_base_metric(record["value"], rounded)
-            year_data = {record["year"]: value}
-            company = {"id": record["id"], "name": record["name"], "metrics": year_data}
+        items = self.__get_procceced_standard_metrics(records)
+        for item in items:
+            company_id = item["id"]
+            value = self.calculate_base_metric(item["total"], rounded)
+            year_data = {item["year"]: value}
+            company = {"id": item["id"], "name": item["name"], "metrics": year_data}
             if data.get(company_id):
                 data[company_id]["metrics"].update(year_data)
             else:
