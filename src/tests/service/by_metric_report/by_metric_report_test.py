@@ -26,9 +26,30 @@ class TestByMetricReport(TestCase):
             self.company_anonymization,
         )
         self.records = [
-            {"id": "1", "name": "Test", "year": 2019, "value": 3},
-            {"id": "1", "name": "Test", "year": 2020, "value": 4},
-            {"id": "2", "name": "Company", "year": 2019, "value": 6},
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": 3,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2020,
+                "total": 4,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
+            {
+                "id": "2",
+                "name": "Company",
+                "year": 2019,
+                "total": 6,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
         ]
         self.sizes = [
             {"label": ">$20 million", "min_value": None, "max_value": 20},
@@ -95,159 +116,217 @@ class TestByMetricReport(TestCase):
 
         self.assertEqual(rule_of_40, expected_metrics)
 
-    # def test_process_standard_metrics_with_metric_records_should_build_dict_structure(
-    #     self,
-    # ):
-    #     expected_data = {
-    #         "1": {"id": "1", "name": "Test", "metrics": {2019: 3, 2020: 4}},
-    #         "2": {"id": "2", "name": "Company", "metrics": {2019: 6}},
-    #     }
+    def test_process_standard_metrics_with_metric_records_should_build_dict_structure(
+        self,
+    ):
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: 3, 2020: 4},
+            },
+            "2": {"id": "2", "name": "Company", "metrics": {2019: 6}},
+        }
 
-    #     data = self.report_instance.process_standard_metrics(self.records)
+        data = self.report_instance.process_standard_metrics(self.records)
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_process_growth_with_metric_records_should_build_dict_structure(self):
-    #     expected_growth = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_process_growth_with_metric_records_should_build_dict_structure(self):
+        expected_growth = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.process_growth_metrics(
-    #         "growth", self.records, [2019, 2020, 2021]
-    #     )
+        data = self.report_instance.process_growth_metrics(
+            "growth", self.records, [2019, 2020, 2021]
+        )
 
-    #     self.assertEqual(data, expected_growth)
+        self.assertEqual(data, expected_growth)
 
-    # def test_process_ratio_metrics_with_valid_metric_return_value_with_specific_decimals(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_growth = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "3.00x", 2020: "4.00x"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "6.00x"},
-    #         },
-    #     }
+    def test_process_ratio_metrics_with_valid_metric_return_value_with_specific_decimals(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_growth = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "3.00x", 2020: "4.00x"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "6.00x"},
+            },
+        }
 
-    #     data = self.report_instance.process_ratio_metrics(
-    #         "cac_ratio", [2019, 2020, 2021]
-    #     )
+        data = self.report_instance.process_ratio_metrics(
+            "cac_ratio", [2019, 2020, 2021]
+        )
 
-    #     self.assertEqual(data, expected_growth)
+        self.assertEqual(data, expected_growth)
 
-    # def test_process_ratio_metrics_when_metric_value_is_none_return_na_values(self):
-    #     records = self.records.copy()
-    #     records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
-    #     self.mock_repository.get_metric_records.return_value = records
-    #     expected_growth = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA"},
-    #         }
-    #     }
+    def test_process_ratio_metrics_when_metric_value_is_none_return_na_values(self):
+        records = self.records.copy()
+        records = [
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": None,
+                "period": "Full-year",
+                "count_periods": 1,
+            }
+        ]
+        self.mock_repository.get_metric_records.return_value = records
+        expected_growth = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA"},
+            }
+        }
 
-    #     data = self.report_instance.process_ratio_metrics(
-    #         "cac_ratio", [2019, 2020, 2021]
-    #     )
+        data = self.report_instance.process_ratio_metrics(
+            "cac_ratio", [2019, 2020, 2021]
+        )
 
-    #     self.assertEqual(data, expected_growth)
+        self.assertEqual(data, expected_growth)
 
-    # def test_process_retention_when_metric_is_gross_retention_return_metrics_dict(self):
-    #     expected_growth = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: -167},
-    #         }
-    #     }
+    def test_process_retention_when_metric_is_gross_retention_return_metrics_dict(self):
+        expected_growth = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: "NA", 2021: -167},
+            }
+        }
 
-    #     data = self.report_instance.process_retention(
-    #         "gross_retention",
-    #         [{"id": "1", "name": "Test", "year": 2020, "value": 3}],
-    #         [{"id": "1", "name": "Test", "year": 2021, "value": 8}],
-    #         [2019, 2020, 2021],
-    #         {},
-    #     )
+        data = self.report_instance.process_retention(
+            "gross_retention",
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2020,
+                    "total": 3,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2021,
+                    "total": 8,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [2019, 2020, 2021],
+            {},
+        )
 
-    #     self.assertEqual(data, expected_growth)
-    #     self.mock_repository.get_metric_records.assert_not_called()
+        self.assertEqual(data, expected_growth)
+        self.mock_repository.get_metric_records.assert_not_called()
 
-    # def test_process_retention_when_metric_is_net_retention_call_get_metric_records(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_growth = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
-    #         }
-    #     }
+    def test_process_retention_when_metric_is_net_retention_call_get_metric_records(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_growth = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
+            }
+        }
 
-    #     data = self.report_instance.process_retention(
-    #         "net_retention",
-    #         [{"id": "1", "name": "Test", "year": 2019, "value": 3}],
-    #         [{"id": "1", "name": "Test", "year": 2020, "value": 8}],
-    #         [2019, 2020, 2021],
-    #         {},
-    #     )
+        data = self.report_instance.process_retention(
+            "net_retention",
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2019,
+                    "total": 3,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2020,
+                    "total": 8,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [2019, 2020, 2021],
+            {},
+        )
 
-    #     self.assertEqual(data, expected_growth)
-    #     self.mock_repository.get_metric_records.assert_called()
+        self.assertEqual(data, expected_growth)
+        self.mock_repository.get_metric_records.assert_called()
 
-    # def test_process_debt_ebitda_with_no_mepty_data_return_metrics_dict(self):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_debt_ebitda = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: 3.0, 2020: 4.0},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: 6.0},
-    #         },
-    #     }
+    def test_process_debt_ebitda_with_no_mepty_data_return_metrics_dict(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_debt_ebitda = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: 3.0, 2020: 4.0},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: 6.0},
+            },
+        }
 
-    #     data = self.report_instance.process_debt_ebitda(
-    #         "debt_ebitda", [2019, 2020, 2021]
-    #     )
-    #     self.assertEqual(data, expected_debt_ebitda)
+        data = self.report_instance.process_debt_ebitda(
+            "debt_ebitda", [2019, 2020, 2021]
+        )
+        self.assertEqual(data, expected_debt_ebitda)
 
-    # def test_process_debt_ebitda_without_metric_value_return_NA(self):
-    #     records = self.records.copy()
-    #     records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
-    #     self.mock_repository.get_metric_records.return_value = records
-    #     expected_debt_ebitda = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA"},
-    #         }
-    #     }
+    def test_process_debt_ebitda_without_metric_value_return_NA(self):
+        records = self.records.copy()
+        records = [
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": None,
+                "period": "Full-year",
+                "count_periods": 1,
+            }
+        ]
+        self.mock_repository.get_metric_records.return_value = records
+        expected_debt_ebitda = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA"},
+            }
+        }
 
-    #     data = self.report_instance.process_debt_ebitda(
-    #         "debt_ebitda", [2019, 2020, 2021]
-    #     )
+        data = self.report_instance.process_debt_ebitda(
+            "debt_ebitda", [2019, 2020, 2021]
+        )
 
-    #     self.assertEqual(data, expected_debt_ebitda)
+        self.assertEqual(data, expected_debt_ebitda)
 
     def test_process_rule_of_40_with_data_return_companies_metrics_dict(self):
         expected_data = {
@@ -289,185 +368,184 @@ class TestByMetricReport(TestCase):
 
         self.assertEqual(profiles, expected_profile)
 
-    # def test_get_retention_records_should_return_companies_metrics_dict(self):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_retention_records_should_return_companies_metrics_dict(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_retention_records(
-    #         "gross_retention", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_retention_records(
+            "gross_retention", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_no_standard_records_with_growth_should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_no_standard_records_with_growth_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_no_standard_records(
-    #         "growth", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_no_standard_records(
+            "growth", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_no_standard_records_with_retention_should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_no_standard_records_with_retention_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: -33, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_no_standard_records(
-    #         "gross_retention", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_no_standard_records(
+            "gross_retention", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_no_standard_records_with_new_bookings_growth
-    # _should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: 133, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_no_standard_records_with_new_bookings_growth_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: 133, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_no_standard_records(
-    #         "new_bookings_growth", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_no_standard_records(
+            "new_bookings_growth", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_no_standard_records_with_rule_of_40_should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: 37, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_no_standard_records_with_rule_of_40_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: 37, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_no_standard_records(
-    #         "rule_of_40", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_no_standard_records(
+            "rule_of_40", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_records_with_standard_metric_should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
-    #     expected_data = {
-    #         "1": {"id": "1", "name": "Test", "metrics": {2019: 3, 2020: 4}},
-    #         "2": {"id": "2", "name": "Company", "metrics": {2019: 6}},
-    #     }
+    def test_get_records_with_standard_metric_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
+        expected_data = {
+            "1": {"id": "1", "name": "Test", "metrics": {2019: 3, 2020: 4}},
+            "2": {"id": "2", "name": "Company", "metrics": {2019: 6}},
+        }
 
-    #     data = self.report_instance.get_records(
-    #         "actuals_revenue", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_records(
+            "actuals_revenue", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_records_with_debt_ebitda_should_return_companies_metrics_dict(self):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     self.mock_repository.get_functions_metric.return_value = {"debt_ebitda": {}}
-    #     expected_data = {
-    #         "1": {"id": "1", "name": "Test", "metrics": {2019: 3.0, 2020: 4.0}},
-    #         "2": {"id": "2", "name": "Company", "metrics": {2019: 6.0}},
-    #     }
+    def test_get_records_with_debt_ebitda_should_return_companies_metrics_dict(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        self.mock_repository.get_functions_metric.return_value = {"debt_ebitda": {}}
+        expected_data = {
+            "1": {"id": "1", "name": "Test", "metrics": {2019: 3.0, 2020: 4.0}},
+            "2": {"id": "2", "name": "Company", "metrics": {2019: 6.0}},
+        }
 
-    #     data = self.report_instance.get_records(
-    #         "debt_ebitda", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_records(
+            "debt_ebitda", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_records_with_ratio_metric_should_return_companies_metrics_dict(self):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
-    #     expected_data = {
-    #         "1": {"id": "1", "name": "Test", "metrics": {2019: "3.0x", 2020: "4.0x"}},
-    #         "2": {"id": "2", "name": "Company", "metrics": {2019: "6.0x"}},
-    #     }
+    def test_get_records_with_ratio_metric_should_return_companies_metrics_dict(self):
+        self.mock_repository.get_metric_records.return_value = self.records
+        self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
+        expected_data = {
+            "1": {"id": "1", "name": "Test", "metrics": {2019: "3.0x", 2020: "4.0x"}},
+            "2": {"id": "2", "name": "Company", "metrics": {2019: "6.0x"}},
+        }
 
-    #     data = self.report_instance.get_records(
-    #         "clv_cac_ratio", [2019, 2020, 2021], dict()
-    #     )
+        data = self.report_instance.get_records(
+            "clv_cac_ratio", [2019, 2020, 2021], dict()
+        )
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
-    # def test_get_records_with_no_standard_metric_should_return_companies_metrics_dict(
-    #     self,
-    # ):
-    #     self.mock_repository.get_metric_records.return_value = self.records
-    #     self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
-    #     expected_data = {
-    #         "1": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
-    #         },
-    #         "2": {
-    #             "id": "2",
-    #             "name": "Company",
-    #             "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
-    #         },
-    #     }
+    def test_get_records_with_no_standard_metric_should_return_companies_metrics_dict(
+        self,
+    ):
+        self.mock_repository.get_metric_records.return_value = self.records
+        self.mock_repository.get_functions_metric.return_value = {"actuals_revenue": {}}
+        expected_data = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: "NA", 2020: 33, 2021: "NA"},
+            },
+            "2": {
+                "id": "2",
+                "name": "Company",
+                "metrics": {2019: "NA", 2020: "NA", 2021: "NA"},
+            },
+        }
 
-    #     data = self.report_instance.get_records("growth", [2019, 2020, 2021], dict())
+        data = self.report_instance.get_records("growth", [2019, 2020, 2021], dict())
 
-    #     self.assertEqual(data, expected_data)
+        self.assertEqual(data, expected_data)
 
     def test_get_na_records_should_return_na_with_no_years_for_company_data(self):
         years = [2020, 2021]
