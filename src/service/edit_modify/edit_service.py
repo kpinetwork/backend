@@ -141,7 +141,7 @@ class EditModifyService:
         return actuals, budget
 
     def __build_companies_rows(self, records: list, rows: dict) -> dict:
-        number_of_scenarios = len(rows.get("years"))
+        number_of_scenarios = len(rows.get("years")) - len(BASE_HEADERS)
         (
             actuals_scenario_index,
             budget_scenario_index,

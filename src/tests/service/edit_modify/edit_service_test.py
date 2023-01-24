@@ -66,11 +66,6 @@ class TestEditModifyService(TestCase):
                     {},
                     {},
                     {},
-                    {},
-                    {},
-                    {},
-                    {},
-                    {},
                 ],
             }
         }
@@ -357,11 +352,6 @@ class TestEditModifyService(TestCase):
                         {},
                         {},
                         {},
-                        {},
-                        {},
-                        {},
-                        {},
-                        {},
                     ],
                 },
                 "124": {
@@ -381,11 +371,6 @@ class TestEditModifyService(TestCase):
                         {},
                         {},
                         {},
-                        {},
-                        {},
-                        {},
-                        {},
-                        {},
                     ],
                 },
             },
@@ -393,7 +378,6 @@ class TestEditModifyService(TestCase):
         self.mock_metric_service.get_metric_types.return_value = ["Revenue"]
         self.mock_repository.get_scenarios_by_type.return_value = self.scenarios_by_type
         self.mock_repository.get_companies_records.return_value = self.fetched_companies
-
         response = self.edit_service.get_data()
         self.assertEqual(response, expected_response)
 
@@ -416,7 +400,7 @@ class TestEditModifyService(TestCase):
                     "sector": "Semiconductors",
                     "vertical": "Education",
                     "inves_profile_name": "Public",
-                    "scenarios": [{}, {}, {}, {}, {}],
+                    "scenarios": [],
                 },
                 "124": {
                     "id": "124",
@@ -424,7 +408,7 @@ class TestEditModifyService(TestCase):
                     "sector": "Online media",
                     "vertical": "Real Estate",
                     "inves_profile_name": "Public",
-                    "scenarios": [{}, {}, {}, {}, {}],
+                    "scenarios": [],
                 },
             },
         }
@@ -465,11 +449,6 @@ class TestEditModifyService(TestCase):
                             "value": 8.4,
                             "period": "Q1",
                         },
-                        {},
-                        {},
-                        {},
-                        {},
-                        {},
                         {},
                         {},
                         {},
