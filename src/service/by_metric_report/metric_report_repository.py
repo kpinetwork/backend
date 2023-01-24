@@ -15,6 +15,8 @@ class MetricReportRepository:
         self.logger = logger
         self.scenario_table_label = "scenario"
         self.id_general_table_label = "first_full_year.id"
+        self.full_year_period_label = "Full-year"
+        self.quarters_period_label = "Quarters"
 
     def add_filters(self, **kwargs) -> dict:
         filters = dict()
@@ -282,7 +284,12 @@ class MetricReportRepository:
                 self.query_builder.add_table_name(f"( {table} ) as full_year")
                 .add_select_conditions(select_condition)
                 .add_sql_where_equal_condition(
-                    {"period": ["'Full-year'", "'Quarters'"]}
+                    {
+                        "period": [
+                            f"'{self.full_year_period_label}'",
+                            f"'{self.quarters_period_label}'",
+                        ]
+                    }
                 )
                 .add_sql_group_by_condition(columns)
                 .build()
@@ -318,7 +325,14 @@ class MetricReportRepository:
                     "THEN full_year.value END), 0)",
                 ]
             )
-            .add_sql_where_equal_condition({"period": ["'Full-year'", "'Quarters'"]})
+            .add_sql_where_equal_condition(
+                {
+                    "period": [
+                        f"'{self.full_year_period_label}'",
+                        f"'{self.quarters_period_label}'",
+                    ]
+                }
+            )
             .add_sql_group_by_condition(columns)
             .build()
             .get_query()
@@ -394,7 +408,6 @@ class MetricReportRepository:
         self,
         where_conditions: dict,
         select_value_condition: list,
-        metric: str,
         scenario: str,
     ) -> list:
         try:
@@ -414,7 +427,12 @@ class MetricReportRepository:
                 )
                 .add_select_conditions(select_options)
                 .add_sql_where_equal_condition(
-                    {"period": ["'Full-year'", "'Quarters'"]}
+                    {
+                        "period": [
+                            f"'{self.full_year_period_label}'",
+                            f"'{self.quarters_period_label}'",
+                        ]
+                    }
                 )
                 .add_sql_group_by_condition(
                     [
@@ -449,7 +467,7 @@ class MetricReportRepository:
             ]
 
             return self.__get_no_base_metrics(
-                where_conditions, select_value, metric, ScenarioNames.ACTUALS
+                where_conditions, select_value, ScenarioNames.ACTUALS
             )
         except Exception as error:
             self.logger.info(error)
@@ -473,7 +491,6 @@ class MetricReportRepository:
             return self.__get_no_base_metrics(
                 where_conditions,
                 select_value,
-                "Revenue",
                 scenario,
             )
         except Exception as error:
@@ -494,7 +511,7 @@ class MetricReportRepository:
                 f"(1 - (SUM(first_full_year.value) / ({subquery}))) * 100 as total",
             ]
             return self.__get_no_base_metrics(
-                where_conditions, select_value, "Cost of goods", ScenarioNames.ACTUALS
+                where_conditions, select_value, ScenarioNames.ACTUALS
             )
         except Exception as error:
             self.logger.info(error)
@@ -516,7 +533,6 @@ class MetricReportRepository:
             return self.__get_no_base_metrics(
                 where_conditions,
                 select_value,
-                "Run rate revenue",
                 ScenarioNames.ACTUALS,
             )
         except Exception as error:
@@ -555,7 +571,6 @@ class MetricReportRepository:
             return self.__get_no_base_metrics(
                 where_conditions,
                 select_value,
-                "Other operating expenses",
                 ScenarioNames.ACTUALS,
             )
         except Exception as error:
@@ -576,7 +591,7 @@ class MetricReportRepository:
                 f"(SUM(first_full_year.value) / ({subquery})) as total",
             ]
             return self.__get_no_base_metrics(
-                where_conditions, select_value, "Long term debt", ScenarioNames.ACTUALS
+                where_conditions, select_value, ScenarioNames.ACTUALS
             )
         except Exception as error:
             self.logger.info(error)
@@ -600,7 +615,6 @@ class MetricReportRepository:
             return self.__get_no_base_metrics(
                 where_conditions,
                 select_value,
-                "Losses and downgrades",
                 ScenarioNames.ACTUALS,
             )
         except Exception as error:
@@ -621,7 +635,7 @@ class MetricReportRepository:
                 f"SUM(first_full_year.value) * 100 / ({subquery}) as total",
             ]
             return self.__get_no_base_metrics(
-                where_conditions, select_value, metric, ScenarioNames.ACTUALS
+                where_conditions, select_value, ScenarioNames.ACTUALS
             )
         except Exception as error:
             self.logger.info(error)
@@ -641,7 +655,7 @@ class MetricReportRepository:
                 f"SUM(first_full_year.value) / ({subquery}) as total",
             ]
             return self.__get_no_base_metrics(
-                where_conditions, select_value, dividend, ScenarioNames.ACTUALS
+                where_conditions, select_value, ScenarioNames.ACTUALS
             )
         except Exception as error:
             self.logger.info(error)

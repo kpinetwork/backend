@@ -168,7 +168,7 @@ class TestMetricReportRepository(TestCase):
 
         with self.assertRaises(Exception) as context:
             self.repository._MetricReportRepository__get_no_base_metrics(
-                dict(), [], "Revenue", "Actuals"
+                dict(), [], "Actuals"
             )
 
         self.assertEqual(str(context.exception), "error")
