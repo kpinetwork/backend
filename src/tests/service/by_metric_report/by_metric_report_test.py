@@ -26,9 +26,30 @@ class TestByMetricReport(TestCase):
             self.company_anonymization,
         )
         self.records = [
-            {"id": "1", "name": "Test", "year": 2019, "value": 3},
-            {"id": "1", "name": "Test", "year": 2020, "value": 4},
-            {"id": "2", "name": "Company", "year": 2019, "value": 6},
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": 3,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2020,
+                "total": 4,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
+            {
+                "id": "2",
+                "name": "Company",
+                "year": 2019,
+                "total": 6,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
         ]
         self.sizes = [
             {"label": ">$20 million", "min_value": None, "max_value": 20},
@@ -99,7 +120,11 @@ class TestByMetricReport(TestCase):
         self,
     ):
         expected_data = {
-            "1": {"id": "1", "name": "Test", "metrics": {2019: 3, 2020: 4}},
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "metrics": {2019: 3, 2020: 4},
+            },
             "2": {"id": "2", "name": "Company", "metrics": {2019: 6}},
         }
 
@@ -152,7 +177,16 @@ class TestByMetricReport(TestCase):
 
     def test_process_ratio_metrics_when_metric_value_is_none_return_na_values(self):
         records = self.records.copy()
-        records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
+        records = [
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": None,
+                "period": "Full-year",
+                "count_periods": 1,
+            }
+        ]
         self.mock_repository.get_metric_records.return_value = records
         expected_growth = {
             "1": {
@@ -179,8 +213,26 @@ class TestByMetricReport(TestCase):
 
         data = self.report_instance.process_retention(
             "gross_retention",
-            [{"id": "1", "name": "Test", "year": 2020, "value": 3}],
-            [{"id": "1", "name": "Test", "year": 2021, "value": 8}],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2020,
+                    "total": 3,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2021,
+                    "total": 8,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
             [2019, 2020, 2021],
             {},
         )
@@ -202,8 +254,26 @@ class TestByMetricReport(TestCase):
 
         data = self.report_instance.process_retention(
             "net_retention",
-            [{"id": "1", "name": "Test", "year": 2019, "value": 3}],
-            [{"id": "1", "name": "Test", "year": 2020, "value": 8}],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2019,
+                    "total": 3,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "year": 2020,
+                    "total": 8,
+                    "period": "Full-year",
+                    "count_periods": 1,
+                }
+            ],
             [2019, 2020, 2021],
             {},
         )
@@ -233,7 +303,16 @@ class TestByMetricReport(TestCase):
 
     def test_process_debt_ebitda_without_metric_value_return_NA(self):
         records = self.records.copy()
-        records = [{"id": "1", "name": "Test", "year": 2019, "value": None}]
+        records = [
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2019,
+                "total": None,
+                "period": "Full-year",
+                "count_periods": 1,
+            }
+        ]
         self.mock_repository.get_metric_records.return_value = records
         expected_debt_ebitda = {
             "1": {

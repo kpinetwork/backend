@@ -1,8 +1,8 @@
 from unittest import TestCase
 import logging
-from unittest.mock import Mock
-from src.service.by_metric_report.metric_report_repository import MetricReportRepository
+from unittest.mock import Mock, patch
 from parameterized import parameterized
+from src.service.by_metric_report.metric_report_repository import MetricReportRepository
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -17,8 +17,22 @@ class TestMetricReportRepository(TestCase):
             self.mock_session, self.mock_query_builder, self.mock_response_sql, logger
         )
         self.records = [
-            {"id": "1", "name": "Test", "year": 2020, "value": 20},
-            {"id": "2", "name": "Company", "year": 2021, "value": 13},
+            {
+                "id": "1",
+                "name": "Test",
+                "year": 2020,
+                "value": 20,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
+            {
+                "id": "2",
+                "name": "Company",
+                "year": 2021,
+                "value": 13,
+                "period": "Full-year",
+                "count_periods": 1,
+            },
         ]
 
     def mock_response_list_query_sql(self, response):
@@ -56,23 +70,135 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(years, [])
 
-    def test_get_base_metric_should_return_base_metrics_list_when_successful_call(self):
+    def test___add_period_name_where_condition_should_return_query_with_period_condition(
+        self,
+    ):
+        base_query = """query AND (time_period.period_name = 'Full-year'
+        OR time_period.period_name IN ('Q1', 'Q2', 'Q3', 'Q4'))GROUP BY"""
+        expected_query = "".join(base_query.split())
+
+        new_query = (
+            self.repository._MetricReportRepository__add_period_name_where_condition(
+                "query GROUP BY"
+            )
+        )
+        query_response = "".join(new_query.split())
+
+        self.assertEqual(expected_query, query_response)
+
+    def test__add_having_condition_should_return_query_with_having_condition(self):
+        base_query = (
+            "query HAVING (COUNT(full_year.period) = 1 AND "
+            "full_year.period = 'Full-year') OR "
+            "(COUNT(full_year.period) = 4 AND "
+            "full_year.period='Quarters') LIMIT 1"
+        )
+        expected_query = "".join(base_query.split())
+
+        new_query = self.repository._MetricReportRepository__add_having_condition(
+            "query"
+        )
+        query_response = "".join(new_query.split())
+
+        self.assertEqual(expected_query, query_response)
+
+    def test__add_having_condition_for_main_metric_should_return_query_with_having_condition(
+        self,
+    ):
+        base_query = (
+            "query HAVING (COUNT(first_full_year.period) = 1 AND "
+            "first_full_year.period = 'Full-year') OR "
+            "(COUNT(first_full_year.period) = 4 AND "
+            "first_full_year.period='Quarters')"
+        )
+        expected_query = "".join(base_query.split())
+
+        new_query = self.repository._MetricReportRepository__add_having_condition_for_main_metric(
+            "query"
+        )
+        query_response = "".join(new_query.split())
+
+        self.assertEqual(expected_query, query_response)
+
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    def test_get_base_metric_should_return_base_metrics_list_when_successful_call(
+        self, mock_add_period_where_condition
+    ):
+        mock_add_period_where_condition.return_value = "Mock query"
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_base_metric("Revenue", "Actuals", dict())
 
         self.assertEqual(metrics, self.records)
 
-    def test_get_base_metric_should_return_empty_list_when_call_fails(self):
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    def test_get_base_metric_should_raise_an_exception_when_call_fails(
+        self, mock_add_period_where_condition
+    ):
+        mock_add_period_where_condition.return_value = "Mock period condition"
         self.mock_session.execute.side_effect = Exception("error")
 
-        metrics = self.repository.get_base_metric("Revenue", "Actuals", dict())
+        with self.assertRaises(Exception) as context:
+            self.repository.get_base_metric("Revenue", "Actuals", dict())
 
-        self.assertEqual(metrics, [])
+        self.assertEqual(str(context.exception), "error")
 
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get__no_base_metric_should_raise_an_exception_when_call_fails(
+        self,
+        mock_add_period_where_condition,
+        mock_add_having_condition_for_main_metric,
+    ):
+        mock_add_period_where_condition.return_value = "Mock period condition"
+        mock_add_having_condition_for_main_metric.return_value = "Mock having condition"
+        self.mock_session.execute.side_effect = Exception("error")
+
+        with self.assertRaises(Exception) as context:
+            self.repository._MetricReportRepository__get_no_base_metrics(
+                dict(), [], "Actuals"
+            )
+
+        self.assertEqual(str(context.exception), "error")
+
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
     def test_get_actuals_vs_budget_should_return_metric_dict_list_when_successful_call(
         self,
+        mock_add_having_condition,
+        mock_add_period_where_condition,
+        mock_get_calculated_submetric_subquery,
+        mock_add_having_condition_for_main_metric,
     ):
+        mock_add_having_condition.return_value = "Mock subquery"
+        mock_get_calculated_submetric_subquery.return_value = "Mock subquery"
+        mock_add_period_where_condition.return_value = "Mock having condition"
+        mock_add_having_condition_for_main_metric.return_value = "Mock having condition"
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_actuals_vs_budget_metric("Ebitda", dict())
@@ -88,9 +214,26 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
     def test_get_ebitda_margin_should_return_metric_dict_list_when_successful_call(
         self,
+        mock_add_having_condition,
+        mock_add_period_where_condition,
+        mock_add_having_condition_for_main_metric,
     ):
+        mock_add_having_condition.return_value = "Mock subquery"
+        mock_add_period_where_condition.return_value = "Mock having condition"
+        mock_add_having_condition_for_main_metric.return_value = "Mock having condition"
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_ebitda_margin_metric(dict())
@@ -145,7 +288,14 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(arguments, expected_arguments)
 
-    def test_get_metric_records_should_call_function(self):
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    def test_get_metric_records_should_call_function(
+        self, mock_add_period_where_condition
+    ):
+        mock_add_period_where_condition.return_value = "Where condition mock"
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_metric_records("actuals_ebitda", dict())
@@ -158,7 +308,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(str(context.exception), "Metric not found")
 
-    def test_get_gross_profit_should_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_gross_profit_should_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_gross_profit(dict())
@@ -172,7 +349,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_gross_margin_should_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_gross_margin_should_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_gross_margin(dict())
@@ -186,7 +390,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_revenue_per_employee_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_revenue_per_employee_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_revenue_per_employee(dict())
@@ -200,7 +431,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_opex_as_revenue_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_opex_as_revenue_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_opex_as_revenue(dict())
@@ -214,7 +472,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_debt_ebitda_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_debt_ebitda_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_debt_ebitda(dict())
@@ -228,7 +513,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_gross_retention_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_gross_retention_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_gross_retention(dict())
@@ -242,7 +554,34 @@ class TestMetricReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_metric_ratio_return_list_on_success(self):
+    @patch.object(
+        MetricReportRepository, "_MetricReportRepository__add_having_condition"
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_period_name_where_condition",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__get_calculated_submetric_subquery",
+    )
+    @patch.object(
+        MetricReportRepository,
+        "_MetricReportRepository__add_having_condition_for_main_metric",
+    )
+    def test_get_metric_ratio_return_list_on_success(
+        self,
+        mock_add_having_condition,
+        mock_add_period_condition,
+        mock_get_calculated_submetric,
+        mock_add_having_condition_for_main_metrics,
+    ):
+        mock_add_having_condition.return_value = "Mock having condition"
+        mock_add_period_condition.return_value = "Mock period condition"
+        mock_get_calculated_submetric.return_value = "Mock subquery"
+        mock_add_having_condition_for_main_metrics.return_value = (
+            "Mock having condition"
+        )
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_metric_ratio("CAV", "CAC", dict())
