@@ -31,21 +31,16 @@ class MetricReportRepository:
     def get_years(self) -> list:
         try:
             start = "start_at"
-            period_name = "Full-year"
             query = (
                 self.query_builder.add_table_name(TableNames.PERIOD)
                 .add_select_conditions(
-                    [f"DISTINCT ON({start}) extract(year from {start})::int as year"]
+                    [f"DISTINCT extract(year from {start})::int as year"]
                 )
-                .add_sql_where_equal_condition(
-                    {
-                        f"{TableNames.PERIOD}.period_name": f"'{period_name}'",
-                    }
-                )
-                .add_sql_order_by_condition([f"{start}"], self.query_builder.Order.ASC)
+                .add_sql_order_by_condition(["year"], self.query_builder.Order.ASC)
                 .build()
                 .get_query()
             )
+            print(query)
             result = self.session.execute(query).fetchall()
             return [
                 year["year"]
