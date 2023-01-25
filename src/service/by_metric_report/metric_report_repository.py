@@ -272,9 +272,9 @@ class MetricReportRepository:
             select_condition = columns.copy()
             select_condition.extend(
                 [
-                    "SUM(CASE WHEN full_year.period = 'Full-year' THEN full_year.value WHEN",
-                    "full_year.period = 'Quarters' THEN full_year.value END) AS total",
-                    "COUNT(full_year.period) as count_periods",
+                    """SUM(CASE WHEN full_year.period = 'Full-year' THEN full_year.value WHEN
+                    full_year.period = 'Quarters' THEN full_year.value END) AS total
+                    COUNT(full_year.period) as count_periods""",
                 ]
             )
             table = self.__get_scenario_values_by_period_subquery(
@@ -320,9 +320,9 @@ class MetricReportRepository:
             )
             .add_select_conditions(
                 [
-                    "NULLIF(SUM(CASE WHEN full_year.period = 'Full-year' THEN full_year.value",
-                    "WHEN full_year.period = 'Quarters' ",
-                    "THEN full_year.value END), 0)",
+                    """NULLIF(SUM(CASE WHEN full_year.period = 'Full-year' THEN full_year.value
+                    WHEN full_year.period = 'Quarters'
+                    THEN full_year.value END), 0)""",
                 ]
             )
             .add_sql_where_equal_condition(
