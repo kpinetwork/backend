@@ -40,7 +40,6 @@ class MetricReportRepository:
                 .build()
                 .get_query()
             )
-            print(query)
             result = self.session.execute(query).fetchall()
             return [
                 year["year"]
