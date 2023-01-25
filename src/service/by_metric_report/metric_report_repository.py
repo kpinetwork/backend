@@ -274,7 +274,7 @@ class MetricReportRepository:
                 [
                     """SUM(CASE WHEN full_year.period = 'Full-year' THEN full_year.value WHEN
                     full_year.period = 'Quarters' THEN full_year.value END) AS total
-                    COUNT(full_year.period) as count_periods""",
+                    ,COUNT(full_year.period) as count_periods""",
                 ]
             )
             table = self.__get_scenario_values_by_period_subquery(
