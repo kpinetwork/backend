@@ -5,6 +5,7 @@ from edit_service import EditModifyService
 from metric_type_service import MetricTypesService
 from base_exception import AuthError
 from response_sql import ResponseSQL
+from edit_modify_repository import EditModifyRepository
 from commons_functions import get_edit_modify_condition_params
 from connection import create_db_engine, create_db_session
 from verify_user_permissions import verify_user_access, get_user_id_from_event
@@ -21,9 +22,10 @@ def get_service():
     metric_service = MetricTypesService(
         session, QuerySQLBuilder(), ResponseSQL(), logger
     )
-    return EditModifyService(
-        session, QuerySQLBuilder(), object(), metric_service, ResponseSQL(), logger
+    edit_modify_repository = EditModifyRepository(
+        session, QuerySQLBuilder(), ResponseSQL(), metric_service, logger
     )
+    return EditModifyService(edit_modify_repository, object(), metric_service, logger)
 
 
 def handler(event, _):
