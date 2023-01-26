@@ -185,8 +185,8 @@ class BaseMetricsRepository:
         index = query.find("GROUP BY")
         new_query = (
             query[:index]
-            + f"""AND {TableNames.PERIOD}.period_name = 'Full-year'
-            OR {TableNames.PERIOD}.period_name IN ('Q1', 'Q2', 'Q3', 'Q4')"""
+            + f"""AND ({TableNames.PERIOD}.period_name = 'Full-year'
+            OR {TableNames.PERIOD}.period_name IN ('Q1', 'Q2', 'Q3', 'Q4'))"""
             + query[index:]
         )
         return new_query
