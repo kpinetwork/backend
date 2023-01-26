@@ -295,7 +295,7 @@ class ByMetricReport:
         if metric == "growth":
             return data_growth
 
-        margin = self.repository.get_metric_records("ebitda_margin", filters)
+        margin = self.repository.get_metric_records("ebitda_margin", {})
         data_margin = self.process_standard_metrics(margin)
         return self.process_rule_of_40(data_growth, data_margin)
 
