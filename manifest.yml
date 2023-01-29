@@ -449,6 +449,7 @@ functions:
     include:
     - ./src/handlers/edit_modify/edit_data_handler.py
     - ./src/service/edit_modify/edit_service.py
+    - ./src/service/edit_modify/edit_modify_repository.py
     - ./src/service/scenario/scenario_service.py
     - ./src/service/metric/metric_type_service.py
     - ./src/utils/verify_user_permissions.py
@@ -465,6 +466,7 @@ functions:
     include:
     - ./src/handlers/edit_modify/get_edit_modify_data_handler.py
     - ./src/service/edit_modify/edit_service.py
+    - ./src/service/edit_modify/edit_modify_repository.py
     - ./src/service/scenario/scenario_service.py
     - ./src/service/metric/metric_type_service.py
     - ./src/utils/verify_user_permissions.py
@@ -639,6 +641,22 @@ functions:
     - ./src/utils/verify_user_permissions.py
     - ./src/utils/response_user.py
     - ./src/service/base_metrics/base_metrics_config_name.py
+
+  get_full_year_total_handler:
+    requirements: ./src/handlers/company_details/requirements.txt
+    include:
+    - ./src/handlers/company_details/get_full_year_total_handler.py
+    - ./src/service/company_details/company_details_service.py
+    - ./src/service/calculator/calculator_service.py
+    - ./src/utils/profile_range.py
+    - ./src/utils/query_builder.py
+    - ./src/utils/response_sql.py
+    - ./db/utils/connection.py
+    - ./src/utils/verify_user_permissions.py
+    - ./src/utils/response_user.py
+    - ./src/exceptions/base_exception.py
+    - ./src/utils/app_names.py
+    - ./src/utils/app_http_headers.py
     
 layers:
   layer_libraries:

@@ -1,16 +1,16 @@
 from unittest import TestCase
 import logging
 from unittest.mock import Mock, patch
+
 from src.utils.app_names import COMPARISON_METRICS
 from src.service.calculator.calculator_service import CalculatorService
 from src.utils.company_anonymization import CompanyAnonymization
 from src.service.dynamic_report.dynamic_report import DynamicReport
-
 from src.service.by_metric_report.by_metric_report import ByMetricReport
-
 from src.service.by_year_report.by_year_report_service import ByYearReportService
 from src.service.base_metrics.base_metrics_report import BaseMetricsReport
 from src.service.base_metrics.base_metrics_repository import BaseMetricsRepository
+from src.utils.query_builder import QuerySQLBuilder
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -20,7 +20,7 @@ size_range = {"label": "$30-<50 million", "max_value": 50, "min_value": 30}
 class TestDynamicReport(TestCase):
     def setUp(self):
         self.mock_session = Mock()
-        self.mock_query_builder = Mock()
+        self.mock_query_builder = QuerySQLBuilder()
         self.mock_response_sql = Mock()
         self.mock_repository = Mock()
         self.company_anonymization = CompanyAnonymization(Mock())

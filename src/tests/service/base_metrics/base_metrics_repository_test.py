@@ -3,6 +3,7 @@ import logging
 from unittest.mock import Mock
 from parameterized import parameterized
 from src.service.base_metrics.base_metrics_repository import BaseMetricsRepository
+from src.utils.query_builder import QuerySQLBuilder
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -11,7 +12,7 @@ logger.setLevel(logging.INFO)
 class TestBaseMetricsRepository(TestCase):
     def setUp(self):
         self.mock_session = Mock()
-        self.mock_query_builder = Mock()
+        self.mock_query_builder = QuerySQLBuilder()
         self.mock_response_sql = Mock()
         self.mock_profile_range = Mock()
         self.repository = BaseMetricsRepository(
@@ -92,7 +93,31 @@ class TestBaseMetricsRepository(TestCase):
                 "metric": "Revenue",
                 "scenario": "Actuals",
                 "year": 2020,
-                "value": self.scenarios["actuals_revenue"],
+                "total": self.scenarios["actuals_revenue"],
+                "period": "Full-year",
+                "count_period": 1,
+            }
+        )
+        expected_actuals = self.company.copy()
+        expected_actuals.update({"actuals_revenue": 40})
+        self.mock_response_list_query_sql([company])
+
+        actuals_values = self.repository.get_actuals_values(
+            2020, {"sector": [self.company["sector"]]}
+        )
+
+        self.assertEqual(actuals_values, {company["id"]: expected_actuals})
+
+    def test_get_actuals_values_with_all_quarters_should_return_data(self):
+        company = self.company.copy()
+        company.update(
+            {
+                "metric": "Revenue",
+                "scenario": "Actuals",
+                "year": 2020,
+                "total": self.scenarios["actuals_revenue"],
+                "period": "Quarters",
+                "count_period": 4,
             }
         )
         expected_actuals = self.company.copy()
@@ -112,7 +137,9 @@ class TestBaseMetricsRepository(TestCase):
                 "metric": "Revenue",
                 "scenario": "Budget",
                 "year": 2020,
-                "value": self.scenarios["actuals_revenue"],
+                "total": self.scenarios["actuals_revenue"],
+                "period": "Full-year",
+                "count_period": 1,
             }
         )
         expected_budget = {"budget_revenue": 40}
@@ -139,7 +166,9 @@ class TestBaseMetricsRepository(TestCase):
                 "metric": "Revenue",
                 "scenario": "Actuals",
                 "year": 2020,
-                "value": self.scenarios["prior_actuals_revenue"],
+                "total": self.scenarios["prior_actuals_revenue"],
+                "period": "Full-year",
+                "count_period": 1,
             }
         )
         expected_prior_values = {"prior_actuals_revenue": 37.5}
