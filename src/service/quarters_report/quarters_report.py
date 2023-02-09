@@ -23,21 +23,25 @@ class QuartersReport:
         self.profile_range = profile_range
         self.company_anonymization = company_anonymization
 
-    def get_standard_metrics(self, years: list) -> list:
-        return list(
+    def get_standard_metrics(self, scenario_type, years: list) -> list:
+        standard = list(
             set(
                 [
-                    metric.split("-")[1]
-                    for metric in self.repository.get_functions_metric(years, dict())
+                    metric
+                    for metric in self.repository.get_functions_metric(
+                        scenario_type, years, dict()
+                    )
                 ]
             )
         )
+        return [
+            metric.split("-")[1] if len(metric.split("-")) > 1 else metric
+            for metric in standard
+        ]
 
     def process_metrics(self, metric: str, years: list, filters: dict) -> list:
         summary = defaultdict(lambda: defaultdict(dict))
-        data = self.repository.get_actuals_plus_budget_metrics_query(
-            metric, years, filters
-        )
+        data = self.repository.get_quarters_year_to_year_records(years, metric, filters)
         for item in data:
             id = item["id"]
             scenario = item["scenario"]
@@ -46,11 +50,13 @@ class QuartersReport:
             summary[id][scenario]["id"] = id
             summary[id][scenario]["name"] = item["name"]
             summary[id][scenario]["scenario"] = scenario
-            summary[id][scenario]["metric"] = item["metric"]
-            summary[id][scenario][period_name] = float(value)
+            summary[id][scenario]["metric"] = metric
+            if value is not None:
+                summary[id][scenario][period_name] = round(float(value), 2)
+            else:
+                summary[id][scenario][period_name] = None
 
         result = [value for values in summary.values() for value in values.values()]
-
         return result
 
     def get_actuals_plus_budget(self, metric: str, years: list, filters: dict) -> list:
@@ -58,9 +64,7 @@ class QuartersReport:
         result = []
         for year in years:
             year_data = [
-                x
-                for x in data
-                if str(year) in x["scenario"] and x["metric"] == "Revenue"
+                x for x in data if str(year) in x["scenario"] and x["metric"] == metric
             ]
             for actuals in [x for x in year_data if "Actuals" in x["scenario"]]:
                 budget = next(
@@ -95,8 +99,14 @@ class QuartersReport:
     def add_full_year_property(self, metric: str, years: list, filters: dict) -> list:
         data = self.get_actuals_plus_budget(metric, years, filters)
         for item in data:
-            quarters_values = [item.get(value, 0) for value in ["Q1", "Q2", "Q3", "Q4"]]
-            item["full_year"] = sum(filter(None.__ne__, quarters_values))
+            full_year = 0
+            if None in [item.get("Q1"), item.get("Q2"), item.get("Q3"), item.get("Q4")]:
+                full_year = None
+            else:
+                full_year = (
+                    item.get("Q1") + item.get("Q2") + item.get("Q3") + item.get("Q4")
+                )
+            item["full_year"] = full_year
         return data
 
     def is_valid_value(self, value) -> Union[float, str, None]:
@@ -120,12 +130,18 @@ class QuartersReport:
                 "Q2": self.is_valid_value(item.get("Q2", None)),
                 "Q3": self.is_valid_value(item.get("Q3", None)),
                 "Q4": self.is_valid_value(item.get("Q4", None)),
-                "full_year": item.get("full_year"),
+                "full_year": self.is_valid_value(item.get("full_year", None)),
             }
-            if prev_full_year[item["id"]] is not None:
+            if (
+                prev_full_year[item["id"]] is not None
+                and prev_full_year[item["id"]] != "NA"
+                and quarter["full_year"] != "NA"
+            ):
                 quarter["vs"] = round(
                     (quarter["full_year"] / prev_full_year[item["id"]] * 100), 2
                 )
+            else:
+                quarter["vs"] = "NA"
             prev_full_year[item["id"]] = quarter["full_year"]
             companies[item["id"]]["quarters"].append(quarter)
         return list(companies.values())
@@ -155,17 +171,16 @@ class QuartersReport:
                             if key != "year" and value != "NA":
                                 year_data[key] += value
                                 count[key] += 1
+            year_result = {}
             for key in year_data.keys():
                 if count[key] > 0:
-                    year_data[key] = round((year_data[key] / count[key]), 2)
+                    year_result[key] = round((year_data[key] / count[key]), 2)
                 else:
-                    year_data[key] = "NA"
-                averages.append({key: year_data[key]})
+                    year_result[key] = "NA"
+            if "full_year" in year_result:
+                year_result["Full Year"] = year_result.pop("full_year")
+            averages.append(year_result)
             first_year = False
-        averages = [
-            {"Full Year": item.pop("full_year")} if "full_year" in item else item
-            for item in averages
-        ]
         return averages
 
     def add_missing_years(self, data, years):
@@ -194,7 +209,7 @@ class QuartersReport:
     def get_records(
         self, metric: str, scenario_type: str, years: list, filters: dict
     ) -> dict:
-        standard = self.get_standard_metrics(years)
+        standard = self.get_standard_metrics(scenario_type, years)
         if metric in standard:
             records = self.repository.get_metric_records_by_quarters(
                 "Year-to-year", metric, scenario_type, years, filters
@@ -387,16 +402,14 @@ class QuartersReport:
         return peers, averages
 
     def actuals_budget_data(self, metric, years, conditions) -> tuple:
-        metric_alias = self.__get_metric_name(metric)
         sorted_years = sorted(years)
-        peers = self.add_vs_property(metric_alias, sorted_years, conditions)
+        peers = self.add_vs_property(metric, sorted_years, conditions)
         self.filter_companies(peers, sorted_years)
         self.add_missing_years(peers, sorted_years)
         averages = self.calculate_averages(peers, sorted_years)
         return peers, averages
 
     def __get_averages_for_actuals_or_budget_data(self, defaul_averages: dict) -> list:
-        # cambiar esto a list comprehension
         averages = []
         for year in defaul_averages:
             for key, value in defaul_averages.get(year).items():
@@ -421,15 +434,13 @@ class QuartersReport:
             )
         return peers, averages
 
-    def need_to_be_anonymized(self, metric: str) -> bool:  # en el by metric report
-        # metric = self.clear_metric_name(metric)
+    def need_to_be_anonymized(self, metric: str) -> bool:
         return (
             metric != METRICS_CONFIG_NAME.get(MetricNames.HEADCOUNT)
             and metric in METRICS_TO_ANONYMIZE.values()
         )
 
     def anonymize_companies_values(self, metric: str, data: dict) -> None:
-        # metric = self.clear_metric_name(metric)
         metric_ranges = self.profile_range.get_profile_ranges(metric)
         for company in data:
             if company.get("id") not in self.company_anonymization.companies:
@@ -438,7 +449,6 @@ class QuartersReport:
     def anonymize_company(self, company: dict, ranges: list) -> None:
         company["name"] = self.anonymized_name(company.get("id"))
         self.anonymized_metric(company.get("quarters", {}), ranges)
-        # company["quarters"] = self.anonymized_metric(company.get("quarters", {}), ranges)
 
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
@@ -462,8 +472,8 @@ class QuartersReport:
         username: str,
         report_type: str,
         metric: str,
-        scenario_type: str,  # Actuals, Budget, Actuals+budget
-        years: list,  # ['2021', '2020', '2019']
+        scenario_type: str,
+        years: list,
         from_main: bool,
         access: bool,
         **conditions,

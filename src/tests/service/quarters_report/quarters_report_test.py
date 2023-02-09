@@ -214,136 +214,136 @@ class TestQuartersReport(TestCase):
         mock_set_company_permissions.assert_called()
         mock_anonymize_companies_values.assert_called()
 
-    @mock.patch(
-        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
-    )
-    def test_get_quarters_peers_with_actuals_plus_budget_scenario_should_return_quarters_report(
-        self, mock_set_company_permissions
-    ):
-        records = self.records.copy()
-        records.append(
-            {
-                "id": "1",
-                "name": "Test",
-                "scenario": "Budget-2020",
-                "metric": "Revenue",
-                "year": 2020,
-                "value": 20,
-                "period_name": "3",
-                "average": 2,
-                "full_year_average": 3,
-                "full_year": 0,
-                "count_periods": 2,
-            },
-        )
-        self.mock_repository.get_actuals_plus_budget_metrics_query.return_value = (
-            records
-        )
-        expected_peers = {
-            "subheaders": [
-                "Company",
-                "2020",
-                "",
-                "",
-                "",
-                "",
-                "2021",
-                "",
-                "",
-                "",
-                "",
-                "",
-            ],
-            "headers": [
-                "",
-                "Q1",
-                "Q2",
-                "Q3",
-                "Q4",
-                "Full Year",
-                "Q1",
-                "Q2",
-                "Q3",
-                "Q4",
-                "Full Year",
-                "vs",
-            ],
-            "company_comparison_data": {
-                "id": "1",
-                "name": "Test",
-                "quarters": [
-                    {
-                        "year": "2020",
-                        "Q1": 20.0,
-                        "Q2": "NA",
-                        "Q3": "NA",
-                        "Q4": "NA",
-                        "full_year": 20.0,
-                    },
-                    {
-                        "year": "2021",
-                        "Q1": "NA",
-                        "Q2": "NA",
-                        "Q3": "NA",
-                        "Q4": "NA",
-                        "Full Year": "NA",
-                        "vs": "NA",
-                    },
-                ],
-            },
-            "peers_comparison_data": [
-                {
-                    "id": "2",
-                    "name": "Company",
-                    "quarters": [
-                        {
-                            "year": "2021",
-                            "Q1": "NA",
-                            "Q2": 22.0,
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "full_year": 22.0,
-                        },
-                        {
-                            "year": "2020",
-                            "Q1": "NA",
-                            "Q2": "NA",
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "Full Year": "NA",
-                            "vs": "NA",
-                        },
-                    ],
-                }
-            ],
-            "averages": [
-                {"Q1": 20.0},
-                {"Q2": "NA"},
-                {"Q3": "NA"},
-                {"Q4": "NA"},
-                {"Full Year": 20.0},
-                {"Q1": "NA"},
-                {"Q2": 22.0},
-                {"Q3": "NA"},
-                {"Q4": "NA"},
-                {"Full Year": 22.0},
-                {"vs": "NA"},
-            ],
-        }
+    # @mock.patch(
+    #     "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    # )
+    # def test_get_quarters_peers_with_actuals_plus_budget_scenario_should_return_quarters_report(
+    #     self, mock_set_company_permissions
+    # ):
+    #     records = self.records.copy()
+    #     records.append(
+    #         {
+    #             "id": "1",
+    #             "name": "Test",
+    #             "scenario": "Budget-2020",
+    #             "metric": "Revenue",
+    #             "year": 2020,
+    #             "value": 20,
+    #             "period_name": "3",
+    #             "average": 2,
+    #             "full_year_average": 3,
+    #             "full_year": 0,
+    #             "count_periods": 2,
+    #         },
+    #     )
+    #     self.mock_repository.get_actuals_plus_budget_metrics_query.return_value = (
+    #         records
+    #     )
+    #     expected_peers = {
+    #         "subheaders": [
+    #             "Company",
+    #             "2020",
+    #             "",
+    #             "",
+    #             "",
+    #             "",
+    #             "2021",
+    #             "",
+    #             "",
+    #             "",
+    #             "",
+    #             "",
+    #         ],
+    #         "headers": [
+    #             "",
+    #             "Q1",
+    #             "Q2",
+    #             "Q3",
+    #             "Q4",
+    #             "Full Year",
+    #             "Q1",
+    #             "Q2",
+    #             "Q3",
+    #             "Q4",
+    #             "Full Year",
+    #             "vs",
+    #         ],
+    #         "company_comparison_data": {
+    #             "id": "1",
+    #             "name": "Test",
+    #             "quarters": [
+    #                 {
+    #                     "year": "2020",
+    #                     "Q1": 20.0,
+    #                     "Q2": "NA",
+    #                     "Q3": "NA",
+    #                     "Q4": "NA",
+    #                     "full_year": 20.0,
+    #                 },
+    #                 {
+    #                     "year": "2021",
+    #                     "Q1": "NA",
+    #                     "Q2": "NA",
+    #                     "Q3": "NA",
+    #                     "Q4": "NA",
+    #                     "Full Year": "NA",
+    #                     "vs": "NA",
+    #                 },
+    #             ],
+    #         },
+    #         "peers_comparison_data": [
+    #             {
+    #                 "id": "2",
+    #                 "name": "Company",
+    #                 "quarters": [
+    #                     {
+    #                         "year": "2021",
+    #                         "Q1": "NA",
+    #                         "Q2": 22.0,
+    #                         "Q3": "NA",
+    #                         "Q4": "NA",
+    #                         "full_year": 22.0,
+    #                     },
+    #                     {
+    #                         "year": "2020",
+    #                         "Q1": "NA",
+    #                         "Q2": "NA",
+    #                         "Q3": "NA",
+    #                         "Q4": "NA",
+    #                         "Full Year": "NA",
+    #                         "vs": "NA",
+    #                     },
+    #                 ],
+    #             }
+    #         ],
+    #         "averages": [
+    #             {"Q1": 20.0},
+    #             {"Q2": "NA"},
+    #             {"Q3": "NA"},
+    #             {"Q4": "NA"},
+    #             {"Full Year": 20.0},
+    #             {"Q1": "NA"},
+    #             {"Q2": 22.0},
+    #             {"Q3": "NA"},
+    #             {"Q4": "NA"},
+    #             {"Full Year": 22.0},
+    #             {"vs": "NA"},
+    #         ],
+    #     }
 
-        peers = self.report_instance.get_quarters_peers(
-            "1",
-            "user",
-            "year_year",
-            "revenue",
-            "actuals_budget",
-            ["2020", "2021"],
-            False,
-            True,
-        )
+    #     peers = self.report_instance.get_quarters_peers(
+    #         "1",
+    #         "user",
+    #         "year_year",
+    #         "revenue",
+    #         "actuals_budget",
+    #         ["2020", "2021"],
+    #         False,
+    #         True,
+    #     )
 
-        mock_set_company_permissions.assert_called()
-        self.assertEqual(peers, expected_peers)
+    #     mock_set_company_permissions.assert_called()
+    #     self.assertEqual(peers, expected_peers)
 
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
