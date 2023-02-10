@@ -332,7 +332,7 @@ class TestQuartersReport(TestCase):
                 "scenario": "Budget-2020",
                 "metric": "Revenue",
                 "year": 2020,
-                "value": 20,
+                "value": None,
                 "period_name": "Q3",
                 "average": 2,
                 "full_year_average": 3,
@@ -340,6 +340,9 @@ class TestQuartersReport(TestCase):
                 "count_periods": 2,
             },
         )
+        expected_value = self.response.copy()
+        expected_value["company_comparison_data"]["quarters"][0]["Q3"] = "NA"
+        expected_value["averages"][0]["Q3"] = "NA"
         self.mock_repository.get_quarters_year_to_year_records.return_value = records
 
         peers = self.report_instance.get_quarters_peers(
@@ -354,7 +357,7 @@ class TestQuartersReport(TestCase):
         )
 
         mock_set_company_permissions.assert_called()
-        self.assertEqual(peers, self.response)
+        self.assertEqual(peers, expected_value)
 
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
@@ -515,3 +518,134 @@ class TestQuartersReport(TestCase):
         filtered_companies = self.report_instance.filter_companies(companies, years)
 
         self.assertEqual(filtered_companies, companies)
+
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    def test_add_vs_property_with_full_year_data_should_return_vs_property(
+        self, mock_set_company_permissions
+    ):
+        records = self.records.copy()
+        expected_value = [
+            {
+                "id": "1",
+                "name": "Test",
+                "quarters": [
+                    {
+                        "year": "2020",
+                        "Q1": 20.0,
+                        "Q2": 20.0,
+                        "Q3": 20.0,
+                        "Q4": 20.0,
+                        "full_year": 80.0,
+                        "vs": "NA",
+                    },
+                    {
+                        "year": "2021",
+                        "Q1": 20.0,
+                        "Q2": 20.0,
+                        "Q3": 20.0,
+                        "Q4": 20.0,
+                        "full_year": 80.0,
+                        "vs": 100.0,
+                    },
+                ],
+            },
+            {
+                "id": "2",
+                "name": "Company",
+                "quarters": [
+                    {
+                        "year": "2021",
+                        "Q1": "NA",
+                        "Q2": 22.0,
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "full_year": "NA",
+                        "vs": "NA",
+                    }
+                ],
+            },
+        ]
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q2",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q3",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q4",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2021",
+                "metric": "Revenue",
+                "year": 2021,
+                "value": 20,
+                "period_name": "Q1",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2021",
+                "metric": "Revenue",
+                "year": 2021,
+                "value": 20,
+                "period_name": "Q2",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2021",
+                "metric": "Revenue",
+                "year": 2021,
+                "value": 20,
+                "period_name": "Q3",
+            }
+        )
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2021",
+                "metric": "Revenue",
+                "year": 2021,
+                "value": 20,
+                "period_name": "Q4",
+            }
+        )
+
+        self.mock_repository.get_quarters_year_to_year_records.return_value = records
+
+        peers = self.report_instance.add_vs_property("revenue", ["2020", "2021"], {})
+        self.assertEqual(peers, expected_value)
