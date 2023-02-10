@@ -55,32 +55,48 @@ class TestQuartersReport(TestCase):
             {"label": "$20 million - $40 million", "min_value": 20, "max_value": 40},
             {"label": "$40 million +", "min_value": 40, "max_value": None},
         ]
-
-    @mock.patch(
-        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
-    )
-    def test_get_quarters_peers_with_base_scenario_when_is_sucessful_should_return_quarters_report(
-        self, mock_set_company_permissions
-    ):
-        records = self.records.copy()
-        records.append(
+        self.quarters_records = [
             {
                 "id": "1",
                 "name": "Test",
-                "scenario": "Actuals-2020",
+                "scenario": "Budget-2020",
                 "metric": "Revenue",
                 "year": 2020,
                 "value": 20,
-                "period_name": "3",
+                "period_name": "Q2",
                 "average": 2,
                 "full_year_average": 3,
                 "full_year": 0,
                 "count_periods": 2,
             },
-        )
-        self.mock_repository.get_metric_records_by_quarters.return_value = records
-        self.mock_repository.get_functions_metric.return_value = {"actuals-revenue": {}}
-        expected_response = {
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Budget-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q3",
+                "average": 2,
+                "full_year_average": 3,
+                "full_year": 0,
+                "count_periods": 2,
+            },
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Budget-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q4",
+                "average": 2,
+                "full_year_average": 3,
+                "full_year": 0,
+                "count_periods": 2,
+            },
+        ]
+        self.response = {
             "subheaders": [
                 "Company",
                 "2020",
@@ -114,13 +130,102 @@ class TestQuartersReport(TestCase):
                 "name": "Test",
                 "quarters": [
                     {
-                        "year": 2020,
+                        "year": "2020",
                         "Q1": 20.0,
+                        "Q2": "NA",
+                        "Q3": 20.0,
+                        "Q4": "NA",
+                        "full_year": "NA",
+                        "vs": "NA",
+                    },
+                    {
+                        "year": "2021",
+                        "Q1": "NA",
                         "Q2": "NA",
                         "Q3": "NA",
                         "Q4": "NA",
+                        "Full Year": "NA",
+                        "vs": "NA",
+                    },
+                ],
+            },
+            "peers_comparison_data": [
+                {
+                    "id": "2",
+                    "name": "Company",
+                    "quarters": [
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": 22.0,
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "full_year": "NA",
+                            "vs": "NA",
+                        },
+                        {
+                            "year": "2020",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                            "vs": "NA",
+                        },
+                    ],
+                }
+            ],
+            "averages": [
+                {"Q1": 20.0, "Q2": "NA", "Q3": 20.0, "Q4": "NA", "Full Year": "NA"},
+                {
+                    "Q1": "NA",
+                    "Q2": 22.0,
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "vs": "NA",
+                    "Full Year": "NA",
+                },
+            ],
+        }
+
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    def test_get_quarters_peers_with_base_scenario_when_is_sucessful_should_return_quarters_report(
+        self, mock_set_company_permissions
+    ):
+        records = self.records.copy()
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Actuals-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q3",
+                "average": 2,
+                "full_year_average": 3,
+                "full_year": 0,
+                "count_periods": 2,
+            },
+        )
+        self.mock_repository.get_metric_records_by_quarters.return_value = records
+        self.mock_repository.get_functions_metric.return_value = {"actuals-revenue": {}}
+        expected_response = {
+            "subheaders": self.response.get("subheaders"),
+            "headers": self.response.get("headers"),
+            "company_comparison_data": {
+                "id": "1",
+                "name": "Test",
+                "quarters": [
+                    {
+                        "year": 2020,
+                        "Q1": 20.0,
+                        "Q2": "NA",
+                        "Q3": 20.0,
+                        "Q4": "NA",
                         "full_year": "NA",
-                        "3": 20.0,
                     },
                     {
                         "year": 2021,
@@ -161,10 +266,9 @@ class TestQuartersReport(TestCase):
             "averages": [
                 {"Q1": 2.0},
                 {"Q2": "NA"},
-                {"Q3": "NA"},
+                {"Q3": 2.0},
                 {"Q4": "NA"},
                 {"Full Year": 3.0},
-                {"3": 2.0},
                 {"Q1": "NA"},
                 {"Q2": 9.0},
                 {"Q3": "NA"},
@@ -184,7 +288,7 @@ class TestQuartersReport(TestCase):
             False,
             True,
         )
-
+        print(peers)
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
 
@@ -214,136 +318,92 @@ class TestQuartersReport(TestCase):
         mock_set_company_permissions.assert_called()
         mock_anonymize_companies_values.assert_called()
 
-    # @mock.patch(
-    #     "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
-    # )
-    # def test_get_quarters_peers_with_actuals_plus_budget_scenario_should_return_quarters_report(
-    #     self, mock_set_company_permissions
-    # ):
-    #     records = self.records.copy()
-    #     records.append(
-    #         {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "scenario": "Budget-2020",
-    #             "metric": "Revenue",
-    #             "year": 2020,
-    #             "value": 20,
-    #             "period_name": "3",
-    #             "average": 2,
-    #             "full_year_average": 3,
-    #             "full_year": 0,
-    #             "count_periods": 2,
-    #         },
-    #     )
-    #     self.mock_repository.get_actuals_plus_budget_metrics_query.return_value = (
-    #         records
-    #     )
-    #     expected_peers = {
-    #         "subheaders": [
-    #             "Company",
-    #             "2020",
-    #             "",
-    #             "",
-    #             "",
-    #             "",
-    #             "2021",
-    #             "",
-    #             "",
-    #             "",
-    #             "",
-    #             "",
-    #         ],
-    #         "headers": [
-    #             "",
-    #             "Q1",
-    #             "Q2",
-    #             "Q3",
-    #             "Q4",
-    #             "Full Year",
-    #             "Q1",
-    #             "Q2",
-    #             "Q3",
-    #             "Q4",
-    #             "Full Year",
-    #             "vs",
-    #         ],
-    #         "company_comparison_data": {
-    #             "id": "1",
-    #             "name": "Test",
-    #             "quarters": [
-    #                 {
-    #                     "year": "2020",
-    #                     "Q1": 20.0,
-    #                     "Q2": "NA",
-    #                     "Q3": "NA",
-    #                     "Q4": "NA",
-    #                     "full_year": 20.0,
-    #                 },
-    #                 {
-    #                     "year": "2021",
-    #                     "Q1": "NA",
-    #                     "Q2": "NA",
-    #                     "Q3": "NA",
-    #                     "Q4": "NA",
-    #                     "Full Year": "NA",
-    #                     "vs": "NA",
-    #                 },
-    #             ],
-    #         },
-    #         "peers_comparison_data": [
-    #             {
-    #                 "id": "2",
-    #                 "name": "Company",
-    #                 "quarters": [
-    #                     {
-    #                         "year": "2021",
-    #                         "Q1": "NA",
-    #                         "Q2": 22.0,
-    #                         "Q3": "NA",
-    #                         "Q4": "NA",
-    #                         "full_year": 22.0,
-    #                     },
-    #                     {
-    #                         "year": "2020",
-    #                         "Q1": "NA",
-    #                         "Q2": "NA",
-    #                         "Q3": "NA",
-    #                         "Q4": "NA",
-    #                         "Full Year": "NA",
-    #                         "vs": "NA",
-    #                     },
-    #                 ],
-    #             }
-    #         ],
-    #         "averages": [
-    #             {"Q1": 20.0},
-    #             {"Q2": "NA"},
-    #             {"Q3": "NA"},
-    #             {"Q4": "NA"},
-    #             {"Full Year": 20.0},
-    #             {"Q1": "NA"},
-    #             {"Q2": 22.0},
-    #             {"Q3": "NA"},
-    #             {"Q4": "NA"},
-    #             {"Full Year": 22.0},
-    #             {"vs": "NA"},
-    #         ],
-    #     }
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    def test_get_quarters_peers_with_actuals_plus_budget_scenario_should_return_quarters_report(
+        self, mock_set_company_permissions
+    ):
+        records = self.records.copy()
+        records.append(
+            {
+                "id": "1",
+                "name": "Test",
+                "scenario": "Budget-2020",
+                "metric": "Revenue",
+                "year": 2020,
+                "value": 20,
+                "period_name": "Q3",
+                "average": 2,
+                "full_year_average": 3,
+                "full_year": 0,
+                "count_periods": 2,
+            },
+        )
+        self.mock_repository.get_quarters_year_to_year_records.return_value = records
 
-    #     peers = self.report_instance.get_quarters_peers(
-    #         "1",
-    #         "user",
-    #         "year_year",
-    #         "revenue",
-    #         "actuals_budget",
-    #         ["2020", "2021"],
-    #         False,
-    #         True,
-    #     )
+        peers = self.report_instance.get_quarters_peers(
+            "1",
+            "user",
+            "year_year",
+            "revenue",
+            "actuals_budget",
+            ["2020", "2021"],
+            False,
+            True,
+        )
 
-    #     mock_set_company_permissions.assert_called()
-    #     self.assertEqual(peers, expected_peers)
+        mock_set_company_permissions.assert_called()
+        self.assertEqual(peers, self.response)
+
+    @mock.patch(
+        "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
+    )
+    def test_get_quarters_peers_actuals_plus_budget_with_full_year_should_return_quarters_report(
+        self, mock_set_company_permissions
+    ):
+        records = self.records.copy()
+        records.extend(self.quarters_records)
+        self.mock_repository.get_quarters_year_to_year_records.return_value = records
+        expected_response = {
+            "subheaders": self.response.get("subheaders"),
+            "headers": self.response.get("headers"),
+            "company_comparison_data": {
+                "id": "1",
+                "name": "Test",
+                "quarters": [
+                    {
+                        "year": "2020",
+                        "Q1": 20.0,
+                        "Q2": 20.0,
+                        "Q3": 20.0,
+                        "Q4": 20.0,
+                        "full_year": 80.0,
+                        "vs": "NA",
+                    },
+                    self.response.get("company_comparison_data").get("quarters")[1],
+                ],
+            },
+            "peers_comparison_data": self.response.get("peers_comparison_data"),
+            "averages": [
+                {"Q1": 20.0, "Q2": 20.0, "Q3": 20.0, "Q4": 20.0, "Full Year": 80.0},
+                self.response.get("averages")[1],
+            ],
+        }
+
+        peers = self.report_instance.get_quarters_peers(
+            "1",
+            "user",
+            "year_year",
+            "revenue",
+            "actuals_budget",
+            ["2020", "2021"],
+            False,
+            True,
+        )
+        print(peers)
+        mock_set_company_permissions.assert_called()
+        self.assertEqual(peers, expected_response)
 
     @mock.patch(
         "src.utils.company_anonymization.CompanyAnonymization.set_company_permissions"
@@ -447,3 +507,11 @@ class TestQuartersReport(TestCase):
         )
 
         self.assertEqual(calculated_averages, expected_average)
+
+    def test_filter_companies_should_return_filtered_companies(self):
+        years = [2021]
+        companies = [{"id": 1, "quarters": [{"year": 2021}]}]
+
+        filtered_companies = self.report_instance.filter_companies(companies, years)
+
+        self.assertEqual(filtered_companies, companies)

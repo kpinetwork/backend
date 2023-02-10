@@ -416,13 +416,6 @@ class QuartersReport:
                 averages.append({key: value})
         return averages
 
-    def __get_metric_name(self, metric: str) -> str:
-        list_of_metrics = list(METRICS_CONFIG_NAME.values())
-        list_of_metrics_alias = list(METRICS_CONFIG_NAME.keys())
-        index = list_of_metrics.index(metric)
-        metric_alias = list_of_metrics_alias[index]
-        return metric_alias
-
     def get_peers_and_averages(
         self, metric: str, scenario_type: str, years: list, conditions
     ) -> tuple:

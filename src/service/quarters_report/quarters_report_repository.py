@@ -444,9 +444,18 @@ class QuartersReportRepository:
         )
         return query
 
-    def __get_full_year_average_subquery_calculated_metrics(
-        self, select_value, main_table
-    ):
+    def __get_full_year_average_base_query(
+        self, base_table, select_conditions, conditions
+    ) -> str:
+        return (
+            self.query_builder.add_table_name(f"({base_table}) as sum_quarters")
+            .add_select_conditions(select_conditions)
+            .add_sql_group_by_condition(conditions)
+            .build()
+            .get_query()
+        )
+
+    def __get_full_year_avg_subquery(self, select_value, main_table):
         conditions = ["sum_quarters.scenario"]
         select_conditions = conditions.copy()
         select_conditions.extend(["SUM(sum_quarters.value) as total"])
@@ -454,28 +463,29 @@ class QuartersReportRepository:
         base_table = self.__get_base_table_for_calculated_metrics(
             select_value, main_table
         )
-        query = (
-            self.query_builder.add_table_name(f"({base_table}) as sum_quarters")
-            .add_select_conditions(select_conditions)
-            .add_sql_group_by_condition(conditions)
-            .build()
-            .get_query()
+        query = self.__get_full_year_average_base_query(
+            base_table, select_conditions, conditions
         )
         return query + "HAVING count(sum_quarters.period_name ) = 4"
 
-    def __get_full_year_table__calculated_metrics(self, select_value, main_table):
-        conditions = ["full_year.scenario"]
-        select_conditions = conditions.copy()
-        select_conditions.extend(["AVG(full_year.total) as full_year_average"])
-        sum_table = self.__get_full_year_average_subquery_calculated_metrics(
-            select_value, main_table
-        )
-        query = (
+    def __get_full_year_table_base_query(
+        self, sum_table, select_conditions, conditions
+    ):
+        return (
             self.query_builder.add_table_name(f"({sum_table}) as full_year")
             .add_select_conditions(select_conditions)
             .add_sql_group_by_condition(conditions)
             .build()
             .get_query()
+        )
+
+    def __get_full_year_table__calculated_metrics(self, select_value, main_table):
+        conditions = ["full_year.scenario"]
+        select_conditions = conditions.copy()
+        select_conditions.extend(["AVG(full_year.total) as full_year_average"])
+        sum_table = self.__get_full_year_avg_subquery(select_value, main_table)
+        query = self.__get_full_year_table_base_query(
+            sum_table, select_conditions, conditions
         )
         return query
 
