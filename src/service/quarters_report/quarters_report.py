@@ -207,39 +207,39 @@ class QuartersReport:
         return data
 
     def get_records(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        period: str,
+        filters: dict,
     ) -> dict:
         standard = self.get_standard_metrics(scenario_type, years)
         if metric in standard:
             records = self.repository.get_metric_records_by_quarters(
-                "Year-to-year", metric, scenario_type, years, filters
+                report_type, metric, scenario_type, years, period, filters
             )
-            return self.process_standard_metrics(records, years)
+            return self.process_standard_metrics(records, years, period)
 
-    def __build_default_quarters(
-        self, includes_comparison: bool = False, is_average: bool = False
-    ) -> dict:
+    def __build_default_quarters(self, includes_comparison: bool = False) -> dict:
         default_quarters = {
             "Q1": "NA",
             "Q2": "NA",
             "Q3": "NA",
             "Q4": "NA",
-            "full_year": "NA",
+            "Full Year": "NA",
         }
-        if is_average:
-            default_quarters.pop("full_year")
-            default_quarters.update({"Full Year": "NA"})
+
         if includes_comparison:
             default_quarters.update({"vs": "NA"})
         return default_quarters
 
     def __build_default_average_object(self, years) -> dict:
-        averages = {years[0]: self.__build_default_quarters(is_average=True)}
+        averages = {years[0]: self.__build_default_quarters()}
         averages.update(
             {
-                year: self.__build_default_quarters(
-                    includes_comparison=True, is_average=True
-                )
+                year: self.__build_default_quarters(includes_comparison=True)
                 for year in years[1:]
             }
         )
@@ -254,25 +254,29 @@ class QuartersReport:
         )
         return default_quarters_object
 
-    def __get_default_quarters(self, company: dict, years: list) -> list:
+    def __get_default_quarters(
+        self, company: dict, years: list, full_year_count: int = 4
+    ) -> list:
         default_quarters = [
             self.__build_default_quarters_object(year, includes_comparison=True)
             for year in years[1:]
         ]
         default_quarters.insert(0, self.__build_default_quarters_object(years[0]))
         index = years.index(str(company.get("year")))
-        self.__update_quarters(default_quarters, index, company)
+        self.__update_quarters(default_quarters, index, company, full_year_count)
 
         return default_quarters
 
-    def __update_quarters(self, quarters: list, index: int, company: dict) -> None:
+    def __update_quarters(
+        self, quarters: list, index: int, company: dict, full_year_count: int = 4
+    ) -> None:
         quarters[index].update(
             {
                 company.get("period_name"): self.__get_valid_value(
                     company.get("value")
                 ),
-                "full_year": self.__get_valid_value(company.get("full_year"))
-                if company.get("quarters_count") == 4
+                "Full Year": self.__get_valid_value(company.get("full_year"))
+                if company.get("quarters_count") == full_year_count
                 else "NA",
             }
         )
@@ -301,11 +305,18 @@ class QuartersReport:
     def __get_valid_value(self, value: float) -> Union[float, str]:
         return round(float(value), 2) if value else "NA"
 
-    def process_standard_metrics(self, records: list, years: list) -> dict:
+    def __get_full_year_count(self, period_type: str = None) -> int:
+        periods = ["Q1", "Q2", "Q3", "Q4"]
+        return periods.index(period_type) + 1 if period_type else len(periods)
+
+    def process_standard_metrics(
+        self, records: list, years: list, period_type: str = None
+    ) -> dict:
         data = defaultdict(dict)
         years.sort()
         averages = self.__build_default_average_object(years)
         comparison_object = {str(year): dict() for year in years}
+        full_year_count = self.__get_full_year_count(period_type)
         for company in records:
             company_id = company.get("id")
             year = company.get("year")
@@ -321,11 +332,15 @@ class QuartersReport:
                 data[company_id] = {
                     "id": company.get("id"),
                     "name": company.get("name"),
-                    "quarters": self.__get_default_quarters(company, years),
+                    "quarters": self.__get_default_quarters(
+                        company, years, full_year_count
+                    ),
                 }
             else:
                 quarters = data.get(company_id).get("quarters")
-                self.__update_quarters(quarters, years.index(str(year)), company)
+                self.__update_quarters(
+                    quarters, years.index(str(year)), company, full_year_count
+                )
                 comparison = (
                     data.get(company_id)
                     .get("quarters")[years.index(str(year))]
@@ -362,10 +377,18 @@ class QuartersReport:
         return int(reduce(lambda a, b: a + b, values) / len(values))
 
     def get_quarters_records(
-        self, metric: str, scenario_type: str, years: list, **conditions
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        period: str,
+        **conditions,
     ) -> dict:
         filters = self.repository.add_filters(**conditions)
-        data = self.get_records(metric, scenario_type, years, filters)
+        data = self.get_records(
+            report_type, metric, scenario_type, years, period, filters
+        )
         return data
 
     def generate_headers(self, years):
@@ -383,10 +406,18 @@ class QuartersReport:
         return headers, subHeaders
 
     def get_actuals_or_budget_data(
-        self, metric, scenario_type, years, conditions
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: str,
+        period: str,
+        conditions,
     ) -> tuple:
         scenario_type = scenario_type.capitalize()
-        data = self.get_quarters_records(metric, scenario_type, years, **conditions)
+        data = self.get_quarters_records(
+            report_type, metric, scenario_type, years, period, **conditions
+        )
         default_averages = data.pop("averages")
         peers = list(data.values())
         averages = self.__get_averages_for_actuals_or_budget_data(default_averages)
@@ -408,13 +439,19 @@ class QuartersReport:
         return averages
 
     def get_peers_and_averages(
-        self, metric: str, scenario_type: str, years: list, conditions
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        conditions,
+        report_type: str = None,
+        period: str = None,
     ) -> tuple:
         if scenario_type == "actuals_budget":
             peers, averages = self.actuals_budget_data(metric, years, conditions)
         else:
             peers, averages = self.get_actuals_or_budget_data(
-                metric, scenario_type, years, conditions
+                report_type, metric, scenario_type, years, period, conditions
             )
         return peers, averages
 
@@ -458,6 +495,7 @@ class QuartersReport:
         metric: str,
         scenario_type: str,
         years: list,
+        period: str,
         from_main: bool,
         access: bool,
         **conditions,
@@ -468,7 +506,7 @@ class QuartersReport:
             self.company_anonymization.set_company_permissions(username)
 
             peers, averages = self.get_peers_and_averages(
-                metric, scenario_type, years, conditions
+                metric, scenario_type, years, conditions, report_type, period
             )
 
             if not access and self.need_to_be_anonymized(metric):
@@ -482,8 +520,8 @@ class QuartersReport:
             headers, subheaders = self.generate_headers(years)
 
             return {
-                "subheaders": headers,
-                "headers": subheaders,
+                "headers": headers,
+                "subheaders": subheaders,
                 "company_comparison_data": company,
                 "peers_comparison_data": peers,
                 "averages": averages,

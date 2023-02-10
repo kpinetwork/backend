@@ -97,7 +97,7 @@ class TestQuartersReport(TestCase):
             },
         ]
         self.response = {
-            "subheaders": [
+            "headers": [
                 "Company",
                 "2020",
                 "",
@@ -111,7 +111,7 @@ class TestQuartersReport(TestCase):
                 "",
                 "",
             ],
-            "headers": [
+            "subheaders": [
                 "",
                 "Q1",
                 "Q2",
@@ -213,8 +213,8 @@ class TestQuartersReport(TestCase):
         self.mock_repository.get_metric_records_by_quarters.return_value = records
         self.mock_repository.get_functions_metric.return_value = {"actuals-revenue": {}}
         expected_response = {
-            "subheaders": self.response.get("subheaders"),
             "headers": self.response.get("headers"),
+            "subheaders": self.response.get("subheaders"),
             "company_comparison_data": {
                 "id": "1",
                 "name": "Test",
@@ -225,7 +225,7 @@ class TestQuartersReport(TestCase):
                         "Q2": "NA",
                         "Q3": 20.0,
                         "Q4": "NA",
-                        "full_year": "NA",
+                        "Full Year": "NA",
                     },
                     {
                         "year": 2021,
@@ -233,7 +233,7 @@ class TestQuartersReport(TestCase):
                         "Q2": "NA",
                         "Q3": "NA",
                         "Q4": "NA",
-                        "full_year": "NA",
+                        "Full Year": "NA",
                         "vs": "NA",
                     },
                 ],
@@ -249,7 +249,7 @@ class TestQuartersReport(TestCase):
                             "Q2": "NA",
                             "Q3": "NA",
                             "Q4": "NA",
-                            "full_year": "NA",
+                            "Full Year": "NA",
                         },
                         {
                             "year": 2021,
@@ -257,7 +257,7 @@ class TestQuartersReport(TestCase):
                             "Q2": 22.0,
                             "Q3": "NA",
                             "Q4": "NA",
-                            "full_year": "NA",
+                            "Full Year": "NA",
                             "vs": "NA",
                         },
                     ],
@@ -285,10 +285,11 @@ class TestQuartersReport(TestCase):
             "revenue",
             "actuals",
             ["2020", "2021"],
+            None,
             False,
             True,
         )
-        print(peers)
+
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
 
@@ -311,6 +312,7 @@ class TestQuartersReport(TestCase):
             "revenue",
             "actuals",
             ["2020", "2021"],
+            None,
             False,
             False,
         )
@@ -342,6 +344,7 @@ class TestQuartersReport(TestCase):
         )
         expected_value = self.response.copy()
         expected_value["company_comparison_data"]["quarters"][0]["Q3"] = "NA"
+
         expected_value["averages"][0]["Q3"] = "NA"
         self.mock_repository.get_quarters_year_to_year_records.return_value = records
 
@@ -352,10 +355,10 @@ class TestQuartersReport(TestCase):
             "revenue",
             "actuals_budget",
             ["2020", "2021"],
+            None,
             False,
             True,
         )
-
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_value)
 
@@ -369,8 +372,8 @@ class TestQuartersReport(TestCase):
         records.extend(self.quarters_records)
         self.mock_repository.get_quarters_year_to_year_records.return_value = records
         expected_response = {
-            "subheaders": self.response.get("subheaders"),
             "headers": self.response.get("headers"),
+            "subheaders": self.response.get("subheaders"),
             "company_comparison_data": {
                 "id": "1",
                 "name": "Test",
@@ -387,7 +390,32 @@ class TestQuartersReport(TestCase):
                     self.response.get("company_comparison_data").get("quarters")[1],
                 ],
             },
-            "peers_comparison_data": self.response.get("peers_comparison_data"),
+            "peers_comparison_data": [
+                {
+                    "id": "2",
+                    "name": "Company",
+                    "quarters": [
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": 22.0,
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "full_year": "NA",
+                            "vs": "NA",
+                        },
+                        {
+                            "year": "2020",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                            "vs": "NA",
+                        },
+                    ],
+                }
+            ],
             "averages": [
                 {"Q1": 20.0, "Q2": 20.0, "Q3": 20.0, "Q4": 20.0, "Full Year": 80.0},
                 self.response.get("averages")[1],
@@ -401,10 +429,11 @@ class TestQuartersReport(TestCase):
             "revenue",
             "actuals_budget",
             ["2020", "2021"],
+            None,
             False,
             True,
         )
-        print(peers)
+
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
 
@@ -424,6 +453,7 @@ class TestQuartersReport(TestCase):
                 "revenue",
                 "actuals",
                 ["2020", "2021"],
+                None,
                 False,
                 True,
             )
@@ -444,7 +474,7 @@ class TestQuartersReport(TestCase):
                         "Q2": "$20 million - $40 million",
                         "Q3": "$20 million - $40 million",
                         "Q4": "$20 million - $40 million",
-                        "full_year": "$20 million - $40 million",
+                        "Full Year": "$20 million - $40 million",
                     }
                 ],
             }
@@ -457,7 +487,7 @@ class TestQuartersReport(TestCase):
                 "id": "123",
                 "name": "Company A",
                 "quarters": [
-                    {"year": 2021, "Q1": 2, "Q2": 2, "Q3": 3, "Q4": 3, "full_year": 10}
+                    {"year": 2021, "Q1": 2, "Q2": 2, "Q3": 3, "Q4": 3, "Full Year": 10}
                 ],
             }
         ]
