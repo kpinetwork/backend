@@ -152,6 +152,7 @@ class QuartersReportRepository:
     def get_averages_of_quarters_total_query(
         self, metric: str, scenario_type: str, years: list, filters: dict
     ) -> str:
+        table_alias = "full_year"
         where_conditions = self.__get_base_where_conditions(
             metric, scenario_type, years, filters
         )
@@ -169,11 +170,14 @@ class QuartersReportRepository:
         full_year_table = " ".join([full_year_table, self.__get_having_condition()])
 
         query = (
-            self.query_builder.add_table_name(f"( {full_year_table} ) as full_year")
+            self.query_builder.add_table_name(f"( {full_year_table} ) as {table_alias}")
             .add_select_conditions(
-                ["full_year.scenario", "AVG(full_year.total) as full_year_average"]
+                [
+                    f"{table_alias}.scenario",
+                    f"AVG({table_alias}.total) as full_year_average",
+                ]
             )
-            .add_sql_group_by_condition(["full_year.scenario"])
+            .add_sql_group_by_condition([f"{table_alias}.scenario"])
             .build()
             .get_query()
         )
@@ -576,31 +580,25 @@ class QuartersReportRepository:
         self, select_value_condition: list, metric: str, years: list, filters: dict
     ) -> list:
         try:
+            table_alias = "main_table"
             columns = [
-                "main_table.id",
-                "main_table.name",
-                "main_table.scenario",
-                "main_table.metric",
-                "main_table.year",
-                "main_table.period_name",
+                f"{table_alias}.id",
+                f"{table_alias}.name",
+                f"{table_alias}.scenario",
+                f"{table_alias}.metric",
+                f"{table_alias}.year",
+                f"{table_alias}.period_name",
             ]
             select_options = columns.copy()
             select_options.extend(select_value_condition)
+            columns.append(
+                f"{table_alias}.value",
+            )
             table = self.get_actuals_plus_main_table_subquery(metric, years, filters)
             query = (
-                self.query_builder.add_table_name(f"( {table} ) as main_table")
+                self.query_builder.add_table_name(f"( {table} ) as {table_alias}")
                 .add_select_conditions(select_options)
-                .add_sql_group_by_condition(
-                    [
-                        "main_table.id",
-                        "main_table.name",
-                        "main_table.scenario",
-                        "main_table.metric",
-                        "main_table.year",
-                        "main_table.period_name",
-                        "main_table.value",
-                    ]
-                )
+                .add_sql_group_by_condition(columns)
                 .build()
                 .get_query()
             )

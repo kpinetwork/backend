@@ -218,7 +218,7 @@ class QuartersReport:
 
     def __build_default_quarters(
         self, includes_comparison: bool = False, is_average: bool = False
-    ) -> list:
+    ) -> dict:
         default_quarters = {
             "Q1": "NA",
             "Q2": "NA",
@@ -280,7 +280,7 @@ class QuartersReport:
             comparison_value = self.__get_comparison_percentage(index, quarters)
             quarters[index].update({"vs": comparison_value})
 
-    def __get_comparison_percentage(self, index, quarters) -> float:
+    def __get_comparison_percentage(self, index, quarters) -> Union[str, float]:
         try:
             prev_full_year = quarters[index - 1].get("full_year")
             full_year = quarters[index].get("full_year")
@@ -368,15 +368,6 @@ class QuartersReport:
         data = self.get_records(metric, scenario_type, years, filters)
         return data
 
-    # def sort_peers(self, data: dict) -> list:
-    #     return sorted(
-    #         list(data.values()),
-    #         key=lambda x: (
-    #             self.company_anonymization.is_anonymized(x.get("name", "")),
-    #             x.get("name", "").lower(),
-    #         ),
-    #     )
-
     def generate_headers(self, years):
         sorted_years = sorted(years)
         headers = ["Company"]
@@ -446,7 +437,7 @@ class QuartersReport:
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
 
-    def anonymized_metric(self, metrics: list, ranges: list) -> dict:
+    def anonymized_metric(self, metrics: list, ranges: list) -> list:
         keys = list(self.__build_default_quarters().keys())
         quarters = [self.__update_metric(metric, ranges, keys) for metric in metrics]
         return quarters
