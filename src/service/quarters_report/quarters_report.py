@@ -154,6 +154,7 @@ class QuartersReport:
                 else:
                     averages_dict[company_id][next_year].append(next_quarter_data)
         elif subheader_years.index(year) == (len(subheader_years) - 1):
+            next_year = str(int(year) + 1)
             year_quarters = subheaders_dict.get(year)
             quarter_data = (
                 self.__get_valid_value(company.get("value"))
@@ -546,7 +547,6 @@ class QuartersReport:
                 company_updated = data.get(company_id)
                 company_updated.update({"quarters": quarters})
                 data.get(company_id).update(company_updated)
-
         if report_type == "last_twelve_months":
             full_year_ltm = self.__update_full_year_ltm(data, averages_dict, years)
             self.__update_comparison_ltm(
