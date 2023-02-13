@@ -45,6 +45,7 @@ def handler(event, _):
         scenario = None
         metric = None
         years = []
+        period = None
         from_main = False
         conditions = dict()
 
@@ -56,6 +57,7 @@ def handler(event, _):
             scenario = params.get("scenario", scenario)
             report_type = params.get("report_type", report_type)
             years = get_list_param(params.get("years"))
+            period = params.get("period", period)
 
         username = get_username_from_user_id(user_id)
         report = report_service.get_quarters_peers(
@@ -65,6 +67,7 @@ def handler(event, _):
             metric,
             scenario,
             years,
+            period,
             from_main,
             access,
             **conditions

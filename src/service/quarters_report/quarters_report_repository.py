@@ -13,6 +13,7 @@ class QuartersReportRepository:
         self.query_builder = query_builder
         self.response_sql = response_sql
         self.logger = logger
+        self.periods = ["Q1", "Q2", "Q3", "Q4"]
 
     def __get_arguments(
         self,
@@ -20,6 +21,8 @@ class QuartersReportRepository:
         metric: str = None,
         scenario_type: str = None,
         years: list = [],
+        report_type: str = None,
+        period: str = None,
     ) -> dict:
         arguments = {"filters": filters}
         if metric:
@@ -28,6 +31,10 @@ class QuartersReportRepository:
             arguments["scenario_type"] = scenario_type
         if years:
             arguments["years"] = years
+        if report_type:
+            arguments["report_type"] = report_type
+        if period:
+            arguments["period"] = period
         return arguments
 
     def __get_metric_names_config(
@@ -48,21 +55,42 @@ class QuartersReportRepository:
                 filters[k] = values
         return filters
 
+    def __get_periods_conditions_array(self, index: int = None) -> list:
+        periods_list = self.periods if index is None else self.periods[: index + 1]
+        return [f"'{period}'" for period in periods_list]
+
     def __get_base_where_conditions(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> dict:
         from_count = len(scenario_type) + 2
+        periods_condition = self.__get_periods_conditions_array()
+
+        if report_type == "year_to_date":
+            index = self.periods.index(period)
+            periods_condition = self.__get_periods_conditions_array(index)
         where_conditions = {
             f"{TableNames.SCENARIO}.type": f"'{scenario_type}'",
-            f"{TableNames.PERIOD}.period_name": ["'Q1'", "'Q2'", "'Q3'", "'Q4'"],
+            f"{TableNames.PERIOD}.period_name": periods_condition,
             f"{TableNames.METRIC}.name": f"'{metric}'",
             f"substring({TableNames.SCENARIO}.name from {from_count})::int": years,
         }
         where_conditions.update(filters)
+
         return where_conditions
 
-    def __get_having_condition(self) -> str:
-        return f" HAVING count({TableNames.PERIOD}.period_name ) = 4 "
+    def __get_having_condition(
+        self, table_name: str, report_type: str = None, period: str = None
+    ) -> str:
+        count = str(len(self.periods))
+        if report_type == "year_to_date":
+            count = str(self.periods.index(period) + 1)
+        return f" HAVING count({table_name}.period_name ) = {count} "
 
     def get_base_query(
         self, select_conditions: list, where_conditions: dict, group_by_conditions: list
@@ -109,10 +137,16 @@ class QuartersReportRepository:
         )
 
     def get_quarters_total_query(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> str:
         where_conditions = self.__get_base_where_conditions(
-            metric, scenario_type, years, filters
+            metric, scenario_type, years, filters, report_type, period
         )
         select_conditions = [
             f"{TableNames.COMPANY}.id as company_id",
@@ -130,10 +164,16 @@ class QuartersReportRepository:
         )
 
     def get_averages_by_quarters_query(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> str:
         where_conditions = self.__get_base_where_conditions(
-            metric, scenario_type, years, filters
+            metric, scenario_type, years, filters, report_type, period
         )
         select_conditions = [
             f"{TableNames.SCENARIO}.name as scenario",
@@ -150,11 +190,17 @@ class QuartersReportRepository:
         )
 
     def get_averages_of_quarters_total_query(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> str:
         table_alias = "full_year"
         where_conditions = self.__get_base_where_conditions(
-            metric, scenario_type, years, filters
+            metric, scenario_type, years, filters, report_type, period
         )
         select_conditions = [
             f"{TableNames.SCENARIO}.name as scenario",
@@ -167,7 +213,12 @@ class QuartersReportRepository:
         full_year_table = self.get_base_query(
             select_conditions, where_conditions, group_by_conditions
         )
-        full_year_table = " ".join([full_year_table, self.__get_having_condition()])
+        full_year_table = " ".join(
+            [
+                full_year_table,
+                self.__get_having_condition(TableNames.PERIOD, report_type, period),
+            ]
+        )
 
         query = (
             self.query_builder.add_table_name(f"( {full_year_table} ) as {table_alias}")
@@ -185,7 +236,13 @@ class QuartersReportRepository:
         return query
 
     def get_base_metric_records(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         try:
             from_count = len(scenario_type) + 2
@@ -203,17 +260,17 @@ class QuartersReportRepository:
                 "total_quarters.quarters_count",
             ]
             where_conditions = self.__get_base_where_conditions(
-                metric, scenario_type, years, filters
+                metric, scenario_type, years, filters, report_type, period
             )
 
             full_year_table = self.get_quarters_total_query(
-                metric, scenario_type, years, filters
+                metric, scenario_type, years, filters, report_type, period
             )
             quarters_averages_table = self.get_averages_by_quarters_query(
-                metric, scenario_type, years, filters
+                metric, scenario_type, years, filters, report_type, period
             )
             full_year_averages_table = self.get_averages_of_quarters_total_query(
-                metric, scenario_type, years, filters
+                metric, scenario_type, years, filters, report_type, period
             )
             full_year_join_condition = f"""total_quarters.company_id
             AND {TableNames.SCENARIO}.name = total_quarters.scenario """
@@ -296,9 +353,23 @@ class QuartersReportRepository:
             return []
 
     def get_actuals_plus_budget_metrics_query(
-        self, metric: str, years: list, filters: dict
+        self,
+        metric: str,
+        years: list,
+        filters: dict,
+        scenario_type: str,
+        report_type: str,
+        period: str,
     ) -> list:
         try:
+            period_index = self.periods.index(period) if period is not None else None
+            periods_condition = self.__get_periods_conditions_array(period_index)
+            where_conditions = {
+                f"{TableNames.PERIOD}.period_name": periods_condition,
+                f"{TableNames.METRIC}.name": f"'{metric}'",
+                f"substring({TableNames.SCENARIO}.name from '.*([0-9]{{4}})$')::int": years,
+            }
+            where_conditions.update(filters)
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
@@ -343,18 +414,7 @@ class QuartersReportRepository:
                         }
                     },
                 )
-                .add_sql_where_equal_condition(
-                    {
-                        f"{TableNames.PERIOD}.period_name": [
-                            "'Q1'",
-                            "'Q2'",
-                            "'Q3'",
-                            "'Q4'",
-                        ],
-                        f"{TableNames.METRIC}.name": f"'{metric}'",
-                        f"substring({TableNames.SCENARIO}.name from '.*([0-9]{{4}})$')::int": years,
-                    }
-                )
+                .add_sql_where_equal_condition(where_conditions)
                 .add_sql_group_by_condition(
                     [
                         f"{TableNames.COMPANY}.id",
@@ -374,7 +434,12 @@ class QuartersReportRepository:
             return []
 
     def get_base_functions_metric(
-        self, filters: dict, scenario_type: str, years: list
+        self,
+        filters: dict,
+        scenario_type: str,
+        years: list,
+        report_type: str = None,
+        period: str = None,
     ) -> dict:
         metric_names = self.__get_metric_names_config()
 
@@ -382,7 +447,12 @@ class QuartersReportRepository:
             f"{scenario_type}-{metric}": {
                 "function": self.get_base_metric_records,
                 "arguments": self.__get_arguments(
-                    filters, metric_names[metric], scenario_type, years
+                    filters,
+                    metric_names[metric],
+                    scenario_type,
+                    years,
+                    report_type,
+                    period,
                 ),
             }
             for metric in metric_names
@@ -459,7 +529,9 @@ class QuartersReportRepository:
             .get_query()
         )
 
-    def __get_full_year_avg_subquery(self, select_value, main_table):
+    def __get_full_year_avg_subquery(
+        self, select_value, main_table, report_type: str = None, period: str = None
+    ):
         conditions = ["sum_quarters.scenario"]
         select_conditions = conditions.copy()
         select_conditions.extend(["SUM(sum_quarters.value) as total"])
@@ -470,7 +542,10 @@ class QuartersReportRepository:
         query = self.__get_full_year_average_base_query(
             base_table, select_conditions, conditions
         )
-        return query + "HAVING count(sum_quarters.period_name ) = 4"
+        having_condition = self.__get_having_condition(
+            "sum_quarters", report_type, period
+        )
+        return query + having_condition
 
     def __get_full_year_table_base_query(
         self, sum_table, select_conditions, conditions
@@ -483,18 +558,29 @@ class QuartersReportRepository:
             .get_query()
         )
 
-    def __get_full_year_table__calculated_metrics(self, select_value, main_table):
+    def __get_full_year_table__calculated_metrics(
+        self, select_value, main_table, report_type: str = None, period: str = None
+    ):
         conditions = ["full_year.scenario"]
         select_conditions = conditions.copy()
         select_conditions.extend(["AVG(full_year.total) as full_year_average"])
-        sum_table = self.__get_full_year_avg_subquery(select_value, main_table)
+        sum_table = self.__get_full_year_avg_subquery(
+            select_value, main_table, report_type, period
+        )
         query = self.__get_full_year_table_base_query(
             sum_table, select_conditions, conditions
         )
         return query
 
     def get_calculated_metrics_with_base_scenarios(
-        self, select_value: list, scenario: str, metric: str, years: list, filters: dict
+        self,
+        select_value: list,
+        scenario: str,
+        metric: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ):
         try:
             table_alias = "main_table"
@@ -522,7 +608,7 @@ class QuartersReportRepository:
             """
             scenario_condition = {f"{TableNames.SCENARIO}.type": f"'{scenario}'"}
             main_table = self.get_actuals_plus_main_table_subquery(
-                metric, years, filters, scenario_condition
+                metric, years, filters, period, scenario_condition
             )
             full_year_table = self.__get_full_year_table_calculated_metrics(
                 select_value, main_table
@@ -535,7 +621,7 @@ class QuartersReportRepository:
             )
 
             average_full_year_table = self.__get_full_year_table__calculated_metrics(
-                select_value, main_table
+                select_value, main_table, report_type, period
             )
             query = (
                 self.query_builder.add_table_name(f"({main_table}) as main_table")
@@ -577,7 +663,12 @@ class QuartersReportRepository:
 
     # queries to get actuals + budget calculated metrics
     def __get_no_base_metrics(
-        self, select_value_condition: list, metric: str, years: list, filters: dict
+        self,
+        select_value_condition: list,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
     ) -> list:
         try:
             table_alias = "main_table"
@@ -594,7 +685,9 @@ class QuartersReportRepository:
             columns.append(
                 f"{table_alias}.value",
             )
-            table = self.get_actuals_plus_main_table_subquery(metric, years, filters)
+            table = self.get_actuals_plus_main_table_subquery(
+                metric, years, filters, period
+            )
             query = (
                 self.query_builder.add_table_name(f"( {table} ) as {table_alias}")
                 .add_select_conditions(select_options)
@@ -610,13 +703,21 @@ class QuartersReportRepository:
 
     # get main table to main metric calculated metric
     def get_actuals_plus_main_table_subquery(
-        self, metric: str, years: list, filters: dict, scenario_condition: dict = dict()
+        self,
+        metric: str,
+        years: list,
+        filters: dict,
+        period: str = None,
+        scenario_condition: dict = dict(),
     ) -> list:
+        period_index = self.periods.index(period) if period is not None else None
+        periods_condition = self.__get_periods_conditions_array(period_index)
         where_conditions = {
-            f"{TableNames.PERIOD}.period_name": ["'Q1'", "'Q2'", "'Q3'", "'Q4'"],
+            f"{TableNames.PERIOD}.period_name": periods_condition,
             f"{TableNames.METRIC}.name": f"'{metric}'",
             f"substring({TableNames.SCENARIO}.name from '.*([0-9]{{4}})$')::int": years,
         }
+        where_conditions.update(filters)
         if scenario_condition:
             where_conditions.update(scenario_condition)
 
@@ -742,19 +843,28 @@ class QuartersReportRepository:
             .get_query()
         )
 
-    def get_gross_profit(self, years: list, filters: dict) -> list:
+    def get_gross_profit(
+        self, years: list, filters: dict, report_type: str, period: str
+    ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Cost of goods")
             select_value = [
                 f"main_table.value - ({subquery}) as value",
             ]
-            return self.__get_no_base_metrics(select_value, "Revenue", years, filters)
+            return self.__get_no_base_metrics(
+                select_value, "Revenue", years, period, filters
+            )
         except Exception as error:
             self.logger.info(error)
             return []
 
     def get_gross_margin(
-        self, years: list, filters: dict, scenario_type: str = "actuals_budget"
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Revenue")
@@ -763,29 +873,59 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Cost_of_goods", years, filters
+                    select_value, "Cost_of_goods", years, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
-                select_value, scenario_type, "Cost of goods", years, filters
+                select_value,
+                scenario_type,
+                "Cost of goods",
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
             return []
 
-    def get_revenue_per_employee(self, years: list, filters: dict) -> list:
+    def get_revenue_per_employee(
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
+    ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Headcount")
             select_value = [
-                f"(main_table.value / ({subquery})) * 1000000 as total",
+                f"(main_table.value / ({subquery})) * 1000000 as value",
             ]
-            return self.__get_no_base_metrics(
-                select_value, "Run rate revenue", years, filters
+            if scenario_type == "actuals_budget":
+                return self.__get_no_base_metrics(
+                    select_value, "Run rate revenue", years, period, filters
+                )
+            return self.get_calculated_metrics_with_base_scenarios(
+                select_value,
+                scenario_type,
+                "Run rate revenue",
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
             return []
 
-    def get_opex_as_revenue(self, years: list, filters: dict) -> list:
+    def get_opex_as_revenue(
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
+    ) -> list:
         try:
             sales_and_marketing = self.__get_subquery_for_submetric(
                 MetricNames.SALES_AND_MARKETING
@@ -799,39 +939,80 @@ class QuartersReportRepository:
             revenue = self.__get_subquery_for_submetric("Revenue")
             sum_factors = f"({sales_and_marketing}) + ({research_and_dev}) + ({general_and_admin})"
             select_value = [
-                f" (main_table.value + {sum_factors}) / ({revenue}) * 100 as total",
+                f" (main_table.value + {sum_factors}) / ({revenue}) * 100 as value",
             ]
-            return self.__get_no_base_metrics(
-                select_value, "Other operating expenses", years, filters
+            if scenario_type == "actuals_budget":
+                return self.__get_no_base_metrics(
+                    select_value, "Other operating expenses", years, period, filters
+                )
+            return self.get_calculated_metrics_with_base_scenarios(
+                select_value,
+                scenario_type,
+                "Other operating expenses",
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
             return []
 
-    def get_debt_ebitda(self, years: list, filters: dict) -> list:
+    def get_debt_ebitda(
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
+    ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Ebitda")
             select_value = [
-                f"(main_table.value / ({subquery})) as total",
+                f"(main_table.value / ({subquery})) as value",
             ]
-            return self.__get_no_base_metrics(
-                select_value, "Long term debt", years, filters
+            if scenario_type == "actuals_budget":
+                return self.__get_no_base_metrics(
+                    select_value, "Long term debt", years, period, filters
+                )
+            return self.get_calculated_metrics_with_base_scenarios(
+                select_value,
+                scenario_type,
+                "Long term debt",
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
             return []
 
-    def get_gross_retention(self, years: list, filters: dict) -> list:
+    def get_gross_retention(
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
+    ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Run rate revenue")
             select_value = [
-                f"(1 - (main_table.value / ({subquery}))) * 100 as total",
+                f"(1 - (main_table.value / ({subquery}))) * 100 as value",
             ]
-            return self.__get_no_base_metrics(
+            if scenario_type == "actuals_budget":
+                return self.__get_no_base_metrics(
+                    select_value, "Losses and downgrades", years, period, filters
+                )
+            return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
+                scenario_type,
                 "Losses and downgrades",
                 years,
                 filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
@@ -843,6 +1024,8 @@ class QuartersReportRepository:
         metric: str,
         filters: dict,
         scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Revenue")
@@ -850,9 +1033,11 @@ class QuartersReportRepository:
                 f"main_table.value * 100 / ({subquery}) as value",
             ]
             if scenario_type == "actuals_budget":
-                return self.__get_no_base_metrics(select_value, metric, years, filters)
+                return self.__get_no_base_metrics(
+                    select_value, metric, years, period, filters
+                )
             return self.get_calculated_metrics_with_base_scenarios(
-                select_value, scenario_type, metric, years, filters
+                select_value, scenario_type, metric, years, filters, report_type, period
             )
         except Exception as error:
             self.logger.info(error)
@@ -865,6 +1050,8 @@ class QuartersReportRepository:
         divisor: str,
         filters: dict,
         scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric(divisor)
@@ -873,20 +1060,31 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, dividend, years, filters
+                    select_value, dividend, years, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
-                select_value, scenario_type, dividend, years, filters
+                select_value,
+                scenario_type,
+                dividend,
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
             return []
 
     def get_ebitda_margin_metric(
-        self, years: list, filters: dict, scenario_type: str = "actuals_budget"
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         return self.get_metric_as_percentage_of_revenue(
-            years, "Ebitda", filters, scenario_type
+            years, "Ebitda", filters, scenario_type, report_type, period
         )
 
     def __get_ratio_arguments(
@@ -896,6 +1094,8 @@ class QuartersReportRepository:
         scenario_type: str = None,
         dividend: str = None,
         divisor: str = None,
+        report_type: str = None,
+        period: str = None,
     ) -> dict:
         arguments = {"filters": filters}
         if dividend:
@@ -906,10 +1106,19 @@ class QuartersReportRepository:
             arguments["years"] = years
         if scenario_type:
             arguments["scenario_type"] = scenario_type
+        if report_type:
+            arguments["report_type"] = report_type
+        if period:
+            arguments["period"] = period
         return arguments
 
     def get_actuals_plus_budget_base_functions_metric(
-        self, years: list, filters: dict
+        self,
+        filters: dict,
+        years: list,
+        report_type: str = None,
+        period: str = None,
+        scenario_type: str = "actuals_budget",
     ) -> dict:
         metric_names = self.__get_metric_names_config()
 
@@ -917,36 +1126,53 @@ class QuartersReportRepository:
             f"{metric}": {
                 "function": self.get_actuals_plus_budget_metrics_query,
                 "arguments": self.__get_arguments(
-                    years=years, filters=filters, metric=metric_names[metric]
+                    metric=metric_names[metric],
+                    years=years,
+                    filters=filters,
+                    scenario_type=scenario_type,
+                    report_type=report_type,
+                    period=period,
                 ),
             }
             for metric in metric_names
         }
 
-    def __get_gross_profit_functions_metric(self, years: list, filters: dict) -> dict:
+    def __get_gross_profit_functions_metric(
+        self, years: list, filters: dict, report_type: str, period: str
+    ) -> dict:
         return {
             "gross_profit": {
                 "function": self.get_gross_profit,
-                "arguments": self.__get_arguments(years, filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             }
         }
 
     def get_actuals_plus_budget_functions_metric(
-        self, years: list, filters: dict
+        self, years: list, filters: dict, report_type: str = None, period: str = None
     ) -> dict:
         metric_config = {
             "ebitda_margin": {
                 "function": self.get_ebitda_margin_metric,
-                "arguments": self.__get_arguments(years=years, filters=filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             },
             "gross_margin": {
                 "function": self.get_gross_margin,
-                "arguments": self.__get_arguments(years=years, filters=filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             },
             "sales_and_marketing": {
                 "function": self.get_metric_as_percentage_of_revenue,
                 "arguments": self.__get_arguments(
-                    years=years, metric=MetricNames.SALES_AND_MARKETING, filters=filters
+                    years=years,
+                    metric=MetricNames.SALES_AND_MARKETING,
+                    filters=filters,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "general_and_admin": {
@@ -955,6 +1181,8 @@ class QuartersReportRepository:
                     years=years,
                     filters=filters,
                     metric=MetricNames.GENERAL_AND_ADMINISTRATION,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "research_and_development": {
@@ -963,45 +1191,77 @@ class QuartersReportRepository:
                     years=years,
                     metric=MetricNames.RESEARCH_AND_DEVELOPMENT,
                     filters=filters,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "clv_cac_ratio": {
                 "function": self.get_metric_ratio,
                 "arguments": self.__get_ratio_arguments(
-                    years, filters, dividend="CLV", divisor="CAC"
+                    years,
+                    filters,
+                    dividend="CLV",
+                    divisor="CAC",
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "cac_ratio": {
                 "function": self.get_metric_ratio,
                 "arguments": self.__get_ratio_arguments(
-                    years, filters, dividend="CAC", divisor="CAV"
+                    years,
+                    filters,
+                    dividend="CAC",
+                    divisor="CAV",
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "revenue_per_employee": {
                 "function": self.get_revenue_per_employee,
-                "arguments": self.__get_arguments(years=years, filters=filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             },
             "opex_as_revenue": {
                 "function": self.get_opex_as_revenue,
-                "arguments": self.__get_arguments(years=years, filters=filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             },
             "debt_ebitda": {
                 "function": self.get_debt_ebitda,
-                "arguments": self.__get_arguments(years=years, filters=filters),
+                "arguments": self.__get_arguments(
+                    years=years, filters=filters, report_type=report_type, period=period
+                ),
             },
         }
         metric_config.update(
-            self.get_actuals_plus_budget_base_functions_metric(years, filters)
+            self.get_actuals_plus_budget_base_functions_metric(
+                years=years, filters=filters, report_type=report_type, period=period
+            )
         )
-        metric_config.update(self.__get_gross_profit_functions_metric(years, filters))
+        metric_config.update(
+            self.__get_gross_profit_functions_metric(
+                years, filters, report_type=report_type, period=period
+            )
+        )
         # metric_config.update(self.__get_actuals_vs_budget_functions_metric(years, filters))
 
         return metric_config
 
     def get_quarters_year_to_year_records(
-        self, years: list, metric: str, filters: dict
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        period: str,
+        filters: dict,
     ) -> list:
-        functions_metric = self.get_actuals_plus_budget_functions_metric(years, filters)
+        functions_metric = self.get_actuals_plus_budget_functions_metric(
+            years, filters, report_type, period
+        )
         metric_config = functions_metric.get(metric)
         if not metric_config:
             raise AppError("Metric not found")
@@ -1009,18 +1269,33 @@ class QuartersReportRepository:
         function = metric_config["function"]
         return function(**metric_config["arguments"])
 
-    def get_functions_metric(self, scenario: str, years: list, filters: dict) -> dict:
+    def get_functions_metric(
+        self,
+        scenario: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
+    ) -> dict:
         metric_config = {
             "ebitda_margin": {
                 "function": self.get_ebitda_margin_metric,
                 "arguments": self.__get_arguments(
-                    filters, scenario_type=scenario, years=years
+                    filters,
+                    scenario_type=scenario,
+                    years=years,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "gross_margin": {
                 "function": self.get_gross_margin,
                 "arguments": self.__get_arguments(
-                    filters, scenario_type=scenario, years=years
+                    filters,
+                    scenario_type=scenario,
+                    years=years,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "sales_and_marketing": {
@@ -1030,6 +1305,8 @@ class QuartersReportRepository:
                     years=years,
                     scenario_type=scenario,
                     metric=MetricNames.SALES_AND_MARKETING,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "general_and_admin": {
@@ -1039,6 +1316,8 @@ class QuartersReportRepository:
                     years=years,
                     scenario_type=scenario,
                     metric=MetricNames.GENERAL_AND_ADMINISTRATION,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "research_and_development": {
@@ -1048,6 +1327,8 @@ class QuartersReportRepository:
                     years=years,
                     scenario_type=scenario,
                     metric=MetricNames.RESEARCH_AND_DEVELOPMENT,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "clv_cac_ratio": {
@@ -1058,6 +1339,8 @@ class QuartersReportRepository:
                     scenario_type=scenario,
                     dividend="CLV",
                     divisor="CAC",
+                    report_type=report_type,
+                    period=period,
                 ),
             },
             "cac_ratio": {
@@ -1068,21 +1351,45 @@ class QuartersReportRepository:
                     scenario_type=scenario,
                     dividend="CAC",
                     divisor="CAV",
+                    report_type=report_type,
+                    period=period,
+                ),
+            },
+            "opex_as_revenue": {
+                "function": self.get_opex_as_revenue,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    scenario_type=scenario,
+                    report_type=report_type,
+                    period=period,
                 ),
             },
         }
         metric_config.update(
-            self.get_base_functions_metric(filters, ScenarioNames.ACTUALS, years)
+            self.get_base_functions_metric(
+                filters, ScenarioNames.ACTUALS, years, report_type, period
+            )
         )
         metric_config.update(
-            self.get_base_functions_metric(filters, ScenarioNames.BUDGET, years)
+            self.get_base_functions_metric(
+                filters, ScenarioNames.BUDGET, years, report_type, period
+            )
         )
         return metric_config
 
     def get_metric_records_with_base_scenarios(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        filters: dict,
+        report_type: str = None,
+        period: str = None,
     ) -> list:
-        functions_metric = self.get_functions_metric(scenario_type, years, filters)
+        functions_metric = self.get_functions_metric(
+            scenario_type, years, filters, report_type, period
+        )
         metric_names = list(self.__get_metric_names_config().keys())
         metric_name = f"{scenario_type}-{metric}" if metric in metric_names else metric
         metric_config = functions_metric.get(metric_name)
@@ -1098,8 +1405,9 @@ class QuartersReportRepository:
         metric: str,
         scenario_type: str,
         years: list,
+        period: str,
         filters: dict,
     ) -> list:
         return self.get_metric_records_with_base_scenarios(
-            metric, scenario_type, years, filters
+            metric, scenario_type, years, filters, report_type, period
         )

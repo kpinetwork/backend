@@ -39,9 +39,19 @@ class QuartersReport:
             for metric in standard
         ]
 
-    def process_metrics(self, metric: str, years: list, filters: dict) -> list:
+    def process_metrics(
+        self,
+        report_type: str,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+    ) -> list:
         summary = defaultdict(lambda: defaultdict(dict))
-        data = self.repository.get_quarters_year_to_year_records(years, metric, filters)
+        data = self.repository.get_quarters_year_to_year_records(
+            report_type, metric, scenario_type, years, period, filters
+        )
         for item in data:
             id = item["id"]
             scenario = item["scenario"]
@@ -59,8 +69,18 @@ class QuartersReport:
         result = [value for values in summary.values() for value in values.values()]
         return result
 
-    def get_actuals_plus_budget(self, metric: str, years: list, filters: dict) -> list:
-        data = self.process_metrics(metric, years, filters)
+    def get_actuals_plus_budget(
+        self,
+        report_type: str,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+    ) -> list:
+        data = self.process_metrics(
+            report_type, metric, years, period, filters, scenario_type
+        )
         result = []
         for year in years:
             year_data = [
@@ -96,24 +116,57 @@ class QuartersReport:
                     result.append(actuals)
         return result
 
-    def add_full_year_property(self, metric: str, years: list, filters: dict) -> list:
-        data = self.get_actuals_plus_budget(metric, years, filters)
+    def __get_calculate_full_year_property_year_to_year(
+        self, data: dict
+    ) -> Union[float, None]:
+        full_year = 0
+        if None in [data.get("Q1"), data.get("Q2"), data.get("Q3"), data.get("Q4")]:
+            full_year = None
+        else:
+            full_year = (
+                data.get("Q1") + data.get("Q2") + data.get("Q3") + data.get("Q4")
+            )
+
+        return full_year
+
+    def __get_calculate_full_year_property_year_to_date(
+        self, data: dict
+    ) -> Union[float, None]:
+        quarters_values = [data.get(value, 0) for value in ["Q1", "Q2", "Q3", "Q4"]]
+        full_year = sum(filter(None.__ne__, quarters_values))
+        return full_year
+
+    def add_full_year_property(
+        self,
+        report_type: str,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+    ) -> list:
+        data = self.get_actuals_plus_budget(report_type, metric, years, period, filters)
         for item in data:
-            full_year = 0
-            if None in [item.get("Q1"), item.get("Q2"), item.get("Q3"), item.get("Q4")]:
-                full_year = None
+            if report_type == "year_to_year":
+                full_year = self.__get_calculate_full_year_property_year_to_year(item)
             else:
-                full_year = (
-                    item.get("Q1") + item.get("Q2") + item.get("Q3") + item.get("Q4")
-                )
-            item["full_year"] = full_year
+                full_year = self.__get_calculate_full_year_property_year_to_date(item)
+            item["Full Year"] = full_year
         return data
 
     def is_valid_value(self, value) -> Union[float, str, None]:
         return value if value is not None else "NA"
 
-    def add_vs_property(self, metric: str, years: list, filters: dict) -> list:
-        data = self.add_full_year_property(metric, years, filters)
+    def add_vs_property(
+        self,
+        report_type: str,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+    ) -> list:
+        data = self.add_full_year_property(report_type, metric, years, period, filters)
         companies = {}
         prev_full_year = {}
         for item in data:
@@ -130,19 +183,17 @@ class QuartersReport:
                 "Q2": self.is_valid_value(item.get("Q2", None)),
                 "Q3": self.is_valid_value(item.get("Q3", None)),
                 "Q4": self.is_valid_value(item.get("Q4", None)),
-                "full_year": self.is_valid_value(item.get("full_year", None)),
+                "Full Year": self.is_valid_value(item.get("Full Year", None)),
             }
             if (
                 prev_full_year[item["id"]] is not None
                 and prev_full_year[item["id"]] != "NA"
-                and quarter["full_year"] != "NA"
+                and quarter["Full Year"] != "NA"
             ):
                 quarter["vs"] = round(
-                    (quarter["full_year"] / prev_full_year[item["id"]] * 100), 2
+                    (quarter["Full Year"] / prev_full_year[item["id"]] * 100), 2
                 )
-            else:
-                quarter["vs"] = "NA"
-            prev_full_year[item["id"]] = quarter["full_year"]
+            prev_full_year[item["id"]] = quarter["Full Year"]
             companies[item["id"]]["quarters"].append(quarter)
         return list(companies.values())
 
@@ -154,31 +205,35 @@ class QuartersReport:
                 filtered_companies.append(company)
         return filtered_companies
 
+    def __get_year_data(self, year, companies):
+        year_data = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Full Year": 0}
+        count = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Full Year": 0}
+        for company in companies:
+            for quarter in company["quarters"]:
+                if quarter["year"] == year:
+                    for key, value in quarter.items():
+                        if key != "year" and value != "NA":
+                            year_data[key] += value
+                            count[key] += 1
+        return year_data, count
+
     def calculate_averages(self, companies, years):
         averages = []
         first_year = True
         for year in years:
-            year_data = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "full_year": 0}
-            count = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "full_year": 0}
+            year_data, count = self.__get_year_data(year, companies)
             if not first_year:
                 year_data["vs"] = 0
                 count["vs"] = 0
 
-            for company in companies:
-                for quarter in company["quarters"]:
-                    if quarter["year"] == year:
-                        for key, value in quarter.items():
-                            if key != "year" and value != "NA":
-                                year_data[key] += value
-                                count[key] += 1
             year_result = {}
             for key in year_data.keys():
                 if count[key] > 0:
                     year_result[key] = round((year_data[key] / count[key]), 2)
                 else:
                     year_result[key] = "NA"
-            if "full_year" in year_result:
-                year_result["Full Year"] = year_result.pop("full_year")
+            if "Full Year" in year_result:
+                year_result["Full Year"] = year_result.pop("Full Year")
             averages.append(year_result)
             first_year = False
         return averages
@@ -207,39 +262,39 @@ class QuartersReport:
         return data
 
     def get_records(
-        self, metric: str, scenario_type: str, years: list, filters: dict
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        period: str,
+        filters: dict,
     ) -> dict:
         standard = self.get_standard_metrics(scenario_type, years)
         if metric in standard:
             records = self.repository.get_metric_records_by_quarters(
-                "Year-to-year", metric, scenario_type, years, filters
+                report_type, metric, scenario_type, years, period, filters
             )
-            return self.process_standard_metrics(records, years)
+            return self.process_standard_metrics(records, years, period)
 
-    def __build_default_quarters(
-        self, includes_comparison: bool = False, is_average: bool = False
-    ) -> dict:
+    def __build_default_quarters(self, includes_comparison: bool = False) -> dict:
         default_quarters = {
             "Q1": "NA",
             "Q2": "NA",
             "Q3": "NA",
             "Q4": "NA",
-            "full_year": "NA",
+            "Full Year": "NA",
         }
-        if is_average:
-            default_quarters.pop("full_year")
-            default_quarters.update({"Full Year": "NA"})
+
         if includes_comparison:
             default_quarters.update({"vs": "NA"})
         return default_quarters
 
     def __build_default_average_object(self, years) -> dict:
-        averages = {years[0]: self.__build_default_quarters(is_average=True)}
+        averages = {years[0]: self.__build_default_quarters()}
         averages.update(
             {
-                year: self.__build_default_quarters(
-                    includes_comparison=True, is_average=True
-                )
+                year: self.__build_default_quarters(includes_comparison=True)
                 for year in years[1:]
             }
         )
@@ -254,25 +309,29 @@ class QuartersReport:
         )
         return default_quarters_object
 
-    def __get_default_quarters(self, company: dict, years: list) -> list:
+    def __get_default_quarters(
+        self, company: dict, years: list, full_year_count: int = 4
+    ) -> list:
         default_quarters = [
             self.__build_default_quarters_object(year, includes_comparison=True)
             for year in years[1:]
         ]
         default_quarters.insert(0, self.__build_default_quarters_object(years[0]))
         index = years.index(str(company.get("year")))
-        self.__update_quarters(default_quarters, index, company)
+        self.__update_quarters(default_quarters, index, company, full_year_count)
 
         return default_quarters
 
-    def __update_quarters(self, quarters: list, index: int, company: dict) -> None:
+    def __update_quarters(
+        self, quarters: list, index: int, company: dict, full_year_count: int = 4
+    ) -> None:
         quarters[index].update(
             {
                 company.get("period_name"): self.__get_valid_value(
                     company.get("value")
                 ),
-                "full_year": self.__get_valid_value(company.get("full_year"))
-                if company.get("quarters_count") == 4
+                "Full Year": self.__get_valid_value(company.get("full_year"))
+                if company.get("quarters_count") == full_year_count
                 else "NA",
             }
         )
@@ -301,11 +360,18 @@ class QuartersReport:
     def __get_valid_value(self, value: float) -> Union[float, str]:
         return round(float(value), 2) if value else "NA"
 
-    def process_standard_metrics(self, records: list, years: list) -> dict:
+    def __get_full_year_count(self, period_type: str = None) -> int:
+        periods = ["Q1", "Q2", "Q3", "Q4"]
+        return periods.index(period_type) + 1 if period_type else len(periods)
+
+    def process_standard_metrics(
+        self, records: list, years: list, period_type: str = None
+    ) -> dict:
         data = defaultdict(dict)
         years.sort()
         averages = self.__build_default_average_object(years)
         comparison_object = {str(year): dict() for year in years}
+        full_year_count = self.__get_full_year_count(period_type)
         for company in records:
             company_id = company.get("id")
             year = company.get("year")
@@ -321,11 +387,15 @@ class QuartersReport:
                 data[company_id] = {
                     "id": company.get("id"),
                     "name": company.get("name"),
-                    "quarters": self.__get_default_quarters(company, years),
+                    "quarters": self.__get_default_quarters(
+                        company, years, full_year_count
+                    ),
                 }
             else:
                 quarters = data.get(company_id).get("quarters")
-                self.__update_quarters(quarters, years.index(str(year)), company)
+                self.__update_quarters(
+                    quarters, years.index(str(year)), company, full_year_count
+                )
                 comparison = (
                     data.get(company_id)
                     .get("quarters")[years.index(str(year))]
@@ -362,10 +432,18 @@ class QuartersReport:
         return int(reduce(lambda a, b: a + b, values) / len(values))
 
     def get_quarters_records(
-        self, metric: str, scenario_type: str, years: list, **conditions
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        period: str,
+        **conditions,
     ) -> dict:
         filters = self.repository.add_filters(**conditions)
-        data = self.get_records(metric, scenario_type, years, filters)
+        data = self.get_records(
+            report_type, metric, scenario_type, years, period, filters
+        )
         return data
 
     def generate_headers(self, years):
@@ -383,18 +461,36 @@ class QuartersReport:
         return headers, subHeaders
 
     def get_actuals_or_budget_data(
-        self, metric, scenario_type, years, conditions
+        self,
+        report_type: str,
+        metric: str,
+        scenario_type: str,
+        years: str,
+        period: str,
+        conditions,
     ) -> tuple:
         scenario_type = scenario_type.capitalize()
-        data = self.get_quarters_records(metric, scenario_type, years, **conditions)
+        data = self.get_quarters_records(
+            report_type, metric, scenario_type, years, period, **conditions
+        )
         default_averages = data.pop("averages")
         peers = list(data.values())
         averages = self.__get_averages_for_actuals_or_budget_data(default_averages)
         return peers, averages
 
-    def actuals_budget_data(self, metric, years, conditions) -> tuple:
+    def actuals_budget_data(
+        self,
+        report_type,
+        metric,
+        years,
+        period,
+        conditions,
+        scenario_type: str = "actuals_budget",
+    ) -> tuple:
         sorted_years = sorted(years)
-        peers = self.add_vs_property(metric, sorted_years, conditions)
+        peers = self.add_vs_property(
+            report_type, metric, sorted_years, period, conditions
+        )
         self.filter_companies(peers, sorted_years)
         self.add_missing_years(peers, sorted_years)
         averages = self.calculate_averages(peers, sorted_years)
@@ -408,13 +504,21 @@ class QuartersReport:
         return averages
 
     def get_peers_and_averages(
-        self, metric: str, scenario_type: str, years: list, conditions
+        self,
+        metric: str,
+        scenario_type: str,
+        years: list,
+        conditions,
+        report_type: str = None,
+        period: str = None,
     ) -> tuple:
         if scenario_type == "actuals_budget":
-            peers, averages = self.actuals_budget_data(metric, years, conditions)
+            peers, averages = self.actuals_budget_data(
+                report_type, metric, years, period, conditions, scenario_type
+            )
         else:
             peers, averages = self.get_actuals_or_budget_data(
-                metric, scenario_type, years, conditions
+                report_type, metric, scenario_type, years, period, conditions
             )
         return peers, averages
 
@@ -458,6 +562,7 @@ class QuartersReport:
         metric: str,
         scenario_type: str,
         years: list,
+        period: str,
         from_main: bool,
         access: bool,
         **conditions,
@@ -468,7 +573,7 @@ class QuartersReport:
             self.company_anonymization.set_company_permissions(username)
 
             peers, averages = self.get_peers_and_averages(
-                metric, scenario_type, years, conditions
+                metric, scenario_type, years, conditions, report_type, period
             )
 
             if not access and self.need_to_be_anonymized(metric):
@@ -482,8 +587,8 @@ class QuartersReport:
             headers, subheaders = self.generate_headers(years)
 
             return {
-                "subheaders": headers,
-                "headers": subheaders,
+                "headers": headers,
+                "subheaders": subheaders,
                 "company_comparison_data": company,
                 "peers_comparison_data": peers,
                 "averages": averages,

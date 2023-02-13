@@ -453,7 +453,8 @@ resource "aws_api_gateway_method" "quarters_report_method" {
     "method.request.querystring.scenario" = true
     "method.request.querystring.metric" = true
     "method.request.querystring.report_type" = true
-    "method.request.querystring.years" = true
+    "method.request.querystring.years" = false
+    "method.request.querystring.period" = false
     "method.request.querystring.investor_profile" = false
     "method.request.querystring.growth_profile" = false
     "method.request.querystring.size" = false

@@ -56,7 +56,20 @@ class TestQuartersReportRepository(TestCase):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_metric_records_by_quarters(
-            "year_year", "revenue", "Actuals", [2021, 2022], dict()
+            "year_year", "revenue", "Actuals", [2021, 2022], None, dict()
+        )
+
+        self.assertEqual(metrics, self.records)
+
+    @patch.object(QuartersReportRepository, "get_base_query")
+    def test_get_metric_by_quarters_with_year_to_date_should_call_function(
+        self, mock_base_query
+    ):
+        mock_base_query.return_value = "Mock subquery"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_metric_records_by_quarters(
+            "year_to_date", "revenue", "Actuals", [2021, 2022], "Q2", dict()
         )
 
         self.assertEqual(metrics, self.records)
@@ -64,7 +77,7 @@ class TestQuartersReportRepository(TestCase):
     def test_get_metric_by_quarters_should_fail_with_invalid_metric(self):
         with self.assertRaises(Exception) as context:
             self.repository.get_metric_records_by_quarters(
-                "year_year", "invalid", "Actuals", [2021, 2022], dict()
+                "year_year", "invalid", "Actuals", [2021, 2022], None, dict()
             )
 
         self.assertEqual(str(context.exception), "Metric not found")
@@ -73,7 +86,7 @@ class TestQuartersReportRepository(TestCase):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_quarters_year_to_year_records(
-            [2021, 2022], "ebitda_margin", dict()
+            "year_to_year", "ebitda_margin", "actuals", [2021, 2022], None, dict()
         )
 
         self.assertEqual(metrics, self.records)
@@ -81,7 +94,7 @@ class TestQuartersReportRepository(TestCase):
     def test_get_quarters_year_to_year_records_should_fail_with_invalid_metric(self):
         with self.assertRaises(Exception) as context:
             self.repository.get_quarters_year_to_year_records(
-                [2021, 2022], "invalid", dict()
+                "year_to_year", "invalid", "actuals", [2021, 2022], None, dict()
             )
 
         self.assertEqual(str(context.exception), "Metric not found")
@@ -101,7 +114,7 @@ class TestQuartersReportRepository(TestCase):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_actuals_plus_budget_metrics_query(
-            "revenue", [2021, 2022], dict()
+            "revenue", [2021, 2022], dict(), "actuals_budget", "year_to_year", "Q3"
         )
 
         self.assertEqual(metrics, [])
@@ -112,7 +125,7 @@ class TestQuartersReportRepository(TestCase):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_actuals_plus_budget_metrics_query(
-            "revenue", [2021, 2022], dict()
+            "revenue", [2021, 2022], dict(), "actuals_budget", "year_to_year", None
         )
 
         self.assertEqual(metrics, self.records)
@@ -202,24 +215,32 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
-    def test_get_opex_as_revenue_success_should_return_list(self):
+    def test_get_opex_as_revenue_actuals_budget_success_should_return_list(self):
         self.mock_response_list_query_sql(self.records)
 
-        metrics = self.repository.get_opex_as_revenue([2021, 2021], dict())
+        metrics = self.repository.get_opex_as_revenue(
+            [2021, 2021], dict(), "actuals_budget", "year_to_year", None
+        )
 
         self.assertEqual(metrics, self.records)
 
     def test_get_opex_as_revenue_should_return_empty_list_when_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
-        metrics = self.repository.get_opex_as_revenue([2021, 2021], dict())
+        metrics = self.repository.get_opex_as_revenue(
+            [2021, 2021], dict(), "actuals_budget", "year_to_year", None
+        )
 
         self.assertEqual(metrics, [])
 
-    def test_get_revenue_per_employee_success_should_return_list(self):
+    def test_get_revenue_per_employee_actuals_plus_budget_success_should_return_list(
+        self,
+    ):
         self.mock_response_list_query_sql(self.records)
 
-        metrics = self.repository.get_revenue_per_employee([2021, 2021], dict())
+        metrics = self.repository.get_revenue_per_employee(
+            [2021, 2021], dict(), "actuals_budget", "year_to_year"
+        )
 
         self.assertEqual(metrics, self.records)
 
@@ -261,14 +282,18 @@ class TestQuartersReportRepository(TestCase):
     def test_get_gross_profit_success_should_return_list(self):
         self.mock_response_list_query_sql(self.records)
 
-        metrics = self.repository.get_gross_profit([2021, 2021], dict())
+        metrics = self.repository.get_gross_profit(
+            [2021, 2021], dict(), "year_to_year", None
+        )
 
         self.assertEqual(metrics, self.records)
 
     def test_get_gross_profit_should_return_empty_list_when_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
-        metrics = self.repository.get_gross_profit([2021, 2021], dict())
+        metrics = self.repository.get_gross_profit(
+            [2021, 2021], dict(), "year_to_year", None
+        )
 
         self.assertEqual(metrics, [])
 
@@ -319,7 +344,8 @@ class TestQuartersReportRepository(TestCase):
     ):
         mock_base_table_query.return_value = "Query "
         mock_full_year_subquery.return_value = "Mock query"
-        expected_response = "Query HAVING count(sum_quarters.period_name ) = 4"
+        expected_response = "Query  HAVING count(sum_quarters.period_name ) = 4 "
+
         query = self.repository._QuartersReportRepository__get_full_year_avg_subquery(
             [], ""
         )
