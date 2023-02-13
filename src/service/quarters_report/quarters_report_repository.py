@@ -362,8 +362,12 @@ class QuartersReportRepository:
         period: str,
     ) -> list:
         try:
-            period_index = self.periods.index(period) if period is not None else None
-            periods_condition = self.__get_periods_conditions_array(period_index)
+            periods_condition = self.__get_periods_conditions_array()
+            if report_type == "year_to_date":
+                period_index = (
+                    self.periods.index(period) if period is not None else None
+                )
+                periods_condition = self.__get_periods_conditions_array(period_index)
             where_conditions = {
                 f"{TableNames.PERIOD}.period_name": periods_condition,
                 f"{TableNames.METRIC}.name": f"'{metric}'",
@@ -608,7 +612,7 @@ class QuartersReportRepository:
             """
             scenario_condition = {f"{TableNames.SCENARIO}.type": f"'{scenario}'"}
             main_table = self.get_actuals_plus_main_table_subquery(
-                metric, years, filters, period, scenario_condition
+                metric, years, filters, report_type, period, scenario_condition
             )
             full_year_table = self.__get_full_year_table_calculated_metrics(
                 select_value, main_table
@@ -667,6 +671,7 @@ class QuartersReportRepository:
         select_value_condition: list,
         metric: str,
         years: list,
+        report_type: str,
         period: str,
         filters: dict,
     ) -> list:
@@ -686,7 +691,7 @@ class QuartersReportRepository:
                 f"{table_alias}.value",
             )
             table = self.get_actuals_plus_main_table_subquery(
-                metric, years, filters, period
+                metric, years, filters, report_type, period
             )
             query = (
                 self.query_builder.add_table_name(f"( {table} ) as {table_alias}")
@@ -707,11 +712,14 @@ class QuartersReportRepository:
         metric: str,
         years: list,
         filters: dict,
+        report_type: str,
         period: str = None,
         scenario_condition: dict = dict(),
     ) -> list:
-        period_index = self.periods.index(period) if period is not None else None
-        periods_condition = self.__get_periods_conditions_array(period_index)
+        periods_condition = self.__get_periods_conditions_array()
+        if report_type == "year_to_date":
+            period_index = self.periods.index(period) if period is not None else None
+            periods_condition = self.__get_periods_conditions_array(period_index)
         where_conditions = {
             f"{TableNames.PERIOD}.period_name": periods_condition,
             f"{TableNames.METRIC}.name": f"'{metric}'",
@@ -852,7 +860,7 @@ class QuartersReportRepository:
                 f"main_table.value - ({subquery}) as value",
             ]
             return self.__get_no_base_metrics(
-                select_value, "Revenue", years, period, filters
+                select_value, "Revenue", years, report_type, period, filters
             )
         except Exception as error:
             self.logger.info(error)
@@ -873,7 +881,7 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Cost_of_goods", years, period, filters
+                    select_value, "Cost_of_goods", years, report_type, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
@@ -903,7 +911,12 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Run rate revenue", years, period, filters
+                    select_value,
+                    "Run rate revenue",
+                    years,
+                    report_type,
+                    period,
+                    filters,
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
@@ -943,7 +956,12 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Other operating expenses", years, period, filters
+                    select_value,
+                    "Other operating expenses",
+                    years,
+                    report_type,
+                    period,
+                    filters,
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
@@ -973,7 +991,7 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Long term debt", years, period, filters
+                    select_value, "Long term debt", years, report_type, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
@@ -1003,7 +1021,12 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, "Losses and downgrades", years, period, filters
+                    select_value,
+                    "Losses and downgrades",
+                    years,
+                    report_type,
+                    period,
+                    filters,
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
@@ -1034,7 +1057,7 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, metric, years, period, filters
+                    select_value, metric, years, report_type, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value, scenario_type, metric, years, filters, report_type, period
@@ -1060,7 +1083,7 @@ class QuartersReportRepository:
             ]
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
-                    select_value, dividend, years, period, filters
+                    select_value, dividend, years, report_type, period, filters
                 )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
