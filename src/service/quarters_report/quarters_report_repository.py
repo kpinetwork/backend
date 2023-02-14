@@ -359,7 +359,7 @@ class QuartersReportRepository:
         filters: dict,
         scenario_type: str,
         report_type: str,
-        period: str,
+        period: str = None,
     ) -> list:
         try:
             periods_condition = self.__get_periods_conditions_array()
@@ -852,7 +852,7 @@ class QuartersReportRepository:
         )
 
     def get_gross_profit(
-        self, years: list, filters: dict, report_type: str, period: str
+        self, years: list, filters: dict, report_type: str, period: str = None
     ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Cost of goods")

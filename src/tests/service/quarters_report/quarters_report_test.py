@@ -154,14 +154,6 @@ class TestQuartersReport(TestCase):
                     "name": "Company",
                     "quarters": [
                         {
-                            "year": "2021",
-                            "Q1": "NA",
-                            "Q2": 22.0,
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "Full Year": "NA",
-                        },
-                        {
                             "year": "2020",
                             "Q1": "NA",
                             "Q2": "NA",
@@ -170,19 +162,29 @@ class TestQuartersReport(TestCase):
                             "Full Year": "NA",
                             "vs": "NA",
                         },
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": 22.0,
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                        },
                     ],
                 }
             ],
             "averages": [
-                {"Q1": 20.0, "Q2": "NA", "Q3": 20.0, "Q4": "NA", "Full Year": "NA"},
-                {
-                    "Q1": "NA",
-                    "Q2": 22.0,
-                    "Q3": "NA",
-                    "Q4": "NA",
-                    "vs": "NA",
-                    "Full Year": "NA",
-                },
+                {"Q1": 20.0},
+                {"Q2": "NA"},
+                {"Q3": 20.0},
+                {"Q4": "NA"},
+                {"Full Year": "NA"},
+                {"Q1": "NA"},
+                {"Q2": 22.0},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Full Year": "NA"},
+                {"vs": "NA"},
             ],
         }
 
@@ -343,7 +345,7 @@ class TestQuartersReport(TestCase):
         expected_value = self.response.copy()
         expected_value["company_comparison_data"]["quarters"][0]["Q3"] = "NA"
 
-        expected_value["averages"][0]["Q3"] = "NA"
+        expected_value["averages"][2]["Q3"] = "NA"
         self.mock_repository.get_quarters_year_to_year_records.return_value = records
 
         peers = self.report_instance.get_quarters_peers(
@@ -357,6 +359,8 @@ class TestQuartersReport(TestCase):
             False,
             True,
         )
+        print("peers", peers)
+        print("expec", expected_value)
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_value)
 
@@ -393,14 +397,6 @@ class TestQuartersReport(TestCase):
                     "name": "Company",
                     "quarters": [
                         {
-                            "year": "2021",
-                            "Q1": "NA",
-                            "Q2": 22.0,
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "Full Year": "NA",
-                        },
-                        {
                             "year": "2020",
                             "Q1": "NA",
                             "Q2": "NA",
@@ -409,12 +405,29 @@ class TestQuartersReport(TestCase):
                             "Full Year": "NA",
                             "vs": "NA",
                         },
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": 22.0,
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                        },
                     ],
                 }
             ],
             "averages": [
-                {"Q1": 20.0, "Q2": 20.0, "Q3": 20.0, "Q4": 20.0, "Full Year": 80.0},
-                self.response.get("averages")[1],
+                {"Q1": 20.0},
+                {"Q2": 20.0},
+                {"Q3": 20.0},
+                {"Q4": 20.0},
+                {"Full Year": 80.0},
+                {"Q1": "NA"},
+                {"Q2": 22.0},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Full Year": "NA"},
+                {"vs": "NA"},
             ],
         }
 
@@ -429,6 +442,8 @@ class TestQuartersReport(TestCase):
             False,
             True,
         )
+        print("peers", peers)
+        print("expec", expected_response)
 
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
@@ -468,14 +483,6 @@ class TestQuartersReport(TestCase):
                     "name": "Company",
                     "quarters": [
                         {
-                            "year": "2021",
-                            "Q1": "NA",
-                            "Q2": 22.0,
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "Full Year": 22.0,
-                        },
-                        {
                             "year": "2020",
                             "Q1": "NA",
                             "Q2": "NA",
@@ -484,12 +491,29 @@ class TestQuartersReport(TestCase):
                             "Full Year": "NA",
                             "vs": "NA",
                         },
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": 22.0,
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": 22.0,
+                        },
                     ],
                 }
             ],
             "averages": [
-                {"Q1": 20.0, "Q2": 20.0, "Q3": 20.0, "Q4": 20.0, "Full Year": 80.0},
-                expected_data.get("averages")[1],
+                {"Q1": 20.0},
+                {"Q2": 20.0},
+                {"Q3": 20.0},
+                {"Q4": 20.0},
+                {"Full Year": 80.0},
+                {"Q1": "NA"},
+                {"Q2": 22.0},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Full Year": 22.0},
+                {"vs": "NA"},
             ],
         }
 
