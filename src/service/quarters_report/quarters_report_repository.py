@@ -852,15 +852,30 @@ class QuartersReportRepository:
         )
 
     def get_gross_profit(
-        self, years: list, filters: dict, report_type: str, period: str = None
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
     ) -> list:
         try:
             subquery = self.__get_subquery_for_submetric("Cost of goods")
             select_value = [
                 f"main_table.value - ({subquery}) as value",
             ]
-            return self.__get_no_base_metrics(
-                select_value, "Revenue", years, report_type, period, filters
+            if scenario_type == "actuals_budget":
+                return self.__get_no_base_metrics(
+                    select_value, "Revenue", years, report_type, period, filters
+                )
+            return self.get_calculated_metrics_with_base_scenarios(
+                select_value,
+                scenario_type,
+                "Revenue",
+                years,
+                filters,
+                report_type,
+                period,
             )
         except Exception as error:
             self.logger.info(error)
@@ -1380,6 +1395,36 @@ class QuartersReportRepository:
             },
             "opex_as_revenue": {
                 "function": self.get_opex_as_revenue,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    scenario_type=scenario,
+                    report_type=report_type,
+                    period=period,
+                ),
+            },
+            "revenue_per_employee": {
+                "function": self.get_revenue_per_employee,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    scenario_type=scenario,
+                    report_type=report_type,
+                    period=period,
+                ),
+            },
+            "debt_ebitda": {
+                "function": self.get_debt_ebitda,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    scenario_type=scenario,
+                    report_type=report_type,
+                    period=period,
+                ),
+            },
+            "gross_profit": {
+                "function": self.get_gross_profit,
                 "arguments": self.__get_arguments(
                     years=years,
                     filters=filters,

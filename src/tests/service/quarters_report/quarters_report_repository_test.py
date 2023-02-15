@@ -125,7 +125,7 @@ class TestQuartersReportRepository(TestCase):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_actuals_plus_budget_metrics_query(
-            "revenue", [2021, 2022], dict(), "actuals_budget", "year_to_year", None
+            "revenue", [2021, 2022], dict(), "actuals_budget", "year_to_date", None
         )
 
         self.assertEqual(metrics, self.records)
@@ -194,6 +194,20 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, self.records)
 
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_gross_retention_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_gross_retention([2021, 2021], dict(), "Actuals")
+
+        self.assertEqual(metrics, self.records)
+
     def test_get_gross_retention_should_return_empty_list_when_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
@@ -205,6 +219,20 @@ class TestQuartersReportRepository(TestCase):
         self.mock_response_list_query_sql(self.records)
 
         metrics = self.repository.get_debt_ebitda([2021, 2021], dict())
+
+        self.assertEqual(metrics, self.records)
+
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_debt_ebitda_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_debt_ebitda([2021, 2021], dict(), "Actuals")
 
         self.assertEqual(metrics, self.records)
 
@@ -224,6 +252,20 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, self.records)
 
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_opex_as_revenue_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_opex_as_revenue([2021, 2021], dict(), "Actuals")
+
+        self.assertEqual(metrics, self.records)
+
     def test_get_opex_as_revenue_should_return_empty_list_when_fails(self):
         self.mock_session.execute.side_effect = Exception("error")
 
@@ -240,6 +282,22 @@ class TestQuartersReportRepository(TestCase):
 
         metrics = self.repository.get_revenue_per_employee(
             [2021, 2021], dict(), "actuals_budget", "year_to_year"
+        )
+
+        self.assertEqual(metrics, self.records)
+
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_revenue_per_employee_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_revenue_per_employee(
+            [2021, 2021], dict(), "Actuals"
         )
 
         self.assertEqual(metrics, self.records)
@@ -279,12 +337,24 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_gross_profit_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_gross_profit([2021, 2021], dict(), "Actuals")
+
+        self.assertEqual(metrics, self.records)
+
     def test_get_gross_profit_success_should_return_list(self):
         self.mock_response_list_query_sql(self.records)
 
-        metrics = self.repository.get_gross_profit(
-            [2021, 2021], dict(), "year_to_year", None
-        )
+        metrics = self.repository.get_gross_profit([2021, 2021], dict())
 
         self.assertEqual(metrics, self.records)
 
@@ -292,7 +362,7 @@ class TestQuartersReportRepository(TestCase):
         self.mock_session.execute.side_effect = Exception("error")
 
         metrics = self.repository.get_gross_profit(
-            [2021, 2021], dict(), "year_to_year", None
+            [2021, 2021], dict(), "actuals_budget", "year_to_year", None
         )
 
         self.assertEqual(metrics, [])
@@ -368,4 +438,14 @@ class TestQuartersReportRepository(TestCase):
             "", [], []
         )
 
+        self.mock_query_builder.assert_not_called()
+
+    def test_get_actuals_plus_main_table_subquery(self):
+        self.repository.get_actuals_plus_main_table_subquery(
+            "Revenue",
+            [2021],
+            dict(),
+            "year_to_date",
+            "Q2",
+        )
         self.mock_query_builder.assert_not_called()

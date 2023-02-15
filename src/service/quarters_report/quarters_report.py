@@ -103,70 +103,56 @@ class QuartersReport:
         ]
 
     def __get_ltm_full_year_base_scenarios(
-        self, subheaders_dict, year, period, company_id, company, averages_dict
+        self,
+        subheaders_dict,
+        year,
+        period,
+        company_id,
+        company,
+        quarters_per_companies,
     ) -> dict:
-        subheader_years = list(subheaders_dict.keys())
-        year = str(year)
-        if subheader_years.index(year) != 0 and subheader_years.index(year) != (
-            len(subheader_years) - 1
-        ):
-            full_year_index = subheaders_dict.get(year, []).index(self.full_year)
-            next_year = str(int(year) + 1)
-            next_full_year_index = full_year_index + 1
-            next_year_quarters = subheaders_dict.get(year, [])[next_full_year_index:]
-            next_quarter_data = (
-                self.__get_valid_value(company.get("value"))
-                if period in next_year_quarters
-                else None
-            )
-            year_quarters = subheaders_dict.get(year)[:full_year_index]
-            quarter_data = (
-                self.__get_valid_value(company.get("value"))
-                if period in year_quarters
-                else None
-            )
-            if company_id not in averages_dict.keys():
-                if quarter_data:
-                    averages_dict[company_id] = {year: [quarter_data]}
-                if next_quarter_data:
-                    averages_dict[company_id] = {next_year: [next_quarter_data]}
-            else:
-                if quarter_data:
-                    averages_list = averages_dict.get(company_id).get(year, [])
-                    averages_list.append(quarter_data)
-                    averages_dict[company_id][year] = averages_list
+        def append_quarter_data(data, year, company_id):
+            if data:
+                quarters_per_companies.setdefault(company_id, {}).setdefault(
+                    year, []
+                ).append(data)
 
-                if next_quarter_data:
-                    averages_list = averages_dict.get(company_id).get(next_year, [])
-                    averages_list.append(next_quarter_data)
-                    averages_dict[company_id][next_year] = averages_list
-        elif subheader_years.index(year) == 0:
-            next_year = str(int(year) + 1)
-            next_year_quarters = subheaders_dict.get(str(year))
+        subheader_years = list(subheaders_dict.keys())
+        year_str = str(year)
+        next_year = str(year + 1)
+        if year_str == subheader_years[0]:
+            next_year_quarters = subheaders_dict.get(year_str, [])
             next_quarter_data = (
                 self.__get_valid_value(company.get("value"))
                 if period in next_year_quarters
                 else None
             )
-            if next_quarter_data:
-                if company_id not in averages_dict.keys():
-                    averages_dict[company_id] = {next_year: [next_quarter_data]}
-                else:
-                    averages_dict[company_id][next_year].append(next_quarter_data)
-        elif subheader_years.index(year) == (len(subheader_years) - 1):
-            next_year = str(int(year) + 1)
-            year_quarters = subheaders_dict.get(year)
+            append_quarter_data(next_quarter_data, next_year, company_id)
+        elif year_str == subheader_years[-1]:
+            year_quarters = subheaders_dict.get(year_str)
             quarter_data = (
                 self.__get_valid_value(company.get("value"))
                 if period in year_quarters
                 else None
             )
-            if company_id not in averages_dict.keys():
-                averages_dict[company_id] = {next_year: [quarter_data]}
-            else:
-                averages_list = averages_dict.get(company_id).get(year, [])
-                averages_list.append(quarter_data)
-                averages_dict[company_id][year] = averages_list
+            append_quarter_data(quarter_data, year_str, company_id)
+        else:
+            full_year_index = subheaders_dict[year_str].index(self.full_year)
+            next_index = full_year_index + 1
+            next_year_quarters = subheaders_dict[year_str][next_index:]
+            next_quarter_data = (
+                self.__get_valid_value(company.get("value"))
+                if period in next_year_quarters
+                else None
+            )
+            year_quarters = subheaders_dict[year_str][:full_year_index]
+            quarter_data = (
+                self.__get_valid_value(company.get("value"))
+                if period in year_quarters
+                else None
+            )
+            append_quarter_data(quarter_data, year_str, company_id)
+            append_quarter_data(next_quarter_data, next_year, company_id)
 
     def process_metrics(
         self,
@@ -471,8 +457,8 @@ class QuartersReport:
             quarters[index].update({"vs": comparison_value})
 
     def __get_comparison_percentage(self, index, quarters) -> Union[str, float]:
-        prev_full_year = quarters[index - 1].get("full_year")
-        full_year = quarters[index].get("full_year")
+        prev_full_year = quarters[index - 1].get(self.full_year)
+        full_year = quarters[index].get(self.full_year)
         return self.__calculate_comparison_percentage(prev_full_year, full_year)
 
     def __calculate_comparison_percentage(self, prev_full_year, full_year):
@@ -550,7 +536,9 @@ class QuartersReport:
                 company_updated.update({"quarters": quarters})
                 data.get(company_id).update(company_updated)
         if report_type == "last_twelve_months":
-            full_year_ltm = self.__update_full_year_ltm(data, averages_dict, years)
+            full_year_ltm = self.__update_full_year_ltm(
+                data, averages_dict, years, subheaders_dict
+            )
             self.__update_comparison_ltm(
                 data, comparison_object, years, subheaders_dict
             )
@@ -569,21 +557,34 @@ class QuartersReport:
                     else "NA"
                 )
 
-    def __update_full_year_ltm(self, data, full_year_dict, years):
+    def __update_full_year_ltm(self, data, full_year_dict, years, subheaders_dict):
         full_year_average_dict = {str(year): [] for year in years}
         for company_id in data:
             full_year_ltm = full_year_dict.get(company_id, [])
             if full_year_ltm:
                 for quarter in data.get(company_id).get("quarters"):
                     current_year = str(quarter.get("year"))
+                    valid_quarters = [
+                        quarter_value
+                        for quarter_value in full_year_ltm.get(current_year, [])
+                        if not isinstance(quarter_value, str)
+                    ]
                     new_full_year = (
-                        sum(full_year_ltm.get(current_year))
-                        if len(full_year_ltm.get(current_year, [])) == 4
-                        else "NA"
+                        sum(valid_quarters) if len(valid_quarters) == 4 else "NA"
                     )
                     if new_full_year != "NA":
                         full_year_average_dict[current_year].append(new_full_year)
+
                     quarter.update({self.full_year: new_full_year})
+                    new_quarter = {
+                        key: value
+                        for key, value in quarter.items()
+                        if key in subheaders_dict.get(current_year)
+                    }
+                    new_quarter.update({"year": current_year})
+                    data[company_id]["quarters"][
+                        years.index(current_year)
+                    ] = new_quarter
         return full_year_average_dict
 
     def __update_comparison_ltm(self, data, comparison_object, years, subheaders_dict):
