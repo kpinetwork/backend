@@ -337,6 +337,31 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, [])
 
+    def test_get_actuals_vs_budget_metric_success_should_return_list(self):
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_actuals_vs_budget_metric(
+            [2021, 2021], "Revenue", dict()
+        )
+
+        self.assertEqual(metrics, [])
+
+    @patch.object(
+        QuartersReportRepository,
+        "_QuartersReportRepository__get_full_year_table__calculated_metrics",
+    )
+    def test_get_actuals_vs_budget_metric_success_with_scenario_should_return_list(
+        self, mock_full_year_table
+    ):
+        mock_full_year_table.return_value = "Mock table"
+        self.mock_response_list_query_sql(self.records)
+
+        metrics = self.repository.get_actuals_vs_budget_metric(
+            [2021, 2021], "Revenue", dict(), "Actuals"
+        )
+
+        self.assertEqual(metrics, self.records)
+
     @patch.object(
         QuartersReportRepository,
         "_QuartersReportRepository__get_full_year_table__calculated_metrics",

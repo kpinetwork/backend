@@ -1114,6 +1114,35 @@ class QuartersReportRepository:
             self.logger.info(error)
             return []
 
+    def get_actuals_vs_budget_metric(
+        self,
+        years: list,
+        metric: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+        report_type: str = None,
+        period: str = None,
+    ) -> list:
+        try:
+            subquery = self.__get_subquery_for_submetric("Revenue")
+            select_value = [
+                f"main_table.value / ({subquery}) as value",
+            ]
+            if scenario_type == "actuals_budget":
+                return []
+            return self.get_calculated_metrics_with_base_scenarios(
+                select_value,
+                "Budget",
+                metric,
+                years,
+                filters,
+                report_type,
+                period,
+            )
+        except Exception as error:
+            self.logger.info(error)
+            return []
+
     def get_ebitda_margin_metric(
         self,
         years: list,
@@ -1186,6 +1215,39 @@ class QuartersReportRepository:
                     years=years, filters=filters, report_type=report_type, period=period
                 ),
             }
+        }
+
+    def __get_actuals_vs_budget_functions_metric(
+        self,
+        years: list,
+        filters: dict,
+        scenario_type: str,
+        report_type: str,
+        period: str,
+    ) -> dict:
+        return {
+            "revenue_vs_budget": {
+                "function": self.get_actuals_vs_budget_metric,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    report_type=report_type,
+                    period=period,
+                    scenario_type=scenario_type,
+                    metric="Revenue",
+                ),
+            },
+            "ebitda_vs_budget": {
+                "function": self.get_actuals_vs_budget_metric,
+                "arguments": self.__get_arguments(
+                    years=years,
+                    filters=filters,
+                    report_type=report_type,
+                    period=period,
+                    scenario_type=scenario_type,
+                    metric="Ebitda",
+                ),
+            },
         }
 
     def get_actuals_plus_budget_functions_metric(
@@ -1443,6 +1505,11 @@ class QuartersReportRepository:
         metric_config.update(
             self.get_base_functions_metric(
                 filters, ScenarioNames.BUDGET, years, report_type, period
+            )
+        )
+        metric_config.update(
+            self.__get_actuals_vs_budget_functions_metric(
+                years, filters, scenario, report_type, period
             )
         )
         return metric_config
