@@ -920,6 +920,7 @@ class QuartersReportRepository:
         period: str = None,
     ) -> list:
         try:
+            metric = "Run rate revenue"
             subquery = self.__get_subquery_for_submetric("Headcount")
             select_value = [
                 f"(main_table.value / ({subquery})) * 1000000 as value",
@@ -927,7 +928,7 @@ class QuartersReportRepository:
             if scenario_type == "actuals_budget":
                 return self.__get_no_base_metrics(
                     select_value,
-                    "Run rate revenue",
+                    metric,
                     years,
                     report_type,
                     period,
@@ -936,7 +937,7 @@ class QuartersReportRepository:
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
                 scenario_type,
-                "Run rate revenue",
+                metric,
                 years,
                 filters,
                 report_type,

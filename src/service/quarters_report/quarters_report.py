@@ -266,7 +266,7 @@ class QuartersReport:
                 full_year = self.__get_calculate_full_year_property_year_to_date(item)
             else:
                 full_year = self.__get_calculate_full_year_property_year_to_year(item)
-            item["Full Year"] = full_year
+            item[self.full_year] = full_year
         return data
 
     def is_valid_value(self, value) -> Union[float, str, None]:
@@ -298,18 +298,18 @@ class QuartersReport:
                 "Q2": self.is_valid_value(item.get("Q2", None)),
                 "Q3": self.is_valid_value(item.get("Q3", None)),
                 "Q4": self.is_valid_value(item.get("Q4", None)),
-                "Full Year": self.is_valid_value(item.get("Full Year", None)),
+                self.full_year: self.is_valid_value(item.get(self.full_year, None)),
             }
             if (
                 prev_full_year[item["id"]] is not None
                 and prev_full_year[item["id"]] != "NA"
             ):
                 quarter["vs"] = round(
-                    (quarter["Full Year"] / prev_full_year[item["id"]] * 100), 2
+                    (quarter[self.full_year] / prev_full_year[item["id"]] * 100), 2
                 )
             elif prev_full_year[item["id"]] is not None:
                 quarter["vs"] = "NA"
-            prev_full_year[item["id"]] = quarter["Full Year"]
+            prev_full_year[item["id"]] = quarter[self.full_year]
             companies[item["id"]]["quarters"].append(quarter)
         return list(companies.values())
 
@@ -322,18 +322,26 @@ class QuartersReport:
         return filtered_companies
 
     def __get_year_data(self, year, companies, is_first_year):
-        year_data = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Full Year": 0}
-        count = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, "Full Year": 0}
-        if not is_first_year:
-            year_data["vs"] = 0
-            count["vs"] = 0
+        def initialize_year_data(is_first_year):
+            year_data = {"Q1": 0, "Q2": 0, "Q3": 0, "Q4": 0, self.full_year: 0}
+            if not is_first_year:
+                year_data["vs"] = 0
+            return year_data
+
+        def update_year_data(year_data, count, quarter):
+            for key, value in quarter.items():
+                if key != "year" and value != "NA":
+                    year_data[key] += value
+                    count[key] += 1
+
+        year_data = initialize_year_data(is_first_year)
+        count = initialize_year_data(is_first_year)
+
         for company in companies:
             for quarter in company["quarters"]:
                 if quarter["year"] == year:
-                    for key, value in quarter.items():
-                        if key != "year" and value != "NA":
-                            year_data[key] += value
-                            count[key] += 1
+                    update_year_data(year_data, count, quarter)
+
         return year_data, count
 
     def calculate_averages(self, companies, years):
@@ -648,7 +656,7 @@ class QuartersReport:
         first_year = True
         for year in sorted_years:
             headers += [year, "", "", "", ""]
-            subHeaders += ["Q1", "Q2", "Q3", "Q4", "Full Year"]
+            subHeaders += ["Q1", "Q2", "Q3", "Q4", self.full_year]
             if not first_year:
                 headers += [""]
                 subHeaders += ["vs"]
