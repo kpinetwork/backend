@@ -682,7 +682,7 @@ functions:
     - ./casbin_configuration/model.conf
     - ./src/service/user_details/user_details_service.py
     - ./src/service/user_details/get_user_details_service.py
-
+    
 layers:
   layer_libraries:
     image: lambci/lambda:build-python3.8
