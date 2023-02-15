@@ -46,6 +46,7 @@ output "lambdas_exec_roles_arn" {
       "get_ranges_by_metric_exec_role_arn": aws_iam_role.get_ranges_by_metric_lambda_exec_role.arn
       "modify_ranges_exec_role_arn": aws_iam_role.modify_ranges_lambda_exec_role.arn
       "get_full_year_total_exec_role_arn": aws_iam_role.get_full_year_total_lambda_exec_role.arn
+      "get_quarters_report_exec_role_arn": aws_iam_role.get_full_year_total_lambda_exec_role.arn
   }
 }
 

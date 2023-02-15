@@ -1,0 +1,16 @@
+{
+    "queryStringParameters": {
+        "metric": "revenue",
+        "scenario": "actuals",
+        "years": "2021,2022,2023",
+        "report_type": "Year-Year"
+    },
+    "pathParameters": {
+        "company_id": null
+    },
+    "requestContext": {
+        "authorizer": {
+            "principalId": "user_id"
+        }
+    }
+}
