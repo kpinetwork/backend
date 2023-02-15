@@ -267,11 +267,5 @@ output "object_references" {
       key : aws_s3_bucket_object.get_full_year_total_function_object.key,
       bucket : aws_s3_bucket_object.get_full_year_total_function_object.bucket
     }
-
-    "get_quarters_report_function_bucket" : {
-      etag : aws_s3_bucket_object.get_quarters_report_function_object.etag,
-      key : aws_s3_bucket_object.get_quarters_report_function_object.key,
-      bucket : aws_s3_bucket_object.get_quarters_report_function_object.bucket
-    }
   }
 }

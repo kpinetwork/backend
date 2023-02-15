@@ -657,31 +657,6 @@ functions:
     - ./src/exceptions/base_exception.py
     - ./src/utils/app_names.py
     - ./src/utils/app_http_headers.py
-  
-  get_quarters_report_handler:
-    requirements: ./src/handlers/company_details/requirements.txt
-    include:
-    - ./src/handlers/quarters_report/get_quarters_report_handler.py
-    - ./src/service/quarters_report/quarters_report.py
-    - ./src/service/quarters_report/quarters_report_repository.py
-    - ./src/service/by_metric_report/metric_report_repository.py
-    - ./src/service/base_metrics/base_metrics_config_name.py
-    - ./src/service/calculator/calculator_service.py
-    - ./src/utils/profile_range.py
-    - ./src/utils/commons_functions.py
-    - ./src/utils/query_builder.py
-    - ./src/utils/response_sql.py
-    - ./db/utils/connection.py
-    - ./src/utils/verify_user_permissions.py
-    - ./src/utils/response_user.py
-    - ./src/exceptions/base_exception.py
-    - ./src/utils/app_names.py
-    - ./src/utils/app_http_headers.py
-    - ./src/utils/company_anonymization.py
-    - ./casbin_configuration/policy_manager.py
-    - ./casbin_configuration/model.conf
-    - ./src/service/user_details/user_details_service.py
-    - ./src/service/user_details/get_user_details_service.py
     
 layers:
   layer_libraries:

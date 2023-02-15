@@ -44,7 +44,6 @@ output "lambdas_invoke_arns" {
     "get_ranges_by_metric_lambda_function": aws_lambda_function.get_ranges_by_metric_lambda_function.invoke_arn
     "modify_ranges_lambda_function": aws_lambda_function.modify_ranges_lambda_function.invoke_arn
     "get_full_year_total_lambda_function": aws_lambda_function.get_full_year_total_lambda_function.invoke_arn
-    "get_quarters_report_lambda_function": aws_lambda_function.get_quarters_report_lambda_function.invoke_arn
   }
 }
 
