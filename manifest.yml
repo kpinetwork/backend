@@ -668,6 +668,7 @@ functions:
     - ./src/service/base_metrics/base_metrics_config_name.py
     - ./src/service/calculator/calculator_service.py
     - ./src/utils/profile_range.py
+    - ./src/utils/commons_functions.py
     - ./src/utils/query_builder.py
     - ./src/utils/response_sql.py
     - ./db/utils/connection.py
