@@ -1,0 +1,226 @@
+{
+    "subheaders": [
+        "Company",
+        "2021",
+        "",
+        "",
+        "",
+        "",
+        "2022",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "2023",
+        "",
+        "",
+        "",
+        "",
+        ""
+    ],
+    "headers": [
+        "",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Full Year",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Full Year",
+        "vs",
+        "Q1",
+        "Q2",
+        "Q3",
+        "Q4",
+        "Full Year",
+        "vs"
+    ],
+    "company_comparison_data": {},
+    "peers_comparison_data": [
+        {
+            "id": "1",
+            "name": "Company A",
+            "quarters": [
+                {
+                    "year": 2021,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA"
+                },
+                {
+                    "year": 2022,
+                    "Q1": 8.0,
+                    "Q2": 8.0,
+                    "Q3": 8.0,
+                    "Q4": 8.0,
+                    "full_year": 32.0,
+                    "vs": "NA"
+                },
+                {
+                    "year": 2023,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "name": "Company B",
+            "quarters": [
+                {
+                    "year": 2021,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA"
+                },
+                {
+                    "year": 2022,
+                    "Q1": 8.0,
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                },
+                {
+                    "year": 2023,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                }
+            ]
+        },
+        {
+            "id": "3",
+            "name": "Company C",
+            "quarters": [
+                {
+                    "year": 2021,
+                    "Q1": 8.0,
+                    "Q2": 8.0,
+                    "Q3": 8.0,
+                    "Q4": 8.0,
+                    "full_year": 32.0
+                },
+                {
+                    "year": 2022,
+                    "Q1": 18.0,
+                    "Q2": 18.0,
+                    "Q3": 41.0,
+                    "Q4": 22.0,
+                    "full_year": 99.0,
+                    "vs": 309.375
+                },
+                {
+                    "year": 2023,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                }
+            ]
+        },
+        {
+            "id": "4",
+            "name": "Company D",
+            "quarters": [
+                {
+                    "year": 2021,
+                    "Q1": 8.0,
+                    "Q2": 2.0,
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA"
+                },
+                {
+                    "year": 2022,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                },
+                {
+                    "year": 2023,
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "full_year": "NA",
+                    "vs": "NA"
+                }
+            ]
+        }
+    ],
+    "averages": [
+        {
+            "Q1": 8.0
+        },
+        {
+            "Q2": 5.0
+        },
+        {
+            "Q3": 8.0
+        },
+        {
+            "Q4": 8.0
+        },
+        {
+            "Full Year": 32.0
+        },
+        {
+            "Q1": 11.33
+        },
+        {
+            "Q2": 13.0
+        },
+        {
+            "Q3": 24.5
+        },
+        {
+            "Q4": 15.0
+        },
+        {
+            "Full Year": 65.5
+        },
+        {
+            "vs": 309
+        },
+        {
+            "Q1": "NA"
+        },
+        {
+            "Q2": "NA"
+        },
+        {
+            "Q3": "NA"
+        },
+        {
+            "Q4": "NA"
+        },
+        {
+            "Full Year": "NA"
+        },
+        {
+            "vs": "NA"
+        }
+    ]
+}
