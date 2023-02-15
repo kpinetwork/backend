@@ -251,6 +251,56 @@ class QuartersReport:
         full_year = sum(filter(None.__ne__, quarters_values))
         return full_year
 
+    def __split_periods_by_last_twelve_months(self):
+        try:
+            month = date.today().month
+            period_of_month = self.get_period_by_month(month)
+            periods = ["Q1", "Q2", "Q3", "Q4"]
+            period_index = periods.index(period_of_month)
+            return periods[: period_index + 1], periods[period_index + 1:]
+        except ValueError:
+            return None, None
+
+    def add_full_year_property_last_twelve_months(
+        self,
+        report_type: str,
+        metric: str,
+        years: list,
+        period: str,
+        filters: dict,
+        scenario_type: str = "actuals_budget",
+    ) -> list:
+        data = self.get_actuals_plus_budget(report_type, metric, years, period, filters)
+        actual_periods, previous_periods = self.__split_periods_by_last_twelve_months()
+        for company in data:
+            full_year = 0
+            company_id = company["id"]
+            year = int(company["year"])
+            previous_company_data = next(
+                (
+                    item
+                    for item in data
+                    if item["id"] == company_id and item["year"] == f"{year-1}"
+                ),
+                None,
+            )
+            previous_company_values = (
+                [previous_company_data[prop] for prop in previous_periods]
+                if previous_company_data is not None
+                else [None]
+            )
+            if None in previous_company_values:
+                full_year = None
+            else:
+                full_year = sum(previous_company_values)
+            actual_company_values = [company[prop] for prop in actual_periods]
+            if None in actual_company_values or full_year is None:
+                full_year = None
+            else:
+                full_year += sum(actual_company_values)
+            company["Full Year"] = full_year
+        return data
+
     def add_full_year_property(
         self,
         report_type: str,
@@ -281,7 +331,15 @@ class QuartersReport:
         filters: dict,
         scenario_type: str = "actuals_budget",
     ) -> list:
-        data = self.add_full_year_property(report_type, metric, years, period, filters)
+        data = []
+        if report_type == "last_twelve_months":
+            data = self.add_full_year_property_last_twelve_months(
+                report_type, metric, years, period, filters
+            )
+        else:
+            data = self.add_full_year_property(
+                report_type, metric, years, period, filters
+            )
         companies = {}
         prev_full_year = {}
         for item in data:
@@ -303,6 +361,7 @@ class QuartersReport:
             if (
                 prev_full_year[item["id"]] is not None
                 and prev_full_year[item["id"]] != "NA"
+                and quarter["Full Year"] != "NA"
             ):
                 quarter["vs"] = round(
                     (quarter[self.full_year] / prev_full_year[item["id"]] * 100), 2
@@ -703,13 +762,51 @@ class QuartersReport:
         scenario_type: str = "actuals_budget",
     ) -> tuple:
         sorted_years = sorted(years)
+        averages = []
         peers = self.add_vs_property(
             report_type, metric, sorted_years, period, conditions
         )
         self.filter_companies(peers, sorted_years)
         self.add_missing_years(peers, sorted_years)
+        if report_type == "last_twelve_months":
+            self.__update_peers_actuals_budget_to_ltm(
+                peers, self.build_subheaders_dict(period, years)
+            )
         averages = self.calculate_averages(peers, sorted_years)
+        if report_type == "last_twelve_months":
+            averages = self.__get_averages_actuals_budget_ltm(
+                averages, self.build_subheaders_dict(period, years)
+            )
         return peers, averages
+
+    def __update_peers_actuals_budget_to_ltm(
+        self, data: list, subheaders: dict
+    ) -> list:
+        for company in data:
+            for i, quarter in enumerate(company["quarters"]):
+                year = quarter["year"]
+                if year in subheaders:
+                    filtered_quarter = {"year": year}
+                    for key in subheaders[year]:
+                        if key in quarter:
+                            filtered_quarter[key] = quarter[key]
+                    company["quarters"][i] = filtered_quarter
+                else:
+                    company["quarters"][i] = {"year": year}
+
+        return data
+
+    def __get_averages_actuals_budget_ltm(
+        self, averages: list, subheaders: list
+    ) -> list:
+        result = []
+        for year, periods_year in subheaders.items():
+            for average in periods_year:
+                for diccionario in averages:
+                    if average in diccionario:
+                        result.append({average: diccionario[average]})
+                        break
+        return result
 
     def __get_averages_for_actuals_or_budget_data(self, defaul_averages: dict) -> list:
         averages = []
