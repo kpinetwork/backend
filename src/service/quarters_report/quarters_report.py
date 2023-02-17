@@ -429,26 +429,32 @@ class QuartersReport:
         first_year = years[0] if report_type != "last_twelve_months" else years[1]
         for company in data:
             company_quarters = company["quarters"]
-            for year in years:
-                found = False
-                default_quarter = {
-                    "year": str(year),
-                    "Q1": "NA",
-                    "Q2": "NA",
-                    "Q3": "NA",
-                    "Q4": "NA",
-                    self.full_year: "NA",
-                }
-                if year != first_year:
-                    default_quarter["vs"] = "NA"
-                for quarter in company_quarters:
-                    if quarter["year"] == str(year):
-                        found = True
-                        break
-                if not found:
-                    company_quarters.append(default_quarter)
-            company_quarters.sort(key=lambda x: int(x["year"]))
+            self.__add_missing_quarters(company_quarters, years, first_year)
+            self.__sort_quarters(company_quarters)
         return data
+
+    def __add_missing_quarters(self, company_quarters, years, first_year):
+        for year in years:
+            found = any(q["year"] == str(year) for q in company_quarters)
+            if not found:
+                quarter = self.__create_default_quarter(year, first_year)
+                company_quarters.append(quarter)
+
+    def __create_default_quarter(self, year, first_year):
+        default_quarter = {
+            "year": str(year),
+            "Q1": "NA",
+            "Q2": "NA",
+            "Q3": "NA",
+            "Q4": "NA",
+            self.full_year: "NA",
+        }
+        if year != first_year:
+            default_quarter["vs"] = "NA"
+        return default_quarter
+
+    def __sort_quarters(self, company_quarters):
+        company_quarters.sort(key=lambda x: int(x["year"]))
 
     def get_records(
         self,
