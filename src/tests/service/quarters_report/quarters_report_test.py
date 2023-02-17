@@ -160,7 +160,6 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
-                            "vs": "NA",
                         },
                         {
                             "year": "2021",
@@ -169,6 +168,7 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
+                            "vs": "NA",
                         },
                     ],
                 }
@@ -281,7 +281,7 @@ class TestQuartersReport(TestCase):
         peers = self.report_instance.get_quarters_peers(
             "1",
             "user",
-            "year_year",
+            "year_to_year",
             "revenue",
             "actuals",
             ["2020", "2021"],
@@ -308,7 +308,7 @@ class TestQuartersReport(TestCase):
         self.report_instance.get_quarters_peers(
             "1",
             "user",
-            "year_year",
+            "year_to_year",
             "revenue",
             "actuals",
             ["2020", "2021"],
@@ -564,7 +564,6 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
-                            "vs": "NA",
                         },
                         {
                             "year": "2021",
@@ -573,6 +572,7 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
+                            "vs": "NA",
                         },
                     ],
                 }
@@ -603,7 +603,6 @@ class TestQuartersReport(TestCase):
             False,
             True,
         )
-
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
 
@@ -648,7 +647,6 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
-                            "vs": "NA",
                         },
                         {
                             "year": "2021",
@@ -657,6 +655,7 @@ class TestQuartersReport(TestCase):
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": 22.0,
+                            "vs": "NA",
                         },
                     ],
                 }
@@ -845,6 +844,7 @@ class TestQuartersReport(TestCase):
                         "Q3": "NA",
                         "Q4": "NA",
                         "Full Year": "NA",
+                        "vs": "NA",
                     }
                 ],
             },
@@ -995,7 +995,7 @@ class TestQuartersReport(TestCase):
 
         self.assertEqual(full_year_average_dict, {"2023": [10]})
 
-    def test___get_ltm_full_year_base_scenarios(self):
+    def test__get_ltm_full_year_base_scenarios(self):
         subheaders_dict = {"2020": ["Q1"], "2021": {"Q2", "Q3", "Q4", "Full Year"}}
         year = 2020
         period = "Q1"

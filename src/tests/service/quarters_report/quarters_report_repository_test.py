@@ -362,6 +362,15 @@ class TestQuartersReportRepository(TestCase):
 
         self.assertEqual(metrics, self.records)
 
+    def test_get_actuals_vs_budget_metric_should_return_empty_list_when_fails(self):
+        self.mock_session.execute.side_effect = Exception("error")
+
+        metrics = self.repository.get_actuals_vs_budget_metric(
+            [2021, 2021], "Revenue", dict(), "Actuals"
+        )
+
+        self.assertEqual(metrics, [])
+
     @patch.object(
         QuartersReportRepository,
         "_QuartersReportRepository__get_full_year_table__calculated_metrics",
