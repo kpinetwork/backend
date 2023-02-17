@@ -257,7 +257,7 @@ class QuartersReport:
             period_of_month = self.get_period_by_month(month)
             periods = ["Q1", "Q2", "Q3", "Q4"]
             period_index = periods.index(period_of_month)
-            return periods[: period_index + 1], periods[period_index + 1 :]
+            return periods[: period_index + 1], periods[period_index + 1:]
         except ValueError:
             return None, None
 
@@ -342,6 +342,7 @@ class QuartersReport:
             data = self.add_full_year_property(
                 report_type, metric, years, period, filters
             )
+        first_year = years[0] if report_type != "last_twelve_months" else years[1]
         companies = {}
         prev_full_year = {}
         for item in data:
@@ -360,16 +361,17 @@ class QuartersReport:
                 "Q4": self.is_valid_value(item.get("Q4", None)),
                 self.full_year: self.is_valid_value(item.get(self.full_year, None)),
             }
-            if (
-                prev_full_year[item["id"]] is not None
-                and prev_full_year[item["id"]] != "NA"
-                and quarter[self.full_year] != "NA"
-            ):
-                quarter["vs"] = round(
-                    (quarter[self.full_year] / prev_full_year[item["id"]] * 100), 2
-                )
-            elif prev_full_year[item["id"]] is not None:
-                quarter["vs"] = "NA"
+            if quarter["year"] != first_year:
+                if (
+                    prev_full_year[item["id"]] is not None
+                    and prev_full_year[item["id"]] != "NA"
+                    and quarter[self.full_year] != "NA"
+                ):
+                    quarter["vs"] = round(
+                        (quarter[self.full_year] / prev_full_year[item["id"]] * 100), 2
+                    )
+                else:
+                    quarter["vs"] = "NA"
             prev_full_year[item["id"]] = quarter[self.full_year]
             companies[item["id"]]["quarters"].append(quarter)
         return list(companies.values())
@@ -423,27 +425,28 @@ class QuartersReport:
             first_year = False
         return averages
 
-    def add_missing_years(self, data, years):
+    def add_missing_years(self, data, years, report_type):
+        first_year = years[0] if report_type != "last_twelve_months" else years[1]
         for company in data:
             company_quarters = company["quarters"]
             for year in years:
                 found = False
+                default_quarter = {
+                    "year": str(year),
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    self.full_year: "NA",
+                }
+                if year != first_year:
+                    default_quarter["vs"] = "NA"
                 for quarter in company_quarters:
                     if quarter["year"] == str(year):
                         found = True
                         break
                 if not found:
-                    company_quarters.append(
-                        {
-                            "year": str(year),
-                            "Q1": "NA",
-                            "Q2": "NA",
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            self.full_year: "NA",
-                            "vs": "NA",
-                        }
-                    )
+                    company_quarters.append(default_quarter)
             company_quarters.sort(key=lambda x: int(x["year"]))
         return data
 
@@ -769,7 +772,7 @@ class QuartersReport:
             report_type, metric, sorted_years, period, conditions
         )
         self.filter_companies(peers, sorted_years)
-        self.add_missing_years(peers, sorted_years)
+        self.add_missing_years(peers, sorted_years, report_type)
         if report_type == "last_twelve_months":
             self.__update_peers_actuals_budget_to_ltm(
                 peers, self.build_subheaders_dict(period, years)
@@ -878,7 +881,8 @@ class QuartersReport:
     def __update_metric(self, metric, ranges, keys):
         updated_values = {
             key: self.profile_range.get_range_from_value(metric.get(key), ranges=ranges)
-            for key in keys
+            for key, value in metric.items()
+            if key in keys
         }
         metric.update(updated_values)
         return metric
