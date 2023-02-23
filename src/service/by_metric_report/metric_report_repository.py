@@ -337,6 +337,11 @@ class MetricReportRepository:
         self, scenario: str, where_conditions: dict
     ) -> str:
         from_count = len(scenario) + 2
+        tag_join_type = (
+            self.query_builder.JoinType.JOIN
+            if where_conditions.get("tag")
+            else self.query_builder.JoinType.LEFT
+        )
         query = (
             self.query_builder.add_table_name(TableNames.COMPANY)
             .add_select_conditions(
@@ -348,6 +353,24 @@ class MetricReportRepository:
                     f"{TableNames.METRIC}.value as value",
                     self.__get_case_of_time_periods(),
                 ]
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.COMPANY_TAG}": {
+                        "from": f"{TableNames.COMPANY_TAG}.company_id",
+                        "to": f"{TableNames.COMPANY}.id",
+                    }
+                },
+                tag_join_type,
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.TAG}": {
+                        "from": f"{TableNames.TAG}.id",
+                        "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                    }
+                },
+                tag_join_type,
             )
             .add_join_clause(
                 {

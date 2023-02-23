@@ -287,7 +287,7 @@ class QuartersReport:
                 None,
             )
             previous_company_values = (
-                [previous_company_data[prop] for prop in previous_periods]
+                [previous_company_data.get(prop, None) for prop in previous_periods]
                 if previous_company_data is not None
                 else [None]
             )
@@ -295,7 +295,7 @@ class QuartersReport:
                 full_year = None
             else:
                 full_year = sum(previous_company_values)
-            actual_company_values = [company[prop] for prop in actual_periods]
+            actual_company_values = [company.get(prop, None) for prop in actual_periods]
             if None in actual_company_values or full_year is None:
                 full_year = None
             else:
@@ -774,9 +774,8 @@ class QuartersReport:
     ) -> tuple:
         sorted_years = sorted(years)
         averages = []
-        peers = self.add_vs_property(
-            report_type, metric, sorted_years, period, conditions
-        )
+        filters = self.repository.add_filters(**conditions)
+        peers = self.add_vs_property(report_type, metric, sorted_years, period, filters)
         self.filter_companies(peers, sorted_years)
         self.add_missing_years(peers, sorted_years, report_type)
         if report_type == "last_twelve_months":

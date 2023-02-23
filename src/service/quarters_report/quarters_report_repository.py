@@ -95,9 +95,32 @@ class QuartersReportRepository:
     def get_base_query(
         self, select_conditions: list, where_conditions: dict, group_by_conditions: list
     ) -> str:
+        tag_join_type = (
+            self.query_builder.JoinType.JOIN
+            if where_conditions.get("tag")
+            else self.query_builder.JoinType.LEFT
+        )
         return (
             self.query_builder.add_table_name(TableNames.COMPANY)
             .add_select_conditions(select_conditions)
+            .add_join_clause(
+                {
+                    f"{TableNames.COMPANY_TAG}": {
+                        "from": f"{TableNames.COMPANY_TAG}.company_id",
+                        "to": f"{TableNames.COMPANY}.id",
+                    }
+                },
+                tag_join_type,
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.TAG}": {
+                        "from": f"{TableNames.TAG}.id",
+                        "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                    }
+                },
+                tag_join_type,
+            )
             .add_join_clause(
                 {
                     f"{TableNames.SCENARIO}": {
@@ -277,9 +300,32 @@ class QuartersReportRepository:
             quarters_average_join_condition = f""" average.scenario
             AND {TableNames.PERIOD}.period_name = average.period """
 
+            tag_join_type = (
+                self.query_builder.JoinType.JOIN
+                if where_conditions.get("tag")
+                else self.query_builder.JoinType.LEFT
+            )
             query = (
                 self.query_builder.add_table_name(f"{TableNames.COMPANY}")
                 .add_select_conditions(columns)
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                        }
+                    },
+                    tag_join_type,
+                )
                 .add_join_clause(
                     {
                         f"{TableNames.SCENARIO}": {
@@ -374,6 +420,11 @@ class QuartersReportRepository:
                 f"substring({TableNames.SCENARIO}.name from '.*([0-9]{{4}})$')::int": years,
             }
             where_conditions.update(filters)
+            tag_join_type = (
+                self.query_builder.JoinType.JOIN
+                if where_conditions.get("tag")
+                else self.query_builder.JoinType.LEFT
+            )
             query = (
                 self.query_builder.add_table_name(TableNames.COMPANY)
                 .add_select_conditions(
@@ -385,6 +436,24 @@ class QuartersReportRepository:
                         f"{TableNames.PERIOD}.period_name",
                         f"{TableNames.METRIC}.value",
                     ]
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.COMPANY_TAG}": {
+                            "from": f"{TableNames.COMPANY_TAG}.company_id",
+                            "to": f"{TableNames.COMPANY}.id",
+                        }
+                    },
+                    tag_join_type,
+                )
+                .add_join_clause(
+                    {
+                        f"{TableNames.TAG}": {
+                            "from": f"{TableNames.TAG}.id",
+                            "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                        }
+                    },
+                    tag_join_type,
                 )
                 .add_join_clause(
                     {
@@ -729,6 +798,11 @@ class QuartersReportRepository:
         if scenario_condition:
             where_conditions.update(scenario_condition)
 
+        tag_join_type = (
+            self.query_builder.JoinType.JOIN
+            if where_conditions.get("tag")
+            else self.query_builder.JoinType.LEFT
+        )
         query = (
             self.query_builder.add_table_name(TableNames.COMPANY)
             .add_select_conditions(
@@ -741,6 +815,24 @@ class QuartersReportRepository:
                     f"{TableNames.PERIOD}.period_name",
                     f"{TableNames.METRIC}.value",
                 ]
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.COMPANY_TAG}": {
+                        "from": f"{TableNames.COMPANY_TAG}.company_id",
+                        "to": f"{TableNames.COMPANY}.id",
+                    }
+                },
+                tag_join_type,
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.TAG}": {
+                        "from": f"{TableNames.TAG}.id",
+                        "to": f"{TableNames.COMPANY_TAG}.tag_id",
+                    }
+                },
+                tag_join_type,
             )
             .add_join_clause(
                 {
