@@ -640,9 +640,9 @@ class QuartersReport:
         full_year_average_dict = {str(year): [] for year in years}
         for company_id in data:
             full_year_ltm = full_year_dict.get(company_id, [])
-            if full_year_ltm:
-                for quarter in data.get(company_id).get("quarters"):
-                    current_year = str(quarter.get("year"))
+            for quarter in data.get(company_id).get("quarters"):
+                current_year = str(quarter.get("year"))
+                if full_year_ltm:
                     valid_quarters = [
                         quarter_value
                         for quarter_value in full_year_ltm.get(current_year, [])
@@ -655,15 +655,18 @@ class QuartersReport:
                         full_year_average_dict[current_year].append(new_full_year)
 
                     quarter.update({self.full_year: new_full_year})
-                    new_quarter = {
-                        key: value
-                        for key, value in quarter.items()
-                        if key in subheaders_dict.get(current_year)
-                    }
-                    new_quarter.update({"year": current_year})
-                    data[company_id]["quarters"][
-                        years.index(current_year)
-                    ] = new_quarter
+
+                if not full_year_ltm:
+                    quarter.update({self.full_year: "NA"})
+
+                new_quarter = {
+                    key: value
+                    for key, value in quarter.items()
+                    if key in subheaders_dict.get(current_year)
+                }
+                new_quarter.update({"year": current_year})
+                data[company_id]["quarters"][years.index(current_year)] = new_quarter
+
         return full_year_average_dict
 
     def __update_comparison_ltm(self, data, comparison_object, years, subheaders_dict):
