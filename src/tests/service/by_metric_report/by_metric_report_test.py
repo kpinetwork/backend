@@ -775,4 +775,4 @@ class TestByMetricReport(TestCase):
         )
 
         mock_set_company_permissions.assert_called()
-        mock_anonymize_companies_values.assert_not_called()
+        mock_anonymize_companies_values.assert_called()
