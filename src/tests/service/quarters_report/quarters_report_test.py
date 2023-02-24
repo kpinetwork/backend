@@ -466,30 +466,24 @@ class TestQuartersReport(TestCase):
                     "name": "Company",
                     "quarters": [
                         {
-                            "year": 2019,
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "year": "2019",
+                        },
+                        {
                             "Q1": "NA",
                             "Q2": "NA",
                             "Q3": "NA",
                             "Q4": "NA",
                             "Full Year": "NA",
+                            "year": "2020",
                         },
                         {
-                            "year": 2020,
                             "Q1": "NA",
-                            "Q2": "NA",
-                            "Q3": "NA",
-                            "Q4": "NA",
                             "Full Year": "NA",
                             "vs": "NA",
-                        },
-                        {
-                            "year": 2021,
-                            "Q1": "NA",
-                            "Q2": 22.0,
-                            "Q3": "NA",
-                            "Q4": "NA",
-                            "Full Year": "NA",
-                            "vs": "NA",
+                            "year": "2021",
                         },
                     ],
                 }
