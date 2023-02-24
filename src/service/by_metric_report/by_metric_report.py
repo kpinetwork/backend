@@ -339,9 +339,12 @@ class ByMetricReport:
             for year in metrics
         }
 
-    def anonymize_company(self, company: dict, ranges: list) -> None:
+    def anonymize_company(self, company: dict, ranges: list, metric: str) -> None:
         company["name"] = self.anonymized_name(company.get("id"))
-        company["metrics"] = self.anonymized_metric(company.get("metrics", {}), ranges)
+        if self.need_to_be_anonymized(metric):
+            company["metrics"] = self.anonymized_metric(
+                company.get("metrics", {}), ranges
+            )
 
     def clear_metric_name(self, metric: str) -> str:
         return re.sub(
@@ -356,7 +359,7 @@ class ByMetricReport:
         metric_ranges = self.profile_range.get_profile_ranges(metric)
         for company_id in data:
             if company_id not in self.company_anonymization.companies:
-                self.anonymize_company(data[company_id], metric_ranges)
+                self.anonymize_company(data[company_id], metric_ranges, metric)
 
     def get_by_metric_records(self, metric: str, years: list, **conditions) -> dict:
         companies = dict()
@@ -422,7 +425,7 @@ class ByMetricReport:
             data = self.get_by_metric_records(metric, years, **conditions)
             averages = self.get_averages(list(data.values()), years)
 
-            if not access and self.need_to_be_anonymized(metric):
+            if not access:
                 self.anonymize_companies_values(metric, data)
 
             if not from_main and is_valid_company:

@@ -257,7 +257,8 @@ class QuartersReport:
             period_of_month = self.get_period_by_month(month)
             periods = ["Q1", "Q2", "Q3", "Q4"]
             period_index = periods.index(period_of_month)
-            return periods[: period_index + 1], periods[period_index + 1:]
+            next_period_index = period_index + 1
+            return periods[:next_period_index], periods[next_period_index:]
         except ValueError:
             return None, None
 
@@ -287,7 +288,7 @@ class QuartersReport:
                 None,
             )
             previous_company_values = (
-                [previous_company_data[prop] for prop in previous_periods]
+                [previous_company_data.get(prop, None) for prop in previous_periods]
                 if previous_company_data is not None
                 else [None]
             )
@@ -295,7 +296,7 @@ class QuartersReport:
                 full_year = None
             else:
                 full_year = sum(previous_company_values)
-            actual_company_values = [company[prop] for prop in actual_periods]
+            actual_company_values = [company.get(prop, None) for prop in actual_periods]
             if None in actual_company_values or full_year is None:
                 full_year = None
             else:
@@ -639,9 +640,9 @@ class QuartersReport:
         full_year_average_dict = {str(year): [] for year in years}
         for company_id in data:
             full_year_ltm = full_year_dict.get(company_id, [])
-            if full_year_ltm:
-                for quarter in data.get(company_id).get("quarters"):
-                    current_year = str(quarter.get("year"))
+            for quarter in data.get(company_id).get("quarters"):
+                current_year = str(quarter.get("year"))
+                if full_year_ltm:
                     valid_quarters = [
                         quarter_value
                         for quarter_value in full_year_ltm.get(current_year, [])
@@ -652,17 +653,19 @@ class QuartersReport:
                     )
                     if new_full_year != "NA":
                         full_year_average_dict[current_year].append(new_full_year)
+                else:
+                    new_full_year = "NA"
 
-                    quarter.update({self.full_year: new_full_year})
-                    new_quarter = {
-                        key: value
-                        for key, value in quarter.items()
-                        if key in subheaders_dict.get(current_year)
-                    }
-                    new_quarter.update({"year": current_year})
-                    data[company_id]["quarters"][
-                        years.index(current_year)
-                    ] = new_quarter
+                quarter.update({self.full_year: new_full_year})
+
+                new_quarter = {
+                    key: value
+                    for key, value in quarter.items()
+                    if key in subheaders_dict.get(current_year)
+                }
+                new_quarter.update({"year": current_year})
+                data[company_id]["quarters"][years.index(current_year)] = new_quarter
+
         return full_year_average_dict
 
     def __update_comparison_ltm(self, data, comparison_object, years, subheaders_dict):
@@ -774,9 +777,8 @@ class QuartersReport:
     ) -> tuple:
         sorted_years = sorted(years)
         averages = []
-        peers = self.add_vs_property(
-            report_type, metric, sorted_years, period, conditions
-        )
+        filters = self.repository.add_filters(**conditions)
+        peers = self.add_vs_property(report_type, metric, sorted_years, period, filters)
         self.filter_companies(peers, sorted_years)
         self.add_missing_years(peers, sorted_years, report_type)
         if report_type == "last_twelve_months":
@@ -870,11 +872,12 @@ class QuartersReport:
         metric_ranges = self.profile_range.get_profile_ranges(metric)
         for company in data:
             if company.get("id") not in self.company_anonymization.companies:
-                self.anonymize_company(company, metric_ranges)
+                self.anonymize_company(company, metric_ranges, metric)
 
-    def anonymize_company(self, company: dict, ranges: list) -> None:
+    def anonymize_company(self, company: dict, ranges: list, metric: str) -> None:
         company["name"] = self.anonymized_name(company.get("id"))
-        self.anonymized_metric(company.get("quarters", {}), ranges)
+        if self.need_to_be_anonymized(metric):
+            self.anonymized_metric(company.get("quarters", {}), ranges)
 
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
@@ -921,7 +924,7 @@ class QuartersReport:
                 metric, scenario_type, years, conditions, report_type, period
             )
 
-            if not access and self.need_to_be_anonymized(metric):
+            if not access:
                 self.anonymize_companies_values(metric, peers)
 
             if not from_main and is_valid_company:
