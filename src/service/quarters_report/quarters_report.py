@@ -257,7 +257,8 @@ class QuartersReport:
             period_of_month = self.get_period_by_month(month)
             periods = ["Q1", "Q2", "Q3", "Q4"]
             period_index = periods.index(period_of_month)
-            return periods[: period_index + 1], periods[period_index + 1:]
+            next_period_index = period_index + 1
+            return periods[:next_period_index], periods[next_period_index:]
         except ValueError:
             return None, None
 
@@ -869,11 +870,12 @@ class QuartersReport:
         metric_ranges = self.profile_range.get_profile_ranges(metric)
         for company in data:
             if company.get("id") not in self.company_anonymization.companies:
-                self.anonymize_company(company, metric_ranges)
+                self.anonymize_company(company, metric_ranges, metric)
 
-    def anonymize_company(self, company: dict, ranges: list) -> None:
+    def anonymize_company(self, company: dict, ranges: list, metric: str) -> None:
         company["name"] = self.anonymized_name(company.get("id"))
-        self.anonymized_metric(company.get("quarters", {}), ranges)
+        if self.need_to_be_anonymized(metric):
+            self.anonymized_metric(company.get("quarters", {}), ranges)
 
     def anonymized_name(self, id: str) -> str:
         return self.company_anonymization.anonymize_company_name(id)
@@ -920,7 +922,7 @@ class QuartersReport:
                 metric, scenario_type, years, conditions, report_type, period
             )
 
-            if not access and self.need_to_be_anonymized(metric):
+            if not access:
                 self.anonymize_companies_values(metric, peers)
 
             if not from_main and is_valid_company:
