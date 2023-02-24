@@ -44,8 +44,9 @@ class DynamicReport:
         companies = set([*data]).union([*budget_values])
 
         for company_id in companies:
-            data[company_id].update(budget_values.get(company_id, dict()))
-            data[company_id].update(prior_actuals_values.get(company_id, dict()))
+            if data.get(company_id):
+                data[company_id].update(budget_values.get(company_id, dict()))
+                data[company_id].update(prior_actuals_values.get(company_id, dict()))
 
         return data
 
