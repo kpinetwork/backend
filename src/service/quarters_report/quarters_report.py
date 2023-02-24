@@ -653,11 +653,10 @@ class QuartersReport:
                     )
                     if new_full_year != "NA":
                         full_year_average_dict[current_year].append(new_full_year)
+                else:
+                    new_full_year = "NA"
 
-                    quarter.update({self.full_year: new_full_year})
-
-                if not full_year_ltm:
-                    quarter.update({self.full_year: "NA"})
+                quarter.update({self.full_year: new_full_year})
 
                 new_quarter = {
                     key: value
