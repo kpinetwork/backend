@@ -153,11 +153,12 @@ class InvestmentDateReport:
             company_data.get("id")
         )
         metrics_data = []
-        for metric in metrics:
-            metrics_data.extend(
-                self.get_anonymized_metric_data(metric, company_data, metric_ranges)
-            )
-        company_data["metrics"] = metrics_data
+        if self.__needs_to_anonymize_metrics(metrics):
+            for metric in metrics:
+                metrics_data.extend(
+                    self.get_anonymized_metric_data(metric, company_data, metric_ranges)
+                )
+            company_data["metrics"] = metrics_data
 
     def anonymize_companies_data(self, companies_data: dict, metrics: list) -> None:
         metric_ranges = {
@@ -194,7 +195,7 @@ class InvestmentDateReport:
             self.company_anonymization.set_company_permissions(username)
 
             data = self.get_companies_data(metrics, **conditions)
-            if not access and self.__needs_to_anonymize_metrics(metrics):
+            if not access:
                 self.anonymize_companies_data(data, metrics)
 
             if not from_main and is_valid_company:
