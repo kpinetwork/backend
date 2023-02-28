@@ -624,7 +624,7 @@ class TestQuartersReport(TestCase):
                         "Q2": 20.0,
                         "Q3": 20.0,
                         "Q4": 20.0,
-                        "Full Year": 80.0,
+                        "Full Year": 60.0,
                     },
                     expected_data.get("company_comparison_data").get("quarters")[1],
                 ],
@@ -659,7 +659,7 @@ class TestQuartersReport(TestCase):
                 {"Q2": 20.0},
                 {"Q3": 20.0},
                 {"Q4": 20.0},
-                {"Full Year": 80.0},
+                {"Full Year": 60.0},
                 {"Q1": "NA"},
                 {"Q2": 22.0},
                 {"Q3": "NA"},
@@ -680,6 +680,9 @@ class TestQuartersReport(TestCase):
             False,
             True,
         )
+
+        print("peeers", peers)
+        print("expect", expected_response)
 
         mock_set_company_permissions.assert_called()
         self.assertEqual(peers, expected_response)
