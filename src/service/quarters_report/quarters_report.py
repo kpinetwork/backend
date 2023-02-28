@@ -825,23 +825,30 @@ class QuartersReport:
     ) -> list:
         return self.__update_company_quarters(data, subheaders)
 
+    def __get_values_for_quarter_company(self, quarter, year, companies):
+        return [
+            quarter_company.get(quarter)
+            for company in companies
+            for quarter_company in company["quarters"]
+            if quarter_company.get("year") == year
+            and quarter_company.get(quarter) != "NA"
+        ]
+
+    def __get_average_for_quarter(self, quarter, year, companies):
+        values = self.__get_values_for_quarter_company(quarter, year, companies)
+        if values:
+            return round(sum(values) / len(values), 2)
+        return "NA"
+
     def __get_averages_actuals_budget_ltm(self, data: list, subheaders: list) -> list:
         averages = []
         for subheader in subheaders:
+            quarter_averages = defaultdict(str)
             for quarter in subheaders[subheader]:
-                values = []
-                for company in data:
-                    for quarter_company in company["quarters"]:
-                        if (
-                            quarter_company.get("year") == subheader
-                            and quarter_company.get(quarter) != "NA"
-                        ):
-                            values.append(quarter_company.get(quarter))
-                if values:
-                    average = round((sum(values) / len(values)), 2)
-                    averages.append({quarter: average})
-                else:
-                    averages.append({quarter: "NA"})
+                quarter_averages[quarter] = self.__get_average_for_quarter(
+                    quarter, subheader, data
+                )
+            averages.append(dict(quarter_averages))
         return averages
 
     def __get_averages_for_actuals_or_budget_data(self, defaul_averages: dict) -> list:
