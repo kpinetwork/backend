@@ -8,6 +8,7 @@ from response_sql import ResponseSQL
 from company_anonymization import CompanyAnonymization
 from quarters_report import QuartersReport
 from quarters_report_repository import QuartersReportRepository
+from calculator_service import CalculatorService
 from profile_range import ProfileRange
 from verify_user_permissions import (
     verify_user_access,
@@ -27,12 +28,15 @@ logger.setLevel(logging.INFO)
 def get_quarters_report_service():
     user_service = get_user_details_service_instance()
     company_anonymization = CompanyAnonymization(user_service)
+    calculator = CalculatorService(logger)
     profile_range = ProfileRange(session, QuerySQLBuilder(), logger, ResponseSQL())
     repository = QuartersReportRepository(
         session, QuerySQLBuilder(), ResponseSQL(), logger
     )
 
-    return QuartersReport(logger, repository, profile_range, company_anonymization)
+    return QuartersReport(
+        logger, calculator, repository, profile_range, company_anonymization
+    )
 
 
 def handler(event, _):
