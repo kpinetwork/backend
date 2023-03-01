@@ -607,9 +607,17 @@ class TestQuartersReport(TestCase):
                 }
             ],
             "averages": [
-                {"Q2": "NA", "Q3": "NA", "Q4": "NA"},
-                {"Q1": 20.0, "Full Year": "NA", "Q2": 20.0, "Q3": 20.0, "Q4": 20.0},
-                {"Q1": "NA", "Full Year": "NA", "vs": "NA"},
+                {"Q2": "NA"},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Q1": 20.0},
+                {"Full Year": "NA"},
+                {"Q2": 20.0},
+                {"Q3": 20.0},
+                {"Q4": 20.0},
+                {"Q1": "NA"},
+                {"Full Year": "NA"},
+                {"vs": "NA"},
             ],
         }
 

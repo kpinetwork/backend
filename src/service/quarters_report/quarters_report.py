@@ -856,7 +856,7 @@ class QuartersReport:
                 quarter_averages[quarter] = self.__get_average_for_quarter(
                     quarter, subheader, data
                 )
-            averages.append(dict(quarter_averages))
+                averages.append({quarter: quarter_averages[quarter]})
         return averages
 
     def __get_averages_for_actuals_or_budget_data(self, defaul_averages: dict) -> list:
