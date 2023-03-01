@@ -1557,22 +1557,140 @@ class TestQuartersReport(TestCase):
 
         self.assertEqual(retention, expected_value)
 
-    def test_process_net_retention_metrics_no_base_scenario_should_return_data(self):
-        run_rate_revenue = {
+    def test_get_gross_retention_records_base_scenarios_success_should_return_data(
+        self,
+    ):
+        self.mock_repository.get_quarters_year_to_year_records.return_value = (
+            self.records
+        )
+        expected_value = (
+            [
+                {
+                    "id": "1",
+                    "name": "Test",
+                    "quarters": [
+                        {
+                            "year": "2020",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                        },
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                            "vs": "NA",
+                        },
+                    ],
+                },
+                {
+                    "id": "2",
+                    "name": "Company",
+                    "quarters": [
+                        {
+                            "year": "2020",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                        },
+                        {
+                            "year": "2021",
+                            "Q1": "NA",
+                            "Q2": "NA",
+                            "Q3": "NA",
+                            "Q4": "NA",
+                            "Full Year": "NA",
+                            "vs": "NA",
+                        },
+                    ],
+                },
+            ],
+            [
+                {"Q1": "NA"},
+                {"Q2": "NA"},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Full Year": "NA"},
+                {"Q1": "NA"},
+                {"Q2": "NA"},
+                {"Q3": "NA"},
+                {"Q4": "NA"},
+                {"Full Year": "NA"},
+                {"vs": "NA"},
+            ],
+        )
+
+        retention = self.report_instance.get_retention_records_base_scenarios(
+            "gross_retention",
+            "actuals_budget",
+            ["2020", "2021"],
+            dict(),
+            "year_to_year",
+        )
+
+        self.assertEqual(retention, expected_value)
+
+    def test_get_net_retention_records_base_scenarios_success_should_return_data(self):
+        self.mock_repository.get_metric_records_with_base_scenarios.return_value = [
+            self.records[0]
+        ]
+        expected_value = {
             "1": {
-                "id": 1,
+                "id": "1",
+                "name": "Test",
                 "quarters": [
                     {
-                        "year": 2019,
-                        "Q1": 2,
-                        "Q2": 1,
+                        "year": 2020,
+                        "Q1": "NA",
+                        "Q2": "NA",
                         "Q3": "NA",
-                        "Q4": 5,
+                        "Q4": "NA",
                         "Full Year": "NA",
-                    }
+                    },
+                    {
+                        "year": 2021,
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                        "vs": "NA",
+                    },
                 ],
-            }
+            },
+            "averages": {
+                "2020": {
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "Full Year": "NA",
+                },
+                "2021": {
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "Full Year": "NA",
+                    "vs": "NA",
+                },
+            },
         }
+
+        retention = self.report_instance.get_retention_records_base_scenarios(
+            "net_retention", "actuals", ["2020", "2021"], dict(), "year_to_year"
+        )
+
+        self.assertEqual(retention, expected_value)
+
+    def test_process_net_retention_with_no_data_should_return_data(self):
         losses_and_downgrades = {
             "1": {
                 "id": 1,
@@ -1588,6 +1706,82 @@ class TestQuartersReport(TestCase):
                 ],
             }
         }
+        expected_value = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2020,
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                    }
+                ],
+            },
+            "averages": {},
+        }
+        retention = self.report_instance.process_retention_metrics(
+            "net_retention",
+            ["2019", "2020"],
+            "last_twelve_months",
+            "actuals",
+            dict(),
+            losses_and_downgrades,
+            losses_and_downgrades,
+            "Q4",
+        )
+
+        self.assertEqual(retention, expected_value)
+
+    def test_process_net_retention_metrics_no_base_scenario_should_return_data(self):
+        run_rate_revenue = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2019,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2020,
+                        "Q1": 9,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                ],
+            }
+        }
+        losses_and_downgrades = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2020,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2021,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                ],
+            }
+        }
         expected_value = [
             {
                 "id": 1,
@@ -1599,14 +1793,22 @@ class TestQuartersReport(TestCase):
                         "Q3": "NA",
                         "Q4": 100,
                         "Full Year": "NA",
-                    }
+                    },
+                    {
+                        "year": 2021,
+                        "Q1": 100,
+                        "Q2": 100,
+                        "Q3": "NA",
+                        "Q4": 100,
+                        "Full Year": "NA",
+                    },
                 ],
             }
         ]
         retention = self.report_instance.process_retention_metrics(
             "net_retention",
             ["2019", "2020"],
-            "last_twelve_moth",
+            "last_twelve_months",
             "actuals_budget",
             run_rate_revenue,
             losses_and_downgrades,
@@ -1615,3 +1817,261 @@ class TestQuartersReport(TestCase):
         )
 
         self.assertEqual(retention[0], expected_value)
+
+    def test_process_new_bookings_growth_no_base_scenario_should_return_data(self):
+        new_bookings = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2018,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2019,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2020,
+                        "Q1": 9,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                ],
+            }
+        }
+
+        expected_value = [
+            {
+                "id": 1,
+                "quarters": [
+                    {"year": 2019, "Full Year": "NA"},
+                    {
+                        "year": 2020,
+                        "Q1": 450,
+                        "Q2": 100,
+                        "Q3": "NA",
+                        "Q4": 100,
+                        "Full Year": "NA",
+                    },
+                ],
+            }
+        ]
+        retention = self.report_instance.process_new_bookings_growth(
+            ["2019", "2020"],
+            "last_twelve_months",
+            "actuals_budget",
+            new_bookings,
+            "Q4",
+        )
+
+        self.assertEqual(retention[0], expected_value)
+
+    def test_process_new_bookings_growth_base_scenario_should_return_data(self):
+        new_bookings = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2018,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2019,
+                        "Q1": 2,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2020,
+                        "Q1": 9,
+                        "Q2": 1,
+                        "Q3": "NA",
+                        "Q4": 5,
+                        "Full Year": "NA",
+                    },
+                ],
+            }
+        }
+
+        expected_value = {
+            "1": {
+                "id": 1,
+                "quarters": [
+                    {
+                        "year": 2019,
+                        "Q1": 100,
+                        "Q2": 100,
+                        "Q3": "NA",
+                        "Q4": 100,
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2020,
+                        "Q1": 450,
+                        "Q2": 100,
+                        "Q3": "NA",
+                        "Q4": 100,
+                        "Full Year": "NA",
+                    },
+                ],
+            },
+            "averages": {
+                "2019": {
+                    "Q1": 100,
+                    "Q2": 100,
+                    "Q3": "NA",
+                    "Q4": 100,
+                    "Full Year": "NA",
+                },
+                "2020": {
+                    "Q1": 450,
+                    "Q2": 100,
+                    "Q3": "NA",
+                    "Q4": 100,
+                    "Full Year": "NA",
+                    "vs": "NA",
+                },
+            },
+        }
+        retention = self.report_instance.process_new_bookings_growth(
+            ["2019", "2020"],
+            "lyear_to_year",
+            "actuals",
+            new_bookings,
+            "Q4",
+        )
+
+        self.assertEqual(retention, expected_value)
+
+    def test_get_new_bookings_growth_records_base_scenarios_success_should_return_data(
+        self,
+    ):
+        self.mock_repository.get_metric_records_with_base_scenarios.return_value = [
+            self.records[0]
+        ]
+        expected_value = {
+            "1": {
+                "id": "1",
+                "name": "Test",
+                "quarters": [
+                    {
+                        "year": 2020,
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": 2021,
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                        "vs": "NA",
+                    },
+                ],
+            },
+            "averages": {
+                "2020": {
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "Full Year": "NA",
+                },
+                "2021": {
+                    "Q1": "NA",
+                    "Q2": "NA",
+                    "Q3": "NA",
+                    "Q4": "NA",
+                    "Full Year": "NA",
+                    "vs": "NA",
+                },
+            },
+        }
+
+        new_bookings = self.report_instance.get_new_bookings_growth_records(
+            "actuals", ["2020", "2021"], dict(), "year_to_year"
+        )
+
+        self.assertEqual(new_bookings, expected_value)
+
+    def test_get_new_bookings_growth_records_no_base_scenarios_success_should_return_data(
+        self,
+    ):
+        self.mock_repository.get_quarters_year_to_year_records.return_value = (
+            self.records
+        )
+        expected_value = [
+            {
+                "id": "1",
+                "name": "Test",
+                "quarters": [
+                    {
+                        "year": "2020",
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": "2021",
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                        "vs": "NA",
+                    },
+                ],
+            },
+            {
+                "id": "2",
+                "name": "Company",
+                "quarters": [
+                    {
+                        "year": "2020",
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                    },
+                    {
+                        "year": "2021",
+                        "Q1": "NA",
+                        "Q2": "NA",
+                        "Q3": "NA",
+                        "Q4": "NA",
+                        "Full Year": "NA",
+                        "vs": "NA",
+                    },
+                ],
+            },
+        ]
+
+        new_bookings = self.report_instance.get_new_bookings_growth_records(
+            "actuals_budget", ["2020", "2021"], dict(), "year_to_year"
+        )
+
+        self.assertEqual(new_bookings[0], expected_value)

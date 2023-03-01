@@ -1004,76 +1004,6 @@ class QuartersReport:
         quarters = all_quarters[: quarter_index + 1]
         quarters_complement = list(set(all_quarters) - set(quarters))
 
-        # def update_quarters(current_year, prior_year, revenue_quarters_by_company):
-        #     new_bookings_current_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, current_year
-        #     )
-        #     new_bookings_prev_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, prior_year
-        #     )
-
-        #     quarters_list = [
-        #         quarter_key
-        #         for quarter_key in quarter.keys()
-        #         if quarter_key in self.get_quarters().keys()
-        #     ]
-        #     if report_type != "last_twelve_months":
-        #         [
-        #             quarter.update({quarter_value: "NA"})
-        #             for quarter_value in quarters_list
-        #             if quarter_value not in quarters
-        #         ]
-        #     for quarter_value in quarters_list:
-        #         quarter[quarter_value] = self.calculator.calculate_new_bookings_growth(
-        #             self.__get_quarter_value(new_bookings_current_year, quarter_value),
-        #             self.__get_quarter_value(new_bookings_prev_year, quarter_value),
-        #         )
-        #         averages_dict.setdefault(current_year, {}).setdefault(
-        #             quarter_value, []
-        #         ).append(quarter[quarter_value])
-
-        # def update_quarters(
-        #     current_year, prior_year, revenue_quarters_by_company, report_type, quarter
-        # ):
-        #     new_bookings_current_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, current_year
-        #     )
-        #     new_bookings_prev_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, prior_year
-        #     )
-
-        #     quarters_list = get_quarters_list(quarter)
-
-        #     if report_type != "last_twelve_months":
-        #         update_quarter_values(quarters_list, quarter)
-
-        #     for quarter_value in quarters_list:
-        #         current_quarter = self.__get_quarter_value(
-        #             new_bookings_current_year, quarter_value
-        #         )
-        #         prev_quarter = self.__get_quarter_value(
-        #             new_bookings_prev_year, quarter_value
-        #         )
-        #         growth = self.calculator.calculate_new_bookings_growth(
-        #             current_quarter, prev_quarter
-        #         )
-        #         quarter[quarter_value] = growth
-        #         averages_dict.setdefault(current_year, {}).setdefault(
-        #             quarter_value, []
-        #         ).append(growth)
-
-        # def get_quarters_list(quarter):
-        #     return [
-        #         quarter_key
-        #         for quarter_key in quarter.keys()
-        #         if quarter_key in self.get_quarters().keys()
-        #     ]
-
-        # def update_quarter_values(quarters_list, quarter):
-        #     for quarter_value in quarters_list:
-        #         if quarter_value not in quarters:
-        #             quarter.update({quarter_value: "NA"})
-
         def update_quarters_data(quarter, new_bookings_quarters_by_company):
             current_year = quarter.get("year")
             prior_year = int(current_year) - 1
@@ -1125,11 +1055,6 @@ class QuartersReport:
             }
             if report_type == "last_twelve_months":
                 growth_quarters_by_company[1].pop("vs", None)
-                # growth_quarters_by_company[1] = {
-                #     key: value
-                #     for key, value in growth_quarters_by_company[1].items()
-                #     if key != "vs"
-                # }
             for index, quarter in enumerate(growth_quarters_by_company):
                 self.__update_comparison_value(
                     index,
@@ -1205,7 +1130,6 @@ class QuartersReport:
                 for quarter_value in quarters_list
                 if quarter_value not in quarters
             ]
-        # margin_curren_year = self.__get_quarter_object_by_year(margin_company, current_year)
         for quarter_value in quarters_list:
             quarter[quarter_value] = self.calculate_rule_of_40(
                 quarter[quarter_value],
@@ -1239,28 +1163,6 @@ class QuartersReport:
         quarter_index = all_quarters.index(period)
         quarters = all_quarters[: quarter_index + 1]
         quarters_complement = list(set(all_quarters) - set(quarters))
-
-        # def update_quarters(quarter, current_year, margin_current_year):
-        #     quarters_list = [
-        #         quarter_key
-        #         for quarter_key in quarter.keys()
-        #         if quarter_key in self.get_quarters().keys()
-        #     ]
-        #     if report_type != "last_twelve_months":
-        #         [
-        #             quarter.update({quarter_value: "NA"})
-        #             for quarter_value in quarters_list
-        #             if quarter_value not in quarters
-        #         ]
-        #     # margin_curren_year = self.__get_quarter_object_by_year(margin_company, current_year)
-        #     for quarter_value in quarters_list:
-        #         quarter[quarter_value] = calculate_rule_of_40(
-        #             quarter[quarter_value],
-        #             self.__get_quarter_value(margin_current_year, quarter_value),
-        #         )
-        #         averages_dict.setdefault(current_year, {}).setdefault(
-        #             quarter_value, []
-        #         ).append(quarter[quarter_value])
 
         def update_quarters_data(quarter):
             current_year = quarter.get("year")
@@ -1388,34 +1290,6 @@ class QuartersReport:
         quarter_index = all_quarters.index(period)
         quarters = all_quarters[: quarter_index + 1]
         quarters_complement = list(set(all_quarters) - set(quarters))
-
-        # def update_quarters(current_year, prior_year, revenue_quarters_by_company):
-        #     revenue_current_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, current_year
-        #     )
-        #     revenue_prev_year = self.__get_quarter_object_by_year(
-        #         revenue_quarters_by_company, prior_year
-        #     )
-
-        #     quarters_list = [
-        #         quarter_key
-        #         for quarter_key in quarter.keys()
-        #         if quarter_key in self.get_quarters().keys()
-        #     ]
-        #     if report_type != "last_twelve_months":
-        #         [
-        #             quarter.update({quarter_value: "NA"})
-        #             for quarter_value in quarters_list
-        #             if quarter_value not in quarters
-        #         ]
-        #     for quarter_value in quarters_list:
-        #         quarter[quarter_value] = self.calculator.calculate_growth_rate(
-        #             self.__get_quarter_value(revenue_current_year, quarter_value),
-        #             self.__get_quarter_value(revenue_prev_year, quarter_value),
-        #         )
-        #         averages_dict.setdefault(current_year, {}).setdefault(
-        #             quarter_value, []
-        #         ).append(quarter[quarter_value])
 
         def update_quarters_data(quarter, revenue_quarters_by_company):
             current_year = quarter.get("year")
@@ -1691,33 +1565,6 @@ class QuartersReport:
                 quarter["Full Year"]
             )
 
-    # def __update_full_year_ltm_retention(
-    #     self,
-    #     quarter,
-    #     quarters,
-    #     current_year,
-    #     prev_quarter,
-    #     quarters_complement,
-    #     averages_dict,
-    # ):
-    #     current_quarters_values = [
-    #         quarter_value
-    #         for quarter_key, quarter_value in quarter.items()
-    #         if quarter_key in quarters and isinstance(quarter_value, (int, float))
-    #     ]
-    #     prev_quarters_value = [
-    #         quarter_value
-    #         for quarter_key, quarter_value in prev_quarter.items()
-    #         if quarter_key in quarters_complement
-    #         and isinstance(quarter_value, (int, float))
-    #     ]
-    #     full_year_quarter = current_quarters_values + prev_quarters_value
-    #     full_year = sum(full_year_quarter) if len(full_year_quarter) == 4 else "NA"
-    #     quarter["Full Year"] = full_year
-    #     averages_dict[current_year].setdefault("Full Year", []).append(
-    #         quarter["Full Year"]
-    #     )
-
     def __update_quarters_retention(
         self,
         quarter,
@@ -1776,91 +1623,10 @@ class QuartersReport:
         upsells=None,
         period: str = "Q4",
     ):
-        # def update_quarters(quarter, metric, run_rate_revenue, current_year):
-        #     quarters_list = [
-        #         quarter_key
-        #         for quarter_key in quarter.keys()
-        #         if quarter_key in self.get_quarters().keys()
-        #     ]
-        #     if report_type != "last_twelve_months":
-        #         [
-        #             quarter.update({quarter_value: "NA"})
-        #             for quarter_value in quarters_list
-        #             if quarter_value not in quarters
-        #         ]
-        #     for quarter_value in quarters_list:
-        #         if metric == "net_retention":
-        #             upsells_quarters = self.get_quarters_list_by_company(
-        #                 upsells, company_id
-        #             )
-        #             upsells_quarters_current_year = self.__get_quarter_object_by_year(
-        #                 upsells_quarters, current_year
-        #             )
-        #             quarter[quarter_value] = self.calculator.calculate_net_retention(
-        #                 self.__get_quarter_value(run_rate_revenue, quarter_value),
-        #                 quarter[quarter_value],
-        #                 self.__get_quarter_value(
-        #                     upsells_quarters_current_year, quarter_value
-        #                 ),
-        #             )
-        #         else:
-        #             quarter[quarter_value] = self.calculator.calculate_gross_retention(
-        #                 self.__get_quarter_value(run_rate_revenue, quarter_value),
-        #                 quarter[quarter_value],
-        #             )
-        #         averages_dict.setdefault(current_year, {}).setdefault(
-        #             quarter_value, []
-        #         ).append(quarter[quarter_value])
-
         def update_quarters_with_default_value(quarter):
             quarters_list = self.get_quarters().keys()
             for quarter_value in quarters_list:
                 quarter[quarter_value] = "NA"
-
-        # def update_full_year_ltm(current_year, prev_quarter):
-        #     current_quarters_values = [
-        #         quarter_value
-        #         for quarter_key, quarter_value in quarter.items()
-        #         if quarter_key in quarters and isinstance(quarter_value, (int, float))
-        #     ]
-        #     prev_quarters_value = [
-        #         quarter_value
-        #         for quarter_key, quarter_value in prev_quarter.items()
-        #         if quarter_key in quarters_complement
-        #         and isinstance(quarter_value, (int, float))
-        #     ]
-        #     full_year_quarter = current_quarters_values + prev_quarters_value
-        #     full_year = sum(full_year_quarter) if len(full_year_quarter) == 4 else "NA"
-        #     quarter["Full Year"] = full_year
-        #     averages_dict[current_year].setdefault("Full Year", []).append(
-        #         quarter["Full Year"]
-        #     )
-
-        # def update_comparison_value(index: int, quarter: dict):
-        #     if index != 0:
-        #         current_year = quarter.get("year")
-        #         prev_quarter = self.get_quarters_list_by_company(
-        #             losses_and_downgrades, company_id
-        #         )[index - 1]
-        #         if report_type == "last_twelve_months":
-        #             self.__update_full_year_ltm_retention(
-        #                 quarter,
-        #                 quarters,
-        #                 current_year,
-        #                 prev_quarter,
-        #                 quarters_complement,
-        #                 averages_dict,
-        #             )
-        #         prev_full_year = prev_quarter.get("Full Year")
-        #         current_full_year = quarter.get("Full Year")
-        #         comparison = self.__calculate_comparison_percentage(
-        #             prev_full_year, current_full_year
-        #         )
-        #         if quarter.get("vs"):
-        #             quarter["vs"] = comparison
-        #             comparison_dict.setdefault(str(current_year), dict()).update(
-        #                 {company_id: quarter["vs"]}
-        #             )
 
         def update_quarters_data(quarter, quarters):
             current_year = quarter.get("year")
