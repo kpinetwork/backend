@@ -9,7 +9,7 @@ from base_metrics_config_name import METRICS_CONFIG_NAME, METRICS_TO_ANONYMIZE
 from profile_range import ProfileRange
 from company_anonymization import CompanyAnonymization
 from metric_report_repository import MetricReportRepository
-from app_names import MetricNames
+from app_names import MetricNames, DEFAULT_RANGES
 
 
 class QuartersReport:
@@ -912,6 +912,8 @@ class QuartersReport:
         return quarters
 
     def __update_metric(self, metric, ranges, keys):
+        if ranges == []:
+            ranges = DEFAULT_RANGES
         updated_values = {
             key: self.profile_range.get_range_from_value(metric.get(key), ranges=ranges)
             for key, value in metric.items()

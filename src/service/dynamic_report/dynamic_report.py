@@ -1,4 +1,4 @@
-from app_names import COMPARISON_METRICS, ScenarioNames, MetricNames
+from app_names import COMPARISON_METRICS, ScenarioNames, MetricNames, DEFAULT_RANGES
 from by_metric_report import ByMetricReport
 from by_year_report_service import ByYearReportService
 from base_metrics_repository import BaseMetricsRepository
@@ -77,9 +77,12 @@ class DynamicReport:
         for metric in metrics:
             value = company_data.get(metric)
             metric_name = self.__remove_scenario_type_in_metric(metric)
+            ranges = profiles.get(metric_name, [])
+            if ranges == []:
+                ranges = DEFAULT_RANGES
             if metric_name in anonymizable_metrics:
                 company_data[metric] = self.profile_range.get_range_from_value(
-                    value, ranges=profiles.get(metric_name, [])
+                    value, ranges=ranges
                 )
             company_data["name"] = self.metric_report.anonymized_name(
                 company_data.get("id")
