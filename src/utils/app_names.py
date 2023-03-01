@@ -80,3 +80,11 @@ METRIC_PERIOD_NAMES = [
     {"period_name": "Q4", "start_at": "10-01", "end_at": "12-31"},
     {"period_name": "Full-year", "start_at": "01-01", "end_at": "12-31"},
 ]
+
+DEFAULT_RANGES = [
+    {"label": "<$25 million", "min_value": None, "max_value": 25.0},
+    {"label": "$100 million+", "min_value": 100.0, "max_value": None},
+    {"label": "$25-<$50 million", "min_value": 25.0, "max_value": 50.0},
+    {"label": "$75-$100 million", "min_value": 75.0, "max_value": 100.0},
+    {"label": "$50-<$75 million", "min_value": 50.0, "max_value": 75.0},
+]
