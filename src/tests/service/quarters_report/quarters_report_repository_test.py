@@ -350,7 +350,6 @@ class TestQuartersReportRepository(TestCase):
         metrics = self.repository.get_actuals_vs_budget_metric(
             [2021, 2021], "Revenue", dict()
         )
-        print("metrics", metrics)
 
         self.assertEqual(metrics, self.records)
 
