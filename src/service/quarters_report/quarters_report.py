@@ -245,10 +245,17 @@ class QuartersReport:
         return full_year
 
     def __get_calculate_full_year_property_year_to_date(
-        self, data: dict
+        self, data: dict, period: str
     ) -> Union[float, None]:
-        quarters_values = [data.get(value, 0) for value in ["Q1", "Q2", "Q3", "Q4"]]
-        full_year = sum(filter(None.__ne__, quarters_values))
+        full_year = 0
+        quarters = ["Q1", "Q2", "Q3", "Q4"]
+        period_index = quarters.index(period)
+        needed_quarters = quarters[: period_index + 1]
+        quarters_values = [data.get(value, 0) for value in needed_quarters]
+        if None not in quarters_values:
+            full_year = sum(quarters_values)
+        if full_year == 0:
+            return None
         return full_year
 
     def __split_periods_by_last_twelve_months(self):
@@ -316,7 +323,9 @@ class QuartersReport:
         data = self.get_actuals_plus_budget(report_type, metric, years, period, filters)
         for item in data:
             if report_type == "year_to_date" and period != "Q4":
-                full_year = self.__get_calculate_full_year_property_year_to_date(item)
+                full_year = self.__get_calculate_full_year_property_year_to_date(
+                    item, period
+                )
             else:
                 full_year = self.__get_calculate_full_year_property_year_to_year(item)
             item[self.full_year] = full_year
@@ -785,11 +794,12 @@ class QuartersReport:
             self.__update_peers_actuals_budget_to_ltm(
                 peers, self.build_subheaders_dict(period, years)
             )
-        averages = self.calculate_averages(peers, sorted_years)
         if report_type == "last_twelve_months":
             averages = self.__get_averages_actuals_budget_ltm(
-                averages, self.build_subheaders_dict(period, years)
+                peers, self.build_subheaders_dict(period, years)
             )
+        else:
+            averages = self.calculate_averages(peers, sorted_years)
         return peers, averages
 
     def __filter_quarter(self, quarter: dict, subheaders: dict) -> dict:
@@ -815,17 +825,31 @@ class QuartersReport:
     ) -> list:
         return self.__update_company_quarters(data, subheaders)
 
-    def __get_averages_actuals_budget_ltm(
-        self, averages: list, subheaders: list
-    ) -> list:
-        result = []
-        for year, periods_year in subheaders.items():
-            for average in periods_year:
-                for diccionario in averages:
-                    if average in diccionario:
-                        result.append({average: diccionario[average]})
-                        break
-        return result
+    def __get_values_for_quarter_company(self, quarter, year, companies):
+        return [
+            quarter_company.get(quarter)
+            for company in companies
+            for quarter_company in company["quarters"]
+            if quarter_company.get("year") == year
+            and quarter_company.get(quarter) != "NA"
+        ]
+
+    def __get_average_for_quarter(self, quarter, year, companies):
+        values = self.__get_values_for_quarter_company(quarter, year, companies)
+        if values:
+            return round(sum(values) / len(values), 2)
+        return "NA"
+
+    def __get_averages_actuals_budget_ltm(self, data: list, subheaders: list) -> list:
+        averages = []
+        for subheader in subheaders:
+            quarter_averages = defaultdict(str)
+            for quarter in subheaders[subheader]:
+                quarter_averages[quarter] = self.__get_average_for_quarter(
+                    quarter, subheader, data
+                )
+            averages.append(dict(quarter_averages))
+        return averages
 
     def __get_averages_for_actuals_or_budget_data(self, defaul_averages: dict) -> list:
         averages = []
