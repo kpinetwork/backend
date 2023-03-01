@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 
-from app_names import ScenarioNames
+from app_names import ScenarioNames, DEFAULT_RANGES
 from profile_range import ProfileRange
 from calculator_service import CalculatorService
 from company_anonymization import CompanyAnonymization
@@ -332,6 +332,8 @@ class ByMetricReport:
         return self.company_anonymization.anonymize_company_name(id)
 
     def anonymized_metric(self, metrics: dict, ranges: list) -> dict:
+        if ranges == []:
+            ranges = DEFAULT_RANGES
         return {
             year: self.profile_range.get_range_from_value(
                 metrics.get(year), ranges=ranges

@@ -911,6 +911,67 @@ class QuartersReportRepository:
             .get_query()
         )
 
+    def __get_actuals_plus_budget_vs_budget_subquery_for_submetric(
+        self,
+        metric: str,
+    ) -> str:
+
+        return (
+            self.query_builder.add_table_name(TableNames.COMPANY)
+            .add_select_conditions(
+                [
+                    f"NULLIF ({TableNames.METRIC}.value,0)",
+                ]
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.SCENARIO}": {
+                        "from": f"{TableNames.SCENARIO}.company_id",
+                        "to": f"{TableNames.COMPANY}.id",
+                    }
+                },
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.PERIOD}": {
+                        "from": f"{TableNames.PERIOD}.id",
+                        "to": f"{TableNames.SCENARIO}.period_id",
+                    }
+                },
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.SCENARIO_METRIC}": {
+                        "from": f"{TableNames.SCENARIO_METRIC}.scenario_id",
+                        "to": f"{TableNames.SCENARIO}.id",
+                    }
+                },
+            )
+            .add_join_clause(
+                {
+                    f"{TableNames.METRIC}": {
+                        "from": f"{TableNames.METRIC}.id",
+                        "to": f"{TableNames.SCENARIO_METRIC}.metric_id",
+                    }
+                },
+            )
+            .add_sql_where_equal_condition(
+                {
+                    f"{TableNames.COMPANY}.id": "main_table.id",
+                    f"{TableNames.METRIC}.name": f"'{metric}'",
+                    f"{TableNames.PERIOD}.period_name": "main_table.period_name",
+                    f"{TableNames.SCENARIO}.name": "concat('Budget-', main_table.year)",
+                }
+            )
+            .add_sql_group_by_condition(
+                [
+                    f"{TableNames.METRIC}.value",
+                ]
+            )
+            .build()
+            .get_query()
+        )
+
     def get_gross_profit(
         self,
         years: list,
@@ -1184,12 +1245,21 @@ class QuartersReportRepository:
         period: str = None,
     ) -> list:
         try:
-            subquery = self.__get_subquery_for_submetric("Revenue")
+            if scenario_type == "actuals_budget":
+                subquery = (
+                    self.__get_actuals_plus_budget_vs_budget_subquery_for_submetric(
+                        metric
+                    )
+                )
+            else:
+                subquery = self.__get_subquery_for_submetric("Revenue")
             select_value = [
                 f"main_table.value / ({subquery}) as value",
             ]
             if scenario_type == "actuals_budget":
-                return []
+                return self.__get_no_base_metrics(
+                    select_value, metric, years, report_type, period, filters
+                )
             return self.get_calculated_metrics_with_base_scenarios(
                 select_value,
                 "Budget",
@@ -1281,9 +1351,9 @@ class QuartersReportRepository:
         self,
         years: list,
         filters: dict,
-        scenario_type: str,
         report_type: str,
         period: str,
+        scenario_type: str = "actuals_budget",
     ) -> dict:
         return {
             "revenue_vs_budget": {
@@ -1407,7 +1477,11 @@ class QuartersReportRepository:
                 years, filters, report_type=report_type, period=period
             )
         )
-        # metric_config.update(self.__get_actuals_vs_budget_functions_metric(years, filters))
+        metric_config.update(
+            self.__get_actuals_vs_budget_functions_metric(
+                years, filters, report_type=report_type, period=period
+            )
+        )
 
         return metric_config
 

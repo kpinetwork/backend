@@ -776,3 +776,12 @@ class TestByMetricReport(TestCase):
 
         mock_set_company_permissions.assert_called()
         mock_anonymize_companies_values.assert_called()
+
+    def test_anonymized_metric_should_return_data_anonymized_with_default_ranges(self):
+        metrics = {2020: 1}
+        ranges = []
+        expected_value = {2020: "<$25 million"}
+        self.mock_profile_range.get_range_from_value.return_value = "<$25 million"
+        anonymized_data = self.report_instance.anonymized_metric(metrics, ranges)
+
+        self.assertEqual(anonymized_data, expected_value)
