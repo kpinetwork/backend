@@ -67,9 +67,9 @@ class QuartersReportRepository:
         )
         return tag_join_type
 
-    def __get_company_tag_join_clause(self):
+    def __get_company_tag_join_clause(self, table: str = f"{TableNames.COMPANY_TAG}"):
         return {
-            f"{TableNames.COMPANY_TAG}": {
+            table: {
                 "from": f"{TableNames.COMPANY_TAG}.company_id",
                 "to": f"{TableNames.COMPANY}.id",
             }
@@ -117,14 +117,18 @@ class QuartersReportRepository:
         return f" HAVING count({table_name}.period_name ) = {count} "
 
     def get_base_query(
-        self, select_conditions: list, where_conditions: dict, group_by_conditions: list
+        self,
+        select_conditions: list,
+        where_conditions: dict,
+        group_by_conditions: list,
+        tag_table=f"{TableNames.COMPANY_TAG}",
     ) -> str:
         tag_join_type = self.__get_tag_join_type(where_conditions)
         return (
             self.query_builder.add_table_name(TableNames.COMPANY)
             .add_select_conditions(select_conditions)
             .add_join_clause(
-                self.__get_company_tag_join_clause(),
+                self.__get_company_tag_join_clause(tag_table),
                 tag_join_type,
             )
             .add_join_clause(
@@ -177,6 +181,8 @@ class QuartersReportRepository:
         filters: dict,
         report_type: str = None,
         period: str = None,
+        tag_table: str = f"{TableNames.COMPANY_TAG}",
+        need_tag_filter: bool = True,
     ) -> str:
         where_conditions = self.__get_base_where_conditions(
             metric, scenario_type, years, filters, report_type, period
@@ -191,9 +197,10 @@ class QuartersReportRepository:
             f"{TableNames.COMPANY}.id",
             f"{TableNames.SCENARIO}.name",
         ]
-
+        if not need_tag_filter:
+            where_conditions.pop(f"{TableNames.TAG}.name", [])
         return self.get_base_query(
-            select_conditions, where_conditions, group_by_conditions
+            select_conditions, where_conditions, group_by_conditions, tag_table
         )
 
     def get_averages_by_quarters_query(
@@ -204,6 +211,8 @@ class QuartersReportRepository:
         filters: dict,
         report_type: str = None,
         period: str = None,
+        tag_table: str = f"{TableNames.COMPANY_TAG}",
+        need_tag_filter: bool = True,
     ) -> str:
         where_conditions = self.__get_base_where_conditions(
             metric, scenario_type, years, filters, report_type, period
@@ -217,9 +226,10 @@ class QuartersReportRepository:
             f"{TableNames.SCENARIO}.name",
             f"{TableNames.PERIOD}.period_name",
         ]
-
+        if not need_tag_filter:
+            where_conditions.pop(f"{TableNames.TAG}.name", [])
         return self.get_base_query(
-            select_conditions, where_conditions, group_by_conditions
+            select_conditions, where_conditions, group_by_conditions, tag_table
         )
 
     def get_averages_of_quarters_total_query(
@@ -230,6 +240,8 @@ class QuartersReportRepository:
         filters: dict,
         report_type: str = None,
         period: str = None,
+        tag_table: str = f"{TableNames.COMPANY_TAG}",
+        need_tag_filter: bool = True,
     ) -> str:
         table_alias = "full_year"
         where_conditions = self.__get_base_where_conditions(
@@ -243,8 +255,10 @@ class QuartersReportRepository:
             f"{TableNames.COMPANY}.id",
             f"{TableNames.SCENARIO}.name",
         ]
+        if not need_tag_filter:
+            where_conditions.pop(f"{TableNames.TAG}.name", [])
         full_year_table = self.get_base_query(
-            select_conditions, where_conditions, group_by_conditions
+            select_conditions, where_conditions, group_by_conditions, tag_table
         )
         full_year_table = " ".join(
             [
@@ -295,21 +309,44 @@ class QuartersReportRepository:
             where_conditions = self.__get_base_where_conditions(
                 metric, scenario_type, years, filters, report_type, period
             )
+            company_tag_table = (
+                f"( SELECT * FROM {TableNames.COMPANY_TAG} LIMIT 1) as company_tag"
+            )
 
             full_year_table = self.get_quarters_total_query(
-                metric, scenario_type, years, filters, report_type, period
+                metric,
+                scenario_type,
+                years,
+                filters,
+                report_type,
+                period,
+                company_tag_table,
+                False,
             )
             quarters_averages_table = self.get_averages_by_quarters_query(
-                metric, scenario_type, years, filters, report_type, period
+                metric,
+                scenario_type,
+                years,
+                filters,
+                report_type,
+                period,
+                company_tag_table,
+                False,
             )
             full_year_averages_table = self.get_averages_of_quarters_total_query(
-                metric, scenario_type, years, filters, report_type, period
+                metric,
+                scenario_type,
+                years,
+                filters,
+                report_type,
+                period,
+                company_tag_table,
+                False,
             )
             full_year_join_condition = f"""total_quarters.company_id
             AND {TableNames.SCENARIO}.name = total_quarters.scenario """
             quarters_average_join_condition = f""" average.scenario
             AND {TableNames.PERIOD}.period_name = average.period """
-
             tag_join_type = self.__get_tag_join_type(where_conditions)
             query = (
                 self.query_builder.add_table_name(f"{TableNames.COMPANY}")
